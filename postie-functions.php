@@ -1374,7 +1374,7 @@ function DeterminePostDate(&$content, $message_date = NULL) {
         $delay = (($days * 24 + $hours) * 60 + $minutes) * 60;
         $content = ereg_replace("delay:$matches[1]","",$content);
     }
-    if (!empty($message_date)) {
+    if (!empty($message_date) && $delay==0) {
         $dateInSeconds = strtotime($message_date);
     }
     else {
@@ -1383,6 +1383,10 @@ function DeterminePostDate(&$content, $message_date = NULL) {
     $post_date = gmdate('Y-m-d H:i:s',$dateInSeconds + ($config["TIME_OFFSET"] * 3600));
     $post_date_gmt = gmdate('Y-m-d H:i:s',$dateInSeconds);
 
+    echo "--------------------DELAY------------\n";
+    echo "delay=$delay, dateInSeconds = $dateInSeconds\n";
+    echo "post_date=$post_date\n";
+    echo "--------------------DELAY------------\n";
     return(array($post_date,$post_date_gmt));
 }
 /**
