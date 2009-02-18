@@ -1804,15 +1804,18 @@ function TestWPMailInstallation() {
   * @param string
   */
 function BuildBooleanSelect($label,$id,$current_value,$recommendation = NULL) {
-   return("<tr>
+   $string="<tr>
 	<th scope=\"row\">". __($label).":</th>
 	<td><select name=\"$id\" id=\"$id\">
     <option value=\"1\">".__("Yes")."</option>
     <option value=\"0\" ". (!$current_value ? "SELECTED" : NULL) . ">".__("No").'</option>
 	</select>
-    <br /><code>'.__($recommendation).'</code><br/>
-    </td>
-	</tr>');
+    <br />';
+    if ($recommendation!=NULL) {
+      $string.='<code>'.__($recommendation).'</code><br/>';
+    }
+    $string.="</td>\n</tr>";
+    return($string);
 }
 /**
   * This takes an array and display a text box for editing
