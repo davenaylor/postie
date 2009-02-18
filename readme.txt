@@ -5,11 +5,11 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.7.1
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 More Information:
 
-This plugin has a lot features. They are all explained on the 
-main site (http://www.economysizegeek.com/?page_id=395).
+The Postie plugin allows you to blog via e-mail, including many advanced
+features not found in wordpress's default post by e-mail feature.
 
 == Description ==
 Postie offers many advanced features for posting to your blog via e-mail,
@@ -130,6 +130,7 @@ If you don't have access to cron - check out "Cronless Postie"
 
 * Version 1.1.3 2009.02.20
   * Fixed delayed posting
+  * updated readme some
 
 * Version 1.1.2 2008.07.12
   * now maintained by Robert Felty
