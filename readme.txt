@@ -53,15 +53,20 @@ If you don't have access to cron - check out "Cronless Postie"
     * If you put in :start - the message processing won't start until it sees that string
     * If you put in :end - the message processing will stop once it sees that string
     * Posts can be delayed by adding a line with delayXdXhXm where X is a number.
-          delay:1d - 1 day
-          delay:1h - 1 hour
-          delay:1m - 1 minute
-          delay:1d2h4m - 1 day 2 hours 4m
+      *    delay:1d - 1 day
+      *    delay:1h - 1 hour
+      *    delay:1m - 1 minute
+      *    delay:1d2h4m - 1 day 2 hours 4m
     * By putting comments:X in your message you can control if comments are allowed
-          comments:0 - means closed
-          comments:1 - means open
-          comments:2 - means registered only
-
+       *   comments:0 - means closed
+       *   comments:1 - means open
+       *   comments:2 - means registered only
+    * Replying to an e-mail gets posted as a comment. 
+      * For example, you e-mailed a post with the subject line "foo".
+        If you then send an e-mail with the subject line "Re: foo", it will
+        get posted as a comment to the "foo" post. This works by the subject
+        line, so if you have two posts with titles "foo", then the comment
+        will get placed in the more recent post.
 
 = Category Handling =
     * If you put a category name in the subject with a : it will be used
@@ -121,7 +126,10 @@ If you don't have access to cron - check out "Cronless Postie"
 
 
 
--= History =-
+== History ==
+
+* Version 1.1.3 2009.02.20
+  * Fixed delayed posting
 
 * Version 1.1.2 2008.07.12
   * now maintained by Robert Felty
