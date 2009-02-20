@@ -15,7 +15,13 @@ $messages[1] = "Configuration successfully updated!";
 $messages[2] = "Error - unable to save configuration";
 
 ?>
- 
+<style type='text/css'>
+legend {font-weight:bold;
+        border:1px solid black;
+        background:white;
+        padding:.3em;}
+fieldset {border: 1px solid black;}
+</style>
 <?php if (isset($_GET['message'])) : ?>
 <div class="updated"><p><?php _e($messages[$_GET['message']]); ?></p></div>
 <?php endif; ?>
@@ -301,6 +307,17 @@ $messages[2] = "Error - unable to save configuration";
                 <input name="IMAGEDIV" type="text" id="IMAGEDIV" value="<?php echo $config["IMAGEDIV"]; ?>" size="50" /><br />
                 <?php _e("Recommended");?>: <code>postie-image-div</code><p>This is the CSS class of a div that wraps each image. Can be used to style the post</p>
                 <br />
+                </td> 
+            </tr> 
+            <tr> 
+            <?php echo BuildBooleanSelect("Use custom image
+            template","USEIMAGETEMPLATE",$config["USEIMAGETEMPLATE"],"If you
+            don't like the default html output around images, you can enter
+            your own below. The default template is already there.");?>
+                <th width="33%" valign="top" scope="row">                <td>
+                <textarea name="IMAGETEMPLATE" id="IMAGETEMPLATE" value="<?php
+                echo $config["IMAGETEMPLATE"]; ?>" cols="30" rows="3">
+                </textarea>
                 </td> 
             </tr> 
             <tr> 

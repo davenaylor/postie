@@ -544,6 +544,7 @@ function GetContent ($part,&$attachments) {
                                                       $config["REALPHOTOSDIR"] . $fileName,
                                                       $part->ctype_secondary);
                 if ($thumbImage) {
+                //TODO image template
                         $marime=DetermineImageSize($file);
                         $marimex=$marime[0]+20;
                         $marimey=$marime[1]+20;
@@ -1073,8 +1074,7 @@ function ResizeImage($file,$type) {
     if (DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]) != 1) {
         if ($config["USE_IMAGEMAGICK"]) {
             return(ResizeImageWithImageMagick($file,$type));
-        }
-        else {
+        } else {
             return(ResizeImageWithGD($file,$type));
         }
     }
@@ -1282,6 +1282,8 @@ function ResizeImageWithImageMagick($file,$type) {
 
 }
 function ResizeImageWithGD($file,$type) {
+    $original_mem_limit = ini_get('memory_limit');
+    ini_set('memory_limit', -1);
     $config = GetConfig();
     $sizeInfo = DetermineImageSize($file);
     $fileName = basename($file);
@@ -1317,6 +1319,8 @@ function ResizeImageWithGD($file,$type) {
             imagedestroy($sourceImage);
         }
     }
+    // Revert to original limit
+    ini_set('memory_limit', $original_mem_limit);
     return(array($scaledFileName,$fileName));
 
 }
@@ -1639,23 +1643,23 @@ function ReplaceImageCIDs(&$content,&$attachments) {
   * @param array - array of HTML for images for post
   */
 function ReplaceImagePlaceHolders(&$content,$attachments) {
-    $config = GetConfig();
-    ($config["START_IMAGE_COUNT_AT_ZERO"] ? $startIndex = 0 :$startIndex = 1);
-    foreach ( $attachments as $i => $value ) {
-        // looks for ' #img1# ' etc... and replaces with image
-        $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $config["IMAGE_PLACEHOLDER"]);
-        if ( stristr($content, $img_placeholder_temp) ) {
-            $content = str_replace($img_placeholder_temp, $value, $content);
-        }
-        else {
-            if ($config["IMAGES_APPEND"]) {
-                $content .= $value;
-            }
-            else {
-                $content = $value . $content;
-            }
-        }
+  $config = GetConfig();
+  ($config["START_IMAGE_COUNT_AT_ZERO"] ? $startIndex = 0 :$startIndex = 1);
+  foreach ( $attachments as $i => $value ) {
+    // looks for ' #img1# ' etc... and replaces with image
+    $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $config["IMAGE_PLACEHOLDER"]);
+    echo "------------- IMG REPLACEMENT ----------------------\n";
+    echo "value=$value\n\n";
+    if ( stristr($content, $img_placeholder_temp) ) {
+      $content = str_replace($img_placeholder_temp, $value, $content);
+    } else {
+      if ($config["IMAGES_APPEND"]) {
+        $content .= $value;
+      } else {
+        $content = $value . $content;
+      }
     }
+  }
 }
 /**
   *This function handles finding and setting the correct subject
