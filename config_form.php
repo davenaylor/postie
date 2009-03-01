@@ -315,8 +315,9 @@ fieldset {border: 1px solid black;}
             don't like the default html output around images, you can enter
             your own below. The default template is already there.");?>
                 <th width="33%" valign="top" scope="row">                <td>
-                <textarea name="IMAGETEMPLATE" id="IMAGETEMPLATE" value="<?php
-                echo $config["IMAGETEMPLATE"]; ?>" cols="30" rows="3">
+                <textarea  cols="50" rows="6" name="IMAGETEMPLATE"
+                id="IMAGETEMPLATE"><?php
+                echo $config["IMAGETEMPLATE"]; ?>
                 </textarea>
                 </td> 
             </tr> 

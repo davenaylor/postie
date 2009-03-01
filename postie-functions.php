@@ -1,4 +1,5 @@
 <?php
+//TODO add tags to posts
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
 define("POSTIE_ROOT",dirname(__FILE__));
 define("POSTIE_TABLE",$GLOBALS["table_prefix"]. "postie_config");
@@ -2047,6 +2048,18 @@ function GetConfig() {
     $config["REALPHOTOSDIR"] = realpath(ABSPATH . $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
     $config["URLFILESDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["FILESDIR"]);
     $config["REALFILESDIR"] = realpath(ABSPATH . $config["FILESDIR"]) . DIRECTORY_SEPARATOR;
+    if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =
+
+                         $mimeTag."<div class='" . $config["IMAGEDIV"]."'><a
+                         href='" . $config["URLPHOTOSDIR"] . '{IMAGE}' . "'
+                         onclick=\"window.open(' . '"
+                            . $config["URLPHOTOSDIR"] . '{IMAGE}' . '","'
+                            . "full_size_image" . "','"
+                            . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;"
+                            . '"><img src="' . $config["URLPHOTOSDIR"] .
+                            '{THUMBNAIL}'. '" alt="'
+                            . $part->ctype_parameters['name'] . '" title="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
+    }
     for ($i = 0; $i < count($config["AUTHORIZED_ADDRESSES"]); $i++) {
         $config["AUTHORIZED_ADDRESSES"][$i] = strtolower($config["AUTHORIZED_ADDRESSES"][$i]);
     }
