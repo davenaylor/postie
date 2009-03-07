@@ -148,6 +148,14 @@ fieldset {border: 1px solid black;}
                         ?>
                 </select></td>
             </tr>
+            <tr valign="top">
+                <th scope="row"><?php _e('Default post by mail tag(s):
+                (separated by commas)') ?></th>
+                <td><input type='text' name="DEFAULT_POST_TAGS"
+                id="DEFAULT_POST_TAGS" value='<?php echo
+                $config["DEFAULT_POST_TAGS"] ?>' />
+                </td>
+            </tr>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Default Title:') ?> </th> 
                 <td>

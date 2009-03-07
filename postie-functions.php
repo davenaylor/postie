@@ -1705,9 +1705,13 @@ function GetPostTags(&$content) {
   global $wpdb;
   $post_tags = array();
   //try and determine tags
-  if ( preg_match('/tags: (.*)/', $content, $matches))  {
-    $content = trim($matches[0]);
+  if ( preg_match('/tags: (.*)\n/', $content, $matches))  {
+    $content = preg_replace("/$matches[0]/", "", $content);
     $post_tags = preg_split("/,\s*/", $matches[1]);
+  }
+  if (!count($post_tags)) {
+      echo "using default tags" . $config["DEFAULT_POST_TAGS"]. "\n";
+      $post_tags =  $config["DEFAULT_POST_TAGS"];
   }
   return($post_tags);
 }
@@ -1999,12 +2003,12 @@ function GetDBConfig() {
     //if (!isset($config["MAIL_SERVER_PORT"])) { $config["MAIL_SERVER_PORT"] =  get_option('mailserver_port'); }
     //if (!isset($config["MAIL_USERID"])) { $config["MAIL_USERID"] =  get_option('mailserver_login'); }
     //if (!isset($config["MAIL_PASSWORD"])) { $config["MAIL_PASSWORD"] =  get_option('mailserver_pass'); }
-    //if (!isset($config["DEFAULT_POST_CATEGORY"])) { $config["DEFAULT_POST_CATEGORY"] =  get_option('default_email_category'); }
     if (!isset($config["MAIL_SERVER"])) { $config["MAIL_SERVER"] = NULL; }
     if (!isset($config["MAIL_SERVER_PORT"])) { $config["MAIL_SERVER_PORT"] =  NULL; }
     if (!isset($config["MAIL_USERID"])) { $config["MAIL_USERID"] =  NULL; }
     if (!isset($config["MAIL_PASSWORD"])) { $config["MAIL_PASSWORD"] =  NULL; }
     if (!isset($config["DEFAULT_POST_CATEGORY"])) { $config["DEFAULT_POST_CATEGORY"] =  NULL; }
+    if (!isset($config["DEFAULT_POST_TAGS"])) { $config["DEFAULT_POST_TAGS"] =  NULL; }
     if (!isset($config["TIME_OFFSET"])) { $config["TIME_OFFSET"] =  get_option('gmt_offset'); }
     if (!isset($config["3GP_QT"])) { $config["3GP_QT"] =  true; }
     if (!isset($config["3GP_FFMPEG"])) { $config["3GP_FFMPEG"] = "/usr/bin/ffmpeg";}
