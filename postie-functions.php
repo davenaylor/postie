@@ -53,6 +53,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
     
     $id=checkReply($subject); 
     $post_categories = GetPostCategories($subject);
+    $post_tags = GetPostTags($content);
     echo "the subject is $subject, right after calling GetPostCategories\n";
     $comment_status = AllowCommentsOnPost($content);
     
@@ -85,6 +86,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
         'post_modified_gmt'	=> $post_date_gmt,
         'ping_status' => get_option('default_ping_status'),
         'post_category' => $post_categories,
+        'tags_input' => $post_tags,
         'comment_status' => $comment_status,
         'post_name' => sanitize_title($subject),
         'ID' => $id,
@@ -1694,6 +1696,21 @@ function GetSubject(&$mimeDecodedEmail,&$content) {
     }
     return($subject);
 }
+/** 
+  * this function determines tags for the post
+  *
+  */
+function GetPostTags(&$content) {
+  $config = GetConfig();
+  global $wpdb;
+  $post_tags = array();
+  //try and determine tags
+  if ( preg_match('/tags: (.*)/', $content, $matches))  {
+    $content = trim($matches[0]);
+    $post_tags = preg_split("/,\s*/", $matches[1]);
+  }
+  return($post_tags);
+}
 /**
   * This function determines categories for the post
   * @return array
@@ -1721,21 +1738,6 @@ function GetPostCategories(&$subject) {
             $match = trim($match);
             $category = NULL;
             print("Working on $match\n"); 
-            //Work on the category search to see if we can determine the cat_id	
-            //check the database to see if their is a category similar
-            /* this is for old category based scheme
-             *
-            $sql_name = 'SELECT cat_ID 
-                         FROM ' . $wpdb->categories. ' 
-                         WHERE cat_name=\'' . addslashes($match) . '\'';
-            $sql_id = 'SELECT cat_ID 
-                       FROM ' . $wpdb->categories. ' 
-                       WHERE cat_ID=\'' . addslashes($match) . '\'';
-            $sql_sub_name = 'SELECT cat_ID 
-                             FROM ' . $wpdb->categories. ' 
-                             WHERE cat_name LIKE \'' . addslashes($match) . '%\' limit 1';
-           *
-           */
 
             $sql_name = 'SELECT term_id 
                          FROM ' . $wpdb->terms. ' 
@@ -1747,9 +1749,6 @@ function GetPostCategories(&$subject) {
                              FROM ' . $wpdb->terms. ' 
                              WHERE name LIKE \'' . addslashes($match) . '%\' limit 1';
                 
-            //echo "sql_name query= $sql_name\n";
-            //$foobar = $wpdb->get_var($sql_name);
-            //echo "sql_name result= $foobar\n";
             if ( $category = $wpdb->get_var($sql_name) ) {
                 //then category is a named and found 
             } elseif ( $category = $wpdb->get_var($sql_id) ) {
@@ -1757,11 +1756,9 @@ function GetPostCategories(&$subject) {
             } elseif ( $category = $wpdb->get_var($sql_sub_name) ) {
                 //then cateogry is a start of a name and found
             }  
-            //echo "the category is $category"; 
             if ($category) {
                 $post_categories[] = $category;
             }
-            //print_r($post_categories);
         }
     }
     if (!count($post_categories)) {
@@ -1900,6 +1897,10 @@ function UpdatePostieConfig($data) {
             }
         }
     }
+    echo '<pre>';
+    echo 'foo';
+    print_r($config);
+    echo '</pre>';
     WriteConfig($config);
     UpdatePostiePermissions($data["ROLE_ACCESS"]);
     return(1);
@@ -2009,6 +2010,20 @@ function GetDBConfig() {
     if (!isset($config["3GP_FFMPEG"])) { $config["3GP_FFMPEG"] = "/usr/bin/ffmpeg";}
     if (!isset($config["WRAP_PRE"])) { $config["WRAP_PRE"] =  'no'; }
     if (!isset($config["ADD_META"])) { $config["ADD_META"] =  'no'; }
+    if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =
+
+                         $mimeTag."<div class='" . '{CONFIG-IMAGEDIV}'."'><a
+                         href='" . 'CONFIG-URLPHOTOSDIR' . '{IMAGE}' . "'
+                         onclick=\"window.open(' . '"
+                            . 'CONFIG-URLPHOTOSDIR' . '{IMAGE}' . '","'
+                            . "full_size_image" . "','"
+                            . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;"
+                            . '"><img src="' . 'CONFIG-URLPHOTOSDIR' .
+                            '{THUMBNAIL}'. '" alt="'
+                            . $part->ctype_parameters['name'] . '" title="' .
+                            $part->ctype_parameters['name'] . '"
+                            style="'.'CONFIG-IMAGESTYLE'.'" class="'.'CONFIG-IMAGECLASS'.'" /></a></div>' . "\n";
+    }
     return($config);
 }
 /**
@@ -2048,18 +2063,6 @@ function GetConfig() {
     $config["REALPHOTOSDIR"] = realpath(ABSPATH . $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
     $config["URLFILESDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["FILESDIR"]);
     $config["REALFILESDIR"] = realpath(ABSPATH . $config["FILESDIR"]) . DIRECTORY_SEPARATOR;
-    if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =
-
-                         $mimeTag."<div class='" . $config["IMAGEDIV"]."'><a
-                         href='" . $config["URLPHOTOSDIR"] . '{IMAGE}' . "'
-                         onclick=\"window.open(' . '"
-                            . $config["URLPHOTOSDIR"] . '{IMAGE}' . '","'
-                            . "full_size_image" . "','"
-                            . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;"
-                            . '"><img src="' . $config["URLPHOTOSDIR"] .
-                            '{THUMBNAIL}'. '" alt="'
-                            . $part->ctype_parameters['name'] . '" title="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
-    }
     for ($i = 0; $i < count($config["AUTHORIZED_ADDRESSES"]); $i++) {
         $config["AUTHORIZED_ADDRESSES"][$i] = strtolower($config["AUTHORIZED_ADDRESSES"][$i]);
     }

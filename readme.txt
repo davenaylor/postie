@@ -128,6 +128,10 @@ If you don't have access to cron - check out "Cronless Postie"
 
 == History ==
 
+* 1.1.4 (2009.03.06)
+  * TODO Added more image options (open in new window, custom image template)
+  * Can now add tags (including default tag option)
+
 * Version 1.1.3 2009.02.20
   * Fixed delayed posting
   * updated readme some
