@@ -1,5 +1,5 @@
 <?php
-//TODO add tags to posts
+//TODO option to set posts for review (not publish immediately)
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
 define("POSTIE_ROOT",dirname(__FILE__));
 define("POSTIE_TABLE",$GLOBALS["table_prefix"]. "postie_config");
@@ -546,20 +546,34 @@ function GetContent ($part,&$attachments) {
                 $attachments["image_files"][] = array(($thumbImage ? $config["REALPHOTOSDIR"] . $thumbImage:NULL),
                                                       $config["REALPHOTOSDIR"] . $fileName,
                                                       $part->ctype_secondary);
+                $onclick='';
+                if ($config['IMAGE_NEW_WINDOW']) {
+                  $onclick='" onclick="window.open(' . "'"
+                            . $config["URLPHOTOSDIR"] . $fullImage . "','"
+                            . "full_size_image" . "','"
+                            . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;";
+                }
                 if ($thumbImage) {
                 //TODO image template
                         $marime=DetermineImageSize($file);
                         $marimex=$marime[0]+20;
                         $marimey=$marime[1]+20;
-                        $attachments["html"][] .= $mimeTag.'<div class="' . $config["IMAGEDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fullImage . '" onclick="window.open(' . "'"
-                            . $config["URLPHOTOSDIR"] . $fullImage . "','"
-                            . "full_size_image" . "','"
-                            . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;"
-                            . '"><img src="' . $config["URLPHOTOSDIR"] . $thumbImage . '" alt="'
-                            . $part->ctype_parameters['name'] . '" title="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
-                    if ($cid) {
-                        $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . $fullImage,count($attachments["html"]) - 1);
-                    }
+                  if ($config['USEIMAGETEMPLATE']) {
+                    $imageTemplate=str_replace('{THUMBNAIL}',
+                        $config['URLPHOTOSDIR'] . $thumbImage,
+                        $config['IMAGETEMPLATE']);
+                    $imageTemplate=str_replace('{IMAGE}',
+                        $config['URLPHOTOSDIR'] . $fullImage,
+                        $imageTemplate);
+                    $attachments["html"][] .=$imageTemplate;
+                  } else {
+                  $attachments["html"][] .= $mimeTag.'<div class="' . $config["IMAGEDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fullImage . 
+                      $onclick . '"><img src="' . $config["URLPHOTOSDIR"] . $thumbImage . '" alt="'
+                      . $part->ctype_parameters['name'] . '" title="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
+                  }
+                  if ($cid) {
+                      $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . $fullImage,count($attachments["html"]) - 1);
+                  }
                 }
                 else {
                     $attachments["html"][] .= $mimeTag .'<div class="' . $config["IMAGEDIV"].'"><img src="' . $config["URLPHOTOSDIR"] . $fileName 
@@ -1651,9 +1665,20 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
   foreach ( $attachments as $i => $value ) {
     // looks for ' #img1# ' etc... and replaces with image
     $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $config["IMAGE_PLACEHOLDER"]);
+    $img_placeholder_temp=rtrim($img_placeholder_temp,'#');
     echo "------------- IMG REPLACEMENT ----------------------\n";
-    echo "value=$value\n\n";
+    echo "<pre>value=$value</pre>\n\n";
+    echo "img_placeholder_temp=$img_placeholder_temp\n";
     if ( stristr($content, $img_placeholder_temp) ) {
+      // look for caption
+      if ( preg_match("/caption=['\"](.*)['\"]/", $content, $matches))  {
+        $caption =$matches[1];
+        $value = str_replace('{CAPTION}', $caption, $value);
+        echo "caption=$caption----\n";
+        $img_placeholder_temp.=' ' . $matches[0];
+      }
+    $img_placeholder_temp.='#';
+        echo "img_placeholder_temp=$img_placeholder_temp\n";
       $content = str_replace($img_placeholder_temp, $value, $content);
     } else {
       if ($config["IMAGES_APPEND"]) {
@@ -1999,10 +2024,6 @@ function GetDBConfig() {
     if (!isset($config["BANNED_FILES_LIST"])) { $config["BANNED_FILES_LIST"] = array();}
     if (!isset($config["SUPPORTED_FILE_TYPES"])) { $config["SUPPORTED_FILE_TYPES"] = array("video","application");}
     if (!isset($config["AUTHORIZED_ADDRESSES"])) { $config["AUTHORIZED_ADDRESSES"] = array();}
-    //if (!isset($config["MAIL_SERVER"])) { $config["MAIL_SERVER"] = get_option('mailserver_url'); }
-    //if (!isset($config["MAIL_SERVER_PORT"])) { $config["MAIL_SERVER_PORT"] =  get_option('mailserver_port'); }
-    //if (!isset($config["MAIL_USERID"])) { $config["MAIL_USERID"] =  get_option('mailserver_login'); }
-    //if (!isset($config["MAIL_PASSWORD"])) { $config["MAIL_PASSWORD"] =  get_option('mailserver_pass'); }
     if (!isset($config["MAIL_SERVER"])) { $config["MAIL_SERVER"] = NULL; }
     if (!isset($config["MAIL_SERVER_PORT"])) { $config["MAIL_SERVER_PORT"] =  NULL; }
     if (!isset($config["MAIL_USERID"])) { $config["MAIL_USERID"] =  NULL; }
@@ -2014,6 +2035,10 @@ function GetDBConfig() {
     if (!isset($config["3GP_FFMPEG"])) { $config["3GP_FFMPEG"] = "/usr/bin/ffmpeg";}
     if (!isset($config["WRAP_PRE"])) { $config["WRAP_PRE"] =  'no'; }
     if (!isset($config["ADD_META"])) { $config["ADD_META"] =  'no'; }
+    if (!isset($config["USEIMAGETEMPLATE"])) { $config["USEIMAGETEMPLATE"] =
+    false; }
+    if (!isset($config["IMAGE_NEW_WINDOW"])) { $config["IMAGE_NEW_WINDOW"] =
+    false; }
     if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =
 
                          $mimeTag."<div class='" . '{CONFIG-IMAGEDIV}'."'><a

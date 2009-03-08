@@ -317,6 +317,9 @@ fieldset {border: 1px solid black;}
                 <br />
                 </td> 
             </tr> 
+            <?php echo BuildBooleanSelect("Open images in new
+            window","IMAGE_NEW_WINDOW",$config["IMAGE_NEW_WINDOW"],"Recommended:
+            no");?>
             <tr> 
             <?php echo BuildBooleanSelect("Use custom image
             template","USEIMAGETEMPLATE",$config["USEIMAGETEMPLATE"],"If you

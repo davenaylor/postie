@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.7.1
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 More Information:
 
 The Postie plugin allows you to blog via e-mail, including many advanced
@@ -16,6 +16,11 @@ Postie offers many advanced features for posting to your blog via e-mail,
 including the ability to assign categories by name, included pictures and
 videos, and automatically strip off signatures. It also has support for both
 imap and pop3, with the option for ssl with both.  
+
+= What's new in 1.1.4 =
+* Added more image options (open in new window, custom image template)
+* can now add captions to images
+* Can now add tags (including default tag option)
 
 == Installation ==
 * Make sure all postie code is its own directory inside of wp-content/plugins/postie
@@ -68,7 +73,7 @@ If you don't have access to cron - check out "Cronless Postie"
         line, so if you have two posts with titles "foo", then the comment
         will get placed in the more recent post.
 
-= Category Handling =
+= Category and tag handling =
     * If you put a category name in the subject with a : it will be used
       as the category for the post
     * If you put a category id number in the subject with a : it will
@@ -92,7 +97,9 @@ If you don't have access to cron - check out "Cronless Postie"
       Subject: -1- -Mo- -Br- My Subject
 
       On my blog it would post to General (Id 1), Moblog, and Brewing all at one time
-
+    * You can add tags by adding a line in the body of the message like so:
+      tags: foo, bar
+    * You can also set a default tag to be applied if no tags are included.
 
 = Image Handling =
     * Postie has a filter to make it easy to show full images on individual pages.
@@ -104,6 +111,24 @@ If you don't have access to cron - check out "Cronless Postie"
     * You can publish images in the text of your message by using #img1#
       #img2# - each one will be replaced with the HTML for the image
       you attached
+    * Captions - you can also add a caption like so:
+      #img1 caption='foo'#
+      #img2 caption='bar'#
+    * Image templates
+      By default, postie wraps images in a div. You can specify the class of
+      the div in the options. You can also choose whether or not to open the
+      full-size image in a new window.
+
+      You can also specify a custom image template. I use the following custom
+template:
+`<div class='imageframe alignleft'><a href='{IMAGE}'><img src="{THUMBNAIL}"
+alt="{CAPTION}" title="{CAPTION}" style="{CONFIG-IMAGESTYLE}"
+class="attachment" /></a><div class='imagecaption'>{CAPTION}</div></div>`
+     
+    {IMAGE} gets replaced with the path to the full-size image
+    {THUMBNAIL} gets replaced with the path to the thumbnail image
+    {CAPTION} gets replaced with the caption you specified (if any)
+
     * Rotation - if you include the text
 
       rotate:90
@@ -129,7 +154,8 @@ If you don't have access to cron - check out "Cronless Postie"
 == History ==
 
 * 1.1.4 (2009.03.06)
-  * TODO Added more image options (open in new window, custom image template)
+  * Added more image options (open in new window, custom image template)
+  * can now add captions to images
   * Can now add tags (including default tag option)
 
 * Version 1.1.3 2009.02.20
