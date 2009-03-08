@@ -74,6 +74,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
         $content = "<pre>\n" . $content . "</pre>\n";
       }
     }
+    $post_status=$config['POST_STATUS'];
     $details = array(
         'post_author'		=> $poster,
         'comment_author'		=> $postAuthorDetails['author'],
@@ -90,7 +91,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
         'comment_status' => $comment_status,
         'post_name' => sanitize_title($subject),
         'ID' => $id,
-        'post_status' => 'publish'
+        'post_status' => $post_status
     );
     DisplayEmailPost($details);
     PostToDB($details); 
@@ -2037,6 +2038,8 @@ function GetDBConfig() {
     if (!isset($config["ADD_META"])) { $config["ADD_META"] =  'no'; }
     if (!isset($config["USEIMAGETEMPLATE"])) { $config["USEIMAGETEMPLATE"] =
     false; }
+    if (!isset($config["POST_STATUS"])) { $config["POST_STATUS"] =
+    'publish'; }
     if (!isset($config["IMAGE_NEW_WINDOW"])) { $config["IMAGE_NEW_WINDOW"] =
     false; }
     if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =

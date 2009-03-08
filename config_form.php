@@ -61,14 +61,6 @@ fieldset {border: 1px solid black;}
 
 
 
-<!--     <tr><td colspan=2> -->
-<!--         <fieldset class="options"> -->
-<!--         <legend><?php _e('Directory Settings');?></legend> -->
-<!--             <table width="100%" cellspacing="2" cellpadding="5" class="editform"> -->
-<!--             </table> -->
-<!--         </fieldset> -->
-<!--     </td> -->
-<!--     </tr> -->
 
 
     <tr><td colspan=2> 
@@ -100,6 +92,21 @@ fieldset {border: 1px solid black;}
         <code><?php _e("This allows you to grant access to other users to post if they have the proper access level");?></code>
         </td>
 	</tr>
+            <tr> 
+                <th width="33%" valign="top" scope="row"><?php _e('Post status:') ?> </th> 
+                <td>
+        <select name="POST_STATUS" id="POST_STATUS">
+        <option value="publish" <?php if($config["POST_STATUS"] == "publish") { echo
+        "SELECTED";} ?>>Published</option>
+        <option value="draft" <?php if($config["POST_STATUS"] == "draft") { echo
+        "SELECTED";} ?>>Draft</option>
+        <option value="pending" <?php if($config["POST_STATUS"] == "pending") { echo
+        "SELECTED";} ?>>Pending Review</option>
+        </select><br />
+                <?php _e("Recommended");?>: <code>plain</code>
+                <br />
+                </td> 
+            </tr> 
             <?php echo BuildTextArea("Authorized Addresses","AUTHORIZED_ADDRESSES",$config["AUTHORIZED_ADDRESSES"],"Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level.");?>
             </table> 
         </fieldset> 
