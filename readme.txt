@@ -6,7 +6,6 @@ Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.7.1
 Stable tag: 1.1.4
-More Information:
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -43,111 +42,113 @@ This fetches the mail every five mintues.
 If you don't have access to cron - check out "Cronless Postie"
 
 == Options ==
-    * You can set the starting characters for you signature so that it
-      is removed from the posting message
-    * You can set a list of banned file names so if you provider adds
-      images to your post they don't show up in the blog
-    * If you post from an email address that is not a valid author the
-      email post will be forwarded to the admin
-    * You can control if you want HTML allowed in the body or subject
-      of your post
-    * Lets you set a default subject when you don't set one
-    * Defaults to posting to the default category you set in Word Press
+* You can set the starting characters for you signature so that it
+  is removed from the posting message
+* You can set a list of banned file names so if you provider adds
+  images to your post they don't show up in the blog
+* If you post from an email address that is not a valid author the
+  email post will be forwarded to the admin
+* You can control if you want HTML allowed in the body or subject
+  of your post
+* Lets you set a default subject when you don't set one
+* Defaults to posting to the default category you set in Word Press
 
 == Usage ==
-    * If you put in :start - the message processing won't start until it sees that string
-    * If you put in :end - the message processing will stop once it sees that string
-    * Posts can be delayed by adding a line with delayXdXhXm where X is a number.
-      *    delay:1d - 1 day
-      *    delay:1h - 1 hour
-      *    delay:1m - 1 minute
-      *    delay:1d2h4m - 1 day 2 hours 4m
-    * By putting comments:X in your message you can control if comments are allowed
-       *   comments:0 - means closed
-       *   comments:1 - means open
-       *   comments:2 - means registered only
-    * Replying to an e-mail gets posted as a comment. 
-      * For example, you e-mailed a post with the subject line "foo".
-        If you then send an e-mail with the subject line "Re: foo", it will
-        get posted as a comment to the "foo" post. This works by the subject
-        line, so if you have two posts with titles "foo", then the comment
-        will get placed in the more recent post.
+* If you put in :start - the message processing won't start until it sees that string
+* If you put in :end - the message processing will stop once it sees that string
+* Posts can be delayed by adding a line with delayXdXhXm where X is a number.
+  *    delay:1d - 1 day
+  *    delay:1h - 1 hour
+  *    delay:1m - 1 minute
+  *    delay:1d2h4m - 1 day 2 hours 4m
+* By putting comments:X in your message you can control if comments are allowed
+   *   comments:0 - means closed
+   *   comments:1 - means open
+   *   comments:2 - means registered only
+* Replying to an e-mail gets posted as a comment. 
+  * For example, you e-mailed a post with the subject line "foo".
+    If you then send an e-mail with the subject line "Re: foo", it will
+    get posted as a comment to the "foo" post. This works by the subject
+    line, so if you have two posts with titles "foo", then the comment
+    will get placed in the more recent post.
 
 = Category and tag handling =
-    * If you put a category name in the subject with a : it will be used
-      as the category for the post
-    * If you put a category id number in the subject with a : it will
-      be used as the category for the post
-    * If you put the first part of a category name it will be posted in
-      the first category that the system finds that matches - so if you put
+* If you put a category name in the subject with a : it will be used
+  as the category for the post
+* If you put a category id number in the subject with a : it will
+  be used as the category for the post
+* If you put the first part of a category name it will be posted in
+  the first category that the system finds that matches - so if you put
 
-      Subject: Gen: New News
+  Subject: Gen: New News
 
-      The system will post that in General.
- 
-    * All of the above also applies if you put the category in brackets []
-    * Using [] or you can post to multiple categories at once
+  The system will post that in General.
 
-      Subject: [1] [Mo] [Br] My Subject
+* All of the above also applies if you put the category in brackets []
+* Using [] or you can post to multiple categories at once
 
-      On my blog it would post to General (Id 1), Moblog, and Brewing all at one time
+  Subject: [1] [Mo] [Br] My Subject
 
-    * Using - or you can post to multiple categories at once
+  On my blog it would post to General (Id 1), Moblog, and Brewing all at one time
 
-      Subject: -1- -Mo- -Br- My Subject
+* Using - or you can post to multiple categories at once
 
-      On my blog it would post to General (Id 1), Moblog, and Brewing all at one time
-    * You can add tags by adding a line in the body of the message like so:
-      tags: foo, bar
-    * You can also set a default tag to be applied if no tags are included.
+  Subject: -1- -Mo- -Br- My Subject
+
+  On my blog it would post to General (Id 1), Moblog, and Brewing all at one time
+* You can add tags by adding a line in the body of the message like so:
+  tags: foo, bar
+* You can also set a default tag to be applied if no tags are included.
 
 = Image Handling =
-    * Postie has a filter to make it easy to show full images on individual pages.
-    * Tells you if you have GD installed for resizing images
-    * Allows you to attach images to your email and automatically post
-      them to your blog
-    * Large images are automatically thumbnailed and linked to the larger
-      image (Requires GD)
-    * You can publish images in the text of your message by using #img1#
-      #img2# - each one will be replaced with the HTML for the image
-      you attached
-    * Captions - you can also add a caption like so:
-      #img1 caption='foo'#
-      #img2 caption='bar'#
-    * Image templates
-      By default, postie wraps images in a div. You can specify the class of
-      the div in the options. You can also choose whether or not to open the
-      full-size image in a new window.
+* Postie has a filter to make it easy to show full images on individual pages.
+* Tells you if you have GD installed for resizing images
+* Allows you to attach images to your email and automatically post
+  them to your blog
+* Large images are automatically thumbnailed and linked to the larger
+  image (Requires GD)
+* You can publish images in the text of your message by using #img1#
+  #img2# - each one will be replaced with the HTML for the image
+  you attached
+* Captions - you can also add a caption like so:
+  #img1 caption='foo'#
+  #img2 caption='bar'#
+* Image templates
+  By default, postie wraps images in a div. You can specify the class of
+  the div in the options. You can also choose whether or not to open the
+  full-size image in a new window.
 
-      You can also specify a custom image template. I use the following custom
+  You can also specify a custom image template. I use the following custom
 template:
-`<div class='imageframe alignleft'><a href='{IMAGE}'><img src="{THUMBNAIL}"
-alt="{CAPTION}" title="{CAPTION}" style="{CONFIG-IMAGESTYLE}"
-class="attachment" /></a><div class='imagecaption'>{CAPTION}</div></div>`
+
+  &lt;div class='imageframe alignleft'&gt;&lt;a href='{IMAGE}'&gt;&lt;img src="{THUMBNAIL}"
+  alt="{CAPTION}" title="{CAPTION}" 
+  class="attachment" /&gt;&lt;/a&gt;&lt;div
+class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
      
-    {IMAGE} gets replaced with the path to the full-size image
-    {THUMBNAIL} gets replaced with the path to the thumbnail image
-    {CAPTION} gets replaced with the caption you specified (if any)
+    * {IMAGE} gets replaced with the path to the full-size image
+    * {THUMBNAIL} gets replaced with the path to the thumbnail image
+    * {CAPTION} gets replaced with the caption you specified (if any)
 
-    * Rotation - if you include the text
+* Rotation - if you include the text
 
-      rotate:90
+  rotate:90
 
-      or any other number - all images in the message will be rotated for you.
+  or any other number - all images in the message will be rotated for you.
 
-    * Images are renamed in a way that makes it impossible to accidentally
-      overwrite images you have already posted
+* Images are renamed in a way that makes it impossible to accidentally
+  overwrite images you have already posted
 
 
 
 = Interoperability =
-    * If your mail client doesn't support setting the subject (nokia) you
-      can do so by putting #your title here# at the begining of your message
-    * POP3,POP3-SSL,IMAP,IMAP-SSL now supported - last three require
-      php-imap support
-    * The program understands enough about mime to not duplicate post
-      if you send an HTML and plain text message
-    * Automatically confirms that you are installed correctly
+* If your mail client doesn't support setting the subject (nokia) you
+  can do so by putting #your title here# at the begining of your message
+* POP3,POP3-SSL,IMAP,IMAP-SSL now supported - last three require
+  php-imap support
+* The program understands enough about mime to not duplicate post
+  if you send an HTML and plain text message
+* Automatically confirms that you are installed correctly
 
 
 
