@@ -108,6 +108,16 @@ fieldset {border: 1px solid black;}
                 </td> 
             </tr> 
             <?php echo BuildTextArea("Authorized Addresses","AUTHORIZED_ADDRESSES",$config["AUTHORIZED_ADDRESSES"],"Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level.");?>
+            <tr> 
+                <th width="33%" valign="top" scope="row"><?php _e('Admin
+                username:') ?> </th> 
+                <td>
+                <input name="ADMIN_USERNAME" type="text" id="ADMIN_USERNAME"
+                value="<?php echo $config["ADMIN_USERNAME"]; ?>" size="50" /><br />
+                <?php _e("Recommended");?>: <code>admin</code>
+                <br />
+                </td> 
+            </tr> 
             </table> 
         </fieldset> 
     </td> 

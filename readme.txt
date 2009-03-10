@@ -156,6 +156,8 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 * 1.1.5 (2009.03.10)
   * Added option to have postie posts be pending review, published, or draft
   * Settings panel only shows up for administrators
+  * Can now set administrator name. Authorized e-mail addresses which don't
+    have a user get posted under this name
 
 * 1.1.4 (2009.03.06)
   * Added more image options (open in new window, custom image template)

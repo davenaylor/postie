@@ -818,7 +818,10 @@ function ValidatePoster( &$mimeDecodedEmail ) {
     	if (empty($user_ID)){
         	print("$from is authorized to post as the administrator\n");
        		$from = get_option("admin_email");
-        	$poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE ID = 1");
+          $adminUser=$config['ADMIN_USERNAME'];
+          echo "adminUser='$adminUser'";
+        	$poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
+          user_login  = '$adminUser'");
 	    }
 	    else {
 		    $poster = $user_ID;
@@ -1984,6 +1987,8 @@ function ReadDBConfig() {
 function GetDBConfig() {
     $config = ReadDBConfig();
     if (!isset($config["PHOTOSDIR"])) { $config["PHOTOSDIR"] = DIRECTORY_SEPARATOR."wp-photos".DIRECTORY_SEPARATOR;}
+    if (!isset($config["ADMIN_USERNAME"])) { $config["ADMIN_USERNAME"] =
+    'admin'; }
     if (!isset($config["FILESDIR"])) { $config["FILESDIR"] = DIRECTORY_SEPARATOR."wp-filez".DIRECTORY_SEPARATOR;}
     if (!isset($config["PREFER_TEXT_TYPE"])) { $config["PREFER_TEXT_TYPE"] = "plain";}
     if (!isset($config["RESIZE_LARGE_IMAGES"])) { $config["RESIZE_LARGE_IMAGES"] = true;}
