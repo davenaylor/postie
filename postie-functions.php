@@ -1927,10 +1927,6 @@ function UpdatePostieConfig($data) {
             }
         }
     }
-    echo '<pre>';
-    echo 'foo';
-    print_r($config);
-    echo '</pre>';
     WriteConfig($config);
     UpdatePostiePermissions($data["ROLE_ACCESS"]);
     return(1);
