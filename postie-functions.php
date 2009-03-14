@@ -48,7 +48,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
 
     ubb2HTML($content);	
 
-    //$content = FilterNewLines($content);
+    $content = FilterNewLines($content);
     //$content = FixEmailQuotes($content);
     
     $id=checkReply($subject); 
@@ -542,7 +542,10 @@ function GetContent ($part,&$attachments) {
                 $thumbImage = NULL;
                 $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
                 if ($config["RESIZE_LARGE_IMAGES"]) {
-                    list($thumbImage, $fullImage) = ResizeImage($file,strtolower($part->ctype_secondary));
+                echo "going to resize now \n<br />";
+                    list($thumbImage, $fullImage, $caption) = ResizeImage($file,strtolower($part->ctype_secondary));
+                echo "caption=$caption\n<br />";
+                echo "thumbImage=$thumbImage\n<br />";
                 }
                 $attachments["image_files"][] = array(($thumbImage ? $config["REALPHOTOSDIR"] . $thumbImage:NULL),
                                                       $config["REALPHOTOSDIR"] . $fileName,
@@ -556,7 +559,7 @@ function GetContent ($part,&$attachments) {
                 }
                 if ($thumbImage) {
                 //TODO image template
-                        $marime=DetermineImageSize($file);
+                        list($marime,$tmpcaption)=DetermineImageSize($file);
                         $marimex=$marime[0]+20;
                         $marimey=$marime[1]+20;
                   if ($config['USEIMAGETEMPLATE']) {
@@ -566,6 +569,13 @@ function GetContent ($part,&$attachments) {
                     $imageTemplate=str_replace('{IMAGE}',
                         $config['URLPHOTOSDIR'] . $fullImage,
                         $imageTemplate);
+                    $imageTemplate=str_replace('{FILENAME}',
+                        $config['REALPHOTOSDIR'] . $fullImage,
+                        $imageTemplate);
+                    if ($caption!='') {
+                      $imageTemplate=str_replace('{CAPTION}',
+                          $caption, $imageTemplate);
+                    }
                     $attachments["html"][] .=$imageTemplate;
                   } else {
                   $attachments["html"][] .= $mimeTag.'<div class="' . $config["IMAGEDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fullImage . 
@@ -903,6 +913,7 @@ function EndFilter( &$content,$filter) {
 
 //filter content for new lines
 function FilterNewLines ( $content ) {
+    $config=GetConfig();
 		$search = array (
 			"/\r\n/",
 			"/\r/",
@@ -913,13 +924,21 @@ function FilterNewLines ( $content ) {
             "\n",
             "\n",
             'ACTUAL_NEW_LINE',
-			' '
+			'LINEBREAK'
 		);
     // strip extra line breaks, and replace double line breaks with paragraph
     // tags
     $result = preg_replace($search,$replace,$content);
-    return('<p>' . preg_replace('/ACTUAL_NEW_LINE/',"<\/p>\n<p>",$result)
-        . '</p>');
+    $newContent='<p>' . preg_replace('/ACTUAL_NEW_LINE/',"</p>\n<p>",$result);
+    $newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
+    if ($config['CONVERTNEWLINE']) {
+      $newContent= preg_replace('/LINEBREAK/',"<br />\n",$newContent);
+      echo "converting newlines\n";
+    } else {
+      $newContent= preg_replace('/LINEBREAK/'," ",$newContent);
+      echo "not converting newlines\n";
+    }
+    return($newContent);
 }
 function FixEmailQuotes ( $content ) {
     # place e-mails quotes (indicated with >) in blockquote and pre tags
@@ -931,7 +950,6 @@ function FixEmailQuotes ( $content ) {
 		);
     // strip extra line breaks, and replace double line breaks with paragraph
     // tags
-    echo $content;
     $result = preg_replace($search,$replace,$content);
     //return('<p>' . preg_replace('/ACTUAL_NEW_LINE/',"<\/p>\n<p>",$result)
         //. '</p>');
@@ -1052,54 +1070,69 @@ function ConfirmTrailingDirectorySeperator($string) {
 function DetermineImageSize($file) {
     $config = GetConfig();
     if ($config["USE_IMAGEMAGICK"]) {
-        return(DetermineImageSizeWithImageMagick($file));
+        list($size,$caption)=DetermineImageSizeWithImageMagick($file);
     }
     else {
-        return(DetermineImageSizeWithGD($file));
+        echo "determining image size with GD\n<br />";
+        list($size,$caption)=DetermineImageSizeWithGD($file);
     }
-    return($size);
+    return(array($size,$caption));
 }
 /**
   * This function handles figuring out the size of the image
   *@return array  - array(width,height)
 */
 function DetermineImageSizeWithImageMagick($file) {
-    $config = GetConfig();
-    $size = array(0,0);
-    if (file_exists($config["IMAGEMAGICK_IDENTIFY"])) {
-        $geometry = @exec (escapeshellcmd($config["IMAGEMAGICK_IDENTIFY"]) . 
-                           " -ping " .
-                           escapeshellarg($file));
-        preg_match("/([0-9]+)x([0-9]+)/",$geometry,$matches);
-        if (isset($matches[1])) {
-            $size[0] = $matches[1];
-        }
-        if (isset($matches[2])) {
-            $size[1] = $matches[2];
-        }
+  $config = GetConfig();
+  $size = array(0,0);
+  if (file_exists($config["IMAGEMAGICK_IDENTIFY"])) {
+    $geometry = @exec (escapeshellcmd($config["IMAGEMAGICK_IDENTIFY"]) . 
+                       " -ping " .
+                       escapeshellarg($file));
+    preg_match("/([0-9]+)x([0-9]+)/",$geometry,$matches);
+    if (isset($matches[1])) {
+      $size[0] = $matches[1];
     }
-    return($size);
+    if (isset($matches[2])) {
+      $size[1] = $matches[2];
+    }
+  }
+  if (file_exists($config["IMAGEMAGICK_CONVERT"])) {
+    $caption = @exec (escapeshellcmd($config["IMAGEMAGICK_CONVERT"]) . 
+                       " " .  escapeshellarg($file)) . '8BIMTEXT:- ';
+    preg_match('/Caption="(.*)"/', $caption, $matches);
+    if (isset($matches[1])) {
+      $caption = $matches[1];
+    }
+  }
+  return(array($size,$caption));
 }
 /**
   * This function handles figuring out the size of the image
   *@return array  - array(width,height)
 */
 function DetermineImageSizeWithGD($file) {
-    return(getimagesize($file));
+  $size = getimagesize($file, $info);
+  if(isset($info['APP13'])) {
+    $iptc = iptcparse($info['APP13']);
+    $caption= $iptc['2#120'][0];
+  }
+  return(array($size,$caption));
 }
 
 function ResizeImage($file,$type) {
     $config = GetConfig();
-    $sizeInfo = DetermineImageSize($file);
+    list($sizeInfo,$caption) = DetermineImageSize($file);
     $fileName = basename($file);
     if (DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]) != 1) {
         if ($config["USE_IMAGEMAGICK"]) {
-            return(ResizeImageWithImageMagick($file,$type));
+            list($scaledFileName, $fileName,$caption)=ResizeImageWithImageMagick($file,$type);
         } else {
-            return(ResizeImageWithGD($file,$type));
+            echo "using GD to resize\n";
+            list($scaledFileName, $fileName,$caption)=ResizeImageWithGD($file,$type);
         }
     }
-    return(array("",$fileName));
+    return(array($scaledFileName,$fileName, $caption));
 
 }
 function RotateImages($rotation,$imageList) {
@@ -1278,7 +1311,7 @@ function DetermineScale($width,$height, $max_width, $max_height) {
 function ResizeImageWithImageMagick($file,$type) {
     //print("<h1>Using ImageMagick</h1>");
     $config = GetConfig();
-    $sizeInfo = DetermineImageSize($file);
+    list($sizeInfo,$caption) = DetermineImageSize($file);
     $fileName = basename($file);
     $scaledFileName = "";
     $scale = DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]);
@@ -1299,18 +1332,19 @@ function ResizeImageWithImageMagick($file,$type) {
 
             @exec ('chmod 755 ' . escapeshellarg($scaledFile));
     }
-    return(array($scaledFileName,$fileName));
+    return(array($scaledFileName,$fileName,$caption));
 
 }
 function ResizeImageWithGD($file,$type) {
     $original_mem_limit = ini_get('memory_limit');
     ini_set('memory_limit', -1);
     $config = GetConfig();
-    $sizeInfo = DetermineImageSize($file);
+    list($sizeInfo,$caption) = DetermineImageSize($file);
     $fileName = basename($file);
     $scaledFileName = "";
     $scale = DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]);
     if ($scale != 1) {
+      echo "scale=$scale, width=". $sizeInfo[0] . "height=". $sizeInfo[1] . "\n<br />";
         $sourceImage = NULL;
         switch($type) {
             case "jpeg":
@@ -1342,7 +1376,8 @@ function ResizeImageWithGD($file,$type) {
     }
     // Revert to original limit
     ini_set('memory_limit', $original_mem_limit);
-    return(array($scaledFileName,$fileName));
+    echo "inside ResizeImageWithGD - scaledFileName=$scaledFileName\n";
+    return(array($scaledFileName,$fileName,$caption));
 
 }
 /**
@@ -1804,9 +1839,11 @@ function GetPostCategories(&$subject) {
   *This function just outputs a simple html report about what is being posted in
   */
 function DisplayEmailPost($details) {
+            $config = GetConfig();
+            print_r($config);
             print_r($details);
             $theFinalContent=$details['post_content'];
-            echo "-----------the final content is:\n $theFinalContent\n";
+            echo "-----------the final content is:\n '$theFinalContent'\n";
             // Report
             print '</pre><p><b>Post Author</b>: ' . $details["post_author"]. '<br />' . "\n";
             print '<b>Date</b>: ' . $details["post_date"] . '<br />' . "\n";
@@ -2018,6 +2055,7 @@ function GetDBConfig() {
     if (!isset($config["MESSAGE_DEQUOTE"])) { $config["MESSAGE_DEQUOTE"] = true; }
     if (!isset($config["TURN_AUTHORIZATION_OFF"])) { $config["TURN_AUTHORIZATION_OFF"] = false;}
     if (!isset($config["USE_IMAGEMAGICK"])) { $config["USE_IMAGEMAGICK"] = false;}
+    if (!isset($config["CONVERTNEWLINE"])) { $config["CONVERTNEWLINE"] = false;}
     if (!isset($config["IMAGEMAGICK_CONVERT"])) { $config["IMAGEMAGICK_CONVERT"] = "/usr/bin/convert";}
     if (!isset($config["IMAGEMAGICK_IDENTIFY"])) { $config["IMAGEMAGICK_IDENTIFY"] = "/usr/bin/identify";}
 

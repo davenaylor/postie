@@ -113,6 +113,10 @@ If you don't have access to cron - check out "Cronless Postie"
 * Captions - you can also add a caption like so:
   #img1 caption='foo'#
   #img2 caption='bar'#
+  
+  Or, if you use IPTC captions, this caption will be used  (adding a caption
+  in many photo editing programs (for example Picasa), will add an IPTC caption)
+
 * Image templates
   By default, postie wraps images in a div. You can specify the class of
   the div in the options. You can also choose whether or not to open the
@@ -126,8 +130,9 @@ template:
   class="attachment" /&gt;&lt;/a&gt;&lt;div
 class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
      
-    * {IMAGE} gets replaced with the path to the full-size image
-    * {THUMBNAIL} gets replaced with the path to the thumbnail image
+    * {IMAGE} gets replaced with the url to the full-size image
+    * {THUMBNAIL} gets replaced with the url to the thumbnail image
+    * {FILENAME} gets replaced with the absolute path to the full-size image
     * {CAPTION} gets replaced with the caption you specified (if any)
 
 * Rotation - if you include the text
@@ -158,6 +163,8 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * Settings panel only shows up for administrators
   * Can now set administrator name. Authorized e-mail addresses which don't
     have a user get posted under this name
+  * Will use IPTC captions if available
+  * Added option to replace newline characters with &lt;br /&gt;
 
 * 1.1.4 (2009.03.06)
   * Added more image options (open in new window, custom image template)

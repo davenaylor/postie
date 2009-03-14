@@ -214,6 +214,9 @@ fieldset {border: 1px solid black;}
                 <br />
                 </td> 
             </tr> 
+            <?php echo BuildBooleanSelect("Replace newline characters with
+            html line breaks (&lt;br
+            /&gt;)","CONVERTNEWLINE",$config["CONVERTNEWLINE"]);?>
             <?php echo BuildBooleanSelect("Forward Rejected Mail","FORWARD_REJECTED_MAIL",$config["FORWARD_REJECTED_MAIL"]);?>
             <?php echo BuildBooleanSelect("Allow Subject In Mail","ALLOW_SUBJECT_IN_MAIL",$config["ALLOW_SUBJECT_IN_MAIL"]);?>
             <?php echo BuildBooleanSelect("Allow HTML In Mail Subject","ALLOW_HTML_IN_SUBJECT",$config["ALLOW_HTML_IN_SUBJECT"]);?>
@@ -341,7 +344,8 @@ fieldset {border: 1px solid black;}
             <?php echo BuildBooleanSelect("Use custom image
             template","USEIMAGETEMPLATE",$config["USEIMAGETEMPLATE"],"If you
             don't like the default html output around images, you can enter
-            your own below. The default template is already there.");?>
+            your own below. The default template is already there. See the
+            readme for more details");?>
                 <th width="33%" valign="top" scope="row">                <td>
                 <textarea  cols="50" rows="6" name="IMAGETEMPLATE"
                 id="IMAGETEMPLATE"><?php
