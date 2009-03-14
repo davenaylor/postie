@@ -14,19 +14,25 @@ features not found in wordpress's default post by e-mail feature.
 Postie offers many advanced features for posting to your blog via e-mail,
 including the ability to assign categories by name, included pictures and
 videos, and automatically strip off signatures. It also has support for both
-imap and pop3, with the option for ssl with both.  
+imap and pop3, with the option for ssl with both.  For usage notes, see the
+[other notes](other_notes) page
 
-= What's new in 1.1.4 =
-* Added more image options (open in new window, custom image template)
-* can now add captions to images
-* Can now add tags (including default tag option)
+= What's new in 1.1.5 = 
+* Added option to have postie posts be pending review, published, or draft
+* Settings panel only shows up for administrators
+* Need not be user "admin" to modify settings or to post from non-registered
+  users
+* Can now set administrator name. Authorized e-mail addresses which don't
+  have a user get posted under this name
+* Will use IPTC captions if available
+* Added option to replace newline characters with &lt;br /&gt;
 
 == Installation ==
 * Make sure all postie code is its own directory inside of wp-content/plugins/postie
 * Make two directories in your main wordpress directory wp-filez and wp-photos
-* Make sure these directories are writable by your web server (chmod 777 or chown to the webserver)
+* Make sure these directories are writable by your web server (chmod 777 or chown to the webserver -- the permissions should be the same as wp-content/uploads)
 * make sure that the postie directory  that this file is in is moved to yourwebsite/wp-content/plugins
-* Login to WordPress as "admin"
+* Login to WordPress as an administrator
 * Goto the Plugins tab in the WordPress Admin Site
 * Activate "Postie"
 * Goto to the "Options" tab and click on the sub-tab "Configure Postie" to configure it.
@@ -161,6 +167,8 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 * 1.1.5 (2009.03.10)
   * Added option to have postie posts be pending review, published, or draft
   * Settings panel only shows up for administrators
+  * Need not be user "admin" to modify settings or to post from non-registered
+    users
   * Can now set administrator name. Authorized e-mail addresses which don't
     have a user get posted under this name
   * Will use IPTC captions if available
@@ -171,11 +179,11 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * can now add captions to images
   * Can now add tags (including default tag option)
 
-* Version 1.1.3 2009.02.20
+* 1.1.3 (2009.02.20)
   * Fixed delayed posting
   * updated readme some
 
-* Version 1.1.2 2008.07.12
+* 1.1.2 (2008.07.12)
   * now maintained by Robert Felty
   * allow negative delays
   * will glean author information from forwarded or redirected e*mails
