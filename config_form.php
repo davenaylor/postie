@@ -369,9 +369,36 @@ fieldset {border: 1px solid black;}
 
     <tr><td colspan=2> 
         <fieldset class="options"> 
-        <legend><?php _e('3GP');?></legend> 
+        <legend><?php _e('Video options');?></legend> 
             <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
             <?php echo BuildBooleanSelect("Embed 3GP videos as QuickTime","3GP_QT",$config["3GP_QT"],"This controls if the video is just a link or embeded in the page using QuickTime");?>
+            <?php echo BuildBooleanSelect("Autoplay embedded
+            videos?","VIDEO_AUTOPLAY",$config["VIDEO_AUTOPLAY"],"When this is
+            set to yes, videos will start to play automatically.");?>
+                <tr>
+                    <th scope="row"><?php _e('Video width:') ?> </th>
+                    <td><input name="VIDEO_WIDTH" type="text" id="VIDEO_WIDTH"
+                    value="<?php echo $config['VIDEO_WIDTH']; ?>" size="5" />
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php _e('Video height:') ?> </th>
+                    <td><input name="VIDEO_HEIGHT" type="text" id="VIDEO_HEIGHT"
+                    value="<?php echo $config['VIDEO_HEIGHT']; ?>" size="5" />
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php _e('Video player width:') ?> </th>
+                    <td><input name="PLAYER_WIDTH" type="text" id="PLAYER_WIDTH"
+                    value="<?php echo $config['PLAYER_WIDTH']; ?>" size="5" />
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><?php _e('Video player height:') ?> </th>
+                    <td><input name="PLAYER_HEIGHT" type="text" id="PLAYER_HEIGHT"
+                    value="<?php echo $config['PLAYER_HEIGHT']; ?>" size="5" />
+                    </td>
+                </tr>
                 <tr>
                     <th scope="row"><?php _e('Location of ffmpeg:') ?> </th>
                     <td><input name="3GP_FFMPEG" type="text" id="3GP_FFMPEG" value="<?php echo $config['3GP_FFMPEG']; ?>" size="30" />

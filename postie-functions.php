@@ -485,8 +485,7 @@ function GetContent ($part,&$attachments) {
         foreach($mimeDecodedEmail->parts as $section) {
             $meta_return .= GetContent($section,$attachments);
         }
-    }
-    else { 
+    } else { 
         switch ( strtolower($part->ctype_primary) ) {
             case 'multipart':
                 FilterTextParts($part);
@@ -609,32 +608,39 @@ function GetContent ($part,&$attachments) {
                     $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
 
                      if ($part->ctype_secondary == "3gpp"
-                             || $part->ctype_secondary == "3gp"
+                             || $part->ctype_secondary == "octet-stream"
                              || $part->ctype_secondary == "3g2"
+                             || $part->ctype_secondary == "3gp"
+                             || $part->ctype_secondary == "mp4"
+                             || $part->ctype_secondary == "quicktime"
                              ||  $part->ctype_secondary == "3gpp2") {
                          if ($config["3GP_QT"]) {
                              //Shamelessly borrowed from http://www.postneo.com/2003/12/19/embedding-3gpp-in-html
+                           $autoplay='false';
+                           if ($config['AUTOPLAY']) {
+                             $autoplay='true';
+                           }
                          $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->' .
-                            '<a href="'.$config["URLFILESDIR"] . $filename.'">Video'.
                             '<object '.
                                 'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
                                 'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
-                                'width="128" '.
-                                'height="112"> '.
+                                'width="' . $config['VIDEO_WIDTH'] . '" '.
+                                'height="' . $config['VIDEO_HEIGHT'] . '"> '.
                                 '<param name="src" VALUE="'. $config["URLFILESDIR"] . $filename .'"> '.
-                                '<param name="autoplay" VALUE="false"> '.
+                                '<param name="autoplay" VALUE="$autoplay"> '.
                                 '<param name="controller" VALUE="true"> '.
                                '<embed '.
                                'src="'. $config["URLFILESDIR"] . $filename .'" '.
-                               'width="128" '.
-                               'height="112" '.
-                               'autoplay="true" '.
+                               'width="' . $config['VIDEO_WIDTH'] . '" '.
+                               'height="' . $config['VIDEO_HEIGHT'] . '"'.
+                               'autoplay="$autoplay" '.
                                'controller="true" '.
                                'type="video/quicktime" '.
                                'pluginspage="http://www.apple.com/quicktime/download/" '.
-                               'width="128" '.
-                               'height="150"></embed> '.
-                               '</object></a>';
+                               'width="' . $config['PLAYER_WIDTH'] . '" '.
+                               'height="' . $config['PLAYER_HEIGHT'] . '">'.
+                               '</embed> '.
+                               '</object>';
                          }
                          else {
                              if (file_exists($config["3GP_FFMPEG"])) {
@@ -2040,6 +2046,11 @@ function GetDBConfig() {
     if (!isset($config["3GPDIV"])) { $config["3GPDIV"] = "postie-3gp-div";}
     if (!isset($config["ATTACHMENTDIV"])) { $config["ATTACHMENTDIV"] = "postie-attachment-div";}
     if (!isset($config["3GPCLASS"])) { $config["3GPCLASS"] = "postie-video";}
+    if (!isset($config["VIDEO_WIDTH"])) { $config["VIDEO_WIDTH"] = 128;}
+    if (!isset($config["PLAYER_WIDTH"])) { $config["PLAYER_WIDTH"] = 128;}
+    if (!isset($config["VIDEO_HEIGHT"])) { $config["VIDEO_HEIGHT"] = 112;}
+    if (!isset($config["PLAYER_HEIGHT"])) { $config["PLAYER_HEIGHT"] = 150;}
+    if (!isset($config["VIDEO_AUTOPLAY"])) { $config["VIDEO_AUTOPLAY"] = false;}
     if (!isset($config["IMAGESTYLE"])) { $config["IMAGESTYLE"] = "border: none;";}
     if (!isset($config["JPEGQUALITY"])) { $config["JPEGQUALITY"] = 80;}
     if (!isset($config["AUTO_SMART_SHARP"])) { $config["AUTO_SMART_SHARP"] = false;}
