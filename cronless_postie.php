@@ -4,7 +4,7 @@ Plugin Name: Cronless Postie
 Plugin URI: http://www.economysizegeek.com/?page_id=395
 Description: This plugin allows you to setup your rss feeds to trigger postie (See <a href="../wp-content/plugins/postie/cronless_postie.php?cronless_postie_read_me=1">Quick Readme</a>)
 Author: Dirk Elmendorf
-Version: 1.1.4
+Version: 1.1.5
 Author URI: http://www.economysizegeek.com/
 */ 
 
