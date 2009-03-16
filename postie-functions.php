@@ -74,6 +74,10 @@ function PostEmail($poster,$mimeDecodedEmail) {
         $content = "<pre>\n" . $content . "</pre>\n";
       }
     }
+    if ($config['CONVERTURLS']) {
+      $content=clickableLink($content);
+    }
+
     $post_status=$config['POST_STATUS'];
     $details = array(
         'post_author'		=> $poster,
@@ -98,6 +102,39 @@ function PostEmail($poster,$mimeDecodedEmail) {
 }
 /** FUNCTIONS **/
 
+
+function clickableLink($text) {
+  # this functions deserves credit to the fine folks at phpbb.com
+
+  $text = preg_replace('#(script|about|applet|activex|chrome):#is', "\\1:",
+  $text);
+
+  // pad it with a space so we can match things at the start of the 1st line.
+  $ret = ' ' . $text;
+
+  // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
+  // xxxx can only be alpha characters.
+  // yyyy is anything up to the first space, newline, comma, double quote or <
+  $ret = preg_replace("#(^|[\n ])([\w]+?://[\w\#$%&~/.\-;:=,?@\[\]+]*)#is",
+  "\\1<a href=\"\\2\" >\\2</a>", $ret);
+
+  // matches a "www|ftp.xxxx.yyyy[/zzzz]" kinda lazy URL thing
+  // Must contain at least 2 dots. xxxx contains either alphanum, or "-"
+  // zzzz is optional.. will contain everything up to the first space, newline,
+  // comma, double quote or <.
+  $ret = preg_replace("#(^|[\n ])((www|ftp)\.[\w\#$%&~/.\-;:=,?@\[\]+]*)#is",
+  "\\1<a href=\"http://\\2\" >\\2</a>", $ret);
+
+  // matches an email@domain type address at the start of a line, or after a space.
+  // Note: Only the followed chars are valid; alphanums, "-", "_" and or ".".
+  $ret = preg_replace("#(^|[\n
+  ])([a-z0-9&\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)*[\w]+)#i", "\\1<a
+  href=\"mailto:\\2@\\3\">\\2@\\3</a>", $ret);
+
+  // Remove our padding..
+  $ret = substr($ret, 1);
+  return $ret;
+} 
 function getPostAuthorDetails(&$subject,&$content,&$mimeDecodedEmail) {
     /* we check whether or not the e-mail is a forwards or a redirect. If it is
     * a fwd, then we glean the author details from the body of the post.
@@ -1321,7 +1358,7 @@ function ResizeImageWithImageMagick($file,$type) {
     $fileName = basename($file);
     $scaledFileName = "";
     $scale = DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]);
-    if ($scale != 1) {
+    if ($scale < 1) {
             $scaledH = round($sizeInfo[1] * $scale );
             $scaledW = round($sizeInfo[0] * $scale );
             $scaledFileName =  "thumb.".$fileName;
@@ -1883,14 +1920,15 @@ function TestWPMailInstallation() {
   */
 function BuildBooleanSelect($label,$id,$current_value,$recommendation = NULL) {
    $string="<tr>
-	<th scope=\"row\">". __($label).":</th>
+	<th scope=\"row\">". __($label, 'postie').":</th>
 	<td><select name=\"$id\" id=\"$id\">
-    <option value=\"1\">".__("Yes")."</option>
-    <option value=\"0\" ". (!$current_value ? "SELECTED" : NULL) . ">".__("No").'</option>
+    <option value=\"1\">".__("Yes", 'postie')."</option>
+    <option value=\"0\" ". (!$current_value ? "SELECTED" : NULL) .
+    ">".__("No", 'postie').'</option>
 	</select>
     <br />';
     if ($recommendation!=NULL) {
-      $string.='<code>'.__($recommendation).'</code><br/>';
+      $string.='<code>'.__($recommendation, 'postie').'</code><br/>';
     }
     $string.="</td>\n</tr>";
     return($string);
@@ -1904,10 +1942,11 @@ function BuildBooleanSelect($label,$id,$current_value,$recommendation = NULL) {
   */
 function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
    $string = "<tr>
-	<th scope=\"row\">".__($label).":</th></tr>";
+	<th scope=\"row\">".__($label, 'postie').":</th></tr>";
 
     if ($recommendation) {
-        $string .= "<tr><td>&nbsp;</td><td><code>".__($recommendation)."</code></td></tr>";
+        $string .= "<tr><td>&nbsp;</td><td><code>".__($recommendation,
+        'postie')."</code></td></tr>";
     }
    $string .=" <tr>
     <td>&nbsp;</td>
@@ -2085,6 +2124,7 @@ function GetDBConfig() {
     if (!isset($config["3GP_QT"])) { $config["3GP_QT"] =  true; }
     if (!isset($config["3GP_FFMPEG"])) { $config["3GP_FFMPEG"] = "/usr/bin/ffmpeg";}
     if (!isset($config["WRAP_PRE"])) { $config["WRAP_PRE"] =  'no'; }
+    if (!isset($config["CONVERTURLS"])) { $config["CONVERTURLS"] =  true; }
     if (!isset($config["ADD_META"])) { $config["ADD_META"] =  'no'; }
     if (!isset($config["USEIMAGETEMPLATE"])) { $config["USEIMAGETEMPLATE"] =
     false; }

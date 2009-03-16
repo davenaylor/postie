@@ -164,6 +164,16 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 
 
 == History ==
+* 1.1.6 (2009.03.20)
+  * More video options:
+    * Can embed 3gp, mp4, mov videos
+    * Can specify video width, video height, player width, and player height in
+      the settings page
+  * Added option to automatically convert urls into links
+  * Only downscale images, not up-scale (thanks Jarven)
+  * Improved internationalization (thanks to Håvard Broberg (nanablag@nanablag.com))
+
+
 * 1.1.5 (2009.03.10)
   * Added option to have postie posts be pending review, published, or draft
   * Settings panel only shows up for administrators
