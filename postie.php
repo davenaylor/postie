@@ -41,8 +41,10 @@ Author URI: http://blog.robfelty.com/
 
 //Older Version History is in the HISTORY file
 if(function_exists('load_plugin_textdomain')){
-  load_plugin_textdomain('postie', false, dirname( plugin_basename(__FILE__)) .
-    '/languages');
+  //load_plugin_textdomain('postie', false, dirname( plugin_basename(__FILE__)) .
+    //'/languages');
+	  $plugin_dir = basename(dirname(__FILE__)) . '/languages';
+	  load_plugin_textdomain( 'postie', 'wp-content/plugins/' . $plugin_dir, $plugin_dir );
 }
 
 
