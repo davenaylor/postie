@@ -609,7 +609,7 @@ function GetContent ($part,&$attachments) {
                         $config['REALPHOTOSDIR'] . $fullImage,
                         $imageTemplate);
                     $imageTemplate=str_replace('{RELFILENAME}',
-                        $config['REALPHOTOSDIR'] . $fullImage,
+                        $config['RELPHOTOSDIR'] . $fullImage,
                         $imageTemplate);
                     if ($caption!='') {
                       $imageTemplate=str_replace('{CAPTION}',
