@@ -264,7 +264,7 @@ So I decided to make an offical fork. I put up an article on my blog asking for 
  BUGFIX: Posting updates the category counts.
 
  Version 0.9.8.6
- BUGFIX: Fixed problems with config page <%php became <?php
+ BUGFIX: Fixed problems with config page &lt;%php became &lt;?php
  
  Version 0.9.8.5
  BUGFIX: onClick changed to onclick
