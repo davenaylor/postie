@@ -2176,7 +2176,7 @@ function GetConfig() {
     $config["POSTIE_ROOT"] = POSTIE_ROOT;
     $config["URLPHOTOSDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["PHOTOSDIR"]);
     $config["REALPHOTOSDIR"] = realpath(ABSPATH . $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
-    $config["RELPHOTOSDIR"] =  $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
+    $config["RELPHOTOSDIR"] =  $config["PHOTOSDIR"]. DIRECTORY_SEPARATOR;
     $config["URLFILESDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["FILESDIR"]);
     $config["REALFILESDIR"] = realpath(ABSPATH . $config["FILESDIR"]) . DIRECTORY_SEPARATOR;
     for ($i = 0; $i < count($config["AUTHORIZED_ADDRESSES"]); $i++) {
