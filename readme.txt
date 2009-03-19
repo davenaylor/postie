@@ -139,6 +139,7 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
     * {IMAGE} gets replaced with the url to the full-size image
     * {THUMBNAIL} gets replaced with the url to the thumbnail image
     * {FILENAME} gets replaced with the absolute path to the full-size image
+    * {RELFILENAME} gets replaced with the relative path to the full-size image
     * {CAPTION} gets replaced with the caption you specified (if any)
 
 * Rotation - if you include the text

@@ -608,6 +608,9 @@ function GetContent ($part,&$attachments) {
                     $imageTemplate=str_replace('{FILENAME}',
                         $config['REALPHOTOSDIR'] . $fullImage,
                         $imageTemplate);
+                    $imageTemplate=str_replace('{RELFILENAME}',
+                        $config['REALPHOTOSDIR'] . $fullImage,
+                        $imageTemplate);
                     if ($caption!='') {
                       $imageTemplate=str_replace('{CAPTION}',
                           $caption, $imageTemplate);
@@ -2173,6 +2176,7 @@ function GetConfig() {
     $config["POSTIE_ROOT"] = POSTIE_ROOT;
     $config["URLPHOTOSDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["PHOTOSDIR"]);
     $config["REALPHOTOSDIR"] = realpath(ABSPATH . $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
+    $config["RELPHOTOSDIR"] =  $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
     $config["URLFILESDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["FILESDIR"]);
     $config["REALFILESDIR"] = realpath(ABSPATH . $config["FILESDIR"]) . DIRECTORY_SEPARATOR;
     for ($i = 0; $i < count($config["AUTHORIZED_ADDRESSES"]); $i++) {
