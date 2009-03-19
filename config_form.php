@@ -350,9 +350,7 @@ fieldset {border: 1px solid black;}
             readme for more details");?>
                 <th width="33%" valign="top" scope="row">                <td>
                 <textarea  cols="50" rows="6" name="IMAGETEMPLATE"
-                id="IMAGETEMPLATE"><?php
-                echo $config["IMAGETEMPLATE"]; ?>
-                </textarea>
+                id="IMAGETEMPLATE"><?php echo $config["IMAGETEMPLATE"]; ?></textarea>
                 </td> 
             </tr> 
             <tr> 

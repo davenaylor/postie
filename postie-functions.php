@@ -972,8 +972,9 @@ function FilterNewLines ( $content ) {
     // strip extra line breaks, and replace double line breaks with paragraph
     // tags
     $result = preg_replace($search,$replace,$content);
-    $newContent='<p>' . preg_replace('/ACTUAL_NEW_LINE/',"</p>\n<p>",$result);
-    $newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
+    //$newContent='<p>' . preg_replace('/ACTUAL_NEW_LINE/',"</p>\n<p>",$result);
+    $newContent=preg_replace('/ACTUAL_NEW_LINE/',"\n\n",$result);
+    //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
     if ($config['CONVERTNEWLINE']) {
       $newContent= preg_replace('/LINEBREAK/',"<br />\n",$newContent);
       echo "converting newlines\n";

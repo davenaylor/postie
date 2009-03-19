@@ -172,6 +172,7 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * Added option to automatically convert urls into links
   * Only downscale images, not up-scale (thanks Jarven)
   * Improved internationalization (thanks to Håvard Broberg (nanablag@nanablag.com))
+  * Fixed some issues with image templates and line break handling
 
 
 * 1.1.5 (2009.03.10)
