@@ -2134,18 +2134,7 @@ function GetDBConfig() {
     if (!isset($config["IMAGE_NEW_WINDOW"])) { $config["IMAGE_NEW_WINDOW"] =
     false; }
     if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =
-
-                         $mimeTag."<div class='" . '{CONFIG-IMAGEDIV}'."'><a
-                         href='" . 'CONFIG-URLPHOTOSDIR' . '{IMAGE}' . "'
-                         onclick=\"window.open(' . '"
-                            . 'CONFIG-URLPHOTOSDIR' . '{IMAGE}' . '","'
-                            . "full_size_image" . "','"
-                            . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;"
-                            . '"><img src="' . 'CONFIG-URLPHOTOSDIR' .
-                            '{THUMBNAIL}'. '" alt="'
-                            . $part->ctype_parameters['name'] . '" title="' .
-                            $part->ctype_parameters['name'] . '"
-                            style="'.'CONFIG-IMAGESTYLE'.'" class="'.'CONFIG-IMAGECLASS'.'" /></a></div>' . "\n";
+      "<div class='imageframe alignleft'><a href='{IMAGE}'><img src='{THUMBNAIL}' alt='{CAPTION}' title='{CAPTION}' class='attachment' /></a><div class='imagecaption'>{CAPTION}</div></div>";
     }
     return($config);
 }
