@@ -27,7 +27,9 @@ function PostEmail($poster,$mimeDecodedEmail) {
 #    }
     $content = GetContent($mimeDecodedEmail,$attachments);
     $subject = GetSubject($mimeDecodedEmail,$content);
-    echo "the subject is $subject, right after calling GetSubject\n";
+    if ($debug) {
+      echo "the subject is $subject, right after calling GetSubject\n";
+    }
     $rotation = GetRotation($mimeDecodedEmail,$content);
     if ($rotation != "0"
             && count($attachments["image_files"])) {
@@ -980,10 +982,14 @@ function FilterNewLines ( $content ) {
     //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
     if ($config['CONVERTNEWLINE']) {
       $newContent= preg_replace('/LINEBREAK/',"<br />\n",$newContent);
-      echo "converting newlines\n";
+      if ($debug) {
+        echo "converting newlines\n";
+      }
     } else {
       $newContent= preg_replace('/LINEBREAK/'," ",$newContent);
-      echo "not converting newlines\n";
+      if ($debug) {
+        echo "not converting newlines\n";
+      }
     }
     return($newContent);
 }
@@ -1466,7 +1472,9 @@ function GetRotation(&$mimeDecodedEmail,&$content) {
 function DeterminePostDate(&$content, $message_date = NULL) {
     $config = GetConfig();
     $delay = 0;
-    echo "inside Determine Post Date, message_date = $message_date\n";
+    if ($debug) {
+      echo "inside Determine Post Date, message_date = $message_date\n";
+    }
     if (eregi("delay:(-?[0-9dhm]+)",$content,$matches)
         && trim($matches[1])) {
         if (eregi("(-?[0-9]+)d",$matches[1],$dayMatches)) {
@@ -1821,7 +1829,7 @@ function GetPostTags(&$content) {
     $post_tags = preg_split("/,\s*/", $matches[1]);
   }
   if (!count($post_tags)) {
-      echo "using default tags" . $config["DEFAULT_POST_TAGS"]. "\n";
+      echo "using default tags " . $config["DEFAULT_POST_TAGS"]. "\n";
       $post_tags =  $config["DEFAULT_POST_TAGS"];
   }
   return($post_tags);
@@ -1877,7 +1885,7 @@ function GetPostCategories(&$subject) {
         }
     }
     if (!count($post_categories)) {
-        echo "using default category" . $config["DEFAULT_POST_CATEGORY"]. "\n";
+        echo "using default category " . $config["DEFAULT_POST_CATEGORY"]. "\n";
         $post_categories[] =  $config["DEFAULT_POST_CATEGORY"];
     }
     return($post_categories);
@@ -1886,23 +1894,25 @@ function GetPostCategories(&$subject) {
   *This function just outputs a simple html report about what is being posted in
   */
 function DisplayEmailPost($details) {
-            $config = GetConfig();
-            print_r($config);
-            print_r($details);
-            $theFinalContent=$details['post_content'];
-            echo "-----------the final content is:\n '$theFinalContent'\n";
-            // Report
-            print '</pre><p><b>Post Author</b>: ' . $details["post_author"]. '<br />' . "\n";
-            print '<b>Date</b>: ' . $details["post_date"] . '<br />' . "\n";
-            print '<b>Date GMT</b>: ' . $details["post_date_gmt"] . '<br />' . "\n";
-            foreach($details["post_category"] as $category) {
-                print '<b>Category</b>: ' . $category . '<br />' . "\n";
-            }
-            print '<b>Ping Status</b>: ' . $details["ping_status"] . '<br />' . "\n";
-            print '<b>Comment Status</b>: ' . $details["comment_status"] . '<br />' . "\n";
-            print '<b>Subject</b>: ' . $details["post_title"]. '<br />' . "\n";
-            print '<b>Postname</b>: ' . $details["post_name"] . '<br />' . "\n";
-            print '<b>Posted content:</b></p><hr />' . $details["post_content"] . '<hr /><pre>';
+  $config = GetConfig();
+  if ($debug) {
+    print_r($config);
+    print_r($details);
+  }
+  $theFinalContent=$details['post_content'];
+  echo "-----------the final content is:\n '$theFinalContent'\n";
+  // Report
+  print '</pre><p><b>Post Author</b>: ' . $details["post_author"]. '<br />' . "\n";
+  print '<b>Date</b>: ' . $details["post_date"] . '<br />' . "\n";
+  print '<b>Date GMT</b>: ' . $details["post_date_gmt"] . '<br />' . "\n";
+  foreach($details["post_category"] as $category) {
+      print '<b>Category</b>: ' . $category . '<br />' . "\n";
+  }
+  print '<b>Ping Status</b>: ' . $details["ping_status"] . '<br />' . "\n";
+  print '<b>Comment Status</b>: ' . $details["comment_status"] . '<br />' . "\n";
+  print '<b>Subject</b>: ' . $details["post_title"]. '<br />' . "\n";
+  print '<b>Postname</b>: ' . $details["post_name"] . '<br />' . "\n";
+  print '<b>Posted content:</b></p><hr />' . $details["post_content"] . '<hr /><pre>';
 }
 /**
   * This function confirms that everything is setup correctly
