@@ -1,4 +1,5 @@
 <?php
+$debug=true;
 //TODO option to set posts for review (not publish immediately)
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
 define("POSTIE_ROOT",dirname(__FILE__));
@@ -35,7 +36,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
             && count($attachments["image_files"])) {
         RotateImages($rotation,$attachments["image_files"]);
     }
-    SpecialMessageParsing($content,$attachments);
+    $customImages = SpecialMessageParsing($content,$attachments);
     $postAuthorDetails=getPostAuthorDetails($subject,$content,
         $mimeDecodedEmail);
     $message_date = NULL;
@@ -56,7 +57,6 @@ function PostEmail($poster,$mimeDecodedEmail) {
     $id=checkReply($subject); 
     $post_categories = GetPostCategories($subject);
     $post_tags = GetPostTags($content);
-    echo "the subject is $subject, right after calling GetPostCategories\n";
     $comment_status = AllowCommentsOnPost($content);
     
     if ((empty($id) || is_null($id)) && 
@@ -70,7 +70,6 @@ function PostEmail($poster,$mimeDecodedEmail) {
         //$content = $postAuthorDetails['content'] . $content;
         $content = $content;
       }
-      echo "id is empty\n";
     } else {
       if ($config['WRAP_PRE']=='yes') {
         $content = "<pre>\n" . $content . "</pre>\n";
@@ -79,6 +78,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
     if ($config['CONVERTURLS']) {
       $content=clickableLink($content);
     }
+
 
     $post_status=$config['POST_STATUS'];
     $details = array(
@@ -97,6 +97,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
         'comment_status' => $comment_status,
         'post_name' => sanitize_title($subject),
         'ID' => $id,
+        'customImages' => $customImages,
         'post_status' => $post_status
     );
     DisplayEmailPost($details);
@@ -172,7 +173,6 @@ function getPostAuthorDetails(&$subject,&$content,&$mimeDecodedEmail) {
       }
     }
     $content=$newContents;
-    echo $newContents;
     $theDetails=array(
     'content' =>"<div class='postmetadata alt'>On $theDate, $theAuthor" . 
                  " posted:</div>",
@@ -211,9 +211,7 @@ function checkReply(&$subject) {
         }
         $checkExistingPostQuery= "SELECT ID FROM $wpdb->posts WHERE 
             '$tmpSubject' = post_title";
-        echo "query = $checkExistingPostQuery\n";
         if ($id=$wpdb->get_var($checkExistingPostQuery)) {
-            echo "results = $id\n";
             if (is_array($id)) {
                 $id=$id[count($id)-1];
             }
@@ -424,51 +422,53 @@ function IsWritableDirectory($directory) {
   * @param array - details of the post
   */
 function PostToDB($details) {
-    $config = GetConfig();
-    if ($config["POST_TO_DB"]) {
-        //generate sql for insertion	    
-        $_POST['publish'] = true; //Added to make subscribe2 work - it will only handle it if the global varilable _POST is set
-        if ($details['ID']==NULL) {
-            $post_ID = wp_insert_post($details);
-        } else {
-            // strip out quoted content
-            $lines=preg_split("/[\r\n]/",$details['post_content']);
-            print_r($lines);
-            $newContents='';
-            foreach ($lines as $line) {
-              //$match=preg_match("/^>.*/i",$line);
-              //echo "line=$line,  match=$match";
-              if (preg_match("/^>.*/i",$line)==0 &&
-                 preg_match("/^(from|subject|to|date):.*?/i",$line)==0 && 
-                 preg_match("/^-+.*?(from|subject|to|date).*?/i",$line)==0 && 
-                 preg_match("/^on.*?wrote:$/i",$line)==0 && 
-                 preg_match("/^-+\s*forwarded\s*message\s*-+/i",$line)==0) {
-                $newContents.="$line\n";
-              }
-            }
-            $comment = array(
-            'comment_author'=>$details['comment_author'],
-            'comment_post_ID' =>$details['ID'], 
-            'comment_author_email' => $details['email_author'],
-            'comment_date' =>$details['post_date'],
-            'comment_date_gmt' =>$details['post_date_gmt'], 
-            'comment_content' =>$newContents,
-            'comment_author_url' =>'',
-            'comment_author_IP' =>'',
-            'comment_approved' =>1,
-            'comment_agent' =>'', 
-            'comment_type' =>'', 
-            'comment_parent' => 0
-            );
-
-            echo "the comment is:\n";
-            print_r($comment);
-            $post_ID = wp_insert_comment($comment);
+  $config = GetConfig();
+  if ($config["POST_TO_DB"]) {
+    //generate sql for insertion	    
+    $_POST['publish'] = true; //Added to make subscribe2 work - it will only handle it if the global varilable _POST is set
+    if ($details['ID']==NULL) {
+      $post_ID = wp_insert_post($details);
+    } else {
+      // strip out quoted content
+      $lines=preg_split("/[\r\n]/",$details['post_content']);
+      print_r($lines);
+      $newContents='';
+      foreach ($lines as $line) {
+        //$match=preg_match("/^>.*/i",$line);
+        //echo "line=$line,  match=$match";
+        if (preg_match("/^>.*/i",$line)==0 &&
+           preg_match("/^(from|subject|to|date):.*?/i",$line)==0 && 
+           preg_match("/^-+.*?(from|subject|to|date).*?/i",$line)==0 && 
+           preg_match("/^on.*?wrote:$/i",$line)==0 && 
+           preg_match("/^-+\s*forwarded\s*message\s*-+/i",$line)==0) {
+          $newContents.="$line\n";
         }
-        //do_action('publish_post', $post_ID); - no longer needed
-        //do_action('publish_phone', $post_ID); -- seems to triger a double
+      }
+      $comment = array(
+      'comment_author'=>$details['comment_author'],
+      'comment_post_ID' =>$details['ID'], 
+      'comment_author_email' => $details['email_author'],
+      'comment_date' =>$details['post_date'],
+      'comment_date_gmt' =>$details['post_date_gmt'], 
+      'comment_content' =>$newContents,
+      'comment_author_url' =>'',
+      'comment_author_IP' =>'',
+      'comment_approved' =>1,
+      'comment_agent' =>'', 
+      'comment_type' =>'', 
+      'comment_parent' => 0
+      );
 
+      echo "the comment is:\n";
+      print_r($comment);
+      $post_ID = wp_insert_comment($comment);
     }
+    if ($config["CUSTOM_IMAGE_FIELD"]) {
+      foreach ($details['customImages'] as $image) {
+        add_post_meta($post_ID, 'image', $image); 
+      }
+    }
+  }
 }
 
 /**
@@ -487,283 +487,265 @@ function BannedFileName($filename) {
 
 //tear apart the meta part for useful information
 function GetContent ($part,&$attachments) {
-    $config = GetConfig();
-    $meta_return = NULL;	
+  $config = GetConfig();
+  $meta_return = NULL;	
 
-	DecodeBase64Part($part);
-    if (BannedFileName($part->ctype_parameters['name'])
-            || BannedFileName($part->ctype_parameters['name'])) {
-        return(NULL);
+  DecodeBase64Part($part);
+  if (BannedFileName($part->ctype_parameters['name'])
+      || BannedFileName($part->ctype_parameters['name'])) {
+    return(NULL);
+  }
+  
+  if ($part->ctype_primary == "application"
+      && $part->ctype_secondary == "octet-stream") {
+    if ($part->disposition == "attachment") {
+      $image_endings = array("jpg","png","gif","jpeg","pjpeg");
+      foreach ($image_endings as $type) {
+        if (eregi(".$type\$",$part->d_parameters["filename"])) {
+            $part->ctype_primary = "image";
+            $part->ctype_secondary = $type;
+            break;
+        }
+      }
+    } else {
+      $mimeDecodedEmail = DecodeMIMEMail($part->body);
+      FilterTextParts($mimeDecodedEmail);
+      foreach($mimeDecodedEmail->parts as $section) {
+        $meta_return .= GetContent($section,$attachments);
+      }
     }
-    
-    if ($part->ctype_primary == "application"
-            && $part->ctype_secondary == "octet-stream") {
-        if ($part->disposition == "attachment") {
-            $image_endings = array("jpg","png","gif","jpeg","pjpeg");
-            foreach ($image_endings as $type) {
-                if (eregi(".$type\$",$part->d_parameters["filename"])) {
-                    $part->ctype_primary = "image";
-                    $part->ctype_secondary = $type;
-                    break;
-                }
-            }
-        }
-        else {
-            $mimeDecodedEmail = DecodeMIMEMail($part->body);
-            FilterTextParts($mimeDecodedEmail);
-            foreach($mimeDecodedEmail->parts as $section) {
-                $meta_return .= GetContent($section,$attachments);
-            }
-        }
+  }
+  if ($part->ctype_primary == "multipart"
+      && $part->ctype_secondary == "appledouble") {
+    $mimeDecodedEmail = DecodeMIMEMail("Content-Type: multipart/mixed; boundary=".$part->ctype_parameters["boundary"]."\n".$part->body);
+    FilterTextParts($mimeDecodedEmail);
+    FilterAppleFile($mimeDecodedEmail);
+    foreach($mimeDecodedEmail->parts as $section) {
+      $meta_return .= GetContent($section,$attachments);
     }
-    if ($part->ctype_primary == "multipart"
-            && $part->ctype_secondary == "appledouble") {
-        $mimeDecodedEmail = DecodeMIMEMail("Content-Type: multipart/mixed; boundary=".$part->ctype_parameters["boundary"]."\n".$part->body);
-        FilterTextParts($mimeDecodedEmail);
-        FilterAppleFile($mimeDecodedEmail);
-        foreach($mimeDecodedEmail->parts as $section) {
-            $meta_return .= GetContent($section,$attachments);
+  } else { 
+    switch ( strtolower($part->ctype_primary) ) {
+      case 'multipart':
+        FilterTextParts($part);
+        foreach ($part->parts as $section) {
+          $meta_return .= GetContent($section,$attachments);
         }
-    } else { 
-        switch ( strtolower($part->ctype_primary) ) {
-            case 'multipart':
-                FilterTextParts($part);
-                foreach ($part->parts as $section) {
-                    $meta_return .= GetContent($section,$attachments);
-                }
-                break;
-            case 'text':
+        break;
+      case 'text':
+          HandleMessageEncoding($part->headers["content-transfer-encoding"],
+                                $part->ctype_parameters["charset"],
+                                $part->body);
 
-                HandleMessageEncoding($part->headers["content-transfer-encoding"],
-                                      $part->ctype_parameters["charset"],
-                                      $part->body);
+          //go through each sub-section
+          if ($part->ctype_secondary=='enriched') {
+            //convert enriched text to HTML
+            $meta_return .= etf2HTML($part->body ) . "\n";
+          } elseif ($part->ctype_secondary=='html') {
+            //strip excess HTML
+            $meta_return .= HTML2HTML($part->body ) . "\n";
+          } else {
+            //regular text, so just strip the pgp signature
+            if (ALLOW_HTML_IN_BODY) {
+              $meta_return .= $part->body  . "\n";
+            }
+            else {
+              $meta_return .= htmlentities( $part->body ) . "\n";
+            }
+            $meta_return = StripPGP($meta_return);
+          }
+          break;
 
-                //go through each sub-section
-                if ($part->ctype_secondary=='enriched') {
-                    //convert enriched text to HTML
-                    $meta_return .= etf2HTML($part->body ) . "\n";
-                } elseif ($part->ctype_secondary=='html') {
-                    //strip excess HTML
-                    $meta_return .= HTML2HTML($part->body ) . "\n";
-                } else {
-                    //regular text, so just strip the pgp signature
-                    if (ALLOW_HTML_IN_BODY) {
-                        $meta_return .= $part->body  . "\n";
-                    }
-                    else {
-                        $meta_return .= htmlentities( $part->body ) . "\n";
-                    }
-                    $meta_return = StripPGP($meta_return);
-                }
-                break;
+      case 'image':
+        $file = GenerateImageFileName($config["REALPHOTOSDIR"], $part->ctype_secondary);
+        //This makes sure there is no collision
+        $ctr = 0;
+        while(file_exists($file) && $ctr < 1000) {
+          $file = GenerateImageFileName($config["REALPHOTOSDIR"], $part->ctype_secondary);
+          $ctr++;
+        }
+        if ($ctr >= 1000) {
+          die("Unable to find a name for images that does not collide\n");
+        }
+        $fileName = basename($file);
+        $fp = fopen($file, 'w');
+        fwrite($fp, $part->body);
+        fclose($fp);
+        @exec ('chmod 755 ' . $file);
+        if ($config["USE_IMAGEMAGICK"] && $config["AUTO_SMART_SHARP"]) {
+                    ImageMagickSharpen($file);
+        }
+        $mimeTag = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->';
+        $thumbImage = NULL;
+        $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
+        if ($config["RESIZE_LARGE_IMAGES"]) {
+            list($thumbImage, $fullImage, $caption) = ResizeImage($file,strtolower($part->ctype_secondary));
+        }
+        $attachments["image_files"][] = array(($thumbImage ? $config["REALPHOTOSDIR"] . $thumbImage:NULL),
+                                              $config["REALPHOTOSDIR"] . $fileName,
+                                              $part->ctype_secondary);
+        $onclick='';
+        if ($config['IMAGE_NEW_WINDOW']) {
+          $onclick='" onclick="window.open(' . "'"
+                    . $config["URLPHOTOSDIR"] . $fullImage . "','"
+                      . "full_size_image" . "','"
+                      . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;";
+          }
+          if ($thumbImage) {
+            list($marime,$tmpcaption)=DetermineImageSize($file);
+            $marimex=$marime[0]+20;
+            $marimey=$marime[1]+20;
+            if ($config['USEIMAGETEMPLATE']) {
+              $imageTemplate=str_replace('{THUMBNAIL}',
+                  $config['URLPHOTOSDIR'] . $thumbImage,
+                  $config['IMAGETEMPLATE']);
+              $imageTemplate=str_replace('{IMAGE}',
+                  $config['URLPHOTOSDIR'] . $fullImage,
+                  $imageTemplate);
+              $imageTemplate=str_replace('{FILENAME}',
+                  $config['REALPHOTOSDIR'] . $fullImage,
+                  $imageTemplate);
+              $imageTemplate=str_replace('{RELFILENAME}',
+                  $config['RELPHOTOSDIR'] . $fullImage,
+                  $imageTemplate);
+              if ($caption!='') {
+                $imageTemplate=str_replace('{CAPTION}',
+                    $caption, $imageTemplate);
+              }
+              $attachments["html"][] .=$imageTemplate;
+            } else {
+            $attachments["html"][] .= $mimeTag.'<div class="' . $config["IMAGEDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fullImage . 
+                $onclick . '"><img src="' . $config["URLPHOTOSDIR"] . $thumbImage . '" alt="'
+                . $part->ctype_parameters['name'] . '" title="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
+            }
+            if ($cid) {
+                $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . $fullImage,count($attachments["html"]) - 1);
+            }
+          } else {
+              $attachments["html"][] .= $mimeTag .'<div class="' . $config["IMAGEDIV"].'"><img src="' . $config["URLPHOTOSDIR"] . $fileName 
+                                     . '" alt="' . $part->ctype_parameters['name'] . '" style="' 
+                                     . $config["IMAGESTYLE"] . '" class="' . $config["IMAGECLASS"] . '"  /></div>' . "\n";
+              if ($cid) {
+                  $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . $fileName,count($attachments["html"]) - 1);
+              }
+          }
+          break;
+      default:
+        if (in_array(strtolower($part->ctype_primary),$config["SUPPORTED_FILE_TYPES"])) {
+            //pgp signature - then forget it
+          if ( $part->ctype_secondary == 'pgp-signature' ) {break;}
+          //other attachments save to FILESDIR
+          $filename =  $part->ctype_parameters['name'];
+          $file = $config["REALFILESDIR"] . $filename;
+          $fp = fopen($file, 'w');
+          fwrite($fp, $part->body );
+          fclose($fp);
+          @exec ('chmod 755 ' . $file);
+          $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
 
-            case 'image':
-                $file = GenerateImageFileName($config["REALPHOTOSDIR"], $part->ctype_secondary);
-                //This makes sure there is no collision
-                $ctr = 0;
-                while(file_exists($file) && $ctr < 1000) {
-                    $file = GenerateImageFileName($config["REALPHOTOSDIR"], $part->ctype_secondary);
-                    $ctr++;
-                }
-                if ($ctr >= 1000) {
-                    die("Unable to find a name for images that does not collide\n");
-                }
+          if ($part->ctype_secondary == "3gpp"
+             || $part->ctype_secondary == "octet-stream"
+             || $part->ctype_secondary == "3g2"
+             || $part->ctype_secondary == "3gp"
+             || $part->ctype_secondary == "mp4"
+             || $part->ctype_secondary == "quicktime"
+             ||  $part->ctype_secondary == "3gpp2") {
+            if ($config["3GP_QT"]) {
+               //Shamelessly borrowed from http://www.postneo.com/2003/12/19/embedding-3gpp-in-html
+              $autoplay='false';
+              if ($config['AUTOPLAY']) {
+                $autoplay='true';
+              }
+              $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->' .
+                  '<object '.
+                      'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
+                      'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
+                      'width="' . $config['VIDEO_WIDTH'] . '" '.
+                      'height="' . $config['VIDEO_HEIGHT'] . '"> '.
+                      '<param name="src" VALUE="'. $config["URLFILESDIR"] . $filename .'"> '.
+                      '<param name="autoplay" VALUE="$autoplay"> '.
+                        '<param name="controller" VALUE="true"> '.
+                       '<embed '.
+                       'src="'. $config["URLFILESDIR"] . $filename .'" '.
+                       'width="' . $config['VIDEO_WIDTH'] . '" '.
+                       'height="' . $config['VIDEO_HEIGHT'] . '"'.
+                       'autoplay="$autoplay" '.
+                       'controller="true" '.
+                       'type="video/quicktime" '.
+                       'pluginspage="http://www.apple.com/quicktime/download/" '.
+                       'width="' . $config['PLAYER_WIDTH'] . '" '.
+                       'height="' . $config['PLAYER_HEIGHT'] . '">'.
+                       '</embed> '.
+                       '</object>';
+            } else {
+              if (file_exists($config["3GP_FFMPEG"])) {
                 $fileName = basename($file);
-                $fp = fopen($file, 'w');
-                fwrite($fp, $part->body);
-                fclose($fp);
-                @exec ('chmod 755 ' . $file);
-                if ($config["USE_IMAGEMAGICK"] && $config["AUTO_SMART_SHARP"]) {
-                            ImageMagickSharpen($file);
-                }
-                $mimeTag = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->';
-                $thumbImage = NULL;
-                $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
-                if ($config["RESIZE_LARGE_IMAGES"]) {
-                echo "going to resize now \n<br />";
-                    list($thumbImage, $fullImage, $caption) = ResizeImage($file,strtolower($part->ctype_secondary));
-                echo "caption=$caption\n<br />";
-                echo "thumbImage=$thumbImage\n<br />";
-                }
-                $attachments["image_files"][] = array(($thumbImage ? $config["REALPHOTOSDIR"] . $thumbImage:NULL),
-                                                      $config["REALPHOTOSDIR"] . $fileName,
-                                                      $part->ctype_secondary);
-                $onclick='';
-                if ($config['IMAGE_NEW_WINDOW']) {
-                  $onclick='" onclick="window.open(' . "'"
-                            . $config["URLPHOTOSDIR"] . $fullImage . "','"
-                            . "full_size_image" . "','"
-                            . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;";
-                }
-                if ($thumbImage) {
-                //TODO image template
-                        list($marime,$tmpcaption)=DetermineImageSize($file);
-                        $marimex=$marime[0]+20;
-                        $marimey=$marime[1]+20;
-                  if ($config['USEIMAGETEMPLATE']) {
-                    $imageTemplate=str_replace('{THUMBNAIL}',
-                        $config['URLPHOTOSDIR'] . $thumbImage,
-                        $config['IMAGETEMPLATE']);
-                    $imageTemplate=str_replace('{IMAGE}',
-                        $config['URLPHOTOSDIR'] . $fullImage,
-                        $imageTemplate);
-                    $imageTemplate=str_replace('{FILENAME}',
-                        $config['REALPHOTOSDIR'] . $fullImage,
-                        $imageTemplate);
-                    $imageTemplate=str_replace('{RELFILENAME}',
-                        $config['RELPHOTOSDIR'] . $fullImage,
-                        $imageTemplate);
-                    if ($caption!='') {
-                      $imageTemplate=str_replace('{CAPTION}',
-                          $caption, $imageTemplate);
-                    }
-                    $attachments["html"][] .=$imageTemplate;
-                  } else {
-                  $attachments["html"][] .= $mimeTag.'<div class="' . $config["IMAGEDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fullImage . 
-                      $onclick . '"><img src="' . $config["URLPHOTOSDIR"] . $thumbImage . '" alt="'
-                      . $part->ctype_parameters['name'] . '" title="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
-                  }
-                  if ($cid) {
-                      $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . $fullImage,count($attachments["html"]) - 1);
-                  }
-                }
-                else {
-                    $attachments["html"][] .= $mimeTag .'<div class="' . $config["IMAGEDIV"].'"><img src="' . $config["URLPHOTOSDIR"] . $fileName 
-                                           . '" alt="' . $part->ctype_parameters['name'] . '" style="' 
-                                           . $config["IMAGESTYLE"] . '" class="' . $config["IMAGECLASS"] . '"  /></div>' . "\n";
-                    if ($cid) {
-                        $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . $fileName,count($attachments["html"]) - 1);
-                    }
-                }
-                break;
-            default:
-                if (in_array(strtolower($part->ctype_primary),$config["SUPPORTED_FILE_TYPES"])) {
-                    //pgp signature - then forget it
-                    if ( $part->ctype_secondary == 'pgp-signature' ) {break;}
-                    //other attachments save to FILESDIR
-                    $filename =  $part->ctype_parameters['name'];
-                    $file = $config["REALFILESDIR"] . $filename;
-                    $fp = fopen($file, 'w');
-                    fwrite($fp, $part->body );
-                    fclose($fp);
-                    @exec ('chmod 755 ' . $file);
-                    $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
+                //options from http://www.getid3.org/phpBB2/viewtopic.php?p=1290&
+                $scaledFileName =  "thumb.".$fileName;
+                $scaledFile = $config["REALPHOTOSDIR"] . $scaledFileName;
 
-                     if ($part->ctype_secondary == "3gpp"
-                             || $part->ctype_secondary == "octet-stream"
-                             || $part->ctype_secondary == "3g2"
-                             || $part->ctype_secondary == "3gp"
-                             || $part->ctype_secondary == "mp4"
-                             || $part->ctype_secondary == "quicktime"
-                             ||  $part->ctype_secondary == "3gpp2") {
-                         if ($config["3GP_QT"]) {
-                             //Shamelessly borrowed from http://www.postneo.com/2003/12/19/embedding-3gpp-in-html
-                           $autoplay='false';
-                           if ($config['AUTOPLAY']) {
-                             $autoplay='true';
-                           }
-                         $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->' .
-                            '<object '.
-                                'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
-                                'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
-                                'width="' . $config['VIDEO_WIDTH'] . '" '.
-                                'height="' . $config['VIDEO_HEIGHT'] . '"> '.
-                                '<param name="src" VALUE="'. $config["URLFILESDIR"] . $filename .'"> '.
-                                '<param name="autoplay" VALUE="$autoplay"> '.
-                                '<param name="controller" VALUE="true"> '.
-                               '<embed '.
-                               'src="'. $config["URLFILESDIR"] . $filename .'" '.
-                               'width="' . $config['VIDEO_WIDTH'] . '" '.
-                               'height="' . $config['VIDEO_HEIGHT'] . '"'.
-                               'autoplay="$autoplay" '.
-                               'controller="true" '.
-                               'type="video/quicktime" '.
-                               'pluginspage="http://www.apple.com/quicktime/download/" '.
-                               'width="' . $config['PLAYER_WIDTH'] . '" '.
-                               'height="' . $config['PLAYER_HEIGHT'] . '">'.
-                               '</embed> '.
-                               '</object>';
-                         }
-                         else {
-                             if (file_exists($config["3GP_FFMPEG"])) {
-                                $fileName = basename($file);
-                                //options from http://www.getid3.org/phpBB2/viewtopic.php?p=1290&
-                                $scaledFileName =  "thumb.".$fileName;
-                                $scaledFile = $config["REALPHOTOSDIR"] . $scaledFileName;
+                @exec (escapeshellcmd($config["3GP_FFMPEG"]) . 
+                    " -i " .  escapeshellarg($file) .
+                    " -y -ss 00:00:01 -vframes 1 -an -sameq -f gif " . 
+                    escapeshellarg($scaledFile) );
+                @exec ('chmod 755 ' . escapeshellarg($scaledFile));
 
-                                @exec (escapeshellcmd($config["3GP_FFMPEG"]) . 
-                                            " -i " .
-                                            escapeshellarg($file) .
-                                            " -y -ss 00:00:01 -vframes 1 -an -sameq -f gif " . 
-                                            escapeshellarg($scaledFile) );
-                                @exec ('chmod 755 ' . escapeshellarg($scaledFile));
-
-                                $attachments["html"][] .= '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><div class="' . $config["3GPDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fileName. '"><img src="' . $config["URLPHOTOSDIR"] . $scaledFileName . '" alt="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
-                             }
-                             else {
-                                $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><div class="' . $config["ATTACHMENTDIV"].'"><a href="' . $config["URLFILESDIR"] . $filename . '" class="' . $config["3GPCLASS"].'">' . $part->ctype_parameters['name'] . '</a></div>' . "\n";
-                            }
-
-                         }
-                    }
-                     elseif ($part->ctype_secondary == "x-shockwave-flash") {
-                         $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->'.
-                            '<object '.
-                                'classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"  '.
-                                'codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0" '.
-                                'width=""  '.
-                                'height=""> '.
-                               '<param name="movie" value="'. $config["URLFILESDIR"] . $filename .'"> '.
-                               '<param name="quality" value="high"> '.
-                               '<embed  '.
-                               'src="'. $config["URLFILESDIR"] . $filename .'"  '.
-                               'width=""  '.
-                               'height=""  '.
-                               'quality="high"  '.
-                               'pluginspage="http://www.macromedia.com/go/getflashplayer"  '.
-                               'type="application/x-shockwave-flash"  '.
-                               'width=""  '.
-                               'height=""></embed> '.
-                               '</object>'; 
-                    }
-                    else {
-                        $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><a href="' . $config["URLFILESDIR"] . $filename . '">' . $part->ctype_parameters['name'] . '</a>' . "\n";
-                    }
-                    if ($cid) {
-                        $attachments["cids"][$cid] = array($config["URLFILESDIR"] . $filename,count($attachments["html"]) - 1);
-                    }
-                }
-                break;
-        }		
-    }
-    return $meta_return;
+                $attachments["html"][] .= '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><div class="' . $config["3GPDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fileName. '"><img src="' . $config["URLPHOTOSDIR"] . $scaledFileName . '" alt="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
+              } else {
+                $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><div class="' . $config["ATTACHMENTDIV"].'"><a href="' . $config["URLFILESDIR"] . $filename . '" class="' . $config["3GPCLASS"].'">' . $part->ctype_parameters['name'] . '</a></div>' . "\n";
+              }
+            }
+          } elseif ($part->ctype_secondary == "x-shockwave-flash") {
+            $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->'.
+                '<object '.
+                 'classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"  '.
+                 'codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0" '.
+                 'width=""  '.  'height=""> '.
+                 '<param name="movie" value="'. $config["URLFILESDIR"] . 
+                 $filename .'"> '.
+                 '<param name="quality" value="high"> '.
+                 '<embed  '.  'src="'. $config["URLFILESDIR"] . $filename .'"  '.
+                 'width=""  '.  'height=""  '.  'quality="high"  '.
+                 'pluginspage="http://www.macromedia.com/go/getflashplayer"  '.
+                 'type="application/x-shockwave-flash"  '.
+                 'width=""  '.  'height=""></embed> '.  '</object>'; 
+          } else {
+              $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><a href="' . $config["URLFILESDIR"] . $filename . '">' . $part->ctype_parameters['name'] . '</a>' . "\n";
+          }
+          if ($cid) {
+            $attachments["cids"][$cid] = array($config["URLFILESDIR"] . $filename,count($attachments["html"]) - 1);
+          }
+        }
+        break;
+    }		
+  }
+  return $meta_return;
 }
 
 function ubb2HTML(&$text) {
-	// Array of tags with opening and closing
-	$tagArray['img'] = array('open'=>'<img src="','close'=>'">');
-	$tagArray['b'] = array('open'=>'<b>','close'=>'</b>');
-	$tagArray['i'] = array('open'=>'<i>','close'=>'</i>');
-	$tagArray['u'] = array('open'=>'<u>','close'=>'</u>');
-	$tagArray['url'] = array('open'=>'<a href="','close'=>'">\\1</a>');
-	$tagArray['email'] = array('open'=>'<a href="mailto:','close'=>'">\\1</a>');
-	$tagArray['url=(.*)'] = array('open'=>'<a href="','close'=>'">\\2</a>');
-	$tagArray['email=(.*)'] = array('open'=>'<a href="mailto:','close'=>'">\\2</a>');
-	$tagArray['color=(.*)'] = array('open'=>'<font color="','close'=>'">\\2</font>');
-	$tagArray['size=(.*)'] = array('open'=>'<font size="','close'=>'">\\2</font>');
-	$tagArray['font=(.*)'] = array('open'=>'<font face="','close'=>'">\\2</font>');
-	// Array of tags with only one part
-	$sTagArray['br'] = array('tag'=>'<br>');
-	$sTagArray['hr'] = array('tag'=>'<hr>');
-	
-	foreach($tagArray as $tagName=>$replace) {
-		$tagEnd = preg_replace('/\W/Ui','',$tagName);
-		$text = preg_replace("|\[$tagName\](.*)\[/$tagEnd\]|Ui","$replace[open]\\1$replace[close]",$text);
-	}
-	foreach($sTagArray as $tagName=>$replace) {
-		$text = preg_replace("|\[$tagName\]|Ui","$replace[tag]",$text);
-	}
-	return $text;
+  // Array of tags with opening and closing
+  $tagArray['img'] = array('open'=>'<img src="','close'=>'">');
+  $tagArray['b'] = array('open'=>'<b>','close'=>'</b>');
+  $tagArray['i'] = array('open'=>'<i>','close'=>'</i>');
+  $tagArray['u'] = array('open'=>'<u>','close'=>'</u>');
+  $tagArray['url'] = array('open'=>'<a href="','close'=>'">\\1</a>');
+  $tagArray['email'] = array('open'=>'<a href="mailto:','close'=>'">\\1</a>');
+  $tagArray['url=(.*)'] = array('open'=>'<a href="','close'=>'">\\2</a>');
+  $tagArray['email=(.*)'] = array('open'=>'<a href="mailto:','close'=>'">\\2</a>');
+  $tagArray['color=(.*)'] = array('open'=>'<font color="','close'=>'">\\2</font>');
+  $tagArray['size=(.*)'] = array('open'=>'<font size="','close'=>'">\\2</font>');
+  $tagArray['font=(.*)'] = array('open'=>'<font face="','close'=>'">\\2</font>');
+  // Array of tags with only one part
+  $sTagArray['br'] = array('tag'=>'<br>');
+  $sTagArray['hr'] = array('tag'=>'<hr>');
+
+  foreach($tagArray as $tagName=>$replace) {
+    $tagEnd = preg_replace('/\W/Ui','',$tagName);
+    $text = preg_replace("|\[$tagName\](.*)\[/$tagEnd\]|Ui","$replace[open]\\1$replace[close]",$text);
+  }
+  foreach($sTagArray as $tagName=>$replace) {
+    $text = preg_replace("|\[$tagName\]|Ui","$replace[tag]",$text);
+  }
+  return $text;
 }
 
 
@@ -772,281 +754,281 @@ function ubb2HTML(&$text) {
 // FIXME: fix colours: <color><param>FFFF,C2FE,0374</param>some text </color>
 function etf2HTML ( $content ) {
 
-	$search = array(
-		'/<bold>/',
-		'/<\/bold>/',
-		'/<underline>/',
-		'/<\/underline>/',
-		'/<italic>/',
-		'/<\/italic>/',
-		'/<fontfamily><param>.*<\/param>/',
-		'/<\/fontfamily>/',
-		'/<x-tad-bigger>/',
-		'/<\/x-tad-bigger>/',
-		'/<bigger>/',
-		'</bigger>/',
-		'/<color>/',
-		'/<\/color>/',	
-		'/<param>.+<\/param>/'
-	);
-	
-	$replace = array (
-		'<b>',
-		'</b>',
-		'<u>',
-		'</u>',
-		'<i>',
-		'</i>',
-		'',
-		'',
-		'',
-		'',
-		'',
-		'',
-		'',
-		'',
-		''
-	);
-		// strip extra line breaks
-		$content = preg_replace($search,$replace,$content);
-		return trim($content);
+$search = array(
+  '/<bold>/',
+  '/<\/bold>/',
+  '/<underline>/',
+  '/<\/underline>/',
+  '/<italic>/',
+  '/<\/italic>/',
+  '/<fontfamily><param>.*<\/param>/',
+  '/<\/fontfamily>/',
+  '/<x-tad-bigger>/',
+  '/<\/x-tad-bigger>/',
+  '/<bigger>/',
+  '</bigger>/',
+  '/<color>/',
+  '/<\/color>/',	
+  '/<param>.+<\/param>/'
+);
+
+$replace = array (
+  '<b>',
+  '</b>',
+  '<u>',
+  '</u>',
+  '<i>',
+  '</i>',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  ''
+);
+  // strip extra line breaks
+  $content = preg_replace($search,$replace,$content);
+  return trim($content);
 }
 
 
 // This function cleans up HTML in the e-mail
 function HTML2HTML ( $content ) {
-	$search = array(
-		'/<html>/',
-		'/<\/html>/',
-		'/<title>/',
-		'/<\/title>/',
-		'/<body.*>/',
-		'/<\/body>/',
-		'/<head>/',
-		'/<\/head>/',
-		'/<meta content=.*>/',
-		'/<!DOCTYPE.*>/',
-		'/<img src=".*>/'
+$search = array(
+  '/<html>/',
+  '/<\/html>/',
+  '/<title>/',
+  '/<\/title>/',
+  '/<body.*>/',
+  '/<\/body>/',
+  '/<head>/',
+  '/<\/head>/',
+  '/<meta content=.*>/',
+  '/<!DOCTYPE.*>/',
+  '/<img src=".*>/'
 //		'/<img src="cid:(.*)" .*>/'
-	);
-	
-	$replace = array (
-		'',
-		'',
-		'',
-		'',
-		'',
-		'',
-		'',
-		'',
-		'',
-		'',
-		'',
-		''
-	);
-		// strip extra line breaks
-		$content = preg_replace($search,$replace,trim($content));
-		return ($content);
+);
+
+$replace = array (
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  ''
+);
+  // strip extra line breaks
+  $content = preg_replace($search,$replace,trim($content));
+  return ($content);
 }
 
 
 
 /**
-  * Determines if the sender is a valid user.
-  * @return integer|NULL
-  */
+* Determines if the sender is a valid user.
+* @return integer|NULL
+*/
 function ValidatePoster( &$mimeDecodedEmail ) {
-    global $wpdb;
-    $config = GetConfig();
-    $poster = NULL;
-    $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
-    $resentFrom = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["resent-from"]));
+  global $wpdb;
+  $config = GetConfig();
+  $poster = NULL;
+  $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
+  $resentFrom = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["resent-from"]));
 
-	if ( empty($from) ) { 
-        echo 'Invalid Sender - Emtpy! ';
-        return;
-    }
+if ( empty($from) ) { 
+      echo 'Invalid Sender - Emtpy! ';
+      return;
+  }
 
-    //See if the email address is one of the special authorized ones
-    print("Confirming Access For $from \n");
-    $sql = 'SELECT id FROM '. $wpdb->users.' WHERE user_email=\'' . addslashes($from) . "' LIMIT 1;";
-    $user_ID= $wpdb->get_var($sql);
-    $user = new WP_User($user_ID);
-    if ($config["TURN_AUTHORIZATION_OFF"] || CheckEmailAddress($from) || CheckEmailAddress($resentFrom)) {
-    	if (empty($user_ID)){
-        	print("$from is authorized to post as the administrator\n");
-       		$from = get_option("admin_email");
-          $adminUser=$config['ADMIN_USERNAME'];
-          echo "adminUser='$adminUser'";
-        	$poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
-          user_login  = '$adminUser'");
-	    }
-	    else {
-		    $poster = $user_ID;
-	    }
+  //See if the email address is one of the special authorized ones
+  print("Confirming Access For $from \n");
+  $sql = 'SELECT id FROM '. $wpdb->users.' WHERE user_email=\'' . addslashes($from) . "' LIMIT 1;";
+  $user_ID= $wpdb->get_var($sql);
+  $user = new WP_User($user_ID);
+  if ($config["TURN_AUTHORIZATION_OFF"] || CheckEmailAddress($from) || CheckEmailAddress($resentFrom)) {
+    if (empty($user_ID)){
+        print("$from is authorized to post as the administrator\n");
+        $from = get_option("admin_email");
+        $adminUser=$config['ADMIN_USERNAME'];
+        echo "adminUser='$adminUser'";
+        $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
+        user_login  = '$adminUser'");
     }
-    else if ($user->has_cap("post_via_postie")) {
-            $poster = $user_ID;
+    else {
+      $poster = $user_ID;
     }
-    if (!$poster) {
-        echo 'Invalid sender: ' . htmlentities($from) . "! Not adding email!\n";
-        if ($config["FORWARD_REJECTED_MAIL"]) {
-            if (ForwardRejectedMailToAdmin($mimeDecodedEmail)) { 
-                echo "A copy of the message has been forwarded to the administrator.\n"; 
-            } else {
-                echo "The message was unable to be forwarded to the adminstrator.\n";
-            }
-        }
-        return;
-    } 
-    return $poster;
+  }
+  else if ($user->has_cap("post_via_postie")) {
+          $poster = $user_ID;
+  }
+  if (!$poster) {
+      echo 'Invalid sender: ' . htmlentities($from) . "! Not adding email!\n";
+      if ($config["FORWARD_REJECTED_MAIL"]) {
+          if (ForwardRejectedMailToAdmin($mimeDecodedEmail)) { 
+              echo "A copy of the message has been forwarded to the administrator.\n"; 
+          } else {
+              echo "The message was unable to be forwarded to the adminstrator.\n";
+          }
+      }
+      return;
+  } 
+  return $poster;
 }
 
 /**
-  * Looks at the content for the start of the message and removes everything before that
-  * If the pattern is not found everything is returned
-  * @param string
-  * @param string
-  */
+* Looks at the content for the start of the message and removes everything before that
+* If the pattern is not found everything is returned
+* @param string
+* @param string
+*/
 function StartFilter(&$content,$start) {
-    $pos = strpos($content,$start);
-    if ( $pos === false) {
-        return($content);
-    }
-    $content = substr($content, $pos + strlen($start), strlen($content));
+  $pos = strpos($content,$start);
+  if ( $pos === false) {
+      return($content);
+  }
+  $content = substr($content, $pos + strlen($start), strlen($content));
 }
 
 /**
-  * Looks at the content for the start of the signature and removes all text
-  * after that point
-  * @param string
-  * @param array - a list of patterns to determine if it is a sig block
-  */
+* Looks at the content for the start of the signature and removes all text
+* after that point
+* @param string
+* @param array - a list of patterns to determine if it is a sig block
+*/
 function RemoveSignature( &$content,$filterList = array('--','- --' )) {
-	$arrcontent = explode("\n", $content);
-	$i = 0;
-	for ($i = 0; $i<=count($arrcontent); $i++) {
-		$line = $arrcontent[$i];
-		$nextline = $arrcontent[$i+1];
-        foreach ($filterList as $pattern) {
-            if (preg_match("/^$pattern/",trim($line))) {
-                //print("<p>Found in $line");
-                break 2;
-            }
-        } 
-		$strcontent .= $line ."\n";
-	}
-    $content = $strcontent;
+$arrcontent = explode("\n", $content);
+$i = 0;
+for ($i = 0; $i<=count($arrcontent); $i++) {
+  $line = $arrcontent[$i];
+  $nextline = $arrcontent[$i+1];
+      foreach ($filterList as $pattern) {
+          if (preg_match("/^$pattern/",trim($line))) {
+              //print("<p>Found in $line");
+              break 2;
+          }
+      } 
+  $strcontent .= $line ."\n";
+}
+  $content = $strcontent;
 }
 /**
-  * Looks at the content for the given tag and removes all text
-  * after that point
-  * @param string
-  * @param filter
-  */
+* Looks at the content for the given tag and removes all text
+* after that point
+* @param string
+* @param filter
+*/
 function EndFilter( &$content,$filter) {
-	$arrcontent = explode("\n", $content);
-	$i = 0;
-	for ($i = 0; $i<=count($arrcontent); $i++) {
-		$line = $arrcontent[$i];
-		$nextline = $arrcontent[$i+1];
-        if (preg_match("/^$filter/",trim($line))) {
-            //print("<p>Found in $line");
-            break;
-        }
-		$strcontent .= $line ."\n";
-	}
-    $content = $strcontent;
+$arrcontent = explode("\n", $content);
+$i = 0;
+for ($i = 0; $i<=count($arrcontent); $i++) {
+  $line = $arrcontent[$i];
+  $nextline = $arrcontent[$i+1];
+      if (preg_match("/^$filter/",trim($line))) {
+          //print("<p>Found in $line");
+          break;
+      }
+  $strcontent .= $line ."\n";
+}
+  $content = $strcontent;
 }
 
 //filter content for new lines
 function FilterNewLines ( $content ) {
-    $config=GetConfig();
-		$search = array (
-			"/\r\n/",
-			"/\r/",
-			"/\n\n/",
-			"/\n/"
-		);
-		$replace = array (
-            "\n",
-            "\n",
-            'ACTUAL_NEW_LINE',
-			'LINEBREAK'
-		);
-    // strip extra line breaks, and replace double line breaks with paragraph
-    // tags
-    $result = preg_replace($search,$replace,$content);
-    //$newContent='<p>' . preg_replace('/ACTUAL_NEW_LINE/',"</p>\n<p>",$result);
-    $newContent=preg_replace('/ACTUAL_NEW_LINE/',"\n\n",$result);
-    //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
-    if ($config['CONVERTNEWLINE']) {
-      $newContent= preg_replace('/LINEBREAK/',"<br />\n",$newContent);
-      if ($debug) {
-        echo "converting newlines\n";
-      }
-    } else {
-      $newContent= preg_replace('/LINEBREAK/'," ",$newContent);
-      if ($debug) {
-        echo "not converting newlines\n";
-      }
+  $config=GetConfig();
+  $search = array (
+    "/\r\n/",
+    "/\r/",
+    "/\n\n/",
+    "/\n/"
+  );
+  $replace = array (
+          "\n",
+          "\n",
+          'ACTUAL_NEW_LINE',
+    'LINEBREAK'
+  );
+  // strip extra line breaks, and replace double line breaks with paragraph
+  // tags
+  $result = preg_replace($search,$replace,$content);
+  //$newContent='<p>' . preg_replace('/ACTUAL_NEW_LINE/',"</p>\n<p>",$result);
+  $newContent=preg_replace('/ACTUAL_NEW_LINE/',"\n\n",$result);
+  //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
+  if ($config['CONVERTNEWLINE']) {
+    $newContent= preg_replace('/LINEBREAK/',"<br />\n",$newContent);
+    if ($debug) {
+      echo "converting newlines\n";
     }
-    return($newContent);
+  } else {
+    $newContent= preg_replace('/LINEBREAK/'," ",$newContent);
+    if ($debug) {
+      echo "not converting newlines\n";
+    }
+  }
+  return($newContent);
 }
 function FixEmailQuotes ( $content ) {
-    # place e-mails quotes (indicated with >) in blockquote and pre tags
-		$search = array (
-			"/^>/"
-		);
-		$replace = array (
-            '<br />&gt;'
-		);
-    // strip extra line breaks, and replace double line breaks with paragraph
-    // tags
-    $result = preg_replace($search,$replace,$content);
-    //return('<p>' . preg_replace('/ACTUAL_NEW_LINE/',"<\/p>\n<p>",$result)
-        //. '</p>');
-    return($result);
+  # place e-mails quotes (indicated with >) in blockquote and pre tags
+  $search = array (
+    "/^>/"
+  );
+  $replace = array (
+          '<br />&gt;'
+  );
+  // strip extra line breaks, and replace double line breaks with paragraph
+  // tags
+  $result = preg_replace($search,$replace,$content);
+  //return('<p>' . preg_replace('/ACTUAL_NEW_LINE/',"<\/p>\n<p>",$result)
+      //. '</p>');
+  return($result);
 }
 
 //strip pgp stuff
 function StripPGP ( $content ) {
-		$search = array (
-			'/-----BEGIN PGP SIGNED MESSAGE-----/',
-			'/Hash: SHA1/'
-		);
-		$replace = array (
-			' ',
-			''
-		);
-		// strip extra line breaks
-		$return = preg_replace($search,$replace,$content);
-		return $return;
+  $search = array (
+    '/-----BEGIN PGP SIGNED MESSAGE-----/',
+    '/Hash: SHA1/'
+  );
+  $replace = array (
+    ' ',
+    ''
+  );
+  // strip extra line breaks
+  $return = preg_replace($search,$replace,$content);
+  return $return;
 }
 
 function ConvertToISO_8859_1($encoding,$charset, &$body ) {
-    $config = GetConfig();
-    $charset = strtolower($charset);
-    $encoding = strtolower($encoding);
-    if( (strtolower($config["MESSAGE_ENCODING"]) == "iso-8859-1") && (strtolower($charset) != 'iso-8859-1')) {
-	    if( $encoding == 'base64' || $encoding == 'quoted-printable' ) {
-		    $body = utf8_decode($body);
-	    }
+  $config = GetConfig();
+  $charset = strtolower($charset);
+  $encoding = strtolower($encoding);
+  if( (strtolower($config["MESSAGE_ENCODING"]) == "iso-8859-1") && (strtolower($charset) != 'iso-8859-1')) {
+    if( $encoding == 'base64' || $encoding == 'quoted-printable' ) {
+      $body = utf8_decode($body);
     }
+  }
 }
 function IsISO88591Blog() {
-    $config = GetConfig();
-    if( (strtolower($config["MESSAGE_ENCODING"]) == "iso-8859-1")) {
-        return(true);
-    }
-    return(false);
+  $config = GetConfig();
+  if( (strtolower($config["MESSAGE_ENCODING"]) == "iso-8859-1")) {
+      return(true);
+  }
+  return(false);
 }
 function IsUTF8Blog() {
-    $config = GetConfig();
-    if( (strtolower($config["MESSAGE_ENCODING"]) == "utf-8")) {
-        return(true);
-    }
-    return(false);
+  $config = GetConfig();
+  if( (strtolower($config["MESSAGE_ENCODING"]) == "utf-8")) {
+      return(true);
+  }
+  return(false);
 }
 function HandleMessageEncoding($encoding, $charset,&$body) {
     $charset = strtolower($charset);
@@ -1126,7 +1108,6 @@ function DetermineImageSize($file) {
         list($size,$caption)=DetermineImageSizeWithImageMagick($file);
     }
     else {
-        echo "determining image size with GD\n<br />";
         list($size,$caption)=DetermineImageSizeWithGD($file);
     }
     return(array($size,$caption));
@@ -1181,7 +1162,6 @@ function ResizeImage($file,$type) {
         if ($config["USE_IMAGEMAGICK"]) {
             list($scaledFileName, $fileName,$caption)=ResizeImageWithImageMagick($file,$type);
         } else {
-            echo "using GD to resize\n";
             list($scaledFileName, $fileName,$caption)=ResizeImageWithGD($file,$type);
         }
     }
@@ -1397,7 +1377,6 @@ function ResizeImageWithGD($file,$type) {
     $scaledFileName = "";
     $scale = DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]);
     if ($scale != 1) {
-      echo "scale=$scale, width=". $sizeInfo[0] . "height=". $sizeInfo[1] . "\n<br />";
         $sourceImage = NULL;
         switch($type) {
             case "jpeg":
@@ -1429,7 +1408,6 @@ function ResizeImageWithGD($file,$type) {
     }
     // Revert to original limit
     ini_set('memory_limit', $original_mem_limit);
-    echo "inside ResizeImageWithGD - scaledFileName=$scaledFileName\n";
     return(array($scaledFileName,$fileName,$caption));
 
 }
@@ -1760,21 +1738,18 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
     // looks for ' #img1# ' etc... and replaces with image
     $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $config["IMAGE_PLACEHOLDER"]);
     $img_placeholder_temp=rtrim($img_placeholder_temp,'#');
-    echo "------------- IMG REPLACEMENT ----------------------\n";
-    echo "<pre>value=$value</pre>\n\n";
-    echo "img_placeholder_temp=$img_placeholder_temp\n";
     if ( stristr($content, $img_placeholder_temp) ) {
       // look for caption
+      $caption='';
       if ( preg_match("/caption=['\"](.*)['\"]/", $content, $matches))  {
         $caption =$matches[1];
-        $value = str_replace('{CAPTION}', $caption, $value);
-        echo "caption=$caption----\n";
         $img_placeholder_temp.=' ' . $matches[0];
       }
-    $img_placeholder_temp.='#';
-        echo "img_placeholder_temp=$img_placeholder_temp\n";
+      $value = str_replace('{CAPTION}', $caption, $value);
+      $img_placeholder_temp.='#';
       $content = str_replace($img_placeholder_temp, $value, $content);
     } else {
+      $value = str_replace('{CAPTION}', '', $value);
       if ($config["IMAGES_APPEND"]) {
         $content .= $value;
       } else {
@@ -1885,7 +1860,6 @@ function GetPostCategories(&$subject) {
         }
     }
     if (!count($post_categories)) {
-        echo "using default category " . $config["DEFAULT_POST_CATEGORY"]. "\n";
         $post_categories[] =  $config["DEFAULT_POST_CATEGORY"];
     }
     return($post_categories);
@@ -1900,7 +1874,6 @@ function DisplayEmailPost($details) {
     print_r($details);
   }
   $theFinalContent=$details['post_content'];
-  echo "-----------the final content is:\n '$theFinalContent'\n";
   // Report
   print '</pre><p><b>Post Author</b>: ' . $details["post_author"]. '<br />' . "\n";
   print '<b>Date</b>: ' . $details["post_date"] . '<br />' . "\n";
@@ -2119,6 +2092,7 @@ function GetDBConfig() {
     if (!isset($config["MESSAGE_DEQUOTE"])) { $config["MESSAGE_DEQUOTE"] = true; }
     if (!isset($config["TURN_AUTHORIZATION_OFF"])) { $config["TURN_AUTHORIZATION_OFF"] = false;}
     if (!isset($config["USE_IMAGEMAGICK"])) { $config["USE_IMAGEMAGICK"] = false;}
+    if (!isset($config["CUSTOM_IMAGE_FIELD"])) { $config["CUSTOM_IMAGE_FIELD"] = false;}
     if (!isset($config["CONVERTNEWLINE"])) { $config["CONVERTNEWLINE"] = false;}
     if (!isset($config["IMAGEMAGICK_CONVERT"])) { $config["IMAGEMAGICK_CONVERT"] = "/usr/bin/convert";}
     if (!isset($config["IMAGEMAGICK_IDENTIFY"])) { $config["IMAGEMAGICK_IDENTIFY"] = "/usr/bin/identify";}
@@ -2333,25 +2307,36 @@ function DebugEmailOutput(&$email,&$mimeDecodedEmail) {
   * If you want to extend this functionality - write a new function and call it from here
   */
 function SpecialMessageParsing(&$content, &$attachments){
-    $config = GetConfig();
-    if ( preg_match('/You have been sent a message from Vodafone mobile/',$content)) {
-        VodafoneHandler($content, $attachments); //Everything for this type of message is handled below
-        return;
-    }
-    if ( $config["MESSAGE_START"] ) {
-        StartFilter($content,$config["MESSAGE_START"]);
-    }
-    if ( $config["MESSAGE_END"] ) {
-        EndFilter($content,$config["MESSAGE_END"]);
-    }
-    if ( $config["DROP_SIGNATURE"] ) { 
-        RemoveSignature($content,$config["SIG_PATTERN_LIST"]);
-    }
-    if  ($config["PREFER_TEXT_TYPE"] == "html"
-            && count($attachments["cids"])) {
-        ReplaceImageCIDs($content,$attachments);
-    }
+  $config = GetConfig();
+  if ( preg_match('/You have been sent a message from Vodafone mobile/',$content)) {
+    VodafoneHandler($content, $attachments); //Everything for this type of message is handled below
+      return;
+  }
+  if ( $config["MESSAGE_START"] ) {
+    StartFilter($content,$config["MESSAGE_START"]);
+  }
+  if ( $config["MESSAGE_END"] ) {
+    EndFilter($content,$config["MESSAGE_END"]);
+  }
+  if ( $config["DROP_SIGNATURE"] ) { 
+    RemoveSignature($content,$config["SIG_PATTERN_LIST"]);
+  }
+  if  ($config["PREFER_TEXT_TYPE"] == "html"
+          && count($attachments["cids"])) {
+      ReplaceImageCIDs($content,$attachments);
+  }
+  if (!$config['CUSTOM_IMAGE_FIELD']) {
     ReplaceImagePlaceHolders($content,$attachments["html"]);
+  } else {
+    $customImages=array();
+    foreach ($attachments["html"] as $value) {
+      preg_match('/<img src="([^"]*)"/', $value, $matches);
+      array_push($customImages,$matches[1]);
+    }
+
+    return($customImages);
+  }
+  return(NULL);
 }
 /**
   * Special Vodafone handler - their messages are mostly vendor trash - this strips them down.

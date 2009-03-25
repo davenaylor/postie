@@ -2,7 +2,8 @@
 /*
 Plugin Name: Postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
-Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href="../wp-content/plugins/postie/postie.php?postie_read_me=1">Quick Readme</a>)
+Description: Signifigantly upgrades the posting by mail features of Word Press
+(See <a href="http://wordpress.org/extend/plugins/postie/other_notes">Readme</a>)
 Version: 1.1.5
 Author: Robert Felty
 Author URI: http://blog.robfelty.com/

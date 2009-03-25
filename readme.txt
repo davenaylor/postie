@@ -35,19 +35,25 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 * Login to WordPress as an administrator
 * Goto the Plugins tab in the WordPress Admin Site
 * Activate "Postie"
-* Goto to the "Options" tab and click on the sub-tab "Configure Postie" to configure it.
-* (Postie ignores the settings under Options->Writing->Writing-by-Email)
+* Goto to the "Settings" tab and click on the sub-tab "Configure Postie" to configure it.
+* Make sure you enter the mailserver information correctly, including the type
+  of connection and the port number. Common port configurations:
+  * pop3: 110 
+  * pop3-ssl: 995
+  * imap: 143
+  * imap-ssl: 993
+* (Postie ignores the settings under Settings->Writing->Writing-by-Email)
 
 
 Setup a cronjob to pull down the get_mail.php
-Example:
+Examples:
 */5 * * * * /usr/bin/lynx --source http://www.economysizegeek.com/wp-content/plugins/postie/get_mail.php >/dev/null 2>&1
 
-This fetches the mail every five mintues.
+This fetches the mail every five minutes with lynx.
 
 If you don't have access to cron - check out "Cronless Postie"
 
-== Options ==
+== Options and Settings ==
 * You can set the starting characters for you signature so that it
   is removed from the posting message
 * You can set a list of banned file names so if you provider adds
@@ -172,8 +178,12 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
       the settings page
   * Added option to automatically convert urls into links
   * Only downscale images, not up-scale (thanks Jarven)
+  * Added option to use custom field for images (for Datapusher)
   * Improved internationalization (thanks to Håvard Broberg (nanablag@nanablag.com))
   * Fixed some issues with image templates and line break handling
+  * Removed debugging info in get_mail.php (security issue) thanks to 
+    [Jens]( http://svalgaard.net/jens/)
+  * Updated readme (thanks to Venkatraman Dhamodaran)
 
 
 * 1.1.5 (2009.03.10)
@@ -202,7 +212,7 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * replying to an e*mail adds a comment to a post
   * fixed category handling to work with taxonomy
   * fixed one syntax error
-  * added option to wrap posts and comments in <pre> tags
+  * added option to wrap posts and comments in &lt;pre%gt; tags
 
 Below is all the of the version information. As far as I can tell there once was a guy named John Blade. He took some of the orignal wp-mail.php code and started hacking away on it. He actually got pretty far. About the time I discovered WordPress and his little hack - called WP-Mail at the time - he went on a vacation or something. There were some problems with the script, and it was missing some features I wanted. I hacked away at it and got it into a place where it did what I wanted. I started posting about it since I figured other people might want the features. 
 

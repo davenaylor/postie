@@ -360,7 +360,12 @@ fieldset {border: 1px solid black;}
                 <?php _e("Recommended", 'postie');?>: <code>postie-attachment-div</code><p>This is the CSS class of a div that wraps each file attachment. Can be used to style the post</p>
                 <br />
                 </td> 
-            </tr> 
+            <?php echo BuildBooleanSelect("Use custom image
+            field","CUSTOM_IMAGE_FIELD",$config["CUSTOM_IMAGE_FIELD"],"When this option is set, images will not appear in the
+            post. Instead the url to the image will be input into a custom
+            field named 'image'.
+Recommended:
+            no");?>            </tr> 
             </table> 
         </fieldset> 
     </td> 
