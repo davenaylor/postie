@@ -1607,7 +1607,9 @@ function ForwardRejectedMailToAdmin( &$mail_content) {
 	$message = "An unauthorized message has been sent to " . $blogname . " from " . $from. ". The subject of this message was: '" . $subject . "'.";
 	$message .= "\n\nIf you wish to allow posts from this address, please add " . $from. " to the registered users list and manually add the content of the e-mail found below.";
 	$message .= "\n\nOtherwise, the e-mail has already been deleted from the server and you can ignore this message.";
-	$message .= "\n\nIf you would like to prevent wp-mail from forwarding mail in the future, please change FORWARD_REJECTED_MAIL to false in wp-mail.php."; 
+	$message .= "\n\nIf you would like to prevent posstie from forwarding mail
+  in the future, please change the FORWARD_REJECTED_MAIL setting in the Postie
+  settings panel"; 
 	$message .= "\n\nThe original content of the e-mail has been attached.\n\n";
     $boundary = "--".$mail_content->ctype_parameters["boundary"] ."\n";
 
