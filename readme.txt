@@ -83,6 +83,11 @@ If you don't have access to cron - check out "Cronless Postie"
     get posted as a comment to the "foo" post. This works by the subject
     line, so if you have two posts with titles "foo", then the comment
     will get placed in the more recent post.
+* Custom excerpt
+  * You can include a custom excerpt of an e-mail by putting it between
+    :excerptstart and :excerptend
+    * You can include images in the excerpt by using the shortcode #eimg1#,
+      #eimg2# etc.
 
 = Category and tag handling =
 * If you put a category name in the subject with a : it will be used
@@ -184,6 +189,8 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * Removed debugging info in get_mail.php (security issue) thanks to 
     [Jens]( http://svalgaard.net/jens/)
   * Updated readme (thanks to Venkatraman Dhamodaran)
+  * Added feature to include a custom excerpt
+  * Custom image template now works even when not resizing images
 
 
 * 1.1.5 (2009.03.10)
