@@ -181,6 +181,7 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
     * Can embed 3gp, mp4, mov videos
     * Can specify video width, video height, player width, and player height in
       the settings page
+    * Can specify custom image template
   * Added option to automatically convert urls into links
   * Only downscale images, not up-scale (thanks Jarven)
   * Added option to use custom field for images (for Datapusher)
@@ -191,6 +192,7 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * Updated readme (thanks to Venkatraman Dhamodaran)
   * Added feature to include a custom excerpt
   * Custom image template now works even when not resizing images
+  * Added links to settings, forum, and readme in plugin description
 
 
 * 1.1.5 (2009.03.10)

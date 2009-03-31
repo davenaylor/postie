@@ -27,32 +27,25 @@ fieldset {border: 1px solid black;}
 <?php endif; ?>
 <div class="wrap"> 
 <h2><?php _e('Postie Options', 'postie') ?></h2> 
-<p>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="reset" />
-    <p align="right"><?php _e("If you would like to start over - you can click the button on the right to reset all configurations to the default.", 'postie');?></p>
     <p class="submit">
-            <input name="Submit" value="<?php _e("Reset Configs To Default", 'postie')?> &raquo" type="submit">
+            <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie')?> &raquo" type="submit">
     </p>
 </form>
-</p>
-<p>
 <form name="postie-options" method="get" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/get_mail.php"?>"> 
-    <p align="right"><?php _e("To run the check mail script manually", 'postie');?></p>
     <p class="submit">
             <input name="Submit" value="<?php _e("Run Postie", 'postie');?> &raquo;" type="submit">
+    <?php _e("(To run the check mail script manually)", 'postie');?>
     </p>
 </form>
-</p>
-<p>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="test" />
-    <p align="right"><?php _e("If you have problems with Postie this will run a special script to test your configuraiton options", 'postie');?></p>
     <p class="submit">
             <input name="Submit" value="<?php _e("Test Config", 'postie');?>&raquo;" type="submit">
+    <?php _e("this will run a special script to test your configuraiton options", 'postie');?>
     </p>
 </form>
-</p>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="config" />
 	<table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
@@ -62,6 +55,67 @@ fieldset {border: 1px solid black;}
 
 
 
+    <tr><td colspan=2>
+        <fieldset class="options">
+    <legend><?php _e('E-mail and Mailserver Settings', 'postie');?></legend>
+
+
+	<table width="100%" cellspacing="2" cellpadding="5" class="editform">
+	<tr>
+        <th scope="row"><?php _e('Mail Protocol:', 'postie') ?></th>
+        <td>
+        <table>
+        <tr><td>
+        <select name="INPUT_PROTOCOL" id="INPUT_PROTOCOL">
+        <option value="pop3">POP3</option>
+        <?php if (HasIMAPSupport(false)):?>
+            <option value="imap" <?php if($config["INPUT_PROTOCOL"] == "imap") { echo "SELECTED";} ?>>IMAP</option>
+            <option value="pop3-ssl" <?php if($config["INPUT_PROTOCOL"] == "pop3-ssl") { echo "SELECTED";} ?>>POP3-SSL</option>
+            <option value="imap-ssl" <?php if($config["INPUT_PROTOCOL"] == "imap-ssl") { echo "SELECTED";} ?>>IMAP-SSL</option>
+        <?php else:?>
+            <option value="pop3" ><?php _e("IMAP/IMAP-SSL/POP3-SSL unavailable", 'postie');?></option>
+        <?php endif;?>
+        </select>
+        </td><td>
+        <code><?php _e("Standard Ports:", 'postie');?><br />
+              <?php _e("POP3", 'postie');?> - 110<br />
+              <?php _e("IMAP", 'postie');?> - 143<br />
+              <?php _e("IMAP-SSL", 'postie');?>- 993 <br />
+              <?php _e("POP3-SSL", 'postie');?> - 995 <br />
+              </code>
+        </td></tr></table></td>
+      <tr>
+        <th scope="row"><?php _e('Postie Time Correction:', 'postie') ?> </th>
+        <td><input name="TIME_OFFSET" type="text" id="TIME_OFFSET" size="2" value="<?php echo $config['TIME_OFFSET']; ?>" /> 
+        <?php _e('hours', 'postie') ?> 
+            <br />
+                <?php _e("Recommended");?>: <code><?php _e("Should be the same as your normal offset - but this lets you adjust it in cases where that doesn't work.", 'postie');?></code>
+                <br />
+
+        </td>
+      </tr>
+	</tr>
+		<tr valign="top">
+			<th scope="row"><?php _e('Mail Server:', 'postie') ?></th>
+			<td><input name="MAIL_SERVER" type="text" id="MAIL_SERVER" value="<?php echo $config["MAIL_SERVER"];?>" size="40" />
+			<?php _e('Port:', 'postie') ?> 
+			<input name="MAIL_SERVER_PORT" type="text" id="MAIL_SERVER_PORT" value="<?php echo $config["MAIL_SERVER_PORT"];?>" size="6" />
+			</td>
+		</tr>
+		<tr valign="top">
+			<th width="33%" scope="row"><?php _e('Mail Userid:', 'postie') ?></th>
+			<td><input name="MAIL_USERID" type="text" id="MAIL_USERID" value="<?php echo $config["MAIL_USERID"]; ?>" size="40" /></td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php _e('Mail Password:', 'postie') ?></th>
+			<td>
+				<input name="MAIL_PASSWORD" type="text" id="MAIL_PASSWORD" value="<?php echo $config["MAIL_PASSWORD"]; ?>" size="40" />
+			</td>
+		</tr>
+	</table>
+</fieldset>
+    </td>
+    </tr>
 
     <tr><td colspan=2> 
         <fieldset class="options"> 
@@ -156,6 +210,11 @@ fieldset {border: 1px solid black;}
             <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
             <tr valign="top">
                 <th scope="row"><?php _e('Default post by mail category:', 'postie') ?></th>
+                <td>
+                <?php
+                $defaultCat=$config['DEFAULT_POST_CATEGORY'];
+                wp_dropdown_categories("name=DEFAULT_POST_CATEGORY&hierarchical=1&selected=$defaultCat"); ?>
+                <!--
                 <td><select name="DEFAULT_POST_CATEGORY" id="DEFAULT_POST_CATEGORY">
                         <?php
                         $categories = $wpdb->get_results("SELECT * FROM $wpdb->terms ORDER BY name");
@@ -165,6 +224,7 @@ fieldset {border: 1px solid black;}
                         }
                         ?>
                 </select></td>
+                -->
             </tr>
             <tr valign="top">
                 <th scope="row"><?php _e('Default post by mail tag(s):
@@ -342,12 +402,12 @@ fieldset {border: 1px solid black;}
             <?php echo BuildBooleanSelect("Open images in new
             window","IMAGE_NEW_WINDOW",$config["IMAGE_NEW_WINDOW"],"Recommended:
             no");?>
-            <tr> 
             <?php echo BuildBooleanSelect("Use custom image
             template","USEIMAGETEMPLATE",$config["USEIMAGETEMPLATE"],"If you
             don't like the default html output around images, you can enter
             your own below. My personal template is already there. See the
             readme for more details");?>
+            <tr> 
                 <th width="33%" valign="top" scope="row">                <td>
                 <textarea  cols="50" rows="6" name="IMAGETEMPLATE"
                 id="IMAGETEMPLATE"><?php echo $config["IMAGETEMPLATE"]; ?></textarea>
@@ -426,6 +486,17 @@ Recommended:
                 <br />
                 </td> 
             </tr> 
+            <?php echo BuildBooleanSelect("Use custom video
+            template","USEVIDEOTEMPLATE",$config["USEVIDEOTEMPLATE"],"If you
+            don't like the default html output around videos, you can enter
+            your own below. The default template is already there. See the
+            readme for more details");?>
+            <tr> 
+                <th width="33%" valign="top" scope="row">                <td>
+                <textarea  cols="50" rows="6" name="VIDEOTEMPLATE"
+                id="VIDEOTEMPLATE"><?php echo $config["VIDEOTEMPLATE"]; ?></textarea>
+                </td> 
+            </tr> 
             </table> 
         </fieldset> 
     </td> 
@@ -435,67 +506,6 @@ Recommended:
 
 
 
-    <tr><td colspan=2>
-        <fieldset class="options">
-    <legend><?php _e('Mailserver Settings', 'postie');?></legend>
-
-
-	<table width="100%" cellspacing="2" cellpadding="5" class="editform">
-	<tr>
-        <th scope="row"><?php _e('Mail Protocol:', 'postie') ?></th>
-        <td>
-        <table>
-        <tr><td>
-        <select name="INPUT_PROTOCOL" id="INPUT_PROTOCOL">
-        <option value="pop3">POP3</option>
-        <?php if (HasIMAPSupport(false)):?>
-            <option value="imap" <?php if($config["INPUT_PROTOCOL"] == "imap") { echo "SELECTED";} ?>>IMAP</option>
-            <option value="pop3-ssl" <?php if($config["INPUT_PROTOCOL"] == "pop3-ssl") { echo "SELECTED";} ?>>POP3-SSL</option>
-            <option value="imap-ssl" <?php if($config["INPUT_PROTOCOL"] == "imap-ssl") { echo "SELECTED";} ?>>IMAP-SSL</option>
-        <?php else:?>
-            <option value="pop3" ><?php _e("IMAP/IMAP-SSL/POP3-SSL unavailable", 'postie');?></option>
-        <?php endif;?>
-        </select>
-        </td><td>
-        <code><?php _e("Standard Ports:", 'postie');?><br />
-              <?php _e("POP3", 'postie');?> - 110<br />
-              <?php _e("IMAP", 'postie');?> - 143<br />
-              <?php _e("IMAP-SSL", 'postie');?>- 993 <br />
-              <?php _e("POP3-SSL", 'postie');?> - 995 <br />
-              </code>
-        </td></tr></table></td>
-      <tr>
-        <th scope="row"><?php _e('Postie Time Correction:', 'postie') ?> </th>
-        <td><input name="TIME_OFFSET" type="text" id="TIME_OFFSET" size="2" value="<?php echo $config['TIME_OFFSET']; ?>" /> 
-        <?php _e('hours', 'postie') ?> 
-            <br />
-                <?php _e("Recommended");?>: <code><?php _e("Should be the same as your normal offset - but this lets you adjust it in cases where that doesn't work.", 'postie');?></code>
-                <br />
-
-        </td>
-      </tr>
-	</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Mail Server:', 'postie') ?></th>
-			<td><input name="MAIL_SERVER" type="text" id="MAIL_SERVER" value="<?php echo $config["MAIL_SERVER"];?>" size="40" />
-			<?php _e('Port:', 'postie') ?> 
-			<input name="MAIL_SERVER_PORT" type="text" id="MAIL_SERVER_PORT" value="<?php echo $config["MAIL_SERVER_PORT"];?>" size="6" />
-			</td>
-		</tr>
-		<tr valign="top">
-			<th width="33%" scope="row"><?php _e('Mail Userid:', 'postie') ?></th>
-			<td><input name="MAIL_USERID" type="text" id="MAIL_USERID" value="<?php echo $config["MAIL_USERID"]; ?>" size="40" /></td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Mail Password:', 'postie') ?></th>
-			<td>
-				<input name="MAIL_PASSWORD" type="text" id="MAIL_PASSWORD" value="<?php echo $config["MAIL_PASSWORD"]; ?>" size="40" />
-			</td>
-		</tr>
-	</table>
-</fieldset>
-    </td>
-    </tr>
 
 
 
@@ -509,4 +519,7 @@ Recommended:
 		<input type="submit" name="Submit" value="<?php _e('Update Options', 'postie') ?> &raquo;" />
 	</p>
 </form> 
+
+<a href="http://validator.w3.org/check?uri=referer"><img src="images/valid-xhtml11.png" alt="Valid XHTML 1.0!" style="height:20px; width:65px; border:0;" /></a>
+<a href="http://jigsaw.w3.org/css-validator/check/referer"><img style="border:0;width:65px;height:20px;" src="images/vcss.gif" alt="Valid CSS!" /></a><br />
 </div>

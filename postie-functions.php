@@ -2176,14 +2176,39 @@ function GetDBConfig() {
     if (!isset($config["WRAP_PRE"])) { $config["WRAP_PRE"] =  'no'; }
     if (!isset($config["CONVERTURLS"])) { $config["CONVERTURLS"] =  true; }
     if (!isset($config["ADD_META"])) { $config["ADD_META"] =  'no'; }
-    if (!isset($config["USEIMAGETEMPLATE"])) { $config["USEIMAGETEMPLATE"] =
-    false; }
-    if (!isset($config["POST_STATUS"])) { $config["POST_STATUS"] =
-    'publish'; }
-    if (!isset($config["IMAGE_NEW_WINDOW"])) { $config["IMAGE_NEW_WINDOW"] =
-    false; }
+    if (!isset($config["USEIMAGETEMPLATE"]))  
+      $config["USEIMAGETEMPLATE"] = false; 
+    if (!isset($config["USEVIDEOTEMPLATE"])) 
+      $config["USEVIDEOTEMPLATE"] = false; 
+    if (!isset($config["POST_STATUS"])) 
+      $config["POST_STATUS"] = 'publish'; 
+    if (!isset($config["IMAGE_NEW_WINDOW"])) 
+      $config["IMAGE_NEW_WINDOW"] = false; 
     if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =
       "<div class='imageframe alignleft'><a href='{IMAGE}'><img src='{THUMBNAIL}' alt='{CAPTION}' title='{CAPTION}' class='attachment' /></a><div class='imagecaption'>{CAPTION}</div></div>";
+    }
+    if (!isset($config["VIDEOTEMPLATE"])) { $config["VIDEOTEMPLATE"] =
+        '<object '.
+            'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
+            'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
+            'width="' . $config['VIDEO_WIDTH'] . '" '.
+            'height="' . $config['VIDEO_HEIGHT'] . '"> '.
+            '<param name="src" VALUE="'. 
+            $config["URLFILESDIR"] . $filename .'"> '.
+            '<param name="autoplay" VALUE="no"> '.
+              '<param name="controller" VALUE="true"> '.
+             '<embed '.
+             'src="'. $config["URLFILESDIR"] . $filename .'" '.
+             'width="' . $config['VIDEO_WIDTH'] . '" '.
+             'height="' . $config['VIDEO_HEIGHT'] . '"'.
+             'autoplay="no" '.
+             'controller="true" '.
+             'type="video/quicktime" '.
+             'pluginspage="http://www.apple.com/quicktime/download/" '.
+             'width="' . $config['PLAYER_WIDTH'] . '" '.
+             'height="' . $config['PLAYER_HEIGHT'] . '">'.
+             '</embed> '.
+             '</object>';
     }
     return($config);
 }
@@ -2192,43 +2217,43 @@ function GetDBConfig() {
   * @return array
   */
 function GetConfig() {
-    $config = GetDBConfig();
-    if (!ConfirmTrailingDirectorySeperator($config["PHOTOSDIR"])) {
-        $config["PHOTOSDIR"] .= DIRECTORY_SEPARATOR;
-    }
-    if (!ConfirmTrailingDirectorySeperator($config["FILESDIR"])) {
-        $config["FILESDIR"] .= DIRECTORY_SEPARATOR;
-    }
-    //These should only be modified if you are testing
-    $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
-    $config["POST_TO_DB"] = true;
-    $config["TEST_EMAIL"] = false;
-    $config["TEST_EMAIL_ACCOUNT"] = "blogtest";
-    $config["TEST_EMAIL_PASSWORD"] = "yourpassword";
-    //include(POSTIE_ROOT . "/../postie-test.php");
-    // These are computed
-    #$config["TIME_OFFSET"] = get_option('gmt_offset');
-    if ($config["USE_IMAGEMAGICK"]) {
-         if (!file_exists($config["IMAGEMAGICK_IDENTIFY"])
+  $config = GetDBConfig();
+  if (!ConfirmTrailingDirectorySeperator($config["PHOTOSDIR"])) {
+    $config["PHOTOSDIR"] .= DIRECTORY_SEPARATOR;
+  }
+  if (!ConfirmTrailingDirectorySeperator($config["FILESDIR"])) {
+    $config["FILESDIR"] .= DIRECTORY_SEPARATOR;
+  }
+  //These should only be modified if you are testing
+  $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
+  $config["POST_TO_DB"] = true;
+  $config["TEST_EMAIL"] = false;
+  $config["TEST_EMAIL_ACCOUNT"] = "blogtest";
+  $config["TEST_EMAIL_PASSWORD"] = "yourpassword";
+  //include(POSTIE_ROOT . "/../postie-test.php");
+  // These are computed
+  #$config["TIME_OFFSET"] = get_option('gmt_offset');
+  if ($config["USE_IMAGEMAGICK"]) {
+     if (!file_exists($config["IMAGEMAGICK_IDENTIFY"])
          ||!file_exists($config["IMAGEMAGICK_CONVERT"])) {
-            $config["RESIZE_LARGE_IMAGES"] = false;
-         }
+       $config["RESIZE_LARGE_IMAGES"] = false;
+     }
+  }
+  else {
+    if (!HasGDInstalled(false)) {
+      $config["RESIZE_LARGE_IMAGES"] = false;
     }
-    else {
-        if (!HasGDInstalled(false)) {
-            $config["RESIZE_LARGE_IMAGES"] = false;
-        }
-    }
-    $config["POSTIE_ROOT"] = POSTIE_ROOT;
-    $config["URLPHOTOSDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["PHOTOSDIR"]);
-    $config["REALPHOTOSDIR"] = realpath(ABSPATH . $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
-    $config["RELPHOTOSDIR"] =  $config["PHOTOSDIR"]. DIRECTORY_SEPARATOR;
-    $config["URLFILESDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["FILESDIR"]);
-    $config["REALFILESDIR"] = realpath(ABSPATH . $config["FILESDIR"]) . DIRECTORY_SEPARATOR;
-    for ($i = 0; $i < count($config["AUTHORIZED_ADDRESSES"]); $i++) {
-        $config["AUTHORIZED_ADDRESSES"][$i] = strtolower($config["AUTHORIZED_ADDRESSES"][$i]);
-    }
-    return $config;
+  }
+  $config["POSTIE_ROOT"] = POSTIE_ROOT;
+  $config["URLPHOTOSDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["PHOTOSDIR"]);
+  $config["REALPHOTOSDIR"] = realpath(ABSPATH . $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
+  $config["RELPHOTOSDIR"] =  $config["PHOTOSDIR"]. DIRECTORY_SEPARATOR;
+  $config["URLFILESDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["FILESDIR"]);
+  $config["REALFILESDIR"] = realpath(ABSPATH . $config["FILESDIR"]) . DIRECTORY_SEPARATOR;
+  for ($i = 0; $i < count($config["AUTHORIZED_ADDRESSES"]); $i++) {
+    $config["AUTHORIZED_ADDRESSES"][$i] = strtolower($config["AUTHORIZED_ADDRESSES"][$i]);
+  }
+  return $config;
 }
 /**
   * Converts from one directory structure to url
