@@ -184,18 +184,21 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
     * Can specify video width, video height, player width, and player height in
       the settings page
     * Can specify custom image template
+  * Image handling improvements:
+    * Only downscale images, not up-scale (thanks Jarven)
+    * More custom image template options
+    * IPTC captions now also work when not resizing images
+    * Added option to use custom field for images (for Datapusher)
+    * Fixed some issues with image templates and line break handling
+    * Custom image template now works even when not resizing images
+  * Documentation improvements:
+    * Added links to settings, forum, and readme in plugin description
+    * Updated readme (thanks to Venkatraman Dhamodaran)
   * Added option to automatically convert urls into links
-  * Only downscale images, not up-scale (thanks Jarven)
-  * Added option to use custom field for images (for Datapusher)
   * Improved internationalization (thanks to Håvard Broberg (nanablag@nanablag.com))
-  * Fixed some issues with image templates and line break handling
   * Removed debugging info in get_mail.php (security issue) thanks to 
     [Jens]( http://svalgaard.net/jens/)
-  * Updated readme (thanks to Venkatraman Dhamodaran)
   * Added feature to include a custom excerpt
-  * Custom image template now works even when not resizing images
-  * Added links to settings, forum, and readme in plugin description
-  * More custom image template options
 
 
 * 1.1.5 (2009.03.10)

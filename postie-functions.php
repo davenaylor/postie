@@ -40,6 +40,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
         RotateImages($rotation,$attachments["image_files"]);
     }
     $customImages = SpecialMessageParsing($content,$attachments);
+    $post_excerpt = GetPostExcerpt($content);
     $postAuthorDetails=getPostAuthorDetails($subject,$content,
         $mimeDecodedEmail);
     $message_date = NULL;
@@ -60,7 +61,6 @@ function PostEmail($poster,$mimeDecodedEmail) {
     $id=checkReply($subject); 
     $post_categories = GetPostCategories($subject);
     $post_tags = GetPostTags($content);
-    $post_excerpt = GetPostExcerpt($content);
     $comment_status = AllowCommentsOnPost($content);
     
     if ((empty($id) || is_null($id)) && 
@@ -588,7 +588,7 @@ function GetContent ($part,&$attachments) {
         $attachments["image_files"][] = array(($thumbImage ? $config["REALPHOTOSDIR"] . $thumbImage:NULL),
                                               $config["REALPHOTOSDIR"] . $fileName,
                                               $part->ctype_secondary);
-        list($marime,$tmpcaption)=DetermineImageSize($file);
+        list($marime,$caption)=DetermineImageSize($file);
         $marimex=$marime[0]+20;
         $marimey=$marime[1]+20;
         $onclick='';
@@ -601,7 +601,7 @@ function GetContent ($part,&$attachments) {
           if ($thumbImage) {
             if ($config['USEIMAGETEMPLATE']) {
               $attachments["html"][]
-                  .=parseImageTemplate($thumbImage,$fullImage);
+                  .=parseImageTemplate($thumbImage,$fullImage,$caption);
             } else {
             $attachments["html"][] .= $mimeTag.'<div class="' . $config["IMAGEDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fullImage . 
                 $onclick . '"><img src="' . $config["URLPHOTOSDIR"] . $thumbImage . '" alt="'
@@ -612,7 +612,8 @@ function GetContent ($part,&$attachments) {
             }
           } else {
             if ($config['USEIMAGETEMPLATE']) {
-              $attachments["html"][] .=parseImageTemplate('',$fullImage);
+              $attachments["html"][]
+              .=parseImageTemplate('',$fileName,$caption);
             } else {
               $attachments["html"][] .= $mimeTag .'<div class="' . $config["IMAGEDIV"].'"><img src="' . $config["URLPHOTOSDIR"] . $fileName 
                                      . '" alt="' . $part->ctype_parameters['name'] . '" style="' 
@@ -1699,7 +1700,7 @@ function GetNameFromEmail($address) {
     return($name);
 }
 
-function parseImageTemplate($thumbImage,$fullImage) {
+function parseImageTemplate($thumbImage,$fullImage,$caption) {
   $config=GetConfig();
   echo "using custom image template\n";
   if ($thumbImage=='') {
@@ -1712,25 +1713,22 @@ function parseImageTemplate($thumbImage,$fullImage) {
         '', $imageTemplate);
   } else {
     $imageTemplate=str_replace('{THUMBNAIL}',
-        $config['URLPHOTOSDIR'] . $thumbImage,
-        $config['IMAGETEMPLATE']);
+        $config['URLPHOTOSDIR'] . $thumbImage, $config['IMAGETEMPLATE']);
     $imageTemplate=str_replace('{IMAGE}',
-        $config['URLPHOTOSDIR'] . $fullImage,
-        $imageTemplate);
+        $config['URLPHOTOSDIR'] . $fullImage, $imageTemplate);
   }
   $imageTemplate=str_replace('{FILENAME}',
-      $config['REALPHOTOSDIR'] . $fullImage,
-      $imageTemplate);
+      $config['REALPHOTOSDIR'] . $fullImage, $imageTemplate);
   $imageTemplate=str_replace('{RELFILENAME}',
-      $config['RELPHOTOSDIR'] . $fullImage,
-      $imageTemplate);
+      $config['RELPHOTOSDIR'] . $fullImage, $imageTemplate);
+  /*
   $imageTemplate=str_replace('{WIDTH}',
       $config['MAX_IMAGE_WIDTH'],$imageTemplate);
   $imageTemplate=str_replace('{HEIGHT}',
       $config['MAX_IMAGE_HEIGHT'],$imageTemplate);
+      */
   if ($caption!='') {
-    $imageTemplate=str_replace('{CAPTION}',
-        $caption, $imageTemplate);
+    $imageTemplate=str_replace('{CAPTION}', $caption, $imageTemplate);
   }
   return($imageTemplate);
 } 
