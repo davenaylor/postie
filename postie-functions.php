@@ -1724,6 +1724,10 @@ function parseImageTemplate($thumbImage,$fullImage) {
   $imageTemplate=str_replace('{RELFILENAME}',
       $config['RELPHOTOSDIR'] . $fullImage,
       $imageTemplate);
+  $imageTemplate=str_replace('{WIDTH}',
+      $config['MAX_IMAGE_WIDTH']);
+  $imageTemplate=str_replace('{HEIGHT}',
+      $config['MAX_IMAGE_HEIGHT']);
   if ($caption!='') {
     $imageTemplate=str_replace('{CAPTION}',
         $caption, $imageTemplate);

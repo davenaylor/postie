@@ -152,6 +152,8 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
     * {FILENAME} gets replaced with the absolute path to the full-size image
     * {RELFILENAME} gets replaced with the relative path to the full-size image
     * {CAPTION} gets replaced with the caption you specified (if any)
+    * {WIDTH} gets replaced with the maximum width for resized photos
+    * {HEIGHT} gets replaced with the maximum height for resized photos
 
 * Rotation - if you include the text
 
@@ -193,6 +195,7 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * Added feature to include a custom excerpt
   * Custom image template now works even when not resizing images
   * Added links to settings, forum, and readme in plugin description
+  * More custom image template options
 
 
 * 1.1.5 (2009.03.10)

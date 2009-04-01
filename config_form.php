@@ -1,5 +1,5 @@
 <?php
-require_once('admin.php');
+//require_once('admin.php');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
 global $wpdb,$wp_roles;
 

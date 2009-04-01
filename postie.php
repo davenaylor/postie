@@ -29,8 +29,6 @@ $Id$
 * Support userid/domain  as a valid username
 * WP-switcher not compatiable http://www.alexking.org/index.php?content=software/wordpress/content.php#wp_120
 * Test out a remote cron system
-* Add ability to post to an existing page
-* Add a download counter
 * Add support for http://unknowngenius.com/wp-plugins/faq.html#one-click
 *    www.cdavies.org/code/3gp-thumb.php.txt
 *    www.cdavies.org/permalink/watchingbrowserembeddedgpvideosinlinux.php
@@ -61,9 +59,10 @@ if (isset($_GET["postie_read_me"])) {
 }
 //Add Menu Configuration
 if (is_admin()) {
-  global $userdata;
-  get_currentuserinfo();
-  if ($userdata->user_level>9) {
+  //global $userdata;
+  //get_currentuserinfo();
+  //if ($userdata->user_level>9) {
+  if (current_user_can('manage_options')) {
     add_action("admin_menu","PostieMenu");
   }
 }
