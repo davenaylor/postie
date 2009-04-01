@@ -1721,12 +1721,10 @@ function parseImageTemplate($thumbImage,$fullImage,$caption) {
       $config['REALPHOTOSDIR'] . $fullImage, $imageTemplate);
   $imageTemplate=str_replace('{RELFILENAME}',
       $config['RELPHOTOSDIR'] . $fullImage, $imageTemplate);
-  /*
   $imageTemplate=str_replace('{WIDTH}',
-      $config['MAX_IMAGE_WIDTH'],$imageTemplate);
+      $config['MAX_IMAGE_WIDTH']. 'px' ,$imageTemplate);
   $imageTemplate=str_replace('{HEIGHT}',
-      $config['MAX_IMAGE_HEIGHT'],$imageTemplate);
-      */
+      $config['MAX_IMAGE_HEIGHT']. 'px' ,$imageTemplate);
   if ($caption!='') {
     $imageTemplate=str_replace('{CAPTION}', $caption, $imageTemplate);
   }
