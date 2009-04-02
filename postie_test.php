@@ -2,17 +2,19 @@
 // try to connect to server with different protocols/ and userids
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR ."postie-functions.php");
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR. "wp-config.php");
-require_once('admin.php');
+//require_once('admin.php');
 require_once("postie-functions.php");
 $config = GetConfig();
 $title = __("Postie Diagnosis");
 $parent_file = 'options-general.php?page=postie/postie.php';
 get_currentuserinfo();
 ?>
-<?php if ($GLOBALS["user_level"] != 10 ) :?>
-    <h2> Sorry only admin can run this file</h2>
-    <?php exit();?>
-<?php endif;?>
+<?php 
+  if (!current_user_can('manage_options')) {
+    echo "<h2> Sorry only admin can run this file</h2>";
+    exit();
+  }
+?>
 
 <?
     $images = array("Test.png",

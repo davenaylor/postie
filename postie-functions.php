@@ -1836,7 +1836,7 @@ function GetPostTags(&$content) {
   global $wpdb;
   $post_tags = array();
   //try and determine tags
-  if ( preg_match('/tags: (.*)\n/', $content, $matches))  {
+  if ( preg_match('/tags: ?(.*)\n/', $content, $matches))  {
     $content = str_replace($matches[0], "", $content);
     $post_tags = preg_split("/,\s*/", $matches[1]);
   }
