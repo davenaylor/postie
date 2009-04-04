@@ -9,6 +9,7 @@ Author URI: http://www.economysizegeek.com/
 */ 
 
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR. "wp-config.php");
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR ."postie-functions.php");
 function check_postie() {
     $host = get_option('siteurl');
     preg_match("/http:\/\/(.[^\/]*)(.*)/",$host,$matches);
@@ -45,19 +46,25 @@ if (isset($_GET["cronless_postie_read_me"])) {
 }
 
 
-add_action('init','postie_cron');
+//add_action('init','postie_cron');
+register_activation_hook(__FILE__,'postie_cron');
+add_action('check_postie_hook', 'check_postie');
 function postie_cron() {
-    if (!wp_next_scheduled('check_postie')) {
-        wp_schedule_event(time(),'hourly','check_postie');
-    }
+  $config=GetConfig();
+  wp_schedule_event(time(),$config['CRONLESS'],'check_postie_hook');
 }
-add_action('check_postie', 'check_postie');
-/**
-  * Now just add the following line to all of the rss/atom pages 
-  * Just make sure it is after the opening if statement
-  
-  do_action('check_postie'); 
-  
- */
+register_deactivation_hook(__FILE__,'postie_decron');
+function postie_decron() {
+  wp_clear_scheduled_hook('check_postie_hook');
+}
 
+/* here we add some more options for how often to check for e-mail */
+function more_reccurences() {
+  return array(
+  'weekly' => array('interval' => 604800, 'display' => 'Once Weekly'),
+  'twiceperhour' => array('interval' => 1800, 'display' => 'Twice per hour
+  '), 'tenminutes' =>array('interval' => 600, 'display' => 'Every 10 minutes')
+  );
+}
+add_filter('cron_schedules', 'more_reccurences');
 ?>

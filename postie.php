@@ -45,9 +45,11 @@ if(function_exists('load_plugin_textdomain')){
 }
 
 
-include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR. "wp-config.php");
-include_once (dirname(dirname(dirname(dirname(__FILE__)))) .
-DIRECTORY_SEPARATOR . 'wp-includes' . DIRECTORY_SEPARATOR . "pluggable.php");
+if (!is_admin()) {
+  include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR. "wp-config.php");
+  include_once (dirname(dirname(dirname(dirname(__FILE__)))) .
+  DIRECTORY_SEPARATOR . 'wp-includes' . DIRECTORY_SEPARATOR . "pluggable.php");
+}
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR ."postie-functions.php");
 if (isset($_GET["postie_read_me"])) {
     include_once(ABSPATH . "wp-admin/admin.php");
@@ -62,8 +64,8 @@ if (is_admin()) {
   //global $userdata;
   //get_currentuserinfo();
   //if ($userdata->user_level>9) {
-  if (current_user_can('manage_options')) {
-    add_action("admin_menu","PostieMenu");
-  }
+  //if (current_user_can('manage_options')) {
+  add_action("admin_menu","PostieMenu");
+  //}
 }
 ?>

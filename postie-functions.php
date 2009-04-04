@@ -234,11 +234,12 @@ function postie_read_me() {
 *  This sets up the configuration menu
 */
 function PostieMenu() {
-    add_options_page("Configure Postie",
-            "Configure Postie" , 
-             0,
-            POSTIE_ROOT .  "/postie.php",
-            "ConfigurePostie");
+  if( function_exists('add_options_page') ) {
+    if (current_user_can('manage_options')) {
+      add_options_page("Postie", "Postie" , 
+          0, POSTIE_ROOT .  "/postie.php", "ConfigurePostie");
+    }
+  }
 }
 /**
   * This handles actually showing the form

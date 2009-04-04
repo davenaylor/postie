@@ -51,9 +51,18 @@ Examples:
 
 This fetches the mail every five minutes with lynx.
 
-If you don't have access to cron - check out "Cronless Postie"
+= Cronless Postie =
+
+If you don't have access to cron, you can run postie without it.
+* Activate the cronless postie plugin (it is included with the postie plugin,
+  so if you have downloaded postie, you don't need to download anything else
+* By default, cronless postie checks for new e-mail once every hour. Currently
+* the only other option currently is daily. If you wish to change this, edit
+* the line in postie_cronless.php to:
+
 
 == Options and Settings ==
+
 * You can set the starting characters for you signature so that it
   is removed from the posting message
 * You can set a list of banned file names so if you provider adds
@@ -194,11 +203,16 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * Documentation improvements:
     * Added links to settings, forum, and readme in plugin description
     * Updated readme (thanks to Venkatraman Dhamodaran)
-  * Added option to automatically convert urls into links
-  * Improved internationalization (thanks to Håvard Broberg (nanablag@nanablag.com))
-  * Removed debugging info in get_mail.php (security issue) thanks to 
-    [Jens]( http://svalgaard.net/jens/)
-  * Added feature to include a custom excerpt
+  * Text processing improvements:
+    * Added option to automatically convert urls into links
+    * Added feature to include a custom excerpt
+  * Miscellaneous improvements
+    * Improved internationalization (thanks to Håvard Broberg (nanablag@nanablag.com))
+  * Bug Fixes
+    * Removed debugging info in get_mail.php (security issue) thanks to 
+      [Jens]( http://svalgaard.net/jens/)
+    * No longer directly including pluggable.php in admin pages (should
+      prevent conflicts with other plugins such as registerplus
 
 
 * 1.1.5 (2009.03.10)
