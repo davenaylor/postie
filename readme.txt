@@ -45,11 +45,16 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 * (Postie ignores the settings under Settings->Writing->Writing-by-Email)
 
 
-Setup a cronjob to pull down the get_mail.php
+Setup a cronjob to pull down the get\_mail.php
 Examples:
-*/5 * * * * /usr/bin/lynx --source http://www.economysizegeek.com/wp-content/plugins/postie/get_mail.php >/dev/null 2>&1
 
-This fetches the mail every five minutes with lynx.
+*/5 * * * * /usr/bin/lynx --source http://blog.robfelty.com/wp-content/plugins/postie/get\_mail.php >/dev/null 2>&1
+
+This fetches the mail every five minutes with lynx 
+
+*/10 * * * * /usr/bin/wget -O /dev/null http://blog.robfelty.com/wp-content/plugins/postie/get\_mail.php >/dev/null 2>&1
+
+This fetches the mail every ten minutes with wget 
 
 = Cronless Postie =
 
