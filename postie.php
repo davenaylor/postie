@@ -37,20 +37,13 @@ $Id$
 */
 
 //Older Version History is in the HISTORY file
-if(function_exists('load_plugin_textdomain')){
-  //load_plugin_textdomain('postie', false, dirname( plugin_basename(__FILE__)) .
-    //'/languages');
-	  $plugin_dir = basename(dirname(__FILE__)) . '/languages';
-	  load_plugin_textdomain( 'postie', 'wp-content/plugins/' . $plugin_dir, $plugin_dir );
-}
 
 
 if (!is_admin()) {
-  include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR. "wp-config.php");
-  include_once (dirname(dirname(dirname(dirname(__FILE__)))) .
-  DIRECTORY_SEPARATOR . 'wp-includes' . DIRECTORY_SEPARATOR . "pluggable.php");
+  //include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR. "wp-config.php");
+  //include_once (dirname(dirname(dirname(dirname(__FILE__)))) .
+  //DIRECTORY_SEPARATOR . 'wp-includes' . DIRECTORY_SEPARATOR . "pluggable.php");
 }
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR ."postie-functions.php");
 if (isset($_GET["postie_read_me"])) {
     include_once(ABSPATH . "wp-admin/admin.php");
     $title = __("Edit Plugins");
@@ -61,11 +54,13 @@ if (isset($_GET["postie_read_me"])) {
 }
 //Add Menu Configuration
 if (is_admin()) {
-  //global $userdata;
-  //get_currentuserinfo();
-  //if ($userdata->user_level>9) {
-  //if (current_user_can('manage_options')) {
+  require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR ."postie-functions.php");
   add_action("admin_menu","PostieMenu");
-  //}
+if(function_exists('load_plugin_textdomain')){
+  //load_plugin_textdomain('postie', false, dirname( plugin_basename(__FILE__)) .
+    //'/languages');
+	  $plugin_dir = basename(dirname(__FILE__)) . '/languages';
+	  load_plugin_textdomain( 'postie', 'wp-content/plugins/' . $plugin_dir, $plugin_dir );
+}
 }
 ?>

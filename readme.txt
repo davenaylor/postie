@@ -203,11 +203,13 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * Documentation improvements:
     * Added links to settings, forum, and readme in plugin description
     * Updated readme (thanks to Venkatraman Dhamodaran)
+    * Added better instructions on how to use cronless postie
   * Text processing improvements:
     * Added option to automatically convert urls into links
     * Added feature to include a custom excerpt
   * Miscellaneous improvements
-    * Improved internationalization (thanks to Håvard Broberg (nanablag@nanablag.com))
+    * Improved internationalization (thanks to Håvard Broberg
+      (nanablag@nanablag.com))
   * Bug Fixes
     * Removed debugging info in get_mail.php (security issue) thanks to 
       [Jens]( http://svalgaard.net/jens/)
