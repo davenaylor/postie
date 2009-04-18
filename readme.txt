@@ -194,32 +194,32 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 == History ==
 * 1.1.6 (2009.03.20)
   * More video options:
-    * Can embed 3gp, mp4, mov videos
-    * Can specify video width, video height, player width, and player height in
-      the settings page
-    * Can specify custom image template
+      * Can embed 3gp, mp4, mov videos
+      * Can specify video width, video height, player width, and player height
+        in the settings page
+      * Can specify custom image template
   * Image handling improvements:
-    * Only downscale images, not up-scale (thanks Jarven)
-    * More custom image template options
-    * IPTC captions now also work when not resizing images
-    * Added option to use custom field for images (for Datapusher)
-    * Fixed some issues with image templates and line break handling
-    * Custom image template now works even when not resizing images
+      * Only downscale images, not up-scale (thanks Jarven)
+      * More custom image template options
+      * IPTC captions now also work when not resizing images
+      * Added option to use custom field for images (for Datapusher)
+      * Fixed some issues with image templates and line break handling
+      * Custom image template now works even when not resizing images
   * Documentation improvements:
-    * Added links to settings, forum, and readme in plugin description
-    * Updated readme (thanks to Venkatraman Dhamodaran)
-    * Added better instructions on how to use cronless postie
+      * Added links to settings, forum, and readme in plugin description
+      * Updated readme (thanks to Venkatraman Dhamodaran)
+      * Added better instructions on how to use cronless postie
   * Text processing improvements:
-    * Added option to automatically convert urls into links
-    * Added feature to include a custom excerpt
+      * Added option to automatically convert urls into links
+      * Added feature to include a custom excerpt
   * Miscellaneous improvements
-    * Improved internationalization (thanks to Håvard Broberg
-      (nanablag@nanablag.com))
+      * Improved internationalization (thanks to Håvard Broberg
+        (nanablag@nanablag.com))
   * Bug Fixes
-    * Removed debugging info in get_mail.php (security issue) thanks to 
-      [Jens]( http://svalgaard.net/jens/)
-    * No longer directly including pluggable.php in admin pages (should
-      prevent conflicts with other plugins such as registerplus
+      * Removed debugging info in get_mail.php (security issue) thanks to 
+        [Jens]( http://svalgaard.net/jens/)
+      * No longer directly including pluggable.php (should
+        prevent conflicts with other plugins such as registerplus
 
 
 * 1.1.5 (2009.03.10)
