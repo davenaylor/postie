@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.7.1
-Stable tag: 1.1.5
+Stable tag: 1.2
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -44,6 +44,11 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
   * imap-ssl: 993
 * (Postie ignores the settings under Settings->Writing->Writing-by-Email)
 
+= Automating checking e-mail =
+
+If your site runs on a UNIX/linux server, and you have shell access, you can
+enable mail checking using cron; if you don't know anything about cron, skip
+to the cronless postie section.
 
 Setup a cronjob to pull down the get\_mail.php
 Examples:
@@ -192,7 +197,7 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 
 
 == History ==
-* 1.1.6 (2009.03.20)
+* 1.2 (2009.04.22)
   * More video options:
       * Can embed 3gp, mp4, mov videos
       * Can specify video width, video height, player width, and player height
