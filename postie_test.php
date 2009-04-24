@@ -34,11 +34,11 @@ get_currentuserinfo();
     <br/>
     <?php 
         
-        if (!TestWPVersion()) {
-            print("<h1>Warning!</h1>
-                    <p>Postie only works on on Word Press version 2.0 and above</p>");
-        exit();
-        }
+//        if (!TestWPVersion()) {
+ //           print("<h1>Warning!</h1>
+  //                  <p>Postie only works on on Word Press version 2.0 and above</p>");
+   //     exit();
+    //    }
          ?>
 
     <br/>

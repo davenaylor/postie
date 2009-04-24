@@ -11,7 +11,6 @@ global $wpdb,$wp_roles;
 $title = __('Postie Options', 'postie');
 $parent_file = 'options-general.php';
 $config = GetConfig();
-print_r(wp_get_schedules());
 $messages[1] = "Configuration successfully updated!";
 $messages[2] = "Error - unable to save configuration";
 
