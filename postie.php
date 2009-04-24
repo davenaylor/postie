@@ -2,7 +2,9 @@
 /*
 Plugin Name: Postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
-Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href='options-general.php?page=postie/postie.php'>Settings and options</a>) to configure your e-mail settings. See the <a href='http://wordpres.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://forum.robfelty.com/forum/postie'>postie forum</a> for support.
+Description: Signifigantly upgrades the posting by mail features of Word Press
+(See <a href='options-general.php?page=postie/postie.php'>Settings and
+options</a>) to configure your e-mail settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://forum.robfelty.com/forum/postie'>postie forum</a> for support.
 Version: 1.2
 Author: Robert Felty
 Author URI: http://blog.robfelty.com/
@@ -59,8 +61,14 @@ if (is_admin()) {
 if(function_exists('load_plugin_textdomain')){
   //load_plugin_textdomain('postie', false, dirname( plugin_basename(__FILE__)) .
     //'/languages');
-	  $plugin_dir = basename(dirname(__FILE__)) . '/languages';
-	  load_plugin_textdomain( 'postie', 'wp-content/plugins/' . $plugin_dir, $plugin_dir );
+	  $plugin_dir = WP_PLUGIN_DIR . '/' . basename(dirname(__FILE__));
+	  //load_plugin_textdomain( 'postie', 'wp-content/plugins/' . $plugin_dir, $plugin_dir );
+function postie_load_domain() {
+	load_plugin_textdomain( 'postie', $plugin_dir."/languages/",
+  basename(dirname(__FILE__)). '/languages/');
+	//load_plugin_textdomain( 'postie', "wp-content/plugins/postie/languages/");
+}
+add_action('init', 'postie_load_domain'); 
 }
 }
 ?>

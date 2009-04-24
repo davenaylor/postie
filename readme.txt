@@ -85,10 +85,13 @@ This fetches the mail every ten minutes with wget
 If you don't have access to cron, you can run postie without it.
 * Activate the cronless postie plugin (it is included with the postie plugin,
   so if you have downloaded postie, you don't need to download anything else
-* By default, cronless postie checks for new e-mail once every hour. Currently
-* the only other option currently is daily. If you wish to change this, edit
-* the line in postie_cronless.php to:
-
+* By default, cronless postie checks for new e-mail once every hour. To select
+  a different rate, change the cronless postie setting in the postie settings
+  page. 
+* Note that timing with cronless postie is not very accurate. It depends
+  on people visiting your website. If you select to check every 10 minutes, but
+  you only get one visit every 30 minutes, then it might take 30 minutes for a
+  post to show up.
 
 == Options and Settings ==
 
@@ -216,6 +219,12 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 
 
 == History ==
+* 1.2.1 (2009.04.xx)
+  * Got rid of stupid version checking
+  * Improved cronless postie instructions and configuration
+  * Internationalization is working now
+  * Dutch localization (thanks to gvmelle http://gvmelle.com)
+
 * 1.2 (2009.04.22)
   * More video options:
       * Can embed 3gp, mp4, mov videos

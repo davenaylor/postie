@@ -3,14 +3,15 @@
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
 global $wpdb,$wp_roles;
 
-        if (!TestWPVersion()) {
-            print("<h1>Warning!</h1>
-                    <p>Postie only works on on Word Press version 2.0 and above</p>");
-        exit();
-        }
+//        if (!TestWPVersion()) {
+ //           print("<h1>Warning!</h1>
+  //                  <p>Postie only works on on Word Press version 2.0 and above</p>");
+   //     exit();
+    //    }
 $title = __('Postie Options', 'postie');
 $parent_file = 'options-general.php';
 $config = GetConfig();
+print_r(wp_get_schedules());
 $messages[1] = "Configuration successfully updated!";
 $messages[2] = "Error - unable to save configuration";
 
@@ -48,6 +49,23 @@ fieldset {border: 1px solid black;}
 </form>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="config" />
+  <?php if (isset($config['CRONLESS']) && $config['CRONLESS']!='') {
+  ?>
+        <fieldset class="options">
+    <legend><?php _e('Cronless postie settings', 'postie');?></legend>
+  <p><?php _e('Cronless postie should check for mail', 'postie') ?>
+  <select name='CRONLESS' id='CRONLESS'>
+    <option value="weekly" <?php if($config["CRONLESS"] == "weekly") { echo "selected='selected'";} ?>><?php _e('Once weekly', 'postie') ?></option>
+    <option value="daily"<?php if($config["CRONLESS"] == "daily") { echo "selected='selected'";} ?>><?php _e('daily', 'postie') ?></option>
+    <option value="hourly" <?php if($config["CRONLESS"] == "hourly") { echo "selected='selected'";} ?>><?php _e('hourly', 'postie') ?></option>
+    <option value="twiceperhour" <?php if($config["CRONLESS"] == "twiceperhour") { echo "selected='selected'";} ?>><?php _e('twice per hour', 'postie') ?></option>
+    <option value="tenminutes" <?php if($config["CRONLESS"] == "tenminutes") { echo "selected='selected'";} ?>><?php _e('every ten minutes', 'postie') ?></option>
+  </select>
+  </fieldset>
+  </p>
+  <?php 
+  }
+  ?>
 	<table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
 
 

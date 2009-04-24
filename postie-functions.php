@@ -1473,10 +1473,10 @@ function DeterminePostDate(&$content, $message_date = NULL) {
     $post_date = gmdate('Y-m-d H:i:s',$dateInSeconds + ($config["TIME_OFFSET"] * 3600));
     $post_date_gmt = gmdate('Y-m-d H:i:s',$dateInSeconds);
 
-    echo "--------------------DELAY------------\n";
-    echo "delay=$delay, dateInSeconds = $dateInSeconds\n";
-    echo "post_date=$post_date\n";
-    echo "--------------------DELAY------------\n";
+    //echo "--------------------DELAY------------\n";
+    //echo "delay=$delay, dateInSeconds = $dateInSeconds\n";
+    //echo "post_date=$post_date\n";
+    //echo "--------------------DELAY------------\n";
     return(array($post_date,$post_date_gmt));
 }
 /**
@@ -1856,19 +1856,13 @@ function GetPostExcerpt(&$content) {
   global $wpdb;
   $post_excerpt = '';
   //try and determine excerpt
-    echo "CONTENT ------
-          $content 
-           -------";
+    //echo "CONTENT ------
+          //$content 
+           //-------";
   if ( preg_match('/:excerptstart ?(.*):excerptend/s', $content, $matches))  {
     $content = str_replace($matches[0], "", $content);
     $post_excerpt = $matches[1];
     print_r($matches);
-    echo "NOW CONTENT ------
-          $content 
-           -------";
-    echo "excerpt ------
-          $post_excerpt 
-           -------";
   }
   return($post_excerpt);
 }
