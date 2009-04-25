@@ -580,7 +580,8 @@ function GetContent ($part,&$attachments) {
         if ($config["USE_IMAGEMAGICK"] && $config["AUTO_SMART_SHARP"]) {
                     ImageMagickSharpen($file);
         }
-        $mimeTag = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->';
+        $mimeTag = '<!--Mime Type of File is
+        '.$part->ctype_primary."/".$part->ctype_secondary.' --></p>';
         $thumbImage = NULL;
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
         if ($config["RESIZE_LARGE_IMAGES"]) {
