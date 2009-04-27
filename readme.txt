@@ -83,6 +83,7 @@ This fetches the mail every ten minutes with wget
 = Cronless Postie =
 
 If you don't have access to cron, you can run postie without it.
+
 * Activate the cronless postie plugin (it is included with the postie plugin,
   so if you have downloaded postie, you don't need to download anything else
 * By default, cronless postie checks for new e-mail once every hour. To select
