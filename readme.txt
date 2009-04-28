@@ -225,6 +225,7 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * Improved cronless postie instructions and configuration
   * Internationalization is working now
   * Dutch localization (thanks to gvmelle http://gvmelle.com)
+  * Fixed caption bug when using image magick
 
 * 1.2 (2009.04.22)
   * More video options:

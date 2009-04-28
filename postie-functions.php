@@ -1,9 +1,9 @@
 <?php
+/*TODO check if image height is being consulted */
 #global $config,$debug;
 #$debug=true;
 #$config=GetConfig();
 
-//TODO excerpt option
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
 define("POSTIE_ROOT",dirname(__FILE__));
 define("POSTIE_TABLE",$GLOBALS["table_prefix"]. "postie_config");
@@ -1135,6 +1135,8 @@ function DetermineImageSizeWithImageMagick($file) {
     preg_match('/Caption="(.*)"/', $caption, $matches);
     if (isset($matches[1])) {
       $caption = $matches[1];
+    } else {
+      $caption='';
     }
   }
   return(array($size,$caption));
