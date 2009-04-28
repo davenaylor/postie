@@ -539,4 +539,6 @@ Recommended:
 
 <a href="http://validator.w3.org/check?uri=referer"><img src="images/valid-xhtml11.png" alt="Valid XHTML 1.0!" style="height:20px; width:65px; border:0;" /></a>
 <a href="http://jigsaw.w3.org/css-validator/check/referer"><img style="border:0;width:65px;height:20px;" src="images/vcss.gif" alt="Valid CSS!" /></a><br />
+Postie Version:
+$Id$
 </div>
