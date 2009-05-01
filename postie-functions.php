@@ -1,5 +1,8 @@
 <?php
-/*TODO check if image height is being consulted */
+/*TODO 
+ * check if image height is being consulted 
+ * html purify
+ */
 #global $config,$debug;
 #$debug=true;
 #$config=GetConfig();
