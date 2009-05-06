@@ -229,6 +229,7 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * Added option to not filter new lines (when using markdown syntax)
   * Fixed autoplay option
   * Can now use wildcards in excluding filenames
+  * Producing better quality thumbnails (thanks to robcarey)
 
 * 1.2 (2009.04.22)
   * More video options:

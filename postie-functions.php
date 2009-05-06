@@ -1414,7 +1414,7 @@ function ResizeImageWithGD($file,$type) {
             $scaledFileName =  "thumb.".$fileName;
             $scaledFile = $config["REALPHOTOSDIR"] . $scaledFileName;
             $scaledImage = imagecreatetruecolor($scaledW,$scaledH);
-            imagecopyresized($scaledImage,$sourceImage,0,0,0,0,
+            imagecopyresampled($scaledImage,$sourceImage,0,0,0,0,
                             $scaledW,$scaledH,
                             $sizeInfo[0],$sizeInfo[1]);
 			imagejpeg($scaledImage,$scaledFile,$config["JPEGQUALITY"]);
@@ -2309,7 +2309,7 @@ function HasGDInstalled($display = true) {
                            "imagecreatefrompng",
                            "imagecreatetruecolor",
                            "imagecreatetruecolor",
-                           "imagecopyresized",
+                           "imagecopyresampled",
                            "imagejpeg",
                            "imagedestroy");
     return(HasFunctions($function_list,$display));
