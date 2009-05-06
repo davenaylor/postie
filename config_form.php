@@ -11,8 +11,8 @@ global $wpdb,$wp_roles;
 $title = __('Postie Options', 'postie');
 $parent_file = 'options-general.php';
 $config = GetConfig();
-$messages[1] = "Configuration successfully updated!";
-$messages[2] = "Error - unable to save configuration";
+$messages[1] = __("Configuration successfully updated!",'postie');
+$messages[2] = __("Error - unable to save configuration",'postie');
 
 ?>
 <style type='text/css'>
@@ -292,6 +292,9 @@ fieldset {border: 1px solid black;}
                 <br />
                 </td> 
             </tr> 
+            <?php echo BuildBooleanSelect("Filter
+            newlines","FILTERNEWLINES",$config["FILTERNEWLINES"], "Set to no
+            if using markdown or textitle syntax");?>
             <?php echo BuildBooleanSelect("Replace newline characters with
             html line breaks (&lt;br
             /&gt;)","CONVERTNEWLINE",$config["CONVERTNEWLINE"]);?>
@@ -310,7 +313,11 @@ fieldset {border: 1px solid black;}
             </tr> 
             <?php echo BuildBooleanSelect("Decode Quoted Printable Data","MESSAGE_DEQUOTE",$config["MESSAGE_DEQUOTE"], "Should be yes in most cases.");?>
             <?php echo BuildTextArea("Supported File Types","SUPPORTED_FILE_TYPES",$config["SUPPORTED_FILE_TYPES"],"Put each type on a single line.");?>
-            <?php echo BuildTextArea("Banned File Names","BANNED_FILES_LIST",$config["BANNED_FILES_LIST"],"Put each file name on a single line.Files matching this list will never be posted to your blog.");?>
+            <?php echo BuildTextArea("Banned File
+            Names","BANNED_FILES_LIST",$config["BANNED_FILES_LIST"],"Put each
+            file name on a single line.Files matching this list will never be
+            posted to your blog. You can use wildcards such as *.xls, or *.* for
+            all files");?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Tag Of Message Start:', 'postie') ?> </th> 
                 <td>

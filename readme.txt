@@ -226,6 +226,9 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   * Internationalization is working now
   * Dutch localization (thanks to gvmelle http://gvmelle.com)
   * Fixed caption bug when using image magick
+  * Added option to not filter new lines (when using markdown syntax)
+  * Fixed autoplay option
+  * Can now use wildcards in excluding filenames
 
 * 1.2 (2009.04.22)
   * More video options:

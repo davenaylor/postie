@@ -11,6 +11,17 @@ include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR
 define("POSTIE_ROOT",dirname(__FILE__));
 define("POSTIE_TABLE",$GLOBALS["table_prefix"]. "postie_config");
 
+/* this function is necessary for wildcard matching on non-posix systems */
+if (!function_exists('fnmatch')) {
+  function fnmatch($pattern, $string) {
+    $pattern = strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' =>
+        '.', '\[' => '[', '\]' => ']'));
+    return @preg_match(
+        '/^' . strtr(addcslashes($pattern, '/\\.+^$(){}=!<>|'),
+        array('*' => '.*', '?' => '.?')) . '$/i', $string
+    );
+  }
+}
 /**
   * This is the main handler for all of the processing
   */
@@ -58,7 +69,8 @@ function PostEmail($poster,$mimeDecodedEmail) {
 
     ubb2HTML($content);	
 
-    $content = FilterNewLines($content);
+    if ($config['FILTERNEWLINES']) 
+      $content = FilterNewLines($content);
     //$content = FixEmailQuotes($content);
     
     $id=checkReply($subject); 
@@ -486,12 +498,14 @@ function PostToDB($details) {
   * @return boolean
   */
 function BannedFileName($filename) {
-    $config = GetConfig();
-    if (in_array($filename,$config["BANNED_FILES_LIST"])) {
-        print("<p>Ignoreing $filename - it is on the banned files list.");
-        return(true);
+  $config = GetConfig();
+  foreach ($config["BANNED_FILES_LIST"] as $bannedFile) {
+    if (fnmatch($bannedFile, $filename)) {
+      print("<p>Ignoreing $filename - it is on the banned files list.");
+      return(true);
     }
-    return(false);
+  }
+  return(false);
 }
 
 //tear apart the meta part for useful information
@@ -663,13 +677,13 @@ function GetContent ($part,&$attachments) {
                       'width="' . $config['VIDEO_WIDTH'] . '" '.
                       'height="' . $config['VIDEO_HEIGHT'] . '"> '.
                       '<param name="src" VALUE="'. $config["URLFILESDIR"] . $filename .'"> '.
-                      '<param name="autoplay" VALUE="$autoplay"> '.
+                      "<param name=\"autoplay\" VALUE=\"$autoplay\"> ".
                         '<param name="controller" VALUE="true"> '.
                        '<embed '.
                        'src="'. $config["URLFILESDIR"] . $filename .'" '.
                        'width="' . $config['VIDEO_WIDTH'] . '" '.
                        'height="' . $config['VIDEO_HEIGHT'] . '"'.
-                       'autoplay="$autoplay" '.
+                       "autoplay=\"$autoplay\" ".
                        'controller="true" '.
                        'type="video/quicktime" '.
                        'pluginspage="http://www.apple.com/quicktime/download/" '.
@@ -2185,6 +2199,8 @@ function GetDBConfig() {
       $config["POST_STATUS"] = 'publish'; 
     if (!isset($config["IMAGE_NEW_WINDOW"])) 
       $config["IMAGE_NEW_WINDOW"] = false; 
+    if (!isset($config["FILTERNEWLINES"]))  
+      $config["FILTERNEWLINES"] = true; 
     if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =
       "<div class='imageframe alignleft'><a href='{IMAGE}'><img src='{THUMBNAIL}' alt='{CAPTION}' title='{CAPTION}' class='attachment' /></a><div class='imagecaption'>{CAPTION}</div></div>";
     }
