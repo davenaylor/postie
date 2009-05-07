@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.7.1
-Stable tag: 1.2
+Stable tag: 1.2.1
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -17,34 +17,16 @@ videos, and automatically strip off signatures. It also has support for both
 imap and pop3, with the option for ssl with both.  For usage notes, see the
 [other notes](other_notes) page
 
-= What's new in 1.2 = 
-  * More video options:
-      * Can embed 3gp, mp4, mov videos
-      * Can specify video width, video height, player width, and player height
-        in the settings page
-      * Can specify custom image template
-  * Image handling improvements:
-      * Only downscale images, not up-scale (thanks Jarven)
-      * More custom image template options
-      * IPTC captions now also work when not resizing images
-      * Added option to use custom field for images (for Datapusher)
-      * Fixed some issues with image templates and line break handling
-      * Custom image template now works even when not resizing images
-  * Documentation improvements:
-      * Added links to settings, forum, and readme in plugin description
-      * Updated readme (thanks to Venkatraman Dhamodaran)
-      * Added better instructions on how to use cronless postie
-  * Text processing improvements:
-      * Added option to automatically convert urls into links
-      * Added feature to include a custom excerpt
-  * Miscellaneous improvements
-      * Improved internationalization (thanks to Håvard Broberg
-        (nanablag@nanablag.com))
-  * Bug Fixes
-      * Removed debugging info in get_mail.php (security issue) thanks to 
-        [Jens]( http://svalgaard.net/jens/)
-      * No longer directly including pluggable.php (should
-        prevent conflicts with other plugins such as registerplus
+= What's new in 1.2.1 = 
+  * Got rid of stupid version checking
+  * Improved cronless postie instructions and configuration
+  * Internationalization is working now
+  * Dutch localization (thanks to gvmelle http://gvmelle.com)
+  * Fixed caption bug when using image magick
+  * Added option to not filter new lines (when using markdown syntax)
+  * Fixed autoplay option
+  * Can now use wildcards in excluding filenames
+  * Producing better quality thumbnails (thanks to robcarey)
 
 == Installation ==
 * Make sure all postie code is its own directory inside of wp-content/plugins/postie
@@ -220,7 +202,7 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 
 
 == History ==
-* 1.2.1 (2009.04.xx)
+* 1.2.1 (2009.05.07)
   * Got rid of stupid version checking
   * Improved cronless postie instructions and configuration
   * Internationalization is working now

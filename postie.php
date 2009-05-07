@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Description: Signifigantly upgrades the posting by mail features of Word Press
 (See <a href='options-general.php?page=postie/postie.php'>Settings and
 options</a>) to configure your e-mail settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://forum.robfelty.com/forum/postie'>postie forum</a> for support.
-Version: 1.2
+Version: 1.2.1
 Author: Robert Felty
 Author URI: http://blog.robfelty.com/
 */
