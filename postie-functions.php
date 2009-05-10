@@ -273,75 +273,79 @@ function ConfigurePostie() {
   * This function handles determining the protocol and fetching the mail
   * @return array
   */ 
-function FetchMail() {
-    $config = GetConfig();
-    $emails = array();
-    if (!$config["MAIL_SERVER"]
-            || !$config["MAIL_SERVER_PORT"]
-            || !$config["MAIL_USERID"]) {
-        die("Missing Configuration For Mail Server\n");
+function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
+    $protocol=NULL, $offset=NULL, $test=NULL) {
+  //$config = GetConfig();
+  $emails = array();
+  //echo "server=$server, port=$port, email=$email";
+  if (!$server || !$port || !$email) {
+      die("Missing Configuration For Mail Server\n");
+  }
+  if ($server == "pop.gmail.com") {
+      print("\nMAKE SURE POP IS TURNED ON IN SETTING AT Gmail\n");
+  }
+switch ( strtolower($protocol) ) {
+  case 'smtp': //direct 
+    $fd = fopen("php://stdin", "r");
+    $input = "";
+    while (!feof($fd)) {
+        $input .= fread($fd, 1024);
     }
-    if ($config["MAIL_SERVER"] == "pop.gmail.com") {
-        print("\nMAKE SURE POP IS TURNED ON IN SETTING AT Gmail\n");
-    }
-	switch ( strtolower($config["INPUT_PROTOCOL"]) ) {
-		case 'smtp': //direct 
-			$fd = fopen("php://stdin", "r");
-			$input = "";
-			while (!feof($fd)) {
-			    $input .= fread($fd, 1024);
-			}
-			fclose($fd);
-			$emails[0] = $input;
-			break;
-        case 'imap':
-        case 'imap-ssl':
-        case 'pop3-ssl':
-            HasIMAPSupport(false);
-            if ($config["TEST_EMAIL"]) {
-                $emails = TestIMAPMessageFetch();
-            }
-            else {
-                $emails = IMAPMessageFetch();
-            }
-            break;
-        case 'pop3':
-		default: 
-            if ($config["TEST_EMAIL"]) {
-			    $emails = TestPOP3MessageFetch();
-            }
-            else {
-			    $emails = POP3MessageFetch();
-            }
-		}
-    if (!$emails) {
-		die("\nThere does not seem to be any new mail.\n");
-    }
-    return($emails);
+    fclose($fd);
+    $emails[0] = $input;
+    break;
+      case 'imap':
+      case 'imap-ssl':
+      case 'pop3-ssl':
+          HasIMAPSupport(false);
+          if ($test) {
+              $emails = TestIMAPMessageFetch();
+          }
+          else {
+            $emails = IMAPMessageFetch($server, $port, $email, 
+                $password, $protocol, $offset, $test); 
+          }
+          break;
+      case 'pop3':
+  default: 
+          if ($test) {
+        $emails = TestPOP3MessageFetch();
+          }
+          else {
+        $emails = POP3MessageFetch();
+          }
+  }
+  if (!$emails) {
+  print("\nThere does not seem to be any new mail.<br />\n");
+  }
+  return($emails);
 }
 /**
   *Handles fetching messages from an imap server
   */
 function TestIMAPMessageFetch ( ) {			
-    print("**************RUNING IN TESTING MODE************\n");
-    $config = GetConfig();
-	$config["MAIL_USERID"] = $config["TEST_EMAIL_ACCOUNT"];
-    $config["MAIL_PASSWORD"] = $config["TEST_EMAIL_PASSWORD"];
-    return(IMAPMessageFetch($config));
+  print("**************RUNING IN TESTING MODE************\n");
+  $config = GetConfig();
+  $email = $config["TEST_EMAIL_ACCOUNT"];
+  $password = $config["TEST_EMAIL_PASSWORD"];
+  return(IMAPMessageFetch($config['MAIL_SERVER'], $config['MAIL_SERVER_PORT'],
+      $email, $password, $config['INPUT_PROTOCOL'],
+      $config['TIME_OFFSET'], $config['TEST_EMAIL']));
 
 }
 /**
   *Handles fetching messages from an imap server
   */
-function IMAPMessageFetch ($config = NULL ) {			
+function IMAPMessageFetch ($server=NULL, $port=NULL, $email=NULL, 
+    $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL) {
     if (!$config) {
         $config = GetConfig();
     }
     require_once("postieIMAP.php");
 
-    $mail_server = &PostieIMAP::Factory($config["INPUT_PROTOCOL"]);
-    print("\nConnecting to $config[MAIL_SERVER]:$config[MAIL_SERVER_PORT] ($config[INPUT_PROTOCOL])) \n");
-    if (!$mail_server->connect($config["MAIL_SERVER"], $config["MAIL_SERVER_PORT"],$config["MAIL_USERID"],$config["MAIL_PASSWORD"])) {
+    $mail_server = &PostieIMAP::Factory($protocol);
+    print("\nConnecting to $server:$port ($protocol) \n");
+    if (!$mail_server->connect($server, $port,$email,$password)) {
         print("Mail Connection Time Out\n
                 Common Reasons: \n
                 Server Down \n
@@ -370,23 +374,26 @@ function IMAPMessageFetch ($config = NULL ) {
 	return $emails;
 }
 function TestPOP3MessageFetch ( ) {			
-    print("**************RUNING IN TESTING MODE************\n");
-    $config = GetConfig();
-	$config["MAIL_USERID"] = $config["TEST_EMAIL_ACCOUNT"];
-    $config["MAIL_PASSWORD"] = $config["TEST_EMAIL_PASSWORD"];
-    return(POP3MessageFetch($config));
+  print("**************RUNING IN TESTING MODE************\n");
+  $config = GetConfig();
+  $email = $config["TEST_EMAIL_ACCOUNT"];
+  $password = $config["TEST_EMAIL_PASSWORD"];
+  return(POP3MessageFetch($config['MAIL_SERVER'], $config['MAIL_SERVER_PORT'],
+      $email, $password, $config['INPUT_PROTOCOL'],
+      $config['TIME_OFFSET'], $config['TEST_EMAIL']));
 }
 /**
   *Retrieves email via POP3
   */
-function POP3MessageFetch ($config = NULL) {			
+function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL, 
+    $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL) {
     if (!$config) {
         $config = GetConfig();
     }
 	require_once(ABSPATH.WPINC.DIRECTORY_SEPARATOR.'class-pop3.php');
 	$pop3 = &new POP3();
-    print("\nConnecting to $config[MAIL_SERVER]:$config[MAIL_SERVER_PORT] ($config[INPUT_PROTOCOL]))  \n");
-    if (!$pop3->connect($config["MAIL_SERVER"], $config["MAIL_SERVER_PORT"])) {
+    print("\nConnecting to $server:$port ($protocol))  \n");
+    if (!$pop3->connect($server, $port)) {
         if (strpos($pop3->ERROR,"POP3: premature NOOP OK, NOT an RFC 1939 Compliant server") === false) {
             print("Mail Connection Time Out\n
                     Common Reasons: \n
@@ -399,7 +406,7 @@ function POP3MessageFetch ($config = NULL) {
     }
 
 	//Check to see if there is any mail, if not die
-	$msg_count = $pop3->login($config["MAIL_USERID"], $config["MAIL_PASSWORD"]);
+	$msg_count = $pop3->login($email, $password);
 	if (!$msg_count) {
 		$pop3->quit();
         return(array());

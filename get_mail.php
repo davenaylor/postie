@@ -18,11 +18,18 @@ TestWPMailInstallation();
 
 //Retreive emails 
 print("<pre>\n");
-$emails = FetchMail();
+$config = GetConfig();
+//print_r($config);
+$emails = FetchMail($config['MAIL_SERVER'], $config['MAIL_SERVER_PORT'],
+$config['MAIL_USERID'], $config['MAIL_PASSWORD'], $config['INPUT_PROTOCOL'],
+$config['TIME_OFFSET'], $config['TEST_EMAIL']);
 //loop through messages
 foreach ($emails as $email) {
     //sanity check to see if there is any info in the message
-    if ($email == NULL ) { print 'Dang, message is empty!'; continue; }
+    if ($email == NULL ) { 
+      print 'Dang, message is empty!'; 
+      continue; 
+    }
     
     $mimeDecodedEmail = DecodeMimeMail($email);
     $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
