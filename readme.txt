@@ -200,6 +200,11 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 * Automatically confirms that you are installed correctly
 
 
+== Frequently Asked Questions ==
+
+= Mail is not showing up right when I send html (rich formatted) e-mail! =
+
+Make sure you set the preferred text type to html
 
 == History ==
 * 1.2.2 (2009.05.xx)
