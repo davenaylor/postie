@@ -26,102 +26,102 @@ if (!function_exists('fnmatch')) {
   * This is the main handler for all of the processing
   */
 function PostEmail($poster,$mimeDecodedEmail) {
-    $config = GetConfig();
-    $GLOBALS["POSTIE_IMAGE_ROTATION"] = 0;
-    $attachments = array(
-            "html" => array(), //holds the html for each image
-            "cids" => array(), //holds the cids for HTML email
-            "image_files" => array() //holds the files for each image
-            );
-    print("<p>Message Id is :" . $mimeDecodedEmail->headers["message-id"] . "</p><br/>\n");
-    print("<p>Email has following attachments:</p>");
-    foreach($mimeDecodedEmail->parts as $parts) {
-        print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."</p><br />\n";
-    }
-    FilterTextParts($mimeDecodedEmail);
+  $config = GetConfig();
+  $GLOBALS["POSTIE_IMAGE_ROTATION"] = 0;
+  $attachments = array(
+          "html" => array(), //holds the html for each image
+          "cids" => array(), //holds the cids for HTML email
+          "image_files" => array() //holds the files for each image
+          );
+  print("<p>Message Id is :" . $mimeDecodedEmail->headers["message-id"] . "</p><br/>\n");
+  print("<p>Email has following attachments:</p>");
+  foreach($mimeDecodedEmail->parts as $parts) {
+    print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."</p><br />\n";
+  }
+  FilterTextParts($mimeDecodedEmail);
 #print("<p>Email has following attachments after filtering:");
 #    foreach($mimeDecodedEmail->parts as $parts) {
 #        print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."<br />\n";
 #    }
-    $content = GetContent($mimeDecodedEmail,$attachments);
-    $subject = GetSubject($mimeDecodedEmail,$content);
-    if ($debug) {
-      echo "the subject is $subject, right after calling GetSubject\n";
-    }
-    $rotation = GetRotation($mimeDecodedEmail,$content);
-    if ($rotation != "0"
-            && count($attachments["image_files"])) {
-        RotateImages($rotation,$attachments["image_files"]);
-    }
-    $customImages = SpecialMessageParsing($content,$attachments);
-    $post_excerpt = GetPostExcerpt($content);
-    $postAuthorDetails=getPostAuthorDetails($subject,$content,
-        $mimeDecodedEmail);
-    $message_date = NULL;
-    if (array_key_exists("date",$mimeDecodedEmail->headers)
-            && !empty($mimeDecodedEmail->headers["date"])) {
-        HandleMessageEncoding($mimeDecodedEmail->headers["content-transfer-encoding"],
-                                               $mimeDecodedEmail->ctype_parameters["charset"],
-                                               $mimeDecodedEmail->headers["date"]);
-        $message_date = $mimeDecodedEmail->headers['date'];
-    }
-    list($post_date,$post_date_gmt) = DeterminePostDate($content, $message_date);
+  $content = GetContent($mimeDecodedEmail,$attachments);
+  $subject = GetSubject($mimeDecodedEmail,$content);
+  if ($debug) {
+    echo "the subject is $subject, right after calling GetSubject\n";
+  }
+  $rotation = GetRotation($mimeDecodedEmail,$content);
+  if ($rotation != "0" && count($attachments["image_files"])) {
+    RotateImages($rotation,$attachments["image_files"]);
+  }
+  $customImages = SpecialMessageParsing($content,$attachments);
+  $post_excerpt = GetPostExcerpt($content);
+  $postAuthorDetails=getPostAuthorDetails($subject,$content,
+      $mimeDecodedEmail);
+  $message_date = NULL;
+  if (array_key_exists("date",$mimeDecodedEmail->headers)
+        && !empty($mimeDecodedEmail->headers["date"])) {
+    HandleMessageEncoding(
+        $mimeDecodedEmail->headers["content-transfer-encoding"],
+        $mimeDecodedEmail->ctype_parameters["charset"],
+        $mimeDecodedEmail->headers["date"]);
+    $message_date = $mimeDecodedEmail->headers['date'];
+  }
+  list($post_date,$post_date_gmt) = DeterminePostDate($content, $message_date);
 
-    ubb2HTML($content);	
+  ubb2HTML($content);	
 
-    if ($config['FILTERNEWLINES']) 
-      $content = FilterNewLines($content);
-    //$content = FixEmailQuotes($content);
-    
-    $id=checkReply($subject); 
-    $post_categories = GetPostCategories($subject);
-    $post_tags = GetPostTags($content);
-    $comment_status = AllowCommentsOnPost($content);
-    
-    if ((empty($id) || is_null($id)) && 
-        $config['ADD_META']=='yes') {
-      if ($config['WRAP_PRE']=='yes') {
-        //BMS: removing metadata from post body?
-	//$content = $postAuthorDetails['content'] . "<pre>\n" . $content . "</pre>\n";
-        $content = "<pre>\n" . $content . "</pre>\n";
-      } else {
-	//BMS: removing metadata from post body?
-        //$content = $postAuthorDetails['content'] . $content;
-        $content = $content;
-      }
+  if ($config['FILTERNEWLINES']) 
+    $content = FilterNewLines($content);
+  //$content = FixEmailQuotes($content);
+  
+  $id=checkReply($subject); 
+  $post_categories = GetPostCategories($subject);
+  $post_tags = GetPostTags($content);
+  $comment_status = AllowCommentsOnPost($content);
+  
+  if ((empty($id) || is_null($id)) && 
+      $config['ADD_META']=='yes') {
+    if ($config['WRAP_PRE']=='yes') {
+      //BMS: removing metadata from post body?
+//$content = $postAuthorDetails['content'] . "<pre>\n" . $content . "</pre>\n";
+      $content = "<pre>\n" . $content . "</pre>\n";
     } else {
-      if ($config['WRAP_PRE']=='yes') {
-        $content = "<pre>\n" . $content . "</pre>\n";
-      }
+//BMS: removing metadata from post body?
+      //$content = $postAuthorDetails['content'] . $content;
+      $content = $content;
     }
-    if ($config['CONVERTURLS']) {
-      $content=clickableLink($content);
+  } else {
+    if ($config['WRAP_PRE']=='yes') {
+      $content = "<pre>\n" . $content . "</pre>\n";
     }
+  }
+  if ($config['CONVERTURLS']) {
+    $content=clickableLink($content);
+  }
 
 
-    $post_status=$config['POST_STATUS'];
-    $details = array(
-        'post_author'		=> $poster,
-        'comment_author'		=> $postAuthorDetails['author'],
-        'email_author'		=> $postAuthorDetails['email'],
-        'post_date'			=> $post_date,
-        'post_date_gmt'		=> $post_date_gmt,
-        'post_content'		=> addslashes($content),
-        'post_title'		=>  preg_replace("/'/","\\'",$subject),
-        'post_modified'		=> $post_date,
-        'post_modified_gmt'	=> $post_date_gmt,
-        'ping_status' => get_option('default_ping_status'),
-        'post_category' => $post_categories,
-        'tags_input' => $post_tags,
-        'comment_status' => $comment_status,
-        'post_name' => sanitize_title($subject),
-        'post_excerpt' => $post_excerpt,
-        'ID' => $id,
-        'customImages' => $customImages,
-        'post_status' => $post_status
-    );
-    DisplayEmailPost($details);
-    PostToDB($details); 
+  $post_status=$config['POST_STATUS'];
+  $details = array(
+      'post_author'  => $poster,
+      'comment_author'  => $postAuthorDetails['author'],
+      'email_author'  => $postAuthorDetails['email'],
+      'post_date'   => $post_date,
+      'post_date_gmt'  => $post_date_gmt,
+      'post_content'  => addslashes($content),
+      'post_title'  =>  preg_replace("/'/","\\'",$subject),
+      'post_modified'  => $post_date,
+      'post_modified_gmt' => $post_date_gmt,
+      'ping_status' => get_option('default_ping_status'),
+      'post_category' => $post_categories,
+      'tags_input' => $post_tags,
+      'comment_status' => $comment_status,
+      'post_name' => sanitize_title($subject),
+      'post_excerpt' => $post_excerpt,
+      'ID' => $id,
+      'customImages' => $customImages,
+      'post_status' => $post_status
+  );
+  DisplayEmailPost($details);
+  PostToDB($details); 
 }
 /** FUNCTIONS **/
 
@@ -277,47 +277,44 @@ function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
     $protocol=NULL, $offset=NULL, $test=NULL) {
   //$config = GetConfig();
   $emails = array();
-  //echo "server=$server, port=$port, email=$email";
   if (!$server || !$port || !$email) {
-      die("Missing Configuration For Mail Server\n");
+    die("Missing Configuration For Mail Server\n");
   }
   if ($server == "pop.gmail.com") {
-      print("\nMAKE SURE POP IS TURNED ON IN SETTING AT Gmail\n");
+    print("\nMAKE SURE POP IS TURNED ON IN SETTING AT Gmail\n");
   }
-switch ( strtolower($protocol) ) {
-  case 'smtp': //direct 
-    $fd = fopen("php://stdin", "r");
-    $input = "";
-    while (!feof($fd)) {
+  switch ( strtolower($protocol) ) {
+    case 'smtp': //direct 
+      $fd = fopen("php://stdin", "r");
+      $input = "";
+      while (!feof($fd)) {
         $input .= fread($fd, 1024);
-    }
-    fclose($fd);
-    $emails[0] = $input;
-    break;
-      case 'imap':
-      case 'imap-ssl':
-      case 'pop3-ssl':
-          HasIMAPSupport(false);
-          if ($test) {
-              $emails = TestIMAPMessageFetch();
-          }
-          else {
-            $emails = IMAPMessageFetch($server, $port, $email, 
-                $password, $protocol, $offset, $test); 
-          }
-          break;
-      case 'pop3':
-  default: 
-          if ($test) {
+      }
+      fclose($fd);
+      $emails[0] = $input;
+      break;
+    case 'imap':
+    case 'imap-ssl':
+    case 'pop3-ssl':
+      HasIMAPSupport(false);
+      if ($test) {
+        $emails = TestIMAPMessageFetch();
+      } else {
+        $emails = IMAPMessageFetch($server, $port, $email, 
+            $password, $protocol, $offset, $test); 
+      }
+      break;
+    case 'pop3':
+    default: 
+      if ($test) {
         $emails = TestPOP3MessageFetch();
-          }
-          else {
-        $emails = POP3MessageFetch();
-          }
+      } else {
+        $emails =POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL, 
+            $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL);
+      }
   }
-  if (!$emails) {
-  die("\nThere does not seem to be any new mail.\n");
-  }
+  if (!$emails)
+    die("\nThere does not seem to be any new mail.\n");
   return($emails);
 }
 /**
@@ -2249,7 +2246,7 @@ function GetConfig() {
     $config["FILESDIR"] .= DIRECTORY_SEPARATOR;
   }
   //These should only be modified if you are testing
-  $config["DELETE_MAIL_AFTER_PROCESSING"] = false;
+  $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
   $config["POST_TO_DB"] = true;
   $config["TEST_EMAIL"] = false;
   $config["TEST_EMAIL_ACCOUNT"] = "blogtest";
@@ -2262,8 +2259,7 @@ function GetConfig() {
          ||!file_exists($config["IMAGEMAGICK_CONVERT"])) {
        $config["RESIZE_LARGE_IMAGES"] = false;
      }
-  }
-  else {
+  } else {
     if (!HasGDInstalled(false)) {
       $config["RESIZE_LARGE_IMAGES"] = false;
     }
@@ -2298,28 +2294,28 @@ function GetListOfArrayConfig() {
   * @return boolean
   */
 function HasIMAPSupport($display = true) {
-    $function_list = array("imap_open",
-                           "imap_delete",
-                           "imap_expunge",
-                           "imap_body",
-                           "imap_fetchheader");
-    return(HasFunctions($function_list,$display));
+  $function_list = array("imap_open",
+                         "imap_delete",
+                         "imap_expunge",
+                         "imap_body",
+                         "imap_fetchheader");
+  return(HasFunctions($function_list,$display));
 }
 function HasIconvInstalled($display = true) {
-    $function_list = array("iconv");
-    return(HasFunctions($function_list,$display));
+  $function_list = array("iconv");
+  return(HasFunctions($function_list,$display));
 }
 function HasGDInstalled($display = true) {
-    $function_list = array("getimagesize",
-                           "imagecreatefromjpeg",
-                           "imagecreatefromgif",
-                           "imagecreatefrompng",
-                           "imagecreatetruecolor",
-                           "imagecreatetruecolor",
-                           "imagecopyresampled",
-                           "imagejpeg",
-                           "imagedestroy");
-    return(HasFunctions($function_list,$display));
+  $function_list = array("getimagesize",
+                         "imagecreatefromjpeg",
+                         "imagecreatefromgif",
+                         "imagecreatefrompng",
+                         "imagecreatetruecolor",
+                         "imagecreatetruecolor",
+                         "imagecopyresampled",
+                         "imagejpeg",
+                         "imagedestroy");
+  return(HasFunctions($function_list,$display));
 }
 /**
   * Handles verifing that a list of functions exists
@@ -2327,34 +2323,33 @@ function HasGDInstalled($display = true) {
   * @param array
   */
 function HasFunctions($function_list,$display = true) {
-    foreach ($function_list as $function) {
-        if (!function_exists($function)) {
-            if ($display) {
-                print("<p>Missing $function");
-            }
-            return(false);
-        }
+  foreach ($function_list as $function) {
+    if (!function_exists($function)) {
+      if ($display) {
+        print("<p>Missing $function");
+      }
+      return(false);
     }
-    return(true);
-
+  }
+  return(true);
 }
 /**
   * This filter makes it easy to change the html from showing the thumbnail to the actual picture
   */
 function filter_postie_thumbnail_with_full($content) {
-     $content = str_replace("thumb.","",$content);
-     return($content);
+   $content = str_replace("thumb.","",$content);
+   return($content);
 }
 /**
   * This function tests to see if postie is its own directory
   */
 function TestPostieDirectory() {
-        $dir_parts = explode(DIRECTORY_SEPARATOR,dirname(__FILE__)); 
-        $last_dir = array_pop($dir_parts);
-        if ($last_dir != "postie") {
-            return false;
-        }
-        return true;
+  $dir_parts = explode(DIRECTORY_SEPARATOR,dirname(__FILE__)); 
+  $last_dir = array_pop($dir_parts);
+  if ($last_dir != "postie") {
+    return false;
+  }
+  return true;
 }
 /**
   *This function looks for markdown which causes problems with postie
