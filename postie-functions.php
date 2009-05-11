@@ -2,6 +2,9 @@
 /*TODO 
  * check if image height is being consulted 
  * html purify
+ * windows 1252 encoding
+ * different custom field names
+ * upload real attachments
  */
 #global $config,$debug;
 #$debug=true;
@@ -158,92 +161,93 @@ function clickableLink($text) {
   $ret = substr($ret, 1);
   return $ret;
 } 
+
 function getPostAuthorDetails(&$subject,&$content,&$mimeDecodedEmail) {
-    /* we check whether or not the e-mail is a forwards or a redirect. If it is
-    * a fwd, then we glean the author details from the body of the post.
-    * Otherwise we get them from the headers    
-    */
-    
-    global $wpdb;
-    // see if subject starts with Fwd:
-    if (preg_match("/(^Fwd:) (.*)/", $subject, $matches)) {
-        $subject=trim($matches[2]);
-      if (preg_match("/\nfrom:(.*?)\n/i",$content,$matches)) {
-        $theAuthor=GetNameFromEmail($matches[1]);
-        $mimeDecodedEmail->headers['from']=$theAuthor;
-      }
-      if (preg_match("/\ndate:(.*?)\n/i",$content,$matches)) {
-        $theDate=$matches[1];
-        $mimeDecodedEmail->headers['date']=$theDate;
+  /* we check whether or not the e-mail is a forwards or a redirect. If it is
+  * a fwd, then we glean the author details from the body of the post.
+  * Otherwise we get them from the headers    
+  */
+  global $wpdb;
+  // see if subject starts with Fwd:
+  if (preg_match("/(^Fwd:) (.*)/", $subject, $matches)) {
+      $subject=trim($matches[2]);
+    if (preg_match("/\nfrom:(.*?)\n/i",$content,$matches)) {
+      $theAuthor=GetNameFromEmail($matches[1]);
+      $mimeDecodedEmail->headers['from']=$theAuthor;
+    }
+    if (preg_match("/\ndate:(.*?)\n/i",$content,$matches)) {
+      $theDate=$matches[1];
+      $mimeDecodedEmail->headers['date']=$theDate;
+    }
+  } else {
+    $theDate=$mimeDecodedEmail->headers['date'];
+    $theAuthor=GetNameFromEmail($mimeDecodedEmail->headers['from']);
+    $theEmail = RemoveExtraCharactersInEmailAddress(trim(
+        $mimeDecodedEmail->headers["from"]));
+  }
+  // now get rid of forwarding info in the content
+  $lines=preg_split("/\r\n/",$content);
+  $newContents='';
+  foreach ($lines as $line) {
+    if (preg_match("/^(from|subject|to|date):.*?/i",$line,$matches)==0 && 
+    //    preg_match("/^$/i",$line,$matches)==0 &&
+        preg_match("/^-+\s*forwarded\s*message\s*-+/i",$line,$matches)==0) {
+      $newContents.=preg_replace("/\r/","",$line) . "\n" ;
+    }
+  }
+  $content=$newContents;
+  $theDetails=array(
+  'content' =>"<div class='postmetadata alt'>On $theDate, $theAuthor" . 
+               " posted:</div>",
+  'emaildate' => $theDate,
+  'author' => $theAuthor,
+  'email' => $theEmail
+  );
+  return($theDetails);
+}
+
+function checkReply(&$subject) {
+  /* we check whether or not the e-mail is a reply to a previously
+   * published post. First we check whether it starts with Re:, and then
+   * we see if the remainder matches an already existing post. If so,
+   * then we add that post id to the details array, which will cause the
+   * existing post to be overwritten, instead of a new one being
+   * generated
+  */
+  
+  global $wpdb;
+  // see if subject starts with Re:
+  if (preg_match("/(^Re:) (.*)/", $subject, $matches)) {
+    $subject=trim($matches[2]);
+    // strip out category info into temporary variable
+    $tmpSubject=$subject;
+    if ( preg_match('/(.+): (.*)/', $tmpSubject, $matches))  {
+      $tmpSubject = trim($matches[2]);
+      $matches[1] = array($matches[1]);
+    }
+    else if (preg_match_all('/\[(.[^\[]*)\]/', $tmpSubject, $matches)) {
+      preg_match("/](.[^\[]*)$/",$tmpSubject,$tmpSubject_matches);
+      $tmpSubject = trim($tmpSubject_matches[1]);
+    }
+    else if ( preg_match_all('/-(.[^-]*)-/', $tmpSubject, $matches) ) {
+      preg_match("/-(.[^-]*)$/",$tmpSubject,$tmpSubject_matches);
+      $tmpSubject = trim($tmpSubject_matches[1]);
+    }
+    $checkExistingPostQuery= "SELECT ID FROM $wpdb->posts WHERE 
+        '$tmpSubject' = post_title";
+    if ($id=$wpdb->get_var($checkExistingPostQuery)) {
+      if (is_array($id)) {
+        $id=$id[count($id)-1];
       }
     } else {
-      $theDate=$mimeDecodedEmail->headers['date'];
-      $theAuthor=GetNameFromEmail($mimeDecodedEmail->headers['from']);
-      $theEmail = RemoveExtraCharactersInEmailAddress(trim(
-          $mimeDecodedEmail->headers["from"]));
+      $id=NULL;
     }
-    // now get rid of forwarding info in the content
-    $lines=preg_split("/\r\n/",$content);
-    $newContents='';
-    foreach ($lines as $line) {
-      if (preg_match("/^(from|subject|to|date):.*?/i",$line,$matches)==0 && 
-      //    preg_match("/^$/i",$line,$matches)==0 &&
-          preg_match("/^-+\s*forwarded\s*message\s*-+/i",$line,$matches)==0) {
-        $newContents.=preg_replace("/\r/","",$line) . "\n" ;
-      }
-    }
-    $content=$newContents;
-    $theDetails=array(
-    'content' =>"<div class='postmetadata alt'>On $theDate, $theAuthor" . 
-                 " posted:</div>",
-    'emaildate' => $theDate,
-    'author' => $theAuthor,
-    'email' => $theEmail
-    );
-    return($theDetails);
-}
-function checkReply(&$subject) {
-    /* we check whether or not the e-mail is a reply to a previously
-     * published post. First we check whether it starts with Re:, and then
-     * we see if the remainder matches an already existing post. If so,
-     * then we add that post id to the details array, which will cause the
-     * existing post to be overwritten, instead of a new one being
-     * generated
-    */
-    
-    global $wpdb;
-    // see if subject starts with Re:
-    if (preg_match("/(^Re:) (.*)/", $subject, $matches)) {
-        $subject=trim($matches[2]);
-        // strip out category info into temporary variable
-        $tmpSubject=$subject;
-        if ( preg_match('/(.+): (.*)/', $tmpSubject, $matches))  {
-            $tmpSubject = trim($matches[2]);
-            $matches[1] = array($matches[1]);
-        }
-        else if (preg_match_all('/\[(.[^\[]*)\]/', $tmpSubject, $matches)) {
-            preg_match("/](.[^\[]*)$/",$tmpSubject,$tmpSubject_matches);
-            $tmpSubject = trim($tmpSubject_matches[1]);
-        }
-        else if ( preg_match_all('/-(.[^-]*)-/', $tmpSubject, $matches) ) {
-            preg_match("/-(.[^-]*)$/",$tmpSubject,$tmpSubject_matches);
-            $tmpSubject = trim($tmpSubject_matches[1]);
-        }
-        $checkExistingPostQuery= "SELECT ID FROM $wpdb->posts WHERE 
-            '$tmpSubject' = post_title";
-        if ($id=$wpdb->get_var($checkExistingPostQuery)) {
-            if (is_array($id)) {
-                $id=$id[count($id)-1];
-            }
-        } else {
-            $id=NULL;
-        }
-    }
-    return($id);
+  }
+  return($id);
 }
 
 function postie_read_me() {
-    include(POSTIE_ROOT . DIRECTORY_SEPARATOR. "postie_read_me.php");
+  include(POSTIE_ROOT . DIRECTORY_SEPARATOR. "postie_read_me.php");
 }
 /**
 *  This sets up the configuration menu
@@ -260,13 +264,13 @@ function PostieMenu() {
   * This handles actually showing the form
   */
 function ConfigurePostie() {
-    PostieAdminPermissions();
-    if (current_user_can('config_postie')) {
-        include(POSTIE_ROOT . DIRECTORY_SEPARATOR. "config_form.php");
-    }
-    else {
-        postie_read_me();
-    }
+  //PostieAdminPermissions();
+  //if (current_user_can('config_postie')) {
+      include(POSTIE_ROOT . DIRECTORY_SEPARATOR. "config_form.php");
+  //}
+  //else {
+      //postie_read_me();
+  //}
 }
 
 /**
@@ -617,21 +621,27 @@ function GetContent ($part,&$attachments) {
         $onclick='';
         if ($config['IMAGE_NEW_WINDOW']) {
           $onclick='" onclick="window.open(' . "'"
-                    . $config["URLPHOTOSDIR"] . $fullImage . "','"
-                      . "full_size_image" . "','"
-                      . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;";
+              . $config["URLPHOTOSDIR"] . $fullImage . "','"
+                . "full_size_image" . "','"
+                . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;";
           }
           if ($thumbImage) {
             if ($config['USEIMAGETEMPLATE']) {
-              $attachments["html"][]
-                  .=parseImageTemplate($thumbImage,$fullImage,$caption);
+              $attachments["html"][] .=
+                  parseImageTemplate($thumbImage,$fullImage,$caption);
             } else {
-            $attachments["html"][] .= $mimeTag.'<div class="' . $config["IMAGEDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fullImage . 
-                $onclick . '"><img src="' . $config["URLPHOTOSDIR"] . $thumbImage . '" alt="'
-                . $part->ctype_parameters['name'] . '" title="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
+              $attachments["html"][] .= $mimeTag.'<div class="' . 
+                  $config["IMAGEDIV"].'"><a href="' . 
+                  $config["URLPHOTOSDIR"] . $fullImage . 
+                  $onclick . '"><img src="' . $config["URLPHOTOSDIR"] . 
+                  $thumbImage . '" alt="' . $part->ctype_parameters['name'] .
+                  '" title="' . $part->ctype_parameters['name'] . 
+                  '" style="'.$config["IMAGESTYLE"].'" class="'.
+                  $config["IMAGECLASS"].'" /></a></div>' . "\n";
             }
             if ($cid) {
-                $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . $fullImage,count($attachments["html"]) - 1);
+              $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . 
+                  $fullImage,count($attachments["html"]) - 1);
             }
           } else {
             if ($config['USEIMAGETEMPLATE']) {
@@ -1074,6 +1084,9 @@ function ConvertToUTF_8($encoding,$charset,&$body) {
             break;
         case "iso-2022-jp":
             $body = iconv("ISO-2022-JP//TRANSLIT","UTF-8",$body);
+            break;
+        case "Windows-1252":
+            $body = iconv("Windows-1252//TRANSLIT","UTF-8",$body);
             break;
     }
 }

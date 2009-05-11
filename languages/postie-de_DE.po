@@ -44,7 +44,7 @@ msgstr "If you have problems with Postie this will run a special script to test 
 
 #: config_form.php:41
 msgid "Test Config"
-msgstr "Test Config"
+msgstr "Einstellungen testen"
 
 msgid "Yes"
 msgstr "Ja"
@@ -58,7 +58,7 @@ msgstr "Authorization Settings"
 
 #: config_form.php
 msgid "Allow Anyone To Post Via Email"
-msgstr "Allow Anyone To Post Via Email"
+msgstr "Alle können per E-mail posten"
 
 #: config_form.php
 msgid "Changing this to yes is NOT RECOMMEDED - anything that gets sent in will automatically be posted. This could make it easier to compromise your server - YOU HAVE BEEN WARNED."
@@ -74,7 +74,7 @@ msgstr "This allows you to grant access to other users to post if they have the 
 
 #: config_form.php
 msgid "Authorized Addresses"
-msgstr "Authorized Addresses"
+msgstr "Bestätigte E-mailaddressen"
 
 #: config_form.php
 msgid "Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level."
@@ -82,15 +82,15 @@ msgstr "Put each email address on a single line. Posts from emails in this list 
 
 #: config_form.php
 msgid "Directory Settings"
-msgstr "Directory Settings"
+msgstr "Ordner Einstellungen"
 
 #: config_form.php
 msgid "Directory For Photos:"
-msgstr "Directory For Photos:"
+msgstr "Ordner für Bilder:"
 
 #: config_form.php
 msgid "Recommended"
-msgstr "Recommended"
+msgstr "Empfohlen"
 
 #: config_form.php
 msgid "Directory For Files:"
@@ -106,7 +106,7 @@ msgstr "Default post by mail category:"
 
 #: config_form.php
 msgid "Default Title:"
-msgstr "Default Title:"
+msgstr "Default Titel:"
 
 #: config_form.php
 msgid "Live from the field"
@@ -134,11 +134,11 @@ msgstr "Allow Subject In Mail"
 
 #: config_form.php
 msgid "Allow HTML In Mail Subject"
-msgstr "Allow HTML In Mail Subject"
+msgstr "HTML in Subjekt erlauben"
 
 #: config_form.php
 msgid "Allow HTML In Mail Body"
-msgstr "Allow HTML In Mail Body"
+msgstr "HTML in Text erlauben"
 
 #: config_form.php
 msgid "Encoding for pages and feeds:"
@@ -158,7 +158,7 @@ msgstr "Decode Quoted Printable Data"
 
 #: config_form.php
 msgid "Should be yes in most cases."
-msgstr "Should be yes in most cases."
+msgstr "Normalerweise ja."
 
 #: config_form.php
 msgid "Supported File Types"
@@ -166,7 +166,7 @@ msgstr "Supported File Types"
 
 #: config_form.php
 msgid "Put each type on a single line."
-msgstr "Put each type on a single line."
+msgstr "Eine pro Zeile."
 
 #: config_form.php
 msgid "Banned File Names"
@@ -190,7 +190,7 @@ msgstr "Put each pattern on a seperate line and make sure to escape any special 
 
 #: config_form.php
 msgid "Image Settings"
-msgstr "Image Settings"
+msgstr "Bild Einstellungen"
 
 #: config_form.php
 msgid "No GD Support"

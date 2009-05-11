@@ -39,11 +39,6 @@ $Id$
 //Older Version History is in the HISTORY file
 
 
-if (!is_admin()) {
-  //include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR. "wp-config.php");
-  //include_once (dirname(dirname(dirname(dirname(__FILE__)))) .
-  //DIRECTORY_SEPARATOR . 'wp-includes' . DIRECTORY_SEPARATOR . "pluggable.php");
-}
 if (isset($_GET["postie_read_me"])) {
     include_once(ABSPATH . "wp-admin/admin.php");
     $title = __("Edit Plugins");
@@ -56,17 +51,13 @@ if (isset($_GET["postie_read_me"])) {
 if (is_admin()) {
   require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR ."postie-functions.php");
   add_action("admin_menu","PostieMenu");
-if(function_exists('load_plugin_textdomain')){
-  //load_plugin_textdomain('postie', false, dirname( plugin_basename(__FILE__)) .
-    //'/languages');
-	  $plugin_dir = WP_PLUGIN_DIR . '/' . basename(dirname(__FILE__));
-	  //load_plugin_textdomain( 'postie', 'wp-content/plugins/' . $plugin_dir, $plugin_dir );
-function postie_load_domain() {
-	load_plugin_textdomain( 'postie', $plugin_dir."/languages/",
-  basename(dirname(__FILE__)). '/languages/');
-	//load_plugin_textdomain( 'postie', "wp-content/plugins/postie/languages/");
-}
-add_action('init', 'postie_load_domain'); 
-}
+  if(function_exists('load_plugin_textdomain')){
+    $plugin_dir = WP_PLUGIN_DIR . '/' . basename(dirname(__FILE__));
+    function postie_load_domain() {
+      load_plugin_textdomain( 'postie', $plugin_dir."/languages/",
+      basename(dirname(__FILE__)). '/languages/');
+    }
+    add_action('init', 'postie_load_domain'); 
+  }
 }
 ?>
