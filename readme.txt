@@ -209,6 +209,8 @@ Make sure you set the preferred text type to html
 == History ==
 * 1.2.2 (2009.05.xx)
   * Show empty categories for default category in options
+  * Image scaling fixed so that the smaller value of max image width and max
+    image height is used
 
 * 1.2.1 (2009.05.07)
   * Got rid of stupid version checking

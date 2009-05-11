@@ -1365,6 +1365,7 @@ function CustomImageRotate($src_img, $angle, $bicubic=false) {
   
   return($rotate);
 }
+/*
 function DetermineScale($width,$height, $max_width, $max_height) {
     if (!empty($max_width)) {
             return($max_width/$width);
@@ -1373,6 +1374,16 @@ function DetermineScale($width,$height, $max_width, $max_height) {
             return($max_height/$height);
     }
     return(1);
+}
+*/
+function DetermineScale($width,$height, $max_width=0, $max_height=0) {
+  if ($max_width!=0 || $max_height!=0) {
+    $width_scale=($max_width/$width);
+    $height_scale=($max_height/$height);
+    $scale = $width_scale < $height_scale? $width_scale : $height_scale;
+    return($scale);
+  }
+  return(1);
 }
 
 function ResizeImageWithImageMagick($file,$type) {
