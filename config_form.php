@@ -230,7 +230,7 @@ fieldset {border: 1px solid black;}
                 <td>
                 <?php
                 $defaultCat=$config['DEFAULT_POST_CATEGORY'];
-                wp_dropdown_categories("name=DEFAULT_POST_CATEGORY&hierarchical=1&selected=$defaultCat"); ?>
+                wp_dropdown_categories("name=DEFAULT_POST_CATEGORY&hierarchical=1&selected=$defaultCat&hide_empty=0"); ?>
                 <!--
                 <td><select name="DEFAULT_POST_CATEGORY" id="DEFAULT_POST_CATEGORY">
                         <?php

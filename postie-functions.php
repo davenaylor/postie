@@ -316,7 +316,7 @@ switch ( strtolower($protocol) ) {
           }
   }
   if (!$emails) {
-  print("\nThere does not seem to be any new mail.<br />\n");
+  die("\nThere does not seem to be any new mail.\n");
   }
   return($emails);
 }
@@ -2249,7 +2249,7 @@ function GetConfig() {
     $config["FILESDIR"] .= DIRECTORY_SEPARATOR;
   }
   //These should only be modified if you are testing
-  $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
+  $config["DELETE_MAIL_AFTER_PROCESSING"] = false;
   $config["POST_TO_DB"] = true;
   $config["TEST_EMAIL"] = false;
   $config["TEST_EMAIL_ACCOUNT"] = "blogtest";
