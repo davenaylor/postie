@@ -313,8 +313,8 @@ function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
       if ($test) {
         $emails = TestPOP3MessageFetch();
       } else {
-        $emails =POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL, 
-            $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL);
+        $emails =POP3MessageFetch ($server, $port, $email, 
+            $password, $protocol, $offset, $test);
       }
   }
   if (!$emails)
