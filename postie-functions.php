@@ -1,12 +1,11 @@
 <?php
 /*
-$Id:
+$Id:$
 */
 /*TODO 
  * check if image height is being consulted 
  * html purify
  * windows 1252 encoding
- * different custom field names
  */
 #global $config,$debug;
 #$debug=true;
@@ -495,7 +494,13 @@ function PostToDB($details) {
       $post_ID = wp_insert_comment($comment);
     }
     if ($config["CUSTOM_IMAGE_FIELD"]) {
-      foreach ($details['customImages'] as $image) {
+      if (count($details['customImages'])>1) {
+      $imageField=1;
+        foreach ($details['customImages'] as $image) {
+          add_post_meta($post_ID, 'image'. $imageField, $image); 
+          $imageField++;
+        }
+      } else {
         add_post_meta($post_ID, 'image', $image); 
       }
     }

@@ -214,6 +214,7 @@ Make sure you set the preferred text type to html
   * Fixed some issues with parsing html e-mail
   * Got rid of stupid mime tag (thanks Jeroen)
   * No longer adding slashes before calling wp_insert_post
+  * When using custom image field, each image has a unique key
 
 * 1.2.1 (2009.05.07)
   * Got rid of stupid version checking
