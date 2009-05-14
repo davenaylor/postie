@@ -1,4 +1,7 @@
 <?php
+/*
+$Id:
+*/
 /*TODO 
  * check if image height is being consulted 
  * html purify
