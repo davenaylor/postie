@@ -7,7 +7,6 @@ $Id:
  * html purify
  * windows 1252 encoding
  * different custom field names
- * upload real attachments
  */
 #global $config,$debug;
 #$debug=true;
