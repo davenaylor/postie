@@ -211,6 +211,9 @@ Make sure you set the preferred text type to html
   * Show empty categories for default category in options
   * Image scaling fixed so that the smaller value of max image width and max
     image height is used
+  * Fixed some issues with parsing html e-mail
+  * Got rid of stupid mime tag (thanks Jeroen)
+  * No longer adding slashes before calling wp_insert_post
 
 * 1.2.1 (2009.05.07)
   * Got rid of stupid version checking

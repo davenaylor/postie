@@ -109,8 +109,8 @@ function PostEmail($poster,$mimeDecodedEmail) {
       'email_author'  => $postAuthorDetails['email'],
       'post_date'   => $post_date,
       'post_date_gmt'  => $post_date_gmt,
-      'post_content'  => addslashes($content),
-      'post_title'  =>  preg_replace("/'/","\\'",$subject),
+      'post_content'  => $content,
+      'post_title'  =>  $subject,
       'post_modified'  => $post_date,
       'post_modified_gmt' => $post_date_gmt,
       'ping_status' => get_option('default_ping_status'),
@@ -605,8 +605,6 @@ function GetContent ($part,&$attachments) {
         if ($config["USE_IMAGEMAGICK"] && $config["AUTO_SMART_SHARP"]) {
                     ImageMagickSharpen($file);
         }
-        $mimeTag = '<!--Mime Type of File is
-        '.$part->ctype_primary."/".$part->ctype_secondary.' --></p>';
         $thumbImage = NULL;
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
         if ($config["RESIZE_LARGE_IMAGES"]) {
@@ -630,7 +628,7 @@ function GetContent ($part,&$attachments) {
               $attachments["html"][] .=
                   parseImageTemplate($thumbImage,$fullImage,$caption);
             } else {
-              $attachments["html"][] .= $mimeTag.'<div class="' . 
+              $attachments["html"][] .= '<div class="' . 
                   $config["IMAGEDIV"].'"><a href="' . 
                   $config["URLPHOTOSDIR"] . $fullImage . 
                   $onclick . '"><img src="' . $config["URLPHOTOSDIR"] . 
@@ -648,7 +646,7 @@ function GetContent ($part,&$attachments) {
               $attachments["html"][]
               .=parseImageTemplate('',$fileName,$caption);
             } else {
-              $attachments["html"][] .= $mimeTag .'<div class="' . $config["IMAGEDIV"].'"><img src="' . $config["URLPHOTOSDIR"] . $fileName 
+              $attachments["html"][] .= '<div class="' . $config["IMAGEDIV"].'"><img src="' . $config["URLPHOTOSDIR"] . $fileName 
                                      . '" alt="' . $part->ctype_parameters['name'] . '" style="' 
                                      . $config["IMAGESTYLE"] . '" class="' . $config["IMAGECLASS"] . '"  /></div>' . "\n";
               if ($cid) {
@@ -831,13 +829,14 @@ $search = array(
   '/<\/html>/',
   '/<title>/',
   '/<\/title>/',
-  '/<body.*>/',
+  '/<body[^<]*>/',
   '/<\/body>/',
   '/<head>/',
   '/<\/head>/',
-  '/<meta content=.*>/',
-  '/<!DOCTYPE.*>/',
-  '/<img src=".*>/'
+  '/<meta[^<]*>/',
+  '/<style[^<]*>[^<]*<\/style>/',
+  '/<!DOCTYPE[^<]*>/',
+  '/<img src=[\'"][^<]*>/'
 //		'/<img src="cid:(.*)" .*>/'
 );
 
@@ -859,8 +858,6 @@ $replace = array (
   $content = preg_replace($search,$replace,trim($content));
   return ($content);
 }
-
-
 
 /**
 * Determines if the sender is a valid user.
