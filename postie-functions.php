@@ -1,6 +1,6 @@
 <?php
 /*
-$Id:$
+$Id$
 */
 /*TODO 
  * check if image height is being consulted 
@@ -1384,7 +1384,13 @@ function DetermineScale($width,$height, $max_width=0, $max_height=0) {
   if ($max_width!=0 || $max_height!=0) {
     $width_scale=($max_width/$width);
     $height_scale=($max_height/$height);
-    $scale = $width_scale < $height_scale? $width_scale : $height_scale;
+    if ($max_width==0) {
+      $scale=$height_scale;
+    } else if ($max_height==0) {
+      $scale=$width_scale;
+    } else {
+      $scale = $width_scale < $height_scale? $width_scale : $height_scale;
+    }
     return($scale);
   }
   return(1);
@@ -2274,7 +2280,7 @@ function GetConfig() {
     $config["FILESDIR"] .= DIRECTORY_SEPARATOR;
   }
   //These should only be modified if you are testing
-  $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
+  $config["DELETE_MAIL_AFTER_PROCESSING"] = false;
   $config["POST_TO_DB"] = true;
   $config["TEST_EMAIL"] = false;
   $config["TEST_EMAIL_ACCOUNT"] = "blogtest";
