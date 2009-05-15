@@ -29,10 +29,7 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
   * Producing better quality thumbnails (thanks to robcarey)
 
 == Installation ==
-* Make sure all postie code is its own directory inside of wp-content/plugins/postie
-* Make two directories in your main wordpress directory wp-filez and wp-photos
-* Make sure these directories are writable by your web server (chmod 777 or chown to the webserver -- the permissions should be the same as wp-content/uploads)
-* make sure that the postie directory  that this file is in is moved to yourwebsite/wp-content/plugins
+* Put the postie.zip file in wp-content/plugins/ and unzip it
 * Login to WordPress as an administrator
 * Goto the Plugins tab in the WordPress Admin Site
 * Activate "Postie"
@@ -206,11 +203,72 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 
 Make sure you set the preferred text type to html
 
+= Do I need to any code to my theme for postie to work? =
+
+No. 
+
+= I read somewhere to add an iframe to my footer. Should I do this? =
+
+No. Do not add an iframe in your footer to get postie to check mail
+periodically. To check e-mail periodically, either set-up a cron job, or use
+cronless postie. See installation instructions
+
+= My mail host requires SSL, but postie will not allow me to select pop3-ssl
+or imap-ssl =
+
+You must have php-imap installed on your server for this to work. Ask your
+hosting provider about this.
+
+= Can I use postie to check a gmail account? =
+
+Yes. You can use either pop3-ssl or imap-ssl with a gmail account. Before
+attempting to use with postie, make sure that you enable pop or imap in your
+gmail preferences.
+
+* Pop3 settings:
+    * protocol - pop3-ssl
+    * server - pop.gmail.com
+    * port - 995
+    * userid - your username (e.g. if your e-mail address is foo@gmail.com,
+      this would be just foo)
+    * password - your password 
+* IMAP settings:
+    * protocol - imap-ssl
+    * server - imap.gmail.com
+    * port - 993
+    * userid - your username (e.g. if your e-mail address is foo@gmail.com,
+      this would be just foo)
+    * password - your password 
+
+= My posts show up as being posted by 'admin' instead of me. Why? =
+
+If your admin account is linked to bar@gmail.com, and you send mail from
+bar@gmail.com, it will show up as being posted by admin. If you have a
+wordpress user named "John Doe", which is linked to johndoe@gmail.com, make
+sure that you send e-mails from johndoe@gmail.com. It doesn't matter which
+e-mail address postie is checking. That is, if you send mail from
+johndoe@gmail.com to foo@gmail.com, it gets posted as "John Doe". 
+
+If you send an e-mail to your postie address from an e-mail address that is no
+t linked to a wordpress user, it will get posted as admin.
 == History ==
+* 1.3 (2009.06.xx)
+  * Now using default wordpress image and upload handling, which means:
+      * No more creating special directories for postie
+      * No more confusion about imagemagick
+      * Can now use the [gallery] feature of wordpress
+      * Attachments are now connected to posts in the database
+      * All image resizing uses wordpress's default settings (under media)
+
 * 1.2.2 (2009.05.xx)
   * Show empty categories for default category in options
   * Image scaling fixed so that the smaller value of max image width and max
     image height is used
+  * Fixed some issues with parsing html e-mail
+  * Got rid of stupid mime tag (thanks Jeroen)
+  * No longer adding slashes before calling wp_insert_post
+  * When using custom image field, each image has a unique key
+
 
 * 1.2.1 (2009.05.07)
   * Got rid of stupid version checking

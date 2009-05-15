@@ -196,30 +196,6 @@ fieldset {border: 1px solid black;}
     </tr> 
 
 
-    <tr><td colspan=2> 
-        <fieldset class="options"> 
-        <legend><?php _e('Directory Settings', 'postie');?></legend> 
-            <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Directory For Photos:', 'postie') ?> </th> 
-                <td>
-                <input name="PHOTOSDIR" type="text" id="PHOTOSDIR" value="<?php echo $config["PHOTOSDIR"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>/wp-photos/</code>
-                <br />
-                </td> 
-            </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Directory For Files:', 'postie') ?> </th> 
-                <td>
-                <input name="FILESDIR" type="text" id="FILESDIR" value="<?php echo $config["FILESDIR"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>/wp-filez/</code>
-                <br />
-                </td> 
-            </tr> 
-            </table> 
-        </fieldset> 
-    </td> 
-    </tr> 
 
     <tr><td colspan=2> 
         <fieldset class="options"> 
@@ -348,48 +324,9 @@ fieldset {border: 1px solid black;}
         <fieldset class="options"> 
         <legend><?php _e('Image Settings', 'postie');?></legend> 
             <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
-            <?php if (!HasGDInstalled()):?>
-                <tr>
-                    <th scope="row">No GD Support </th>
-                    <td>Currently your installation of PHP does not have GD installed so no image resizing can occur.
-                    <input type="hidden" name="RESIZE_LARGE_IMAGES" value="0">
-                    <input type="hidden" name="JPEGQUALITY"" value="80">
-                    </td>
-                </tr>
-            <?php else:?>
-                <?php echo BuildBooleanSelect("Post Images At End","IMAGES_APPEND",$config["IMAGES_APPEND"],"No means they will be put before the text of the message.");?>
-                <?php echo BuildBooleanSelect("Resize Large Images","RESIZE_LARGE_IMAGES",$config["RESIZE_LARGE_IMAGES"]);?>
-                <tr>
-                    <th scope="row"><?php _e('Maximum Image Width:', 'postie') ?> </th>
-                    <td><input name="MAX_IMAGE_WIDTH" type="text" id="MAX_IMAGE_WIDTH" value="<?php echo $config['MAX_IMAGE_WIDTH']; ?>" size="4" /> 
-                    <?php _e('pixels', 'postie') ?>
-                    <br /><?php _e("Recommended", 'postie');?>: <code>400</code><br />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('Maximum Image Height:', 'postie') ?> </th>
-                    <td><input name="MAX_IMAGE_HEIGHT" type="text" id="MAX_IMAGE_HEIGHT" value="<?php echo $config['MAX_IMAGE_HEIGHT']; ?>" size="4" /> 
-                    <?php _e('pixels', 'postie') ?>
-                    <br /><?php _e("Recommended", 'postie');?>: <code>Leave Blank</code><br />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('JPEG Compression:', 'postie') ?> </th>
-                    <td><input name="JPEGQUALITY" type="text" id="JPEGQUALITY" value="<?php echo $config['JPEGQUALITY']; ?>" size="3" />
-                    <?php _e('%', 'postie') ?>
-                    <br /><?php _e("Recommended", 'postie');?>: <code>80</code>%
-                    </td>
-                </tr>
-            <?php endif;?>
-            <?php echo BuildBooleanSelect("Use ImageMagick","USE_IMAGEMAGICK",$config["USE_IMAGEMAGICK"]);?>
-                <tr>
-                    <th scope="row"><?php _e('convert binary location:', 'postie') ?> </th>
-                    <td><input name="IMAGEMAGICK_CONVERT" type="text" id="IMAGEMAGICK_CONVERT" value="<?php echo $config['IMAGEMAGICK_CONVERT']; ?>" size="30" />
-                    <br /><?php _e("Recommended", 'postie');?>: <code>only needed if you are using ImageMagick <br /> should be /usr/bin/convert</code>
-                    </td>
-                </tr>
-            <?php echo BuildBooleanSelect("Automatic SmartSharp Mask","AUTO_SMART_SHARP",$config["AUTO_SMART_SHARP"],"This automatically smart sharpens the images that are posted. This feature is <b>EXPERIMENTAL</b>. It alsot takes a lot of processing power");?>
-
+            <?php echo BuildBooleanSelect("Post Images At
+            End","IMAGES_APPEND",$config["IMAGES_APPEND"],"No means they will
+            be put before the text of the message.");?>     
             <?php echo BuildBooleanSelect("Start Image Count At 0","START_IMAGE_COUNT_AT_ZERO",$config["START_IMAGE_COUNT_AT_ZERO"]);?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Image Place Holder Tag:', 'postie') ?> </th> 
