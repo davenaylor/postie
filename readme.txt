@@ -4,8 +4,8 @@ Donate link: http://blog.robfelty.com/plugins/postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
-Tested up to: 2.7.1
-Stable tag: 1.2.1
+Tested up to: 2.8.beta
+Stable tag: 1.2.2
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -15,18 +15,19 @@ Postie offers many advanced features for posting to your blog via e-mail,
 including the ability to assign categories by name, included pictures and
 videos, and automatically strip off signatures. It also has support for both
 imap and pop3, with the option for ssl with both.  For usage notes, see the
-[other notes](other_notes) page
+[other notes](other_notes) page. Please also see the
+[FAQ](faq) page
 
-= What's new in 1.2.1 = 
-  * Got rid of stupid version checking
-  * Improved cronless postie instructions and configuration
-  * Internationalization is working now
-  * Dutch localization (thanks to gvmelle http://gvmelle.com)
-  * Fixed caption bug when using image magick
-  * Added option to not filter new lines (when using markdown syntax)
-  * Fixed autoplay option
-  * Can now use wildcards in excluding filenames
-  * Producing better quality thumbnails (thanks to robcarey)
+
+= What's new in 1.2.2? = 
+  * Show empty categories for default category in options
+  * Image scaling fixed so that the smaller value of max image width and max
+    image height is used
+  * Fixed some issues with parsing html e-mail
+  * Got rid of stupid mime tag (thanks Jeroen)
+  * No longer adding slashes before calling wp_insert_post
+  * When using custom image field, each image has a unique key
+  * Added FAQ
 
 == Installation ==
 * Make sure all postie code is its own directory inside of wp-content/plugins/postie
@@ -206,8 +207,57 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 
 Make sure you set the preferred text type to html
 
+= Do I need to any code to my theme for postie to work? =
+
+No. 
+
+= I read somewhere to add an iframe to my footer. Should I do this? =
+
+No. Do not add an iframe in your footer to get postie to check mail
+periodically. To check e-mail periodically, either set-up a cron job, or use
+cronless postie. See installation instructions
+
+= My mail host requires SSL, but postie will not allow me to select pop3-ssl
+or imap-ssl =
+
+You must have php-imap installed on your server for this to work. Ask your
+hosting provider about this.
+
+= Can I use postie to check a gmail account? =
+
+Yes. You can use either pop3-ssl or imap-ssl with a gmail account. Before
+attempting to use with postie, make sure that you enable pop or imap in your
+gmail preferences.
+
+* Pop3 settings:
+    * protocol - pop3-ssl
+    * server - pop.gmail.com
+    * port - 995
+    * userid - your username (e.g. if your e-mail address is foo@gmail.com,
+      this would be just foo)
+    * password - your password 
+* IMAP settings:
+    * protocol - imap-ssl
+    * server - imap.gmail.com
+    * port - 993
+    * userid - your username (e.g. if your e-mail address is foo@gmail.com,
+      this would be just foo)
+    * password - your password 
+
+= My posts show up as being posted by 'admin' instead of me. Why? =
+
+If your admin account is linked to bar@gmail.com, and you send mail from
+bar@gmail.com, it will show up as being posted by admin. If you have a
+wordpress user named "John Doe", which is linked to johndoe@gmail.com, make
+sure that you send e-mails from johndoe@gmail.com. It doesn't matter which
+e-mail address postie is checking. That is, if you send mail from
+johndoe@gmail.com to foo@gmail.com, it gets posted as "John Doe". 
+
+If you send an e-mail to your postie address from an e-mail address that is no
+t linked to a wordpress user, it will get posted as admin.
+
 == History ==
-* 1.2.2 (2009.05.xx)
+* 1.2.2 (2009.05.15)
   * Show empty categories for default category in options
   * Image scaling fixed so that the smaller value of max image width and max
     image height is used
@@ -215,6 +265,7 @@ Make sure you set the preferred text type to html
   * Got rid of stupid mime tag (thanks Jeroen)
   * No longer adding slashes before calling wp_insert_post
   * When using custom image field, each image has a unique key
+  * Added FAQ
 
 * 1.2.1 (2009.05.07)
   * Got rid of stupid version checking
