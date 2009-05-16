@@ -60,4 +60,7 @@ if (is_admin()) {
     add_action('init', 'postie_load_domain'); 
   }
 }
+/* Version info
+$Id:$
+*/
 ?>
