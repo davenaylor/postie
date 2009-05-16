@@ -2071,8 +2071,8 @@ function GetConfig() {
     $config["FILESDIR"] .= DIRECTORY_SEPARATOR;
   }
   //These should only be modified if you are testing
-  $config["DELETE_MAIL_AFTER_PROCESSING"] = false;
-  $config["POST_TO_DB"] = false;
+  $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
+  $config["POST_TO_DB"] = true;
   $config["TEST_EMAIL"] = false;
   $config["TEST_EMAIL_ACCOUNT"] = "blogtest";
   $config["TEST_EMAIL_PASSWORD"] = "yourpassword";
