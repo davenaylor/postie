@@ -16,7 +16,7 @@ get_currentuserinfo();
   }
 ?>
 
-<?
+<?php
     $images = array("Test.png",
                     "Test.jpg",
                     "Test.gif");
@@ -56,11 +56,11 @@ get_currentuserinfo();
     <br/>
     <h2>GD Library Test<h2>
     <p>
-    <?= HasGDInstalled();?>
+    <?php echo HasGDInstalled();?>
     </p>
     <h2>Iconv Library Test<h2>
     <p><i>Only required if you want to support ISO-2022-JP</i>
-    <?= HasIconvInstalled();?>
+    <?php echo HasIconvInstalled();?>
     </p>
     <br/>
     <h2>Clock Tests<h2>

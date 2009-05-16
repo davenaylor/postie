@@ -51,8 +51,6 @@ if (is_admin()) {
   }
 }
 /* Version info
-$Id:$
+$Id$
 */
 ?>
-
-

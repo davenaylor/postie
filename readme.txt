@@ -257,6 +257,11 @@ If you send an e-mail to your postie address from an e-mail address that is no
 t linked to a wordpress user, it will get posted as admin.
 
 == History ==
+* 1.2.3 (2009.05.20)
+  * Fixed headers already sent bug
+  * Converted shortcode `<?` to proper `<?php` (thanks brack)
+  * Deleting mails after processing again
+
 * 1.2.2 (2009.05.15)
   * Show empty categories for default category in options
   * Image scaling fixed so that the smaller value of max image width and max
