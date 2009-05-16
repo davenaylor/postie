@@ -46,16 +46,15 @@ function PostEmail($poster,$mimeDecodedEmail) {
   FilterTextParts($mimeDecodedEmail);
   $tmpPost=array('post_title'=> 'tmptitle',
                  'post_content'=>'tmoPost');
+  /* in order to do attachments correctly, we need to associate the
+  attachments with a post. So we add the post here, then update it 
+  */
   $post_id = wp_insert_post($tmpPost);
   $content = GetContent($mimeDecodedEmail,$attachments,$post_id);
   echo "content is: $content";
   $subject = GetSubject($mimeDecodedEmail,$content);
   if ($debug) {
     echo "the subject is $subject, right after calling GetSubject\n";
-  }
-  $rotation = GetRotation($mimeDecodedEmail,$content);
-  if ($rotation != "0" && count($attachments["image_files"])) {
-    RotateImages($rotation,$attachments["image_files"]);
   }
   $customImages = SpecialMessageParsing($content,$attachments);
   $post_excerpt = GetPostExcerpt($content);
@@ -88,12 +87,10 @@ function PostEmail($poster,$mimeDecodedEmail) {
     $isReply=false;
     if ($config['ADD_META']=='yes') {
       if ($config['WRAP_PRE']=='yes') {
-        //BMS: removing metadata from post body?
-  //$content = $postAuthorDetails['content'] . "<pre>\n" . $content . "</pre>\n";
+        $content = $postAuthorDetails['content'] . "<pre>\n" . $content . "</pre>\n";
         $content = "<pre>\n" . $content . "</pre>\n";
       } else {
-  //BMS: removing metadata from post body?
-        //$content = $postAuthorDetails['content'] . $content;
+        $content = $postAuthorDetails['content'] . $content;
         $content = $content;
       }
     } else {
@@ -607,46 +604,10 @@ function GetContent ($part,&$attachments, $post_id) {
                           'size' => filesize($tmpFile),
                           'error' => ''
                           );
-        /* in order to do attachments correctly, we need to associate the
-        attachments with a post. However, we haven't added the post yet. So
-        instead, we generate a new post ID based on the 
-        $idQuery =select ID from wp_posts WHERE date(post_date) >
-        '2009-05-11' order by IDlimit 1;
-        */
         $file_id = postie_media_handle_upload($the_file, $post_id);
         unlink($tmpFile);
 
-/*
-        $file = GenerateImageFileName($config["REALPHOTOSDIR"], $part->ctype_secondary);
-        //This makes sure there is no collision
-        $ctr = 0;
-        while(file_exists($file) && $ctr < 1000) {
-          $file = GenerateImageFileName($config["REALPHOTOSDIR"], $part->ctype_secondary);
-          $ctr++;
-        }
-        if ($ctr >= 1000) {
-          die("Unable to find a name for images that does not collide\n");
-        }
-        $fileName = basename($file);
-        $fp = fopen($file, 'w');
-        fwrite($fp, $part->body);
-        fclose($fp);
-        */
-        @exec ('chmod 755 ' . $file);
-        if ($config["USE_IMAGEMAGICK"] && $config["AUTO_SMART_SHARP"]) {
-                    ImageMagickSharpen($file);
-        }
-        $mimeTag = '<!--Mime Type of File is
-        '.$part->ctype_primary."/".$part->ctype_secondary.' --></p>';
-        $thumbImage = NULL;
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
-        if ($config["RESIZE_LARGE_IMAGES"]) {
-            list($thumbImage, $fullImage, $caption) = ResizeImage($file,strtolower($part->ctype_secondary));
-        }
-        $attachments["image_files"][] = array(
-            ($thumbImage ? $config["REALPHOTOSDIR"] . $thumbImage:NULL),
-            $config["REALPHOTOSDIR"] . $fileName, $part->ctype_secondary);
-        list($marime,$caption)=DetermineImageSize($file);
         $marimex=$marime[0]+20;
         $marimey=$marime[1]+20;
         $onclick='';
@@ -656,56 +617,47 @@ function GetContent ($part,&$attachments, $post_id) {
                 . "full_size_image" . "','"
                 . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;";
           }
-          if ($thumbImage) {
             if ($config['USEIMAGETEMPLATE']) {
-              $attachments["html"][] =
-                  parseImageTemplate($thumbImage,$fullImage,$caption);
+              add_filter('get_image_send_to_editor', 'parseImageTemplate');
+              //$attachments["html"][] =
+                  //parseImageTemplate($thumbImage,$fullImage,$caption);
             } else {
               $the_post=get_post($file_id);
+              /* TODO make these options */
+              $url=wp_get_attachment_link($file_id);
+              $align='left';
+              $size='medium';
               $attachments["html"][] .= get_image_send_to_editor($file_id,
-              $the_post->post_excerpt, $the_post->post_title, 'left', '', '',
-              'medium');
-            /*
-              $attachments["html"][] = $mimeTag.'<div class="' . 
-                  $config["IMAGEDIV"].'"><a href="' . 
-                  $config["URLPHOTOSDIR"] . $fullImage . 
-                  $onclick . '"><img src="' . $config["URLPHOTOSDIR"] . 
-                  $thumbImage . '" alt="' . $part->ctype_parameters['name'] .
-                  '" title="' . $part->ctype_parameters['name'] . 
-                  '" style="'.$config["IMAGESTYLE"].'" class="'.
-                  $config["IMAGECLASS"].'" /></a></div>' . "\n";
-                  */
+                  $the_post->post_excerpt, $the_post->post_title, $align, 
+                  $url, '', $size);
             }
             if ($cid) {
               $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . 
                   $fullImage,count($attachments["html"]) - 1);
             }
-          } else {
-            if ($config['USEIMAGETEMPLATE']) {
-              $attachments["html"][]
-              .=parseImageTemplate('',$fileName,$caption);
-            } else {
-              $attachments["html"][] .= $mimeTag .'<div class="' . $config["IMAGEDIV"].'"><img src="' . $config["URLPHOTOSDIR"] . $fileName 
-                                     . '" alt="' . $part->ctype_parameters['name'] . '" style="' 
-                                     . $config["IMAGESTYLE"] . '" class="' . $config["IMAGECLASS"] . '"  /></div>' . "\n";
-              if ($cid) {
-                $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . $fileName,count($attachments["html"]) - 1);
-              }
-            }
-          }
 
           break;
       default:
-        if (in_array(strtolower($part->ctype_primary),$config["SUPPORTED_FILE_TYPES"])) {
-            //pgp signature - then forget it
-          if ( $part->ctype_secondary == 'pgp-signature' ) {break;}
-          //other attachments save to FILESDIR
-          $filename =  $part->ctype_parameters['name'];
-          $file = $config["REALFILESDIR"] . $filename;
-          $fp = fopen($file, 'w');
-          fwrite($fp, $part->body );
+        if (in_array(strtolower($part->ctype_primary),
+            $config["SUPPORTED_FILE_TYPES"])) {
+          //pgp signature - then forget it
+          if ( $part->ctype_secondary == 'pgp-signature' )
+            break;
+          $overrides = array('test_form'=>false, 'test_size'=>false,
+                             'test_type'=>false);
+          $tmpFile=tempnam('/tmp', 'postie');
+          $fp = fopen($tmpFile, 'w');
+          fwrite($fp, $part->body);
           fclose($fp);
-          @exec ('chmod 755 ' . $file);
+          $the_file = array('name' => $part->ctype_parameters['name'],
+                            'type' => $part->ctype_secondary,
+                            'tmp_name' => $tmpFile,
+                            'size' => filesize($tmpFile),
+                            'error' => ''
+                            );
+          $file_id = postie_media_handle_upload($the_file, $post_id);
+          unlink($tmpFile);
+          $file = wp_get_attachment_url($file_id);
           $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
 
           if ($part->ctype_secondary == "3gpp"
@@ -727,11 +679,11 @@ function GetContent ($part,&$attachments, $post_id) {
                       'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
                       'width="' . $config['VIDEO_WIDTH'] . '" '.
                       'height="' . $config['VIDEO_HEIGHT'] . '"> '.
-                      '<param name="src" VALUE="'. $config["URLFILESDIR"] . $filename .'"> '.
-                      "<param name=\"autoplay\" VALUE=\"$autoplay\"> ".
-                        '<param name="controller" VALUE="true"> '.
+                      '<param name="src" value="'. $file. '" /> '.
+                      "<param name=\"autoplay\" value=\"$autoplay\" /> ".
+                        '<param name="controller" value="true" /> '.
                        '<embed '.
-                       'src="'. $config["URLFILESDIR"] . $filename .'" '.
+                       'src="'. $file. '" '.
                        'width="' . $config['VIDEO_WIDTH'] . '" '.
                        'height="' . $config['VIDEO_HEIGHT'] . '"'.
                        "autoplay=\"$autoplay\" ".
@@ -744,10 +696,8 @@ function GetContent ($part,&$attachments, $post_id) {
                        '</object>';
             } else {
               if (file_exists($config["3GP_FFMPEG"])) {
-                $fileName = basename($file);
                 //options from http://www.getid3.org/phpBB2/viewtopic.php?p=1290&
-                $scaledFileName =  "thumb.".$fileName;
-                $scaledFile = $config["REALPHOTOSDIR"] . $scaledFileName;
+                $scaledFile = 'thumb-' . $file;
 
                 @exec (escapeshellcmd($config["3GP_FFMPEG"]) . 
                     " -i " .  escapeshellarg($file) .
@@ -1169,332 +1119,6 @@ function ConfirmTrailingDirectorySeperator($string) {
     return(false);
 }
 /**
-  * This function handles figuring out the size of the image
-  *@return array  - array(width,height)
-*/
-function DetermineImageSize($file) {
-    $config = GetConfig();
-    if ($config["USE_IMAGEMAGICK"]) {
-        list($size,$caption)=DetermineImageSizeWithImageMagick($file);
-    }
-    else {
-        list($size,$caption)=DetermineImageSizeWithGD($file);
-    }
-    return(array($size,$caption));
-}
-/**
-  * This function handles figuring out the size of the image
-  *@return array  - array(width,height)
-*/
-function DetermineImageSizeWithImageMagick($file) {
-  $config = GetConfig();
-  $size = array(0,0);
-  if (file_exists($config["IMAGEMAGICK_IDENTIFY"])) {
-    $geometry = @exec (escapeshellcmd($config["IMAGEMAGICK_IDENTIFY"]) . 
-                       " -ping " .
-                       escapeshellarg($file));
-    preg_match("/([0-9]+)x([0-9]+)/",$geometry,$matches);
-    if (isset($matches[1])) {
-      $size[0] = $matches[1];
-    }
-    if (isset($matches[2])) {
-      $size[1] = $matches[2];
-    }
-  }
-  if (file_exists($config["IMAGEMAGICK_CONVERT"])) {
-    $caption = @exec (escapeshellcmd($config["IMAGEMAGICK_CONVERT"]) . 
-                       " " .  escapeshellarg($file)) . '8BIMTEXT:- ';
-    preg_match('/Caption="(.*)"/', $caption, $matches);
-    if (isset($matches[1])) {
-      $caption = $matches[1];
-    } else {
-      $caption='';
-    }
-  }
-  return(array($size,$caption));
-}
-/**
-  * This function handles figuring out the size of the image
-  *@return array  - array(width,height)
-*/
-function DetermineImageSizeWithGD($file) {
-  $size = getimagesize($file, $info);
-  if(isset($info['APP13'])) {
-    $iptc = iptcparse($info['APP13']);
-    $caption= $iptc['2#120'][0];
-  }
-  return(array($size,$caption));
-}
-
-function ResizeImage($file,$type) {
-    $config = GetConfig();
-    list($sizeInfo,$caption) = DetermineImageSize($file);
-    $fileName = basename($file);
-    if (DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]) != 1) {
-        if ($config["USE_IMAGEMAGICK"]) {
-            list($scaledFileName, $fileName,$caption)=ResizeImageWithImageMagick($file,$type);
-        } else {
-            list($scaledFileName, $fileName,$caption)=ResizeImageWithGD($file,$type);
-        }
-    }
-    return(array($scaledFileName,$fileName, $caption));
-
-}
-function RotateImages($rotation,$imageList) {
-    $config = GetConfig();
-    foreach ($imageList as $data) {
-        if ($config["USE_IMAGEMAGICK"]) {
-            if ($data[0]) {
-                RotateImageWithImageMagick($data[0],$data[2],$rotation);
-            }
-            RotateImageWithImageMagick($data[1],$data[2],$rotation);
-        }
-        else {
-            if ($data[0]) {
-                RotateImageWithGD($data[0],$data[2],$rotation);
-            }
-            RotateImageWithGD($data[1],$data[2],$rotation);
-        }
-    }
-}
-function ImageMagickSharpen($source,$dest = null) {
-    $config = GetConfig();
-    if (!$dest) {
-        $dest = $source;
-    }
-    @exec (escapeshellcmd($config["IMAGEMAGICK_CONVERT"]) .  " ".
-             escapeshellarg($source) . " ".
-                '\( +clone -modulate 100,0 \) \( +clone -unsharp 0x1+200+0 \) \( -clone 0 -edge 3 -colorspace GRAY -colors 256 -level 20%,95% -gaussian 10 -level 10%,95% \) -colorspace RGB -fx "u[0]+(((u[2]+1)/(u[1]+1))-1)*u[0]*u[3]" ' .
-                escapeshellarg($dest) );
-    @exec ('chmod 755 ' . escapeshellarg($dest));
-
-}
-function RotateImageWithImageMagick($file,$type,$rotation) {
-    $config = GetConfig();
-    @exec (escapeshellcmd($config["IMAGEMAGICK_CONVERT"]) . 
-                " -rotate " .
-                escapeshellarg($rotation) .
-                " " .
-                escapeshellarg($file) .
-                " " .
-                escapeshellarg($file) );
-    @exec ('chmod 755 ' . escapeshellarg($file));
-}
-function RotateImageWithGD($file,$type,$rotation) {
-    $config = GetConfig();
-    $fileName = basename($file);
-        $sourceImage = NULL;
-        
-        switch($type) {
-            case "jpeg":
-            case "jpg":
-            case "pjpeg":
-                $typePrefix = "jpeg";
-                break;
-            case "gif":
-                $typePrefix = "gif";
-                break;
-            case "png":
-                $typePrefix = "png";
-                break;
-            default:
-                $typePrefix = NULL;
-                break;
-        }
-        if ($typePrefix) {
-            eval ('$sourceImage = imagecreatefrom'.$typePrefix.'($file);');
-            if (function_exists("imagerotate")) {
-                $rotatedImage = imagerotate($sourceImage,$rotation,0);
-            }
-            else {
-                $rotatedImage = CustomImageRotate($sourceImage,$rotation);
-            }
-            eval ('image'.$typePrefix.'($rotatedImage,$file);');
-            imagedestroy($sourceImage);
-            @exec ('chmod 755 ' . escapeshellarg($file));
-        }
-}
-/**
-  * This function handles rotating in GD when you do not have imagerotate available 
-  * Writen byu wulff at fyens dot dk
-  * From http://us2.php.net/manual/en/function.imagerotate.php#50487
-  */
-// $src_img - a GD image resource
-// $angle - degrees to rotate clockwise, in degrees
-// returns a GD image resource
-// USAGE:
-// $im = imagecreatefrompng('test.png');
-// $im = imagerotate($im, 15);
-// header('Content-type: image/png');
-// imagepng($im);
-function CustomImageRotate($src_img, $angle, $bicubic=false) {
- 
-   // convert degrees to radians
-   $angle = $angle + 180;
-   $angle = deg2rad($angle);
- 
-   $src_x = imagesx($src_img);
-   $src_y = imagesy($src_img);
- 
-   $center_x = floor($src_x/2);
-   $center_y = floor($src_y/2);
-
-   $cosangle = cos($angle);
-   $sinangle = sin($angle);
-
-   $corners=array(array(0,0), array($src_x,0), array($src_x,$src_y), array(0,$src_y));
-
-   foreach($corners as $key=>$value) {
-     $value[0]-=$center_x;        //Translate coords to center for rotation
-     $value[1]-=$center_y;
-     $temp=array();
-     $temp[0]=$value[0]*$cosangle+$value[1]*$sinangle;
-     $temp[1]=$value[1]*$cosangle-$value[0]*$sinangle;
-     $corners[$key]=$temp;   
-   }
-  
-   $min_x=1000000000000000;
-   $max_x=-1000000000000000;
-   $min_y=1000000000000000;
-   $max_y=-1000000000000000;
-  
-   foreach($corners as $key => $value) {
-     if($value[0]<$min_x)
-       $min_x=$value[0];
-     if($value[0]>$max_x)
-       $max_x=$value[0];
-  
-     if($value[1]<$min_y)
-       $min_y=$value[1];
-     if($value[1]>$max_y)
-       $max_y=$value[1];
-   }
-
-   $rotate_width=round($max_x-$min_x);
-   $rotate_height=round($max_y-$min_y);
-
-   $rotate=imagecreatetruecolor($rotate_width,$rotate_height);
-   imagealphablending($rotate, false);
-   imagesavealpha($rotate, true);
-
-   //Reset center to center of our image
-   $newcenter_x = ($rotate_width)/2;
-   $newcenter_y = ($rotate_height)/2;
-
-   for ($y = 0; $y < ($rotate_height); $y++) {
-     for ($x = 0; $x < ($rotate_width); $x++) {
-       // rotate...
-       $old_x = round((($newcenter_x-$x) * $cosangle + ($newcenter_y-$y) * $sinangle))
-         + $center_x;
-       $old_y = round((($newcenter_y-$y) * $cosangle - ($newcenter_x-$x) * $sinangle))
-         + $center_y;
-    
-       if ( $old_x >= 0 && $old_x < $src_x
-             && $old_y >= 0 && $old_y < $src_y ) {
-
-           $color = imagecolorat($src_img, $old_x, $old_y);
-       } else {
-         // this line sets the background colour
-         $color = imagecolorallocatealpha($src_img, 255, 255, 255, 127);
-       }
-       imagesetpixel($rotate, $x, $y, $color);
-     }
-   }
-  
-  return($rotate);
-}
-/*
-function DetermineScale($width,$height, $max_width, $max_height) {
-    if (!empty($max_width)) {
-            return($max_width/$width);
-    }
-    else if (!empty($max_height)) {
-            return($max_height/$height);
-    }
-    return(1);
-}
-*/
-function DetermineScale($width,$height, $max_width=0, $max_height=0) {
-  if ($max_width!=0 || $max_height!=0) {
-    $width_scale=($max_width/$width);
-    $height_scale=($max_height/$height);
-    $scale = $width_scale < $height_scale? $width_scale : $height_scale;
-    return($scale);
-  }
-  return(1);
-}
-
-function ResizeImageWithImageMagick($file,$type) {
-    //print("<h1>Using ImageMagick</h1>");
-    $config = GetConfig();
-    list($sizeInfo,$caption) = DetermineImageSize($file);
-    $fileName = basename($file);
-    $scaledFileName = "";
-    $scale = DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]);
-    if ($scale < 1) {
-            $scaledH = round($sizeInfo[1] * $scale );
-            $scaledW = round($sizeInfo[0] * $scale );
-            $scaledFileName =  "thumb.".$fileName;
-            $scaledFile = $config["REALPHOTOSDIR"] . $scaledFileName;
-            @exec (escapeshellcmd($config["IMAGEMAGICK_CONVERT"]) . 
-                        " -resize " .
-                        $scaledW .
-                        "x" . 
-                        $scaledH  . 
-                        " " .
-                        escapeshellarg($file) .
-                        " " .
-                        escapeshellarg($scaledFile) );
-
-            @exec ('chmod 755 ' . escapeshellarg($scaledFile));
-    }
-    return(array($scaledFileName,$fileName,$caption));
-
-}
-function ResizeImageWithGD($file,$type) {
-    $original_mem_limit = ini_get('memory_limit');
-    ini_set('memory_limit', -1);
-    $config = GetConfig();
-    list($sizeInfo,$caption) = DetermineImageSize($file);
-    $fileName = basename($file);
-    $scaledFileName = "";
-    $scale = DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]);
-    if ($scale < 1) {
-        $sourceImage = NULL;
-        switch($type) {
-            case "jpeg":
-            case "jpg":
-            case "pjpeg":
-                $sourceImage = imagecreatefromjpeg($file);
-                break;
-            case "gif":
-                $sourceImage = imagecreatefromgif($file);
-                break;
-            case "png":
-                $sourceImage = imagecreatefrompng($file);
-                break;
-        }
-        if ($sourceImage) {
-            $scaledH = round($sizeInfo[1] * $scale );
-            $scaledW = round($sizeInfo[0] * $scale );
-            $scaledFileName =  "thumb.".$fileName;
-            $scaledFile = $config["REALPHOTOSDIR"] . $scaledFileName;
-            $scaledImage = imagecreatetruecolor($scaledW,$scaledH);
-            imagecopyresampled($scaledImage,$sourceImage,0,0,0,0,
-                            $scaledW,$scaledH,
-                            $sizeInfo[0],$sizeInfo[1]);
-			imagejpeg($scaledImage,$scaledFile,$config["JPEGQUALITY"]);
-            @exec ('chmod 755 ' . escapeshellarg($scaledFile));
-            imagedestroy($scaledImage);
-            imagedestroy($sourceImage);
-        }
-    }
-    // Revert to original limit
-    ini_set('memory_limit', $original_mem_limit);
-    return(array($scaledFileName,$fileName,$caption));
-
-}
-/**
   * Checks for the comments tag
   * @return boolean
   */
@@ -1513,19 +1137,6 @@ function AllowCommentsOnPost(&$content) {
         }
     }
     return($comments_allowed);
-}
-/**
-  * This function figures out how much rotation should be applied to all images in the message
-  */
-function GetRotation(&$mimeDecodedEmail,&$content) {
-    $rotation = 0;
-    if (eregi("rotate:([0-9]+)",$content,$matches)
-        && trim($matches[1])) {
-        $delay = (($days * 24 + $hours) * 60 + $minutes) * 60;
-        $rotation = $matches[1];
-        $content = ereg_replace("rotate:$matches[1]","",$content);
-    }
-    return($rotation);
 }
 /**
   * Needed to be able to modify the content to remove the usage of the delay tag
@@ -2346,20 +1957,13 @@ function ReadDBConfig() {
   */
 function GetDBConfig() {
     $config = ReadDBConfig();
-    if (!isset($config["PHOTOSDIR"])) { $config["PHOTOSDIR"] = DIRECTORY_SEPARATOR."wp-photos".DIRECTORY_SEPARATOR;}
     if (!isset($config["ADMIN_USERNAME"])) { $config["ADMIN_USERNAME"] =
     'admin'; }
-    if (!isset($config["FILESDIR"])) { $config["FILESDIR"] = DIRECTORY_SEPARATOR."wp-filez".DIRECTORY_SEPARATOR;}
     if (!isset($config["PREFER_TEXT_TYPE"])) { $config["PREFER_TEXT_TYPE"] = "plain";}
-    if (!isset($config["RESIZE_LARGE_IMAGES"])) { $config["RESIZE_LARGE_IMAGES"] = true;}
-    if (!isset($config["MAX_IMAGE_WIDTH"])) { $config["MAX_IMAGE_WIDTH"] = 400;}
-    if (!isset($config["MAX_IMAGE_HEIGHT"])) { $config["MAX_IMAGE_HEIGHT"] = "";}
     if (!isset($config["DEFAULT_TITLE"])) { $config["DEFAULT_TITLE"] = "Live From The Field";}
     if (!isset($config["INPUT_PROTOCOL"])) { $config["INPUT_PROTOCOL"] = "pop3";}
     if (!isset($config["IMAGE_PLACEHOLDER"])) { $config["IMAGE_PLACEHOLDER"] = "#img%#";}
     if (!isset($config["IMAGES_APPEND"])) { $config["IMAGES_APPEND"] = true;}
-    if (!isset($config["IMAGECLASS"])) { $config["IMAGECLASS"] = "postie-image";}
-    if (!isset($config["IMAGEDIV"])) { $config["IMAGEDIV"] = "postie-image-div";}
     if (!isset($config["3GPDIV"])) { $config["3GPDIV"] = "postie-3gp-div";}
     if (!isset($config["ATTACHMENTDIV"])) { $config["ATTACHMENTDIV"] = "postie-attachment-div";}
     if (!isset($config["3GPCLASS"])) { $config["3GPCLASS"] = "postie-video";}
@@ -2368,7 +1972,6 @@ function GetDBConfig() {
     if (!isset($config["VIDEO_HEIGHT"])) { $config["VIDEO_HEIGHT"] = 112;}
     if (!isset($config["PLAYER_HEIGHT"])) { $config["PLAYER_HEIGHT"] = 150;}
     if (!isset($config["VIDEO_AUTOPLAY"])) { $config["VIDEO_AUTOPLAY"] = false;}
-    if (!isset($config["IMAGESTYLE"])) { $config["IMAGESTYLE"] = "border: none;";}
     if (!isset($config["JPEGQUALITY"])) { $config["JPEGQUALITY"] = 80;}
     if (!isset($config["AUTO_SMART_SHARP"])) { $config["AUTO_SMART_SHARP"] = false;}
     if (!isset($config["ALLOW_SUBJECT_IN_MAIL"])) { $config["ALLOW_SUBJECT_IN_MAIL"] = true;}
@@ -2382,11 +1985,8 @@ function GetDBConfig() {
     if (!isset($config["MESSAGE_ENCODING"])) { $config["MESSAGE_ENCODING"] = "UTF-8"; }
     if (!isset($config["MESSAGE_DEQUOTE"])) { $config["MESSAGE_DEQUOTE"] = true; }
     if (!isset($config["TURN_AUTHORIZATION_OFF"])) { $config["TURN_AUTHORIZATION_OFF"] = false;}
-    if (!isset($config["USE_IMAGEMAGICK"])) { $config["USE_IMAGEMAGICK"] = false;}
     if (!isset($config["CUSTOM_IMAGE_FIELD"])) { $config["CUSTOM_IMAGE_FIELD"] = false;}
     if (!isset($config["CONVERTNEWLINE"])) { $config["CONVERTNEWLINE"] = false;}
-    if (!isset($config["IMAGEMAGICK_CONVERT"])) { $config["IMAGEMAGICK_CONVERT"] = "/usr/bin/convert";}
-    if (!isset($config["IMAGEMAGICK_IDENTIFY"])) { $config["IMAGEMAGICK_IDENTIFY"] = "/usr/bin/identify";}
 
 
     if (!isset($config["SIG_PATTERN_LIST"])) { $config["SIG_PATTERN_LIST"] = array('--','- --',"\?--");}
@@ -2424,10 +2024,10 @@ function GetDBConfig() {
             'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
             'width="' . $config['VIDEO_WIDTH'] . '" '.
             'height="' . $config['VIDEO_HEIGHT'] . '"> '.
-            '<param name="src" VALUE="'. 
-            $config["URLFILESDIR"] . $filename .'"> '.
-            '<param name="autoplay" VALUE="no"> '.
-              '<param name="controller" VALUE="true"> '.
+            '<param name="src" value="'. 
+            $config["URLFILESDIR"] . $filename .'" /> '.
+            '<param name="autoplay" value="no" /> '.
+              '<param name="controller" value="true" /> '.
              '<embed '.
              'src="'. $config["URLFILESDIR"] . $filename .'" '.
              'width="' . $config['VIDEO_WIDTH'] . '" '.
@@ -2456,7 +2056,7 @@ function GetConfig() {
     $config["FILESDIR"] .= DIRECTORY_SEPARATOR;
   }
   //These should only be modified if you are testing
-  $config["DELETE_MAIL_AFTER_PROCESSING"] = false;
+  $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
   $config["POST_TO_DB"] = true;
   $config["TEST_EMAIL"] = false;
   $config["TEST_EMAIL_ACCOUNT"] = "blogtest";
@@ -2513,18 +2113,6 @@ function HasIMAPSupport($display = true) {
 }
 function HasIconvInstalled($display = true) {
   $function_list = array("iconv");
-  return(HasFunctions($function_list,$display));
-}
-function HasGDInstalled($display = true) {
-  $function_list = array("getimagesize",
-                         "imagecreatefromjpeg",
-                         "imagecreatefromgif",
-                         "imagecreatefrompng",
-                         "imagecreatetruecolor",
-                         "imagecreatetruecolor",
-                         "imagecopyresampled",
-                         "imagejpeg",
-                         "imagedestroy");
   return(HasFunctions($function_list,$display));
 }
 /**
@@ -2598,14 +2186,6 @@ function UpdatePostiePermissions($role_access) {
             }
         }
     }
-}
-function TestWPVersion() {
-    //fix from Mathew Boedicker
-    $version_parts = explode('.', get_bloginfo('version'));
-    if ((count($version_parts) > 0) && (intval($version_parts[0]) >= 2)) {
-        return true;
-    }
-    return false;
 }
 function DebugEmailOutput(&$email,&$mimeDecodedEmail) {
     $config = GetConfig();

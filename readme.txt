@@ -252,7 +252,7 @@ johndoe@gmail.com to foo@gmail.com, it gets posted as "John Doe".
 If you send an e-mail to your postie address from an e-mail address that is no
 t linked to a wordpress user, it will get posted as admin.
 == History ==
-* 1.3 (2009.06.xx)
+* 1.3.testing (2009.06.xx)
   * Now using default wordpress image and upload handling, which means:
       * No more creating special directories for postie
       * No more confusion about imagemagick
