@@ -336,33 +336,6 @@ fieldset {border: 1px solid black;}
                 <br />
                 </td> 
             </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Image CSS Class:', 'postie') ?> </th> 
-                <td>
-                <input name="IMAGECLASS" type="text" id="IMAGECLASS" value="<?php echo $config["IMAGECLASS"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>postie-image</code>
-                <br />
-                </td> 
-            </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Image CSS Style:', 'postie') ?> </th> 
-                <td>
-                <input name="IMAGESTYLE" type="text" id="IMAGESTYLE" value="<?php echo $config["IMAGESTYLE"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>border: none;</code>
-                <br />
-                </td> 
-            </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Image Div CSS:', 'postie') ?> </th> 
-                <td>
-                <input name="IMAGEDIV" type="text" id="IMAGEDIV" value="<?php echo $config["IMAGEDIV"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>postie-image-div</code><p>This is the CSS class of a div that wraps each image. Can be used to style the post</p>
-                <br />
-                </td> 
-            </tr> 
-            <?php echo BuildBooleanSelect("Open images in new
-            window","IMAGE_NEW_WINDOW",$config["IMAGE_NEW_WINDOW"],"Recommended:
-            no");?>
             <?php echo BuildBooleanSelect("Use custom image
             template","USEIMAGETEMPLATE",$config["USEIMAGETEMPLATE"],"If you
             don't like the default html output around images, you can enter
@@ -374,19 +347,12 @@ fieldset {border: 1px solid black;}
                 id="IMAGETEMPLATE"><?php echo $config["IMAGETEMPLATE"]; ?></textarea>
                 </td> 
             </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Attachment Div CSS:', 'postie') ?> </th> 
-                <td>
-                <input name="ATTACHMENTDIV" type="text" id="ATTACHMENTDIV" value="<?php echo $config["ATTACHMENTDIV"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>postie-attachment-div</code><p>This is the CSS class of a div that wraps each file attachment. Can be used to style the post</p>
-                <br />
-                </td> 
             <?php echo BuildBooleanSelect("Use custom image
             field","CUSTOM_IMAGE_FIELD",$config["CUSTOM_IMAGE_FIELD"],"When this option is set, images will not appear in the
             post. Instead the url to the image will be input into a custom
             field named 'image'.
 Recommended:
-            no");?>            </tr> 
+            no");?>            
             </table> 
         </fieldset> 
     </td> 

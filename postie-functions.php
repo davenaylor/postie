@@ -616,27 +616,23 @@ function GetContent ($part,&$attachments, $post_id) {
               . $config["URLPHOTOSDIR"] . $fullImage . "','"
                 . "full_size_image" . "','"
                 . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;";
-          }
-            if ($config['USEIMAGETEMPLATE']) {
-              add_filter('get_image_send_to_editor', 'parseImageTemplate');
-              //$attachments["html"][] =
-                  //parseImageTemplate($thumbImage,$fullImage,$caption);
-            } else {
-              $the_post=get_post($file_id);
-              /* TODO make these options */
-              $url=wp_get_attachment_link($file_id);
-              $align='left';
-              $size='medium';
-              $attachments["html"][] .= get_image_send_to_editor($file_id,
-                  $the_post->post_excerpt, $the_post->post_title, $align, 
-                  $url, '', $size);
-            }
-            if ($cid) {
-              $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . 
-                  $fullImage,count($attachments["html"]) - 1);
-            }
-
-          break;
+        }
+        $the_post=get_post($file_id);
+        /* TODO make these options */
+        $url=wp_get_attachment_link($file_id);
+        $align='left';
+        $size='medium';
+        if ($config['USEIMAGETEMPLATE']) {
+          add_filter('image_send_to_editor', 'parseImageTemplate', 1,7);
+        }
+        $attachments["html"][] .= get_image_send_to_editor($file_id,
+              $the_post->post_excerpt, $the_post->post_title, $align, 
+              $url, '', $size);
+        if ($cid) {
+          $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . 
+              $fullImage,count($attachments["html"]) - 1);
+        }
+        break;
       default:
         if (in_array(strtolower($part->ctype_primary),
             $config["SUPPORTED_FILE_TYPES"])) {
@@ -1543,33 +1539,52 @@ function GetNameFromEmail($address) {
     return($name);
 }
 
-function parseImageTemplate($thumbImage,$fullImage,$caption) {
+function parseImageTemplate($html, $id, $alt, $title, $align, $url,
+    $size='medium') {
   $config=GetConfig();
-  echo "using custom image template\n";
-  if ($thumbImage=='') {
-    $imageTemplate=str_replace('{THUMBNAIL}',
-        $config['URLPHOTOSDIR'] . $fullImage,
-        $config['IMAGETEMPLATE']);
-    $imageTemplate=str_replace("<a href='{IMAGE}'>",
-        '', $imageTemplate);
-    $imageTemplate=str_replace("</a>",
-        '', $imageTemplate);
-  } else {
-    $imageTemplate=str_replace('{THUMBNAIL}',
-        $config['URLPHOTOSDIR'] . $thumbImage, $config['IMAGETEMPLATE']);
-    $imageTemplate=str_replace('{IMAGE}',
-        $config['URLPHOTOSDIR'] . $fullImage, $imageTemplate);
+
+  $htmlalt = ( empty($alt) ) ? $title : $alt;
+
+  $html = get_image_tag($id, $htmlalt, $title, $align, $size);
+
+  $rel = $rel ? ' rel="attachment wp-att-'.attr($id).'"' : '';
+
+  if ( $url )
+    $html = '<a href="' . clean_url($url) . "\"$rel>$html</a>";
+
+
+/* we check template for thumb, thumbnail, large, full and use that as
+size. If not found, we default to medium */
+  $imageTemplate=$config['IMAGETEMPLATE'];
+  if (strpos($imageTemplate, '{THUMBNAIL}')!==false  ||
+      strpos($imageTemplate, '{THUMB}')!==false) {
+    $size='thumbnail';
+  } else if (strpos($imageTemplate, '{LARGE}')!==false) {
+    $size='large';
+  } else if (strpos($imageTemplate, '{FULL}')!==false) {
+    $size='full';
   }
-  $imageTemplate=str_replace('{FILENAME}',
-      $config['REALPHOTOSDIR'] . $fullImage, $imageTemplate);
-  $imageTemplate=str_replace('{RELFILENAME}',
-      $config['RELPHOTOSDIR'] . $fullImage, $imageTemplate);
-  $imageTemplate=str_replace('{WIDTH}',
-      $config['MAX_IMAGE_WIDTH']. 'px' ,$imageTemplate);
-  $imageTemplate=str_replace('{HEIGHT}',
-      $config['MAX_IMAGE_HEIGHT']. 'px' ,$imageTemplate);
-  if ($caption!='') {
-    $imageTemplate=str_replace('{CAPTION}', $caption, $imageTemplate);
+  list( $img_src, $width, $height ) = image_downsize($id, $size);
+  $hwstring = image_hwstring($width, $height);
+  $uploadDir=wp_upload_dir();
+  $absFileName=$uploadDir['path'] .'/'. basename($img_src);
+  $relFileName=str_replace(ABSPATH,'', $absFileName);
+  $fileLink=wp_get_attachment_url($id);
+  $pageLink=get_attachment_link($id);
+
+  $imageTemplate=str_replace('{THUMBNAIL}', $img_src, $imageTemplate);
+  $imageTemplate=str_replace('{THUMB}', $img_src, $imageTemplate);
+  $imageTemplate=str_replace('{MEDIUM}', $img_src, $imageTemplate);
+  $imageTemplate=str_replace('{LARGE}', $img_src, $imageTemplate);
+  $imageTemplate=str_replace('{FULL}', $img_src, $imageTemplate);
+  $imageTemplate=str_replace('{FILELINK}', $fileLink, $imageTemplate);
+  $imageTemplate=str_replace('{PAGELINK}', $pageLink, $imageTemplate);
+  $imageTemplate=str_replace('{WIDTH}', $width . 'px', $imageTemplate);
+  $imageTemplate=str_replace('{HEIGHT}', $height . 'px', $imageTemplate);
+  $imageTemplate=str_replace('{FILENAME}', $absFileName, $imageTemplate);
+  $imageTemplate=str_replace('{RELFILENAME}', $relFileName, $imageTemplate);
+  if ($alt!='') {
+    $imageTemplate=str_replace('{CAPTION}', $alt, $imageTemplate);
   }
   return($imageTemplate);
 } 
@@ -2056,8 +2071,8 @@ function GetConfig() {
     $config["FILESDIR"] .= DIRECTORY_SEPARATOR;
   }
   //These should only be modified if you are testing
-  $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
-  $config["POST_TO_DB"] = true;
+  $config["DELETE_MAIL_AFTER_PROCESSING"] = false;
+  $config["POST_TO_DB"] = false;
   $config["TEST_EMAIL"] = false;
   $config["TEST_EMAIL_ACCOUNT"] = "blogtest";
   $config["TEST_EMAIL_PASSWORD"] = "yourpassword";

@@ -156,9 +156,8 @@ If you don't have access to cron, you can run postie without it.
   in many photo editing programs (for example Picasa), will add an IPTC caption)
 
 * Image templates
-  By default, postie wraps images in a div. You can specify the class of
-  the div in the options. You can also choose whether or not to open the
-  full-size image in a new window.
+  Postie now uses the default wordpress image template, but you can specify a
+different one if you wish.
 
   You can also specify a custom image template. I use the following custom
 template:
@@ -168,24 +167,15 @@ template:
   class="attachment" /&gt;&lt;/a&gt;&lt;div
 class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
      
-    * {IMAGE} gets replaced with the url to the full-size image
     * {THUMBNAIL} gets replaced with the url to the thumbnail image
+    * {MEDIUM} gets replaced with the url to the medium-sized image
+    * {LARGE} gets replaced with the url to the large-sized image
+    * {FULL} gets replaced with the url to the full-sized image
     * {FILENAME} gets replaced with the absolute path to the full-size image
     * {RELFILENAME} gets replaced with the relative path to the full-size image
     * {CAPTION} gets replaced with the caption you specified (if any)
-    * {WIDTH} gets replaced with the maximum width for resized photos
-    * {HEIGHT} gets replaced with the maximum height for resized photos
-
-* Rotation - if you include the text
-
-  rotate:90
-
-  or any other number - all images in the message will be rotated for you.
-
-* Images are renamed in a way that makes it impossible to accidentally
-  overwrite images you have already posted
-
-
+    * {WIDTH} gets replaced with width of the photo
+    * {HEIGHT} gets replaced with the height of the photo
 
 = Interoperability =
 * If your mail client doesn't support setting the subject (nokia) you
