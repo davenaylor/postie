@@ -2079,16 +2079,6 @@ function GetConfig() {
   //include(POSTIE_ROOT . "/../postie-test.php");
   // These are computed
   #$config["TIME_OFFSET"] = get_option('gmt_offset');
-  if ($config["USE_IMAGEMAGICK"]) {
-     if (!file_exists($config["IMAGEMAGICK_IDENTIFY"])
-         ||!file_exists($config["IMAGEMAGICK_CONVERT"])) {
-       $config["RESIZE_LARGE_IMAGES"] = false;
-     }
-  } else {
-    if (!HasGDInstalled(false)) {
-      $config["RESIZE_LARGE_IMAGES"] = false;
-    }
-  }
   $config["POSTIE_ROOT"] = POSTIE_ROOT;
   $config["URLPHOTOSDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["PHOTOSDIR"]);
   $config["REALPHOTOSDIR"] = realpath(ABSPATH . $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
