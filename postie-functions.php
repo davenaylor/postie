@@ -73,6 +73,9 @@ function PostEmail($poster,$mimeDecodedEmail) {
 
   ubb2HTML($content);	
 
+  if ($config['CONVERTURLS']) 
+    $content=clickableLink($content);
+  
   if ($config['FILTERNEWLINES']) 
     $content = FilterNewLines($content);
   //$content = FixEmailQuotes($content);
@@ -101,9 +104,6 @@ function PostEmail($poster,$mimeDecodedEmail) {
   } else {
     $isReply=true;
     wp_delete_post($post_id);
-  }
-  if ($config['CONVERTURLS']) {
-    $content=clickableLink($content);
   }
 
 
@@ -142,7 +142,10 @@ function clickableLink($text) {
 
   // pad it with a space so we can match things at the start of the 1st line.
   $ret = ' ' . $text;
+  // try to embed youtube videos
+  $ret = preg_replace("#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is", "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />", $ret);
 
+  echo "ret=$ret\n";
   // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
   // xxxx can only be alpha characters.
   // yyyy is anything up to the first space, newline, comma, double quote or <
@@ -606,6 +609,7 @@ function GetContent ($part,&$attachments, $post_id) {
                           );
         $file_id = postie_media_handle_upload($the_file, $post_id);
         unlink($tmpFile);
+        $file = wp_get_attachment_url($file_id);
 
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
         $marimex=$marime[0]+20;
@@ -629,8 +633,7 @@ function GetContent ($part,&$attachments, $post_id) {
               $the_post->post_excerpt, $the_post->post_title, $align, 
               $url, '', $size);
         if ($cid) {
-          $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . 
-              $fullImage,count($attachments["html"]) - 1);
+          $attachments["cids"][$cid] = array($file,count($attachments["html"]) - 1);
         }
         break;
       default:
@@ -639,6 +642,7 @@ function GetContent ($part,&$attachments, $post_id) {
           //pgp signature - then forget it
           if ( $part->ctype_secondary == 'pgp-signature' )
             break;
+          //postie_upload_attachment($part);
           $overrides = array('test_form'=>false, 'test_size'=>false,
                              'test_type'=>false);
           $tmpFile=tempnam('/tmp', 'postie');
@@ -703,7 +707,8 @@ function GetContent ($part,&$attachments, $post_id) {
 
                 $attachments["html"][] .= '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><div class="' . $config["3GPDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fileName. '"><img src="' . $config["URLPHOTOSDIR"] . $scaledFileName . '" alt="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
               } else {
-                $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><div class="' . $config["ATTACHMENTDIV"].'"><a href="' . $config["URLFILESDIR"] . $filename . '" class="' . $config["3GPCLASS"].'">' . $part->ctype_parameters['name'] . '</a></div>' . "\n";
+                $attachments["html"][] = '<div class="' .
+                $config["ATTACHMENTDIV"].'"><a href="' . $file. '" class="' . $config["3GPCLASS"].'">' . $part->ctype_parameters['name'] . '</a></div>' . "\n";
               }
             }
           } elseif ($part->ctype_secondary == "x-shockwave-flash") {
@@ -721,10 +726,12 @@ function GetContent ($part,&$attachments, $post_id) {
                  'type="application/x-shockwave-flash"  '.
                  'width=""  '.  'height=""></embed> '.  '</object>'; 
           } else {
-              $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><a href="' . $config["URLFILESDIR"] . $filename . '">' . $part->ctype_parameters['name'] . '</a>' . "\n";
+            $attachments["html"][] = '<a href="' . $file . '">' . 
+                $part->ctype_parameters['name'] . '</a>' . "\n";
           }
           if ($cid) {
-            $attachments["cids"][$cid] = array($config["URLFILESDIR"] . $filename,count($attachments["html"]) - 1);
+            $attachments["cids"][$cid] = array($file,
+                count($attachments["html"]) - 1);
           }
         }
         break;
@@ -2076,6 +2083,9 @@ function GetConfig() {
   $config["TEST_EMAIL"] = false;
   $config["TEST_EMAIL_ACCOUNT"] = "blogtest";
   $config["TEST_EMAIL_PASSWORD"] = "yourpassword";
+  if (file_exists(POSTIE_ROOT . '/postie_test_variables.php')) { 
+    include(POSTIE_ROOT . '/postie_test_variables.php');
+  }
   //include(POSTIE_ROOT . "/../postie-test.php");
   // These are computed
   #$config["TIME_OFFSET"] = get_option('gmt_offset');
