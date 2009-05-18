@@ -263,6 +263,7 @@ sure that it is
       * All image resizing uses wordpress's default settings (under media)
       * Automatically turn links to youtube into an embedded player
       * Completely redesigned settings page (mostly thanks to Rainman)
+      * Reset configuration no longer deletes mailserver settings
 
 * 1.2.2 (2009.05.xx)
   * Show empty categories for default category in options

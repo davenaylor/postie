@@ -15,3 +15,9 @@ table.form-table td {line-height:1em;
                      margin:0;
                      padding:0;
                      font-size:1em;}
+table.form-table th {width:40%;
+                     font-weight:bold;}
+span.recommendation {font-size:.7em;
+                     font-weight:normal;
+                     color:#222;
+                    }

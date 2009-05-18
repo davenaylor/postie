@@ -1836,10 +1836,10 @@ function BuildBooleanSelect($label,$id,$current_value,$recommendation = NULL) {
     <option value=\"1\">".__("Yes", 'postie')."</option>
     <option value=\"0\" ". (!$current_value ? "SELECTED" : NULL) .
     ">".__("No", 'postie').'</option>
-	</select>
-    <br />';
+	</select>';
     if ($recommendation!=NULL) {
-      $string.='<code>'.__($recommendation, 'postie').'</code><br/>';
+      $string.='<span class="recommendation">'.__($recommendation,
+      'postie').'</span>';
     }
     $string.="</td>\n</tr>";
     return($string);
@@ -1852,16 +1852,14 @@ function BuildBooleanSelect($label,$id,$current_value,$recommendation = NULL) {
   *@param string
   */
 function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
-   $string = "<tr>
-	<th scope=\"row\">".__($label, 'postie').":</th></tr>";
+  $string = "<tr> <th scope=\"row\">".__($label, 'postie').":";
+  if ($recommendation) {
+    $string.="<br /><span class='recommendation'>".__($recommendation,
+    'postie')."</span>";
+  }
+  $string.="</th>";
 
-    if ($recommendation) {
-        $string .= "<tr><td>&nbsp;</td><td><code>".__($recommendation,
-        'postie')."</code></td></tr>";
-    }
-   $string .=" <tr>
-    <td>&nbsp;</td>
-	<td><textarea cols=40 rows=5 name=\"$id\" id=\"$id\">";
+   $string .="<td><textarea cols=40 rows=5 name=\"$id\" id=\"$id\">";
         if (is_array($current_value)) {
             foreach($current_value as $item) {
                 $string .= "$item\n";
@@ -1890,14 +1888,18 @@ function SetupConfiguration() {
   */
 function ResetPostieConfig() {
 	global $wpdb;
-    //Get rid of the old table
-    $wpdb->query("DROP TABLE ". POSTIE_TABLE .";");
-    $config = GetConfig();
-    $key_arrays = GetListOfArrayConfig();
-    foreach($key_arrays as $key) {
-        $config[$key] = join("\n",$config[$key]);
-    }
-    UpdatePostieConfig($config);
+  //Get rid of the old table
+  //$postie_table=$GLOBALS["table_prefix"]. "postie_config";
+  $query ="UPDATE ". POSTIE_TABLE . " set value='' WHERE label NOT IN ('MAIL_PASSWORD', 'MAIL_SERVER', 'MAIL_SERVER_PORT', 'MAIL_USERID', 'INPUT_PROTOCOL');";
+  echo "<script type='text/javascript'>alert('query=$query');</script>\n";
+  $results=$wpdb->query($wpdb->prepare($query));
+  $config = GetConfig();
+  $key_arrays = GetListOfArrayConfig();
+  foreach($key_arrays as $key) {
+      $config[$key] = join("\n",$config[$key]);
+  }
+  UpdatePostieConfig($config);
+  return('foo');
 }
 /**
   * This function handles updating the configuration 
@@ -2071,12 +2073,6 @@ function GetDBConfig() {
   */
 function GetConfig() {
   $config = GetDBConfig();
-  if (!ConfirmTrailingDirectorySeperator($config["PHOTOSDIR"])) {
-    $config["PHOTOSDIR"] .= DIRECTORY_SEPARATOR;
-  }
-  if (!ConfirmTrailingDirectorySeperator($config["FILESDIR"])) {
-    $config["FILESDIR"] .= DIRECTORY_SEPARATOR;
-  }
   //These should only be modified if you are testing
   $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
   $config["POST_TO_DB"] = true;
@@ -2088,13 +2084,8 @@ function GetConfig() {
   }
   //include(POSTIE_ROOT . "/../postie-test.php");
   // These are computed
-  #$config["TIME_OFFSET"] = get_option('gmt_offset');
+  $config["TIME_OFFSET"] = get_option('gmt_offset');
   $config["POSTIE_ROOT"] = POSTIE_ROOT;
-  $config["URLPHOTOSDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["PHOTOSDIR"]);
-  $config["REALPHOTOSDIR"] = realpath(ABSPATH . $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
-  $config["RELPHOTOSDIR"] =  $config["PHOTOSDIR"]. DIRECTORY_SEPARATOR;
-  $config["URLFILESDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["FILESDIR"]);
-  $config["REALFILESDIR"] = realpath(ABSPATH . $config["FILESDIR"]) . DIRECTORY_SEPARATOR;
   for ($i = 0; $i < count($config["AUTHORIZED_ADDRESSES"]); $i++) {
     $config["AUTHORIZED_ADDRESSES"][$i] = strtolower($config["AUTHORIZED_ADDRESSES"][$i]);
   }
