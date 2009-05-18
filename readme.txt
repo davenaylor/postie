@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.8.beta
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -19,7 +19,13 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 [FAQ](faq) page
 
 
-= What's new in 1.2.2? = 
+= What's new in? = 
+* 1.2.3 (2009.05.17)
+  * Fixed headers already sent bug
+  * Converted shortcode `<?` to proper `<?php` (thanks brack)
+  * Deleting mails after processing again
+
+* 1.2.2 (2009.05.15)
   * Show empty categories for default category in options
   * Image scaling fixed so that the smaller value of max image width and max
     image height is used
@@ -257,7 +263,7 @@ If you send an e-mail to your postie address from an e-mail address that is no
 t linked to a wordpress user, it will get posted as admin.
 
 == History ==
-* 1.2.3 (2009.05.20)
+* 1.2.3 (2009.05.17)
   * Fixed headers already sent bug
   * Converted shortcode `<?` to proper `<?php` (thanks brack)
   * Deleting mails after processing again
