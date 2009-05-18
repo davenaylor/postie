@@ -241,6 +241,18 @@ johndoe@gmail.com to foo@gmail.com, it gets posted as "John Doe".
 
 If you send an e-mail to your postie address from an e-mail address that is no
 t linked to a wordpress user, it will get posted as admin.
+
+= Images aren't showing up at all? =
+
+There are a couple possible reasons for this. First, check to see if you can
+add an image through wordpress's normal posting mechanism. If not, then there
+is probably 1 or 2 problems:
+1. Your server does not have the php-gd library installed. Ask your hosting
+provider about this.
+
+2. Your wp-content/uploads directory is not writable by the webserver. Make
+sure that it is
+
 == History ==
 * 1.3.testing (2009.06.xx)
   * Now using default wordpress image and upload handling, which means:
