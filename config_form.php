@@ -19,36 +19,30 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 <div class="updated"><p><?php _e($messages[$_GET['message']], 'postie'); ?></p></div>
 <?php endif; ?>
 <div class="wrap"> 
-<h2><?php _e('Postie Options', 'postie') ?></h2> 
+<h2><img src="<?php echo '../wp-content/plugins/postie/images/mail.png'; ?>" alt="postie" /><?php _e('Postie Options', 'postie') ?></h2>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="reset" />
-    <p class="submit">
-            <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie')?> &raquo" type="submit">
-    </p>
+            <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie')?> &raquo" type="submit" class='button'>
 </form>
 <form name="postie-options" method="get" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/get_mail.php"?>"> 
-    <p class="submit">
-            <input name="Submit" value="<?php _e("Run Postie", 'postie');?> &raquo;" type="submit">
+            <input name="Submit" value="<?php _e("Run Postie", 'postie');?> &raquo;" type="submit" class='button'>
     <?php _e("(To run the check mail script manually)", 'postie');?>
-    </p>
 </form>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="test" />
-    <p class="submit">
-            <input name="Submit" value="<?php _e("Test Config", 'postie');?>&raquo;" type="submit">
-    <?php _e("this will run a special script to test your configuraiton options", 'postie');?>
-    </p>
+            <input name="Submit" value="<?php _e("Test Config", 'postie');?>&raquo;" type="submit" class='button'>
+    <?php _e("this will run a special script to test your configuration options", 'postie');?>
 </form>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="config" />
 <div id="simpleTabs">
 	<div class="simpleTabs-nav">
 	<ul>
-	<li id="simpleTabs-nav-1"><?php _e('Mailserver Settings' , 'postie') ?></li>
-	<li id="simpleTabs-nav-2"><?php _e('User Settings' , 'postie') ?></li>
-	<li id="simpleTabs-nav-3"><?php _e('Message Settings' , 'postie') ?></li>
-	<li id="simpleTabs-nav-4"><?php _e('Image Settings' , 'postie') ?></li>
-	<li id="simpleTabs-nav-5"><?php _e('Video and Audio Settings' , 'postie') ?></li>
+	<li id="simpleTabs-nav-1"><?php _e('Mailserver' , 'postie') ?></li>
+	<li id="simpleTabs-nav-2"><?php _e('User' , 'postie') ?></li>
+	<li id="simpleTabs-nav-3"><?php _e('Message' , 'postie') ?></li>
+	<li id="simpleTabs-nav-4"><?php _e('Image' , 'postie') ?></li>
+	<li id="simpleTabs-nav-5"><?php _e('Video and Audio' , 'postie') ?></li>
   </ul>
 	</div>
 	<div id="simpleTabs-content-1" class="simpleTabs-content">
@@ -163,7 +157,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
         <option value="pending" <?php if($config["POST_STATUS"] == "pending") { echo
         "SELECTED";} ?>>Pending Review</option>
         </select><br />
-                <?php _e("Recommended", 'postie');?>: <code>plain</code>
+                <?php _e("Recommended", 'postie');?>: <code>published</code>
                 <br />
                 </td> 
             </tr> 
@@ -415,9 +409,7 @@ Recommended:
 
 	</table> 
   </div>
-	<p class="submit">
-		<input type="submit" name="Submit" value="<?php _e('Update Options', 'postie') ?> &raquo;" />
-	</p>
+		<input type="submit" name="Submit" value="<?php _e('Update Options', 'postie') ?> &raquo;" class='button' />
 </form> 
 <div id="w3c">
     <a href="http://validator.w3.org/check?uri=referer"><img src="<?php echo '../wp-content/plugins/postie/images/valid-xhtml10-blue.png'; ?>" alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
