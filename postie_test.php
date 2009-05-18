@@ -43,10 +43,6 @@ get_currentuserinfo();
          ?>
 
     <br/>
-    <h2>GD Library Test<h2>
-    <p>
-    <?php  echo HasGDInstalled();?>
-    </p>
     <h2>Iconv Library Test<h2>
     <p><i>Only required if you want to support ISO-2022-JP</i>
     <?php echo HasIconvInstalled();?>
