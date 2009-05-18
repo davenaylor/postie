@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.7.1
-Stable tag: 1.2.1
+Stable tag: 1.3.testing
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -261,6 +261,8 @@ sure that it is
       * Can now use the [gallery] feature of wordpress
       * Attachments are now connected to posts in the database
       * All image resizing uses wordpress's default settings (under media)
+      * Automatically turn links to youtube into an embedded player
+      * Completely redesigned settings page (mostly thanks to Rainman)
 
 * 1.2.2 (2009.05.xx)
   * Show empty categories for default category in options

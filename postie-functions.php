@@ -13,7 +13,7 @@ $Id$
 #$config=GetConfig();
 
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
-define("POSTIE_ROOT",dirname(__FILE__));
+//define("POSTIE_ROOT",dirname(__FILE__));
 define("POSTIE_TABLE",$GLOBALS["table_prefix"]. "postie_config");
 
 /* this function is necessary for wildcard matching on non-posix systems */

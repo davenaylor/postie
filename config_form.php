@@ -15,13 +15,6 @@ $messages[1] = __("Configuration successfully updated!",'postie');
 $messages[2] = __("Error - unable to save configuration",'postie');
 
 ?>
-<style type='text/css'>
-legend {font-weight:bold;
-        border:1px solid black;
-        background:white;
-        padding:.3em;}
-fieldset {border: 1px solid black;}
-</style>
 <?php if (isset($_GET['message'])) : ?>
 <div class="updated"><p><?php _e($messages[$_GET['message']], 'postie'); ?></p></div>
 <?php endif; ?>
@@ -48,10 +41,21 @@ fieldset {border: 1px solid black;}
 </form>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="config" />
+<div id="simpleTabs">
+	<div class="simpleTabs-nav">
+	<ul>
+	<li id="simpleTabs-nav-1"><?php _e('Mailserver Settings' , 'postie') ?></li>
+	<li id="simpleTabs-nav-2"><?php _e('User Settings' , 'postie') ?></li>
+	<li id="simpleTabs-nav-3"><?php _e('Message Settings' , 'postie') ?></li>
+	<li id="simpleTabs-nav-4"><?php _e('Image Settings' , 'postie') ?></li>
+	<li id="simpleTabs-nav-5"><?php _e('Video and Audio Settings' , 'postie') ?></li>
+  </ul>
+	</div>
+	<div id="simpleTabs-content-1" class="simpleTabs-content">
+	<table class='form-table'>
+    <tr><td colspan=2>
   <?php if (isset($config['CRONLESS']) && $config['CRONLESS']!='') {
   ?>
-        <fieldset class="options">
-    <legend><?php _e('Cronless postie settings', 'postie');?></legend>
   <p><?php _e('Cronless postie should check for mail', 'postie') ?>
   <select name='CRONLESS' id='CRONLESS'>
     <option value="weekly" <?php if($config["CRONLESS"] == "weekly") { echo "selected='selected'";} ?>><?php _e('Once weekly', 'postie') ?></option>
@@ -60,24 +64,12 @@ fieldset {border: 1px solid black;}
     <option value="twiceperhour" <?php if($config["CRONLESS"] == "twiceperhour") { echo "selected='selected'";} ?>><?php _e('twice per hour', 'postie') ?></option>
     <option value="tenminutes" <?php if($config["CRONLESS"] == "tenminutes") { echo "selected='selected'";} ?>><?php _e('every ten minutes', 'postie') ?></option>
   </select>
-  </fieldset>
   </p>
   <?php 
   }
   ?>
-	<table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
 
 
-
-
-
-
-    <tr><td colspan=2>
-        <fieldset class="options">
-    <legend><?php _e('E-mail and Mailserver Settings', 'postie');?></legend>
-
-
-	<table width="100%" cellspacing="2" cellpadding="5" class="editform">
 	<tr>
         <th scope="row"><?php _e('Mail Protocol:', 'postie') ?></th>
         <td>
@@ -130,14 +122,10 @@ fieldset {border: 1px solid black;}
 			</td>
 		</tr>
 	</table>
-</fieldset>
-    </td>
-    </tr>
+  </div>
+	<div id="simpleTabs-content-2" class="simpleTabs-content">
+            <table class='form-table'>
 
-    <tr><td colspan=2> 
-        <fieldset class="options"> 
-        <legend><?php _e('Authorization Settings', 'postie');?></legend> 
-            <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
             <?php echo BuildBooleanSelect("Allow Anyone To Post Via Email","TURN_AUTHORIZATION_OFF",$config["TURN_AUTHORIZATION_OFF"],"Changing this to yes is NOT RECOMMEDED - anything that gets sent in will automatically be posted. This could make it easier to compromise your server - YOU HAVE BEEN WARNED.");?>
         <tr>
         <th scope="row"><?php _e('Roles That Can Post:', 'postie') ?></th>
@@ -191,16 +179,9 @@ fieldset {border: 1px solid black;}
                 </td> 
             </tr> 
             </table> 
-        </fieldset> 
-    </td> 
-    </tr> 
-
-
-
-    <tr><td colspan=2> 
-        <fieldset class="options"> 
-        <legend><?php _e('Message Settings', 'postie');?></legend> 
-            <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
+</div>
+	<div id="simpleTabs-content-3" class="simpleTabs-content">
+  <table class='form-table'>
             <tr valign="top">
                 <th scope="row"><?php _e('Default post by mail category:', 'postie') ?></th>
                 <td>
@@ -315,15 +296,11 @@ fieldset {border: 1px solid black;}
             <?php echo BuildBooleanSelect("Drop The Signature From Mail","DROP_SIGNATURE",$config["DROP_SIGNATURE"]);?>
             <?php echo BuildTextArea("Signature Patterns","SIG_PATTERN_LIST",$config["SIG_PATTERN_LIST"],"Put each pattern on a seperate line and make sure to escape any special characters.");?>
             </table> 
-        </fieldset> 
-    </td> 
-    </tr> 
+            </div>
+	<div id="simpleTabs-content-4" class="simpleTabs-content">
+  <table class='form-table'>
 
 
-    <tr><td colspan=2> 
-        <fieldset class="options"> 
-        <legend><?php _e('Image Settings', 'postie');?></legend> 
-            <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
             <?php echo BuildBooleanSelect("Post Images At
             End","IMAGES_APPEND",$config["IMAGES_APPEND"],"No means they will
             be put before the text of the message.");?>     
@@ -354,15 +331,10 @@ fieldset {border: 1px solid black;}
 Recommended:
             no");?>            
             </table> 
-        </fieldset> 
-    </td> 
-    </tr> 
+   </div> 
+	<div id="simpleTabs-content-5" class="simpleTabs-content">
+<table class='form-table'>
 
-
-    <tr><td colspan=2> 
-        <fieldset class="options"> 
-        <legend><?php _e('Video options', 'postie');?></legend> 
-            <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
             <?php echo BuildBooleanSelect("Embed 3GP videos as QuickTime","3GP_QT",$config["3GP_QT"],"This controls if the video is just a link or embeded in the page using QuickTime");?>
             <?php echo BuildBooleanSelect("Autoplay embedded
             videos?","VIDEO_AUTOPLAY",$config["VIDEO_AUTOPLAY"],"When this is
@@ -442,13 +414,27 @@ Recommended:
 
 
 	</table> 
+  </div>
 	<p class="submit">
 		<input type="submit" name="Submit" value="<?php _e('Update Options', 'postie') ?> &raquo;" />
 	</p>
 </form> 
-
-<a href="http://validator.w3.org/check?uri=referer">valid xhtml</a>
-<a href="http://jigsaw.w3.org/css-validator/check/referer">valid css</a><br />
+<div id="w3c">
+    <a href="http://validator.w3.org/check?uri=referer"><img src="<?php echo '../wp-content/plugins/postie/images/valid-xhtml10-blue.png'; ?>" alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
+    <a href="http://jigsaw.w3.org/css-validator/check/referer"><img style="border:0;width:88px;height:31px" src="<?php echo '../wp-content/plugins/postie/images/vcss-blue.gif'; ?>" alt="Valid CSS!" /></a>
+</div>
 Postie Version:
 $Id$
 </div>
+
+<script type="text/javascript">
+jQuery(document).ready(function() {
+	jQuery("#simpleTabs").simpleTabs({
+		fadeSpeed: "medium", // @param : low, medium, fast
+		defautContent: 1,    // @param : number ( simpleTabs-nav-number)
+		autoNav: "false",     // @param : true or false
+		closeTabs : "false"   // @param : true or false;
+	});
+
+});
+</script>
