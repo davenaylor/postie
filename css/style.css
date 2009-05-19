@@ -21,3 +21,8 @@ span.recommendation {font-size:.7em;
                      font-weight:normal;
                      color:#222;
                     }
+div.simpleTabs-content ul {margin-left:1em}
+div.simpleTabs-content li {list-style-type:disc;
+                           margin-left:1em;}
+div.simpleTabs-content li li {list-style-type:square;}
+div.simpleTabs-content li li li {list-style-type:circle;}

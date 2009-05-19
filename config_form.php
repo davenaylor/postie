@@ -43,6 +43,8 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 	<li id="simpleTabs-nav-3"><?php _e('Message' , 'postie') ?></li>
 	<li id="simpleTabs-nav-4"><?php _e('Image' , 'postie') ?></li>
 	<li id="simpleTabs-nav-5"><?php _e('Video and Audio' , 'postie') ?></li>
+	<li id="simpleTabs-nav-6"><?php _e('Help' , 'postie') ?></li>
+	<li id="simpleTabs-nav-7"><?php _e('FAQ' , 'postie') ?></li>
   </ul>
 	</div>
 	<div id="simpleTabs-content-1" class="simpleTabs-content">
@@ -401,6 +403,12 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 
 
 	</table> 
+  </div>
+	<div id="simpleTabs-content-6" class="simpleTabs-content">
+  <?php include('readme.html'); ?>
+  </div>
+	<div id="simpleTabs-content-7" class="simpleTabs-content">
+  <?php include('faq.html'); ?>
   </div>
 		<input type="submit" name="Submit" value="<?php _e('Update Options', 'postie') ?> &raquo;" class='button' />
 </form> 
