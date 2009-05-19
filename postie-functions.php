@@ -1812,17 +1812,6 @@ function DisplayEmailPost($details) {
   print '<b>Posted content:</b></p><hr />' . $details["post_content"] . '<hr /><pre>';
 }
 /**
-  * This function confirms that everything is setup correctly
-  */
-function TestWPMailInstallation() {
-    $config = GetConfig();
-    IsWritableDirectory($config["REALPHOTOSDIR"]);
-    IsWritableDirectory($config["REALFILESDIR"]);
-    if (!TestPostieDirectory) {
-        print("<p>Postie should be in its own directory in wp-content/plugins/postie</p>");
-    }
-}
-/**
   * Takes a value and builds a simple simple yes/no select box
   * @param string
   * @param string

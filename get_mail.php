@@ -14,7 +14,6 @@ require_once (dirname(__FILE__). DIRECTORY_SEPARATOR . 'postie-functions.php');
 /* END OF USER VARIABLES */
 //some variables
 error_reporting(2037);
-TestWPMailInstallation();
 
 //Retreive emails 
 print("<pre>\n");
