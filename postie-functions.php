@@ -6,7 +6,6 @@ $Id$
 /*TODO 
  * html purify
  * windows 1252 encoding
- * upload real attachments
  */
 #global $config,$debug;
 #$debug=true;
@@ -32,7 +31,6 @@ if (!function_exists('fnmatch')) {
   */
 function PostEmail($poster,$mimeDecodedEmail) {
   $config = GetConfig();
-  $GLOBALS["POSTIE_IMAGE_ROTATION"] = 0;
   $attachments = array(
           "html" => array(), //holds the html for each image
           "cids" => array(), //holds the cids for HTML email
@@ -51,7 +49,6 @@ function PostEmail($poster,$mimeDecodedEmail) {
   */
   $post_id = wp_insert_post($tmpPost);
   $content = GetContent($mimeDecodedEmail,$attachments,$post_id);
-  echo "content is: $content";
   $subject = GetSubject($mimeDecodedEmail,$content);
   if ($debug) {
     echo "the subject is $subject, right after calling GetSubject\n";
@@ -145,7 +142,6 @@ function clickableLink($text) {
   // try to embed youtube videos
   $ret = preg_replace("#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is", "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />", $ret);
 
-  echo "ret=$ret\n";
   // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
   // xxxx can only be alpha characters.
   // yyyy is anything up to the first space, newline, comma, double quote or <
@@ -489,7 +485,6 @@ function PostToDB($details) {
       'comment_parent' => 0
       );
 
-      echo "the comment is:\n";
       $post_ID = wp_insert_comment($comment);
     }
     if ($config["CUSTOM_IMAGE_FIELD"]) {
@@ -532,7 +527,6 @@ function GetContent ($part,&$attachments, $post_id) {
       || BannedFileName($part->ctype_parameters['name'])) {
     return(NULL);
   }
-  
   if ($part->ctype_primary == "application"
       && $part->ctype_secondary == "octet-stream") {
     if ($part->disposition == "attachment") {
@@ -578,12 +572,10 @@ function GetContent ($part,&$attachments, $post_id) {
             //convert enriched text to HTML
             $meta_return .= etf2HTML($part->body ) . "\n";
           } elseif ($part->ctype_secondary=='html') {
-            echo "\nhtml\n";
             //strip excess HTML
             $meta_return .= HTML2HTML($part->body ) . "\n";
             //$meta_return .= $part->body  . "\n";
           } else {
-            echo "\ntext\n";
             //regular text, so just strip the pgp signature
             if (ALLOW_HTML_IN_BODY) {
               $meta_return .= $part->body  . "\n";
@@ -595,32 +587,10 @@ function GetContent ($part,&$attachments, $post_id) {
           break;
 
       case 'image':
-        $overrides = array('test_form'=>false, 'test_size'=>false,
-                           'test_type'=>false);
-        $tmpFile=tempnam('/tmp', 'postie');
-        $fp = fopen($tmpFile, 'w');
-        fwrite($fp, $part->body);
-        fclose($fp);
-        $the_file = array('name' => $part->ctype_parameters['name'],
-                          'type' => $part->ctype_secondary,
-                          'tmp_name' => $tmpFile,
-                          'size' => filesize($tmpFile),
-                          'error' => ''
-                          );
-        $file_id = postie_media_handle_upload($the_file, $post_id);
-        unlink($tmpFile);
+        $file_id = postie_media_handle_upload($part, $post_id);
         $file = wp_get_attachment_url($file_id);
 
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
-        $marimex=$marime[0]+20;
-        $marimey=$marime[1]+20;
-        $onclick='';
-        if ($config['IMAGE_NEW_WINDOW']) {
-          $onclick='" onclick="window.open(' . "'"
-              . $config["URLPHOTOSDIR"] . $fullImage . "','"
-                . "full_size_image" . "','"
-                . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;";
-        }
         $the_post=get_post($file_id);
         /* TODO make these options */
         $url=wp_get_attachment_link($file_id);
@@ -636,6 +606,14 @@ function GetContent ($part,&$attachments, $post_id) {
           $attachments["cids"][$cid] = array($file,count($attachments["html"]) - 1);
         }
         break;
+      case 'audio':
+        $file_id = postie_media_handle_upload($part, $post_id);
+        $file = wp_get_attachment_url($file_id);
+        $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
+        $attachments["html"][] = parseAudioTemplate($file,
+            $config['AUDIOTEMPLATE']);
+        break;
+
       default:
         if (in_array(strtolower($part->ctype_primary),
             $config["SUPPORTED_FILE_TYPES"])) {
@@ -643,20 +621,7 @@ function GetContent ($part,&$attachments, $post_id) {
           if ( $part->ctype_secondary == 'pgp-signature' )
             break;
           //postie_upload_attachment($part);
-          $overrides = array('test_form'=>false, 'test_size'=>false,
-                             'test_type'=>false);
-          $tmpFile=tempnam('/tmp', 'postie');
-          $fp = fopen($tmpFile, 'w');
-          fwrite($fp, $part->body);
-          fclose($fp);
-          $the_file = array('name' => $part->ctype_parameters['name'],
-                            'type' => $part->ctype_secondary,
-                            'tmp_name' => $tmpFile,
-                            'size' => filesize($tmpFile),
-                            'error' => ''
-                            );
-          $file_id = postie_media_handle_upload($the_file, $post_id);
-          unlink($tmpFile);
+          $file_id = postie_media_handle_upload($part, $post_id);
           $file = wp_get_attachment_url($file_id);
           $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
 
@@ -673,7 +638,7 @@ function GetContent ($part,&$attachments, $post_id) {
               if ($config['AUTOPLAY']) {
                 $autoplay='true';
               }
-              $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->' .
+              $attachments["html"][] = 
                   '<object '.
                       'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
                       'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
@@ -705,7 +670,10 @@ function GetContent ($part,&$attachments, $post_id) {
                     escapeshellarg($scaledFile) );
                 @exec ('chmod 755 ' . escapeshellarg($scaledFile));
 
-                $attachments["html"][] .= '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><div class="' . $config["3GPDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fileName. '"><img src="' . $config["URLPHOTOSDIR"] . $scaledFileName . '" alt="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
+                $attachments["html"][] .= '<div class="' . 
+                    $config["3GPDIV"].'"><a href="' . $file. '"><img src="' . 
+                    $scaledFileName . '" alt="' . 
+                    $part->ctype_parameters['name'] . ' /></a></div>' . "\n";
               } else {
                 $attachments["html"][] = '<div class="' .
                 $config["ATTACHMENTDIV"].'"><a href="' . $file. '" class="' . $config["3GPCLASS"].'">' . $part->ctype_parameters['name'] . '</a></div>' . "\n";
@@ -874,7 +842,9 @@ if ( empty($from) ) {
   $sql = 'SELECT id FROM '. $wpdb->users.' WHERE user_email=\'' . addslashes($from) . "' LIMIT 1;";
   $user_ID= $wpdb->get_var($sql);
   $user = new WP_User($user_ID);
-  if ($config["TURN_AUTHORIZATION_OFF"] || CheckEmailAddress($from) || CheckEmailAddress($resentFrom)) {
+  if ($config["TURN_AUTHORIZATION_OFF"] || 
+      CheckEmailAddress($from, $config['AUTHORIZED_ADDRESSES']) ||
+      CheckEmailAddress($resentFrom, $config['AUTHORIZED_ADDRESSES'])) {
     if (empty($user_ID)){
         print("$from is authorized to post as the administrator\n");
         $from = get_option("admin_email");
@@ -1216,8 +1186,20 @@ function FilterAppleFile(&$mimeDecodedEmail) {
         $mimeDecodedEmail->parts = $newParts; //This is now the filtered list of just the preferred type.
     }
 }
-function postie_media_handle_upload($the_file, $post_id, $post_data = array()) {
+function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   $overrides = array('test_form'=>false);
+        //$overrides = array('test_form'=>false, 'test_size'=>false,
+         //                  'test_type'=>false);
+  $tmpFile=tempnam('/tmp', 'postie');
+  $fp = fopen($tmpFile, 'w');
+  fwrite($fp, $part->body);
+  fclose($fp);
+  $the_file = array('name' => $part->ctype_parameters['name'],
+                    'type' => $part->ctype_secondary,
+                    'tmp_name' => $tmpFile,
+                    'size' => filesize($tmpFile),
+                    'error' => ''
+                    );
 
   $time = current_time('mysql');
   if ( $post = get_post($post_id) ) {
@@ -1226,6 +1208,7 @@ function postie_media_handle_upload($the_file, $post_id, $post_data = array()) {
   }
 
   $file = postie_handle_upload($the_file, $overrides, $time);
+  unlink($tmpFile);
 
   if ( isset($file['error']) )
     return new WP_Error( 'upload_error', $file['error'] );
@@ -1504,14 +1487,14 @@ function DisplayMIMEPartTypes($mimeDecodedEmail) {
   * @param string - email address
   * @return boolean
   */
-function CheckEmailAddress($address) {
+function CheckEmailAddress($address, $authorized) {
     $config = GetConfig();
     $address = strtolower($address);
-    if (!is_array($config["AUTHORIZED_ADDRESSES"])
-            || !count($config["AUTHORIZED_ADDRESSES"])) {
+    if (!is_array($authorized)
+            || !count($authorized)) {
         return false;
     }
-    return(in_array($address,$config["AUTHORIZED_ADDRESSES"]));
+    return(in_array($address,$authorized));
 }
 /**
   *This method works around a problemw with email address with extra <> in the email address
@@ -1595,6 +1578,11 @@ size. If not found, we default to medium */
   }
   return($imageTemplate);
 } 
+
+function parseAudioTemplate($file, $audioTemplate) {
+  $html = str_replace('{FILELINK}', $file, $audioTemplate);
+  return($html);
+}
 /**
   * When sending in HTML email the html refers to the content-id(CID) of the image - this replaces
   * the cid place holder with the actual url of the image sent in
@@ -1877,10 +1865,8 @@ function SetupConfiguration() {
   */
 function ResetPostieConfig() {
 	global $wpdb;
-  //Get rid of the old table
-  //$postie_table=$GLOBALS["table_prefix"]. "postie_config";
-  $query ="UPDATE ". POSTIE_TABLE . " set value='' WHERE label NOT IN ('MAIL_PASSWORD', 'MAIL_SERVER', 'MAIL_SERVER_PORT', 'MAIL_USERID', 'INPUT_PROTOCOL');";
-  echo "<script type='text/javascript'>alert('query=$query');</script>\n";
+  //Get rid of old values
+  $query ="delete from  ". POSTIE_TABLE . "  WHERE label NOT IN ('MAIL_PASSWORD', 'MAIL_SERVER', 'MAIL_SERVER_PORT', 'MAIL_USERID', 'INPUT_PROTOCOL');";
   $results=$wpdb->query($wpdb->prepare($query));
   $config = GetConfig();
   $key_arrays = GetListOfArrayConfig();
@@ -1888,7 +1874,6 @@ function ResetPostieConfig() {
       $config[$key] = join("\n",$config[$key]);
   }
   UpdatePostieConfig($config);
-  return('foo');
 }
 /**
   * This function handles updating the configuration 
@@ -2020,6 +2005,21 @@ function GetDBConfig() {
     if (!isset($config["ADD_META"])) { $config["ADD_META"] =  'no'; }
     if (!isset($config["USEIMAGETEMPLATE"]))  
       $config["USEIMAGETEMPLATE"] = false; 
+
+    if (!isset($config["AUDIOTEMPLATE"])) { 
+      $config["AUDIOTEMPLATE"] ='
+          <embed type="application/x-shockwave-flash" ' .
+          'src="http://www.google.com/reader/ui/3247397568-audio-player.swf?audioUrl={FILELINK}" ' . 
+          'width="400" height="27" allowscriptaccess="never" quality="best" ' .
+          'bgcolor="#ffffff" wmode="window" flashvars="playerMode=embedded" />';
+    }
+    if (!isset($config["SELECTED_AUDIOTEMPLATE"])) { 
+      $config['SELECTED_AUDIOTEMPLATE'] = 'simple_link';
+    }
+    if (!isset($config["AUDIOTEMPLATES"])) { 
+      include_once('templates/audio_templates.php');
+      $config['AUDIOTEMPLATES']=$audioTemplates;
+    }
     if (!isset($config["USEVIDEOTEMPLATE"])) 
       $config["USEVIDEOTEMPLATE"] = false; 
     if (!isset($config["POST_STATUS"])) 

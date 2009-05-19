@@ -37,8 +37,8 @@ $Id$
 */
 
 //Older Version History is in the HISTORY file
-error_reporting(E_ALL);
-ini_set("display_errors", 1);
+//error_reporting(E_ALL);
+//ini_set("display_errors", 1);
 
 define("POSTIE_ROOT",dirname(__FILE__));
 

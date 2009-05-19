@@ -67,46 +67,43 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 
 
 	<tr>
-        <th scope="row"><?php _e('Mail Protocol:', 'postie') ?>        </th>
-        <td>
-        <select name="INPUT_PROTOCOL" id="INPUT_PROTOCOL">
-        <option value="pop3">POP3</option>
-        <?php if (HasIMAPSupport(false)):?>
-            <option value="imap" <?php if($config["INPUT_PROTOCOL"] == "imap") { echo "SELECTED";} ?>>IMAP</option>
-            <option value="pop3-ssl" <?php if($config["INPUT_PROTOCOL"] == "pop3-ssl") { echo "SELECTED";} ?>>POP3-SSL</option>
-            <option value="imap-ssl" <?php if($config["INPUT_PROTOCOL"] == "imap-ssl") { echo "SELECTED";} ?>>IMAP-SSL</option>
-        <?php else:?>
-            <option value="pop3" ><?php _e("IMAP/IMAP-SSL/POP3-SSL unavailable", 'postie');?></option>
-        <?php endif;?>
-        </select>
-        </td>
-      </tr>
-      <tr>
-			<th scope="row"><?php _e('Port:', 'postie') ?><br />
-        <span class='recommendation'><?php _e("Standard Ports:", 'postie');?><br />
-              <?php _e("POP3", 'postie');?> - 110<br />
-              <?php _e("IMAP", 'postie');?> - 143<br />
-              <?php _e("IMAP-SSL", 'postie');?>- 993 <br />
-              <?php _e("POP3-SSL", 'postie');?> - 995 <br />
-              </span>
-      </th>
-      <td>
-			<input name="MAIL_SERVER_PORT" type="text" id="MAIL_SERVER_PORT" value="<?php echo $config["MAIL_SERVER_PORT"];?>" size="6" />
-			</td>
-		</tr>
-      <tr>
-        <th scope="row"><?php _e('Postie Time Correction:', 'postie') ?>
-            <br />
-                <span class='recommendation'><?php _e("Should be the same as
-                your normal offset - but this lets you adjust it in cases
-                where that doesn't work.", 'postie');?></span>
-         </th>
-        <td><input name="TIME_OFFSET" type="text" id="TIME_OFFSET" size="2" value="<?php echo $config['TIME_OFFSET']; ?>" /> 
-        <?php _e('hours', 'postie') ?> 
+    <th scope="row"><?php _e('Mail Protocol:', 'postie') ?>        </th>
+    <td>
+    <select name="INPUT_PROTOCOL" id="INPUT_PROTOCOL">
+    <option value="pop3">POP3</option>
+    <?php if (HasIMAPSupport(false)):?>
+        <option value="imap" <?php if($config["INPUT_PROTOCOL"] == "imap") { echo "SELECTED";} ?>>IMAP</option>
+        <option value="pop3-ssl" <?php if($config["INPUT_PROTOCOL"] == "pop3-ssl") { echo "SELECTED";} ?>>POP3-SSL</option>
+        <option value="imap-ssl" <?php if($config["INPUT_PROTOCOL"] == "imap-ssl") { echo "SELECTED";} ?>>IMAP-SSL</option>
+    <?php else:?>
+        <option value="pop3" ><?php _e("IMAP/IMAP-SSL/POP3-SSL unavailable", 'postie');?></option>
+    <?php endif;?>
+    </select>
+    </td>
+  </tr>
+  <tr>
+    <th scope="row"><?php _e('Port:', 'postie') ?><br />
+      <span class='recommendation'><?php _e("Standard Ports:", 'postie');?><br />
+            <?php _e("POP3", 'postie');?> - 110<br />
+            <?php _e("IMAP", 'postie');?> - 143<br />
+            <?php _e("IMAP-SSL", 'postie');?>- 993 <br />
+            <?php _e("POP3-SSL", 'postie');?> - 995 <br />
+            </span>
+    </th>
+    <td>
+    <input name="MAIL_SERVER_PORT" type="text" id="MAIL_SERVER_PORT" value="<?php echo $config["MAIL_SERVER_PORT"];?>" size="6" />
+    </td>
+  </tr>
+  <tr>
+    <th scope="row"><?php _e('Postie Time Correction:', 'postie') ?>
+        <br />
+            <span class='recommendation'><?php _e("Should be the same as your normal offset - but this lets you adjust it in cases where that doesn't work.", 'postie');?></span>
+     </th>
+    <td><input name="TIME_OFFSET" type="text" id="TIME_OFFSET" size="2" value="<?php echo $config['TIME_OFFSET']; ?>" /> 
+    <?php _e('hours', 'postie') ?> 
 
-        </td>
-      </tr>
-	</tr>
+    </td>
+  </tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Mail Server:', 'postie') ?></th>
 			<td><input name="MAIL_SERVER" type="text" id="MAIL_SERVER" value="<?php echo $config["MAIL_SERVER"];?>" size="40" />
@@ -131,8 +128,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
         <tr>
         <th scope="row"><?php _e('Roles That Can Post:', 'postie') ?>
         <br />
-        <span class='recommendation'><?php _e("This allows you to grant access to other users to post
-        if they have the proper access level", 'postie');?></span></th>
+        <span class='recommendation'><?php _e("This allows you to grant access to other users to post if they have the proper access level", 'postie');?></span></th>
         <td>
         <table>
         <tr><th>Administrator role can always post.</th>
@@ -168,8 +164,8 @@ $messages[2] = __("Error - unable to save configuration",'postie');
             </tr> 
             <?php echo BuildTextArea("Authorized Addresses","AUTHORIZED_ADDRESSES",$config["AUTHORIZED_ADDRESSES"],"Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level.");?>
             <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Admin
-                username:') ?> </th> 
+                <th width="33%" valign="top" scope="row">
+                <?php _e('Admin username:') ?> </th> 
                 <td>
                 <input name="ADMIN_USERNAME" type="text" id="ADMIN_USERNAME"
                 value="<?php echo $config["ADMIN_USERNAME"]; ?>" size="50" />                </td> 
@@ -195,16 +191,16 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                         ?>
                 </select></td>
                 -->
-            </tr>
-            <tr valign="top">
-                <th scope="row"><?php _e('Default post by mail tag(s):
-                separated by commas', 'postie') ?></th>
-                <td><input type='text' name="DEFAULT_POST_TAGS"
-                id="DEFAULT_POST_TAGS" value='<?php echo
-                $config["DEFAULT_POST_TAGS"] ?>' />
-                </td>
-            </tr>
-            <tr> 
+          </tr>
+          <tr valign="top">
+            <th scope="row">
+            <?php _e('Default post by mail tag(s): separated by commas', 'postie') ?></th>
+            <td><input type='text' name="DEFAULT_POST_TAGS"
+            id="DEFAULT_POST_TAGS" value='<?php echo
+            $config["DEFAULT_POST_TAGS"] ?>' />
+            </td>
+          </tr>
+          <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Default Title:', 'postie') ?> </th> 
                 <td>
                 <input name="DEFAULT_TITLE" type="text" id="DEFAULT_TITLE" value="<?php echo $config["DEFAULT_TITLE"]; ?>" size="50" /><br />
@@ -244,9 +240,9 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                 </td> 
             </tr> 
             -->
-            <?php echo BuildBooleanSelect("Filter
-            newlines","FILTERNEWLINES",$config["FILTERNEWLINES"], "Set to no
-            if using markdown or textitle syntax");?>
+            <?php echo BuildBooleanSelect("Filter newlines",
+              "FILTERNEWLINES",$config["FILTERNEWLINES"],
+              "Set to no if using markdown or textitle syntax");?>
             <?php echo BuildBooleanSelect("Replace newline characters with
             html line breaks (&lt;br
             /&gt;)","CONVERTNEWLINE",$config["CONVERTNEWLINE"]);?>
@@ -262,19 +258,13 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                 <span class='recommendation'>UTF-8 <?php _e("should handle ISO-8859-1 as well", 'postie');?></span>
                 </td> 
             </tr> 
-            <?php echo BuildBooleanSelect("Decode Quoted Printable Data","MESSAGE_DEQUOTE",$config["MESSAGE_DEQUOTE"], '');?>
+            <?php echo BuildBooleanSelect("Decode Quoted Printable Data","MESSAGE_DEQUOTE",$config["MESSAGE_DEQUOTE"]);?>
             <?php echo BuildTextArea("Supported File Types","SUPPORTED_FILE_TYPES",$config["SUPPORTED_FILE_TYPES"],"Put each type on a single line.");?>
-            <?php echo BuildTextArea("Banned File
-            Names","BANNED_FILES_LIST",$config["BANNED_FILES_LIST"],"Put each
-            file name on a single line.Files matching this list will never be
-            posted to your blog. You can use wildcards such as *.xls, or *.* for
-            all files");?>
+            <?php echo BuildTextArea("Banned File Names","BANNED_FILES_LIST",$config["BANNED_FILES_LIST"],"Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files");?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Tag Of
                 Message Start:', 'postie') ?> <br />
-                <span class='recommendation'><?php _e('Use to remove
-                any text from a message that the email provider puts at the
-                top of the message', 'postie') ?></span></th>
+                <span class='recommendation'><?php _e('Use to remove any text from a message that the email provider puts at the top of the message', 'postie') ?></span></th>
                 <td>
                 <input name="MESSAGE_START" type="text" id="MESSAGE_START" value="<?php echo $config["MESSAGE_START"]; ?>" size="20" /><br />
                 </td> 
@@ -282,9 +272,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Tag Of
                 Message End:', 'postie') ?> <br />
-                <span class='recommendation'><?php _e('Use to remove
-                any text from a message that the email provider puts at the
-                end of the message', 'postie') ?></span></th>
+                <span class='recommendation'><?php _e('Use to remove any text from a message that the email provider puts at the end of the message', 'postie') ?></span></th>
                 <td>
                 <input name="MESSAGE_END" type="text" id="MESSAGE_END" value="<?php echo $config["MESSAGE_END"]; ?>" size="20" /><br />
                 </td> 
@@ -298,8 +286,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 
 
             <?php echo BuildBooleanSelect("Post Images At
-            End","IMAGES_APPEND",$config["IMAGES_APPEND"],"No means they will
-            be put before the text of the message.");?>     
+            End","IMAGES_APPEND",$config["IMAGES_APPEND"],"No means they will be put before the text of the message.");?>     
             <?php echo BuildBooleanSelect("Start Image Count At 0","START_IMAGE_COUNT_AT_ZERO",$config["START_IMAGE_COUNT_AT_ZERO"]);?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Image Place Holder Tag:', 'postie') ?> </th> 
@@ -308,18 +295,14 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                 </td> 
             </tr> 
             <?php echo BuildBooleanSelect("Use custom image
-            template","USEIMAGETEMPLATE",$config["USEIMAGETEMPLATE"],"If you
-            don't like the default html output around images, you can enter
-            your own below. My personal template is already there. See the
-            readme for more details");?>
+            template","USEIMAGETEMPLATE",$config["USEIMAGETEMPLATE"],"If you don't like the default html output around images, you can enter your own below. My personal template is already there. See the readme for more details");?>
             <tr> 
                 <th width="33%" valign="top" scope="row">                <td>
                 <textarea  cols="50" rows="6" name="IMAGETEMPLATE"
                 id="IMAGETEMPLATE"><?php echo $config["IMAGETEMPLATE"]; ?></textarea>
                 </td> 
             </tr> 
-            <?php echo BuildBooleanSelect("Use custom image
-            field","CUSTOM_IMAGE_FIELD",$config["CUSTOM_IMAGE_FIELD"],"When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'.");?>            
+            <?php echo BuildBooleanSelect("Use custom image field","CUSTOM_IMAGE_FIELD",$config["CUSTOM_IMAGE_FIELD"],"When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'.");?>            
             </table> 
    </div> 
 	<div id="simpleTabs-content-5" class="simpleTabs-content">
@@ -327,8 +310,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 
             <?php echo BuildBooleanSelect("Embed 3GP videos as QuickTime","3GP_QT",$config["3GP_QT"],"This controls if the video is just a link or embeded in the page using QuickTime");?>
             <?php echo BuildBooleanSelect("Autoplay embedded
-            videos?","VIDEO_AUTOPLAY",$config["VIDEO_AUTOPLAY"],"When this is
-            set to yes, videos will start to play automatically.");?>
+            videos?","VIDEO_AUTOPLAY",$config["VIDEO_AUTOPLAY"],"When this is set to yes, videos will start to play automatically.");?>
                 <tr>
                     <th scope="row"><?php _e('Video width:', 'postie') ?> </th>
                     <td><input name="VIDEO_WIDTH" type="text" id="VIDEO_WIDTH"
@@ -375,33 +357,49 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                 </td> 
             </tr> 
             <?php echo BuildBooleanSelect("Use custom video
-            template","USEVIDEOTEMPLATE",$config["USEVIDEOTEMPLATE"],"If you
-            don't like the default html output around videos, you can enter
-            your own below. The default template is already there. See the
-            readme for more details");?>
+            template","USEVIDEOTEMPLATE",$config["USEVIDEOTEMPLATE"],"If you don't like the default html output around videos, you can enter your own below. The default template is already there. See the readme for more details");?>
             <tr> 
                 <th width="33%" valign="top" scope="row">                <td>
-                <textarea  cols="50" rows="6" name="VIDEOTEMPLATE"
+                <textarea  cols="70" rows="8" name="VIDEOTEMPLATE"
                 id="VIDEOTEMPLATE"><?php echo $config["VIDEOTEMPLATE"]; ?></textarea>
                 </td> 
             </tr> 
+            <tr><th scope='row'><?php _e('Audio template', 'postie') ?><br />
+            <span class='recommendation'><?php _e('Choose a default template,
+            then customize to your liking in the text box', 'postie') ?></span></th>
+            <td>
+  <input type='hidden' id='SELECTED_AUDIOTEMPLATE' name='SELECTED_AUDIOTEMPLATE'
+  value="<?php echo attribute_escape($config['SELECTED_AUDIOTEMPLATE']) ?>" />
+  <input type='hidden' id='CURRENT_AUDIOTEMPLATE' value="<?php echo
+attribute_escape($config['AUDIOTEMPLATE']) ?>" />
+			 <select name='AUDIOTEMPLATESELECT' id='AUDIOTEMPLATESELECT' onchange='changeStyle();' >
+			 <?php
+		$url = get_option('siteurl') . '/' . PLUGINDIR . '/postie/templates';
+			 $styleOptions=unserialize($config['AUDIOTEMPLATES']);
+			 $selected=$config['SELECTED_AUDIOTEMPLATE'];
+			 foreach ($styleOptions as $key=>$value) {
+			   if ($key!='selected') {
+           if ($key==$selected) {
+					   $select=' selected=selected ';
+					 } else {
+						 $select=' ';
+					 }
+					 echo '<option' .  $select . 'value="'.
+					     attribute_escape($value) . '" >'.$key . '</option>';
+         }
+       }
+			 ?>
+			 </select>
+	     &nbsp;&nbsp;
+			 <?php _e('Preview', 'postie'); ?>
+			 <span id='audioTemplatePreview' alt='preview'></span>
+   <textarea onfocus='customStyle();' cols='70' rows='7' id="AUDIOTEMPLATE"
+   name="AUDIOTEMPLATE"><?php echo attribute_escape($config['AUDIOTEMPLATE']) ?></textarea>
+			 </td>
             </table> 
         </fieldset> 
     </td> 
     </tr> 
-
-
-
-
-
-
-
-
-
-
-
-
-
 	</table> 
   </div>
 	<div id="simpleTabs-content-6" class="simpleTabs-content">
@@ -430,4 +428,32 @@ jQuery(document).ready(function() {
 	});
 
 });
+function changeStyle() {
+	var preview = document.getElementById('audioTemplatePreview');
+	var pageStyles = document.getElementById('AUDIOTEMPLATESELECT');
+	var selectedStyle;
+  var hiddenStyle=document.getElementById('SELECTED_AUDIOTEMPLATE');
+	for(i=0; i<pageStyles.options.length; i++) {
+		if (pageStyles.options[i].selected == true) {
+			selectedStyle=pageStyles.options[i];
+		}
+	}
+	hiddenStyle.value=selectedStyle.innerHTML
+	var previewHTML=selectedStyle.value
+  previewHTML=previewHTML.replace(/{FILELINK}/, '<?php echo $url ?>/funky.mp3');
+	previewHTML=previewHTML.replace(/{FILENAME}/, 'funky.mp3');
+  preview.innerHTML=previewHTML;
+  var pageStyle = document.getElementById('AUDIOTEMPLATE');
+  pageStyle.value=selectedStyle.value;
+}
+function restoreStyle() {
+  var defaultStyle = document.getElementById('CURRENT_AUDIOTEMPLATE').value;
+  var pageStyle = document.getElementById('AUDIOTEMPLATE');
+  pageStyle.value=defaultStyle;
+}
+function customStyle() {
+	var hiddenStyle=document.getElementById('SELECTED_AUDIOTEMPLATE');
+	hiddenStyle.value='custom';
+}
+	changeStyle();
 </script>
