@@ -261,9 +261,13 @@ sure that it is
       * Can now use the [gallery] feature of wordpress
       * Attachments are now connected to posts in the database
       * All image resizing uses wordpress's default settings (under media)
-      * Automatically turn links to youtube into an embedded player
+  * Configuration, settings and documentation improvements
       * Completely redesigned settings page (mostly thanks to Rainman)
       * Reset configuration no longer deletes mailserver settings
+      * Now including help files and faq directly in settings page
+  * More media features
+      * Automatically turn links to youtube into an embedded player
+      * Added option to embed audio files with custom templates
 
 * 1.2.2 (2009.05.xx)
   * Show empty categories for default category in options
