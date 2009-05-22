@@ -1,4 +1,5 @@
 <?php
+ini_set('xdebug.remote_mode', 'jit');
 /*
 $Id$
 */
@@ -521,7 +522,8 @@ function BannedFileName($filename) {
 function GetContent ($part,&$attachments, $post_id) {
   $config = GetConfig();
   $meta_return = NULL;	
-
+  echo "primary= " . $part->ctype_primary . ", secondary = " .  $part->ctype_secondary . "\n";
+  echo "paramaters=" . print_r($part->ctype_parameters). "\n";
   DecodeBase64Part($part);
   if (BannedFileName($part->ctype_parameters['name'])
       || BannedFileName($part->ctype_parameters['name'])) {
@@ -588,11 +590,15 @@ function GetContent ($part,&$attachments, $post_id) {
 
       case 'image':
         $file_id = postie_media_handle_upload($part, $post_id);
+        echo "file_id=$file_id";
         $file = wp_get_attachment_url($file_id);
 
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
         $the_post=get_post($file_id);
         /* TODO make these options */
+        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
+            $config['IMAGETEMPLATE']);
+        /*
         $url=wp_get_attachment_link($file_id);
         $align='left';
         $size='medium';
@@ -602,6 +608,7 @@ function GetContent ($part,&$attachments, $post_id) {
         $attachments["html"][] .= get_image_send_to_editor($file_id,
               $the_post->post_excerpt, $the_post->post_title, $align, 
               $url, '', $size);
+        */
         if ($cid) {
           $attachments["cids"][$cid] = array($file,count($attachments["html"]) - 1);
         }
@@ -610,8 +617,22 @@ function GetContent ($part,&$attachments, $post_id) {
         $file_id = postie_media_handle_upload($part, $post_id);
         $file = wp_get_attachment_url($file_id);
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
-        $attachments["html"][] = parseAudioTemplate($file,
+        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
             $config['AUDIOTEMPLATE']);
+        break;
+      case 'video':
+        $file_id = postie_media_handle_upload($part, $post_id);
+        $file = wp_get_attachment_url($file_id);
+        $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
+        if (in_array($part->ctype_secondary,
+            $config['VIDEO1TYPES'])) {
+          $videoTemplate=$config['VIDEO1TEMPLATE'];
+        } else if (in_array($part->ctype_secondary,
+            $config['VIDEO2TYPES'])) {
+          $videoTemplate=$config['VIDEO2TEMPLATE'];
+        }
+        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary, 
+            $videoTemplate);
         break;
 
       default:
@@ -1194,13 +1215,19 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   $fp = fopen($tmpFile, 'w');
   fwrite($fp, $part->body);
   fclose($fp);
-  $the_file = array('name' => $part->ctype_parameters['name'],
+  if ($part->ctype_parameters['name']=='') {
+    $name = $part->d_parameters['filename'];
+  } else {
+    $name =  $part->ctype_parameters['name'];
+  }
+  $the_file = array('name' => $name,
                     'type' => $part->ctype_secondary,
                     'tmp_name' => $tmpFile,
                     'size' => filesize($tmpFile),
                     'error' => ''
                     );
 
+  print_r($the_file);
   $time = current_time('mysql');
   if ( $post = get_post($post_id) ) {
     if ( substr( $post->post_date, 0, 4 ) > 0 )
@@ -1208,7 +1235,8 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   }
 
   $file = postie_handle_upload($the_file, $overrides, $time);
-  unlink($tmpFile);
+  print_r($file);
+  //unlink($tmpFile);
 
   if ( isset($file['error']) )
     return new WP_Error( 'upload_error', $file['error'] );
@@ -1529,6 +1557,54 @@ function GetNameFromEmail($address) {
     return($name);
 }
 
+function parseTemplate($id, $type, $template, $size='medium') {
+
+/* we check template for thumb, thumbnail, large, full and use that as
+size. If not found, we default to medium */
+  if ($type=='image') {
+    $sizes=array('thumbnail', 'medium', 'large');
+    $hwstrings=array();
+    $widths=array();
+    $heights=array();
+    for ($i=0; $i<count($sizes); $i++) {
+      list( $img_src[$i], $widths[$i], $heights[$i] ) = image_downsize($id,
+          $sizes[$i]);
+      $hwstrings[$i] = image_hwstring($widths[$i], $heights[$i]);
+    }
+  }
+  $the_post=get_post($id);
+  $uploadDir=wp_upload_dir();
+  $fileName=basename($the_post->guid);
+  $absFileName=$uploadDir['path'] .'/'. $fileName;
+  $relFileName=str_replace(ABSPATH,'', $absFileName);
+  $fileLink=wp_get_attachment_url($id);
+  $pageLink=get_attachment_link($id);
+
+  $template=str_replace('{THUMBNAIL}', $img_src[0], $template);
+  $template=str_replace('{THUMB}', $img_src[0], $template);
+  $template=str_replace('{MEDIUM}', $img_src[1], $template);
+  $template=str_replace('{LARGE}', $img_src[2], $template);
+  $template=str_replace('{FULL}', $fileLink, $template);
+  $template=str_replace('{FILELINK}', $fileLink, $template);
+  $template=str_replace('{PAGELINK}', $pageLink, $template);
+  $template=str_replace('{THUMBWIDTH}', $widths[0] . 'px', $template);
+  $template=str_replace('{THUMBHEIGHT}', $heights[0] . 'px', $template);
+  $template=str_replace('{MEDIUMWIDTH}', $widths[0] . 'px', $template);
+  $template=str_replace('{MEDIUMHEIGHT}', $heights[0] . 'px', $template);
+  $template=str_replace('{LARGEWIDTH}', $widths[0] . 'px', $template);
+  $template=str_replace('{LARGEHEIGHT}', $heights[0] . 'px', $template);
+  $template=str_replace('{FILENAME}', $fileName, $template);
+  $template=str_replace('{IMAGE}', $fileLink, $template);
+  $template=str_replace('{URL}', $fileLink, $template);
+  $template=str_replace('{RELFILENAME}', $relFileName, $template);
+  $template=str_replace('{POSTTITLE}', $the_post->post_title, $template);
+  if ($alt!='') {
+    $template=str_replace('{CAPTION}', $alt, $template);
+  } else {
+    $template=str_replace('{CAPTION}', '', $template);
+  }
+  return($template);
+} 
 function parseImageTemplate($html, $id, $alt, $title, $align, $url,
     $size='medium') {
   $config=GetConfig();
@@ -1886,8 +1962,14 @@ function UpdatePostieConfig($data) {
     foreach($config as $key => $value) {
         if (isset($data[$key])) {
             if (in_array($key,$key_arrays)) { //This is stored as an array
+                $data[$key]=trim($data[$key]);
+                if (strstr($data[$key], "\n")) {
+                  $delim = "\n";
+                } else {
+                  $delim = ',';
+                }
                 $config[$key] = array();
-                $values = explode("\n",$data[$key]);
+                $values = explode($delim,$data[$key]);
                 foreach($values as $item) {
                     if (trim($item)) {
                         $config[$key][] = trim($item);
@@ -2016,12 +2098,58 @@ function GetDBConfig() {
     if (!isset($config["SELECTED_AUDIOTEMPLATE"])) { 
       $config['SELECTED_AUDIOTEMPLATE'] = 'simple_link';
     }
-    if (!isset($config["AUDIOTEMPLATES"])) { 
-      include_once('templates/audio_templates.php');
-      $config['AUDIOTEMPLATES']=$audioTemplates;
+    include_once('templates/audio_templates.php');
+    $config['AUDIOTEMPLATES']=$audioTemplates;
+    if (!isset($config["SELECTED_VIDEO1TEMPLATE"])) { 
+      $config['SELECTED_VIDEO1TEMPLATE'] = 'simple_link';
     }
-    if (!isset($config["USEVIDEOTEMPLATE"])) 
-      $config["USEVIDEOTEMPLATE"] = false; 
+    include_once('templates/video1_templates.php');
+    $config['VIDEO1TEMPLATES']=$video1Templates;
+    if (!isset($config["VIDEO1TEMPLATE"])) { 
+      $config["VIDEO1TEMPLATE"] = '<object '.
+          'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
+          'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
+          'width="320"'.  'height="240"> '.
+          '<param name="src" value="{FILELINK}" /> '.
+          '<param name="autoplay" value="no" /> '.
+            '<param name="controller" value="true" /> '.
+           '<embed src="{FILELINK}" '.
+           'width="320" height="240"'.
+           'autoplay="no" controller="true" '.
+           'type="video/quicktime" '.
+           'pluginspage="http://www.apple.com/quicktime/download/" '.
+           'width="320" height="260">'.
+           '</embed> '.
+           '</object>';
+    }
+    if (!isset($config["VIDEO1TYPES"])) { 
+      $config['VIDEO1TYPES'] = 'mp4, 3gp, 3gpp2, 3gp2, mov';
+    }
+    if (!isset($config["SELECTED_VIDEO2TEMPLATE"])) { 
+      $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
+    }
+    include_once('templates/video2_templates.php');
+    $config['VIDEO2TEMPLATES']=$video2Templates;
+    if (!isset($config["VIDEO2TEMPLATE"])) { 
+      $config["VIDEO2TEMPLATE"] = '<object '.
+          'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
+          'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
+          'width="320"'.  'height="240"> '.
+          '<param name="src" value="{FILELINK}" /> '.
+          '<param name="autoplay" value="no" /> '.
+            '<param name="controller" value="true" /> '.
+           '<embed src="{FILELINK}" '.
+           'width="320" height="240"'.
+           'autoplay="no" controller="true" '.
+           'type="video/quicktime" '.
+           'pluginspage="http://www.apple.com/quicktime/download/" '.
+           'width="320" height="260">'.
+           '</embed> '.
+           '</object>';
+    }
+    if (!isset($config["VIDEO2TYPES"])) { 
+      $config['VIDEO2TYPES'] = 'x-flv';
+    }
     if (!isset($config["POST_STATUS"])) 
       $config["POST_STATUS"] = 'publish'; 
     if (!isset($config["IMAGE_NEW_WINDOW"])) 
@@ -2030,29 +2158,6 @@ function GetDBConfig() {
       $config["FILTERNEWLINES"] = true; 
     if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =
       "<div class='imageframe alignleft'><a href='{IMAGE}'><img src='{THUMBNAIL}' alt='{CAPTION}' title='{CAPTION}' class='attachment' /></a><div class='imagecaption'>{CAPTION}</div></div>";
-    }
-    if (!isset($config["VIDEOTEMPLATE"])) { $config["VIDEOTEMPLATE"] =
-        '<object '.
-            'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
-            'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
-            'width="' . $config['VIDEO_WIDTH'] . '" '.
-            'height="' . $config['VIDEO_HEIGHT'] . '"> '.
-            '<param name="src" value="'. 
-            $config["URLFILESDIR"] . $filename .'" /> '.
-            '<param name="autoplay" value="no" /> '.
-              '<param name="controller" value="true" /> '.
-             '<embed '.
-             'src="'. $config["URLFILESDIR"] . $filename .'" '.
-             'width="' . $config['VIDEO_WIDTH'] . '" '.
-             'height="' . $config['VIDEO_HEIGHT'] . '"'.
-             'autoplay="no" '.
-             'controller="true" '.
-             'type="video/quicktime" '.
-             'pluginspage="http://www.apple.com/quicktime/download/" '.
-             'width="' . $config['PLAYER_WIDTH'] . '" '.
-             'height="' . $config['PLAYER_HEIGHT'] . '">'.
-             '</embed> '.
-             '</object>';
     }
     return($config);
 }
@@ -2092,7 +2197,7 @@ function ConvertFilePathToUrl($path) {
   *@return array
   */
 function GetListOfArrayConfig() {
-    return(array("SUPPORTED_FILE_TYPES","AUTHORIZED_ADDRESSES","SIG_PATTERN_LIST","BANNED_FILES_LIST"));
+    return(array("SUPPORTED_FILE_TYPES","AUTHORIZED_ADDRESSES","SIG_PATTERN_LIST","BANNED_FILES_LIST", "VIDEO1TYPES", "VIDEO2TYPES"));
 }
 /**
   * Detects if they can do IMAP

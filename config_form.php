@@ -305,76 +305,111 @@ $messages[2] = __("Error - unable to save configuration",'postie');
             <?php echo BuildBooleanSelect("Use custom image field","CUSTOM_IMAGE_FIELD",$config["CUSTOM_IMAGE_FIELD"],"When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'.");?>            
             </table> 
    </div> 
+
+<!-- 
+##########   VIDEO AND AUDIO OPTIONS ###################
+-->
+
 	<div id="simpleTabs-content-5" class="simpleTabs-content">
 <table class='form-table'>
 
-            <?php echo BuildBooleanSelect("Embed 3GP videos as QuickTime","3GP_QT",$config["3GP_QT"],"This controls if the video is just a link or embeded in the page using QuickTime");?>
-            <?php echo BuildBooleanSelect("Autoplay embedded
-            videos?","VIDEO_AUTOPLAY",$config["VIDEO_AUTOPLAY"],"When this is set to yes, videos will start to play automatically.");?>
-                <tr>
-                    <th scope="row"><?php _e('Video width:', 'postie') ?> </th>
-                    <td><input name="VIDEO_WIDTH" type="text" id="VIDEO_WIDTH"
-                    value="<?php echo $config['VIDEO_WIDTH']; ?>" size="5" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('Video height:', 'postie') ?> </th>
-                    <td><input name="VIDEO_HEIGHT" type="text" id="VIDEO_HEIGHT"
-                    value="<?php echo $config['VIDEO_HEIGHT']; ?>" size="5" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('Video player width:', 'postie') ?> </th>
-                    <td><input name="PLAYER_WIDTH" type="text" id="PLAYER_WIDTH"
-                    value="<?php echo $config['PLAYER_WIDTH']; ?>" size="5" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('Video player height:', 'postie') ?> </th>
-                    <td><input name="PLAYER_HEIGHT" type="text" id="PLAYER_HEIGHT"
-                    value="<?php echo $config['PLAYER_HEIGHT']; ?>" size="5" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('Location of ffmpeg:', 'postie') ?> </th>
-                    <td><input name="3GP_FFMPEG" type="text" id="3GP_FFMPEG" value="<?php echo $config['3GP_FFMPEG']; ?>" size="30" />
-                    <br /><?php _e("Recommended");?>: <code><?php _e("only needed if you are on a Linux server and use 3gp video,and don't embed the video. This allows postie to make thumbnail of the very first frame");?>  <br /><?php _e("should be /usr/bin/ffmpeg", 'postie');?></code>
-                    </td>
-                </tr>
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('3GP CSS Class:', 'postie') ?> </th> 
-                <td>
-                <input name="3GPCLASS" type="text" id="3GPCLASS" value="<?php echo $config["3GPCLASS"]; ?>" size="50" /><br />
-                <br />
-                </td> 
-            </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('3GP Div CSS:', 'postie') ?> </th> 
-                <td>
-                <input name="3GPDIV" type="text" id="3GPDIV" value="<?php echo $config["3GPDIV"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>postie-3gp-div</code><p>This is the CSS class of a div that wraps each 3GP video. Can be used to style the post</p>
-                <br />
-                </td> 
-            </tr> 
-            <?php echo BuildBooleanSelect("Use custom video
-            template","USEVIDEOTEMPLATE",$config["USEVIDEOTEMPLATE"],"If you don't like the default html output around videos, you can enter your own below. The default template is already there. See the readme for more details");?>
-            <tr> 
-                <th width="33%" valign="top" scope="row">                <td>
-                <textarea  cols="70" rows="8" name="VIDEOTEMPLATE"
-                id="VIDEOTEMPLATE"><?php echo $config["VIDEOTEMPLATE"]; ?></textarea>
-                </td> 
-            </tr> 
-            <tr><th scope='row'><?php _e('Audio template', 'postie') ?><br />
+            <tr><th scope='row'><?php _e('Video template 1', 'postie') ?><br />
+            <span class='recommendation'><?php _e('Choose a default template,
+            then customize to your liking in the text box', 'postie') ?></span></th>
+<?php $templateDir = get_option('siteurl') . '/' . PLUGINDIR .  '/postie/templates'; ?>
+            <td>
+  <input type='hidden' id='SELECTED_VIDEO1TEMPLATE' name='SELECTED_VIDEO1TEMPLATE'
+  value="<?php echo attribute_escape($config['SELECTED_VIDEO1TEMPLATE']) ?>" />
+  <input type='hidden' id='CURRENT_VIDEO1TEMPLATE' value="<?php echo
+attribute_escape($config['VIDEO1TEMPLATE']) ?>" />
+			 <select name='VIDEO1TEMPLATESELECT' id='VIDEO1TEMPLATESELECT' 
+       onchange="changeStyle('video1TemplatePreview','VIDEO1TEMPLATE', 'VIDEO1TEMPLATESELECT', 'SELECTED_VIDEO1TEMPLATE','hi.mp4');" />
+			 <?php
+			 $styleOptions=unserialize($config['VIDEO1TEMPLATES']);
+			 $selected=$config['SELECTED_VIDEO1TEMPLATE'];
+			 foreach ($styleOptions as $key=>$value) {
+			   if ($key!='selected') {
+           if ($key==$selected) {
+					   $select=' selected=selected ';
+					 } else {
+						 $select=' ';
+					 }
+					 echo '<option' .  $select . 'value="'.
+					     attribute_escape($value) . '" >'.$key . '</option>';
+         }
+       }
+			 ?>
+			 </select>
+	     &nbsp;&nbsp;
+			 <?php _e('Preview', 'postie'); ?>
+			 <span id='video1TemplatePreview' alt='preview'></span>
+   <textarea onfocus='customStyle("SELECTED_VIDEO1TEMPLATE");' cols='70' rows='7' id="VIDEO1TEMPLATE"
+   name="VIDEO1TEMPLATE"><?php echo attribute_escape($config['VIDEO1TEMPLATE']) ?></textarea>
+			 </td>
+       </tr>
+      <tr> 
+        <th width="33%" valign="top" scope="row">
+        <?php _e('Video 1 file types:') ?><br /><span class='recommendation'>
+        <?php _e('Use the video template 1 for these files types (separated by
+        commas)', 'postie') ?></span> </th> 
+          <td>
+          <input name="VIDEO1TYPES" type="text" id="VIDEO1TYPES"
+          value="<?php echo implode(', ', $config["VIDEO1TYPES"]); ?>" size="40" />                </td> 
+      </tr> 
+            <tr><th scope='row'><?php _e('Video template 2', 'postie') ?><br />
             <span class='recommendation'><?php _e('Choose a default template,
             then customize to your liking in the text box', 'postie') ?></span></th>
             <td>
+  <input type='hidden' id='SELECTED_VIDEO2TEMPLATE' name='SELECTED_VIDEO2TEMPLATE'
+  value="<?php echo attribute_escape($config['SELECTED_VIDEO2TEMPLATE']) ?>" />
+  <input type='hidden' id='CURRENT_VIDEO2TEMPLATE' value="<?php echo
+attribute_escape($config['VIDEO2TEMPLATE']) ?>" />
+			 <select name='VIDEO2TEMPLATESELECT' id='VIDEO2TEMPLATESELECT' 
+       onchange="changeStyle('video2TemplatePreview','VIDEO2TEMPLATE', 'VIDEO2TEMPLATESELECT', 'SELECTED_VIDEO2TEMPLATE','hi.flv');" />
+			 <?php
+			 $styleOptions=unserialize($config['VIDEO2TEMPLATES']);
+			 $selected=$config['SELECTED_VIDEO2TEMPLATE'];
+			 foreach ($styleOptions as $key=>$value) {
+			   if ($key!='selected') {
+           if ($key==$selected) {
+					   $select=' selected=selected ';
+					 } else {
+						 $select=' ';
+					 }
+					 echo '<option' .  $select . 'value="'.
+					     attribute_escape($value) . '" >'.$key . '</option>';
+         }
+       }
+			 ?>
+			 </select>
+	     &nbsp;&nbsp;
+			 <?php _e('Preview', 'postie'); ?>
+			 <span id='video2TemplatePreview' alt='preview'></span>
+   <textarea onfocus='customStyle("SELECTED_VIDEO2TEMPLATE");' cols='70' rows='7' id="VIDEO2TEMPLATE"
+   name="VIDEO2TEMPLATE"><?php echo attribute_escape($config['VIDEO2TEMPLATE']) ?></textarea>
+			 </td>
+       </tr>
+      <tr> 
+        <th width="33%" valign="top" scope="row">
+        <?php _e('Video 2 file types:') ?><br /><span class='recommendation'>
+        <?php _e('Use the video template 2 for these files types (separated by
+        commas)', 'postie') ?></span> </th> 
+          <td>
+          <input name="VIDEO2TYPES" type="text" id="VIDEO2TYPES"
+          value="<?php echo implode(', ', $config["VIDEO2TYPES"]); ?>" size="40" />                </td> 
+      </tr> 
+        <tr><th scope='row'><?php _e('Audio template', 'postie') ?><br />
+        <span class='recommendation'><?php _e('Choose a default template,
+        then customize to your liking in the text box', 'postie') ?></span></th>
+        <td>
   <input type='hidden' id='SELECTED_AUDIOTEMPLATE' name='SELECTED_AUDIOTEMPLATE'
   value="<?php echo attribute_escape($config['SELECTED_AUDIOTEMPLATE']) ?>" />
   <input type='hidden' id='CURRENT_AUDIOTEMPLATE' value="<?php echo
 attribute_escape($config['AUDIOTEMPLATE']) ?>" />
-			 <select name='AUDIOTEMPLATESELECT' id='AUDIOTEMPLATESELECT' onchange='changeStyle();' >
+			 <select name='AUDIOTEMPLATESELECT' id='AUDIOTEMPLATESELECT' 
+       onchange="changeStyle('audioTemplatePreview','AUDIOTEMPLATE',
+       'AUDIOTEMPLATESELECT', 'SELECTED_AUDIOTEMPLATE','funky.mp3');" />
 			 <?php
-		$url = get_option('siteurl') . '/' . PLUGINDIR . '/postie/templates';
 			 $styleOptions=unserialize($config['AUDIOTEMPLATES']);
 			 $selected=$config['SELECTED_AUDIOTEMPLATE'];
 			 foreach ($styleOptions as $key=>$value) {
@@ -393,11 +428,10 @@ attribute_escape($config['AUDIOTEMPLATE']) ?>" />
 	     &nbsp;&nbsp;
 			 <?php _e('Preview', 'postie'); ?>
 			 <span id='audioTemplatePreview' alt='preview'></span>
-   <textarea onfocus='customStyle();' cols='70' rows='7' id="AUDIOTEMPLATE"
+   <textarea onfocus='customStyle("SELECTED_AUDIOTEMPLATE");' cols='70' rows='7' id="AUDIOTEMPLATE"
    name="AUDIOTEMPLATE"><?php echo attribute_escape($config['AUDIOTEMPLATE']) ?></textarea>
 			 </td>
             </table> 
-        </fieldset> 
     </td> 
     </tr> 
 	</table> 
@@ -428,32 +462,38 @@ jQuery(document).ready(function() {
 	});
 
 });
-function changeStyle() {
-	var preview = document.getElementById('audioTemplatePreview');
-	var pageStyles = document.getElementById('AUDIOTEMPLATESELECT');
+function changeStyle(preview,template,select,selected,sample) {
+	var preview = document.getElementById(preview);
+	var pageStyles = document.getElementById(select);
 	var selectedStyle;
-  var hiddenStyle=document.getElementById('SELECTED_AUDIOTEMPLATE');
+  var hiddenStyle=document.getElementById(selected);
 	for(i=0; i<pageStyles.options.length; i++) {
 		if (pageStyles.options[i].selected == true) {
 			selectedStyle=pageStyles.options[i];
 		}
 	}
 	hiddenStyle.value=selectedStyle.innerHTML
-	var previewHTML=selectedStyle.value
-  previewHTML=previewHTML.replace(/{FILELINK}/, '<?php echo $url ?>/funky.mp3');
-	previewHTML=previewHTML.replace(/{FILENAME}/, 'funky.mp3');
+	var previewHTML=selectedStyle.value;
+  var fileLink = '<?php echo $templateDir ?>/' + sample;
+  previewHTML=previewHTML.replace(/{FILELINK}/g, fileLink);
+	previewHTML=previewHTML.replace(/{FILENAME}/, sample);
   preview.innerHTML=previewHTML;
-  var pageStyle = document.getElementById('AUDIOTEMPLATE');
+  var pageStyle = document.getElementById(template);
   pageStyle.value=selectedStyle.value;
 }
-function restoreStyle() {
-  var defaultStyle = document.getElementById('CURRENT_AUDIOTEMPLATE').value;
-  var pageStyle = document.getElementById('AUDIOTEMPLATE');
+function restoreStyle(current,template) {
+  var defaultStyle = document.getElementById(current).value;
+  var pageStyle = document.getElementById(template);
   pageStyle.value=defaultStyle;
 }
-function customStyle() {
-	var hiddenStyle=document.getElementById('SELECTED_AUDIOTEMPLATE');
+function customStyle(selected) {
+	var hiddenStyle=document.getElementById(selected);
 	hiddenStyle.value='custom';
 }
-	changeStyle();
+	changeStyle('audioTemplatePreview','AUDIOTEMPLATE', 'AUDIOTEMPLATESELECT',
+  'SELECTED_AUDIOTEMPLATE','funky.mp3');
+	changeStyle('video1TemplatePreview','VIDEO1TEMPLATE', 'VIDEO1TEMPLATESELECT',
+  'SELECTED_VIDEO1TEMPLATE','hi.mp4');
+	changeStyle('video2TemplatePreview','VIDEO2TEMPLATE', 'VIDEO2TEMPLATESELECT',
+  'SELECTED_VIDEO2TEMPLATE','hi.flv');
 </script>

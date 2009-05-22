@@ -268,6 +268,9 @@ sure that it is
   * More media features
       * Automatically turn links to youtube into an embedded player
       * Added option to embed audio files with custom templates
+      * Video options are now template based
+  * Bug fixes
+      * Uploading images from vodafone phones should now work
 
 * 1.2.2 (2009.05.xx)
   * Show empty categories for default category in options

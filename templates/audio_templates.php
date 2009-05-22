@@ -7,7 +7,6 @@ $google_reader = '<embed type="application/x-shockwave-flash" ' .
 $simple_link = '<a href="{FILELINK}">{FILENAME}</a>';
 
 $custom=$config['AUDIOTEMPLATE'];
-$selected='simple_link';
 $audioTemplates=serialize(compact('google_reader','simple_link',
-'custom','selected'));
+'custom'));
 ?>
