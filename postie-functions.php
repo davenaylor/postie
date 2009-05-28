@@ -1572,14 +1572,17 @@ size. If not found, we default to medium */
       $hwstrings[$i] = image_hwstring($widths[$i], $heights[$i]);
     }
   }
-  $the_post=get_post($id);
+  $attachment=get_post($id);
+  $the_parent=get_post($attachment->post_parent);
   $uploadDir=wp_upload_dir();
-  $fileName=basename($the_post->guid);
+  $fileName=basename($attachment->guid);
   $absFileName=$uploadDir['path'] .'/'. $fileName;
   $relFileName=str_replace(ABSPATH,'', $absFileName);
   $fileLink=wp_get_attachment_url($id);
   $pageLink=get_attachment_link($id);
 
+  $template=str_replace('{TITLE}', $attachment->post_title, $template);
+  $template=str_replace('{ID}', $id, $template);
   $template=str_replace('{THUMBNAIL}', $img_src[0], $template);
   $template=str_replace('{THUMB}', $img_src[0], $template);
   $template=str_replace('{MEDIUM}', $img_src[1], $template);
@@ -1597,9 +1600,9 @@ size. If not found, we default to medium */
   $template=str_replace('{IMAGE}', $fileLink, $template);
   $template=str_replace('{URL}', $fileLink, $template);
   $template=str_replace('{RELFILENAME}', $relFileName, $template);
-  $template=str_replace('{POSTTITLE}', $the_post->post_title, $template);
-  if ($alt!='') {
-    $template=str_replace('{CAPTION}', $alt, $template);
+  $template=str_replace('{POSTTITLE}', $the_parent->post_title, $template);
+  if ($attachment->post_excerpt!='') {
+    $template=str_replace('{CAPTION}', $attachment->post_excerpt, $template);
   } else {
     $template=str_replace('{CAPTION}', '', $template);
   }
@@ -2044,16 +2047,6 @@ function GetDBConfig() {
     if (!isset($config["INPUT_PROTOCOL"])) { $config["INPUT_PROTOCOL"] = "pop3";}
     if (!isset($config["IMAGE_PLACEHOLDER"])) { $config["IMAGE_PLACEHOLDER"] = "#img%#";}
     if (!isset($config["IMAGES_APPEND"])) { $config["IMAGES_APPEND"] = true;}
-    if (!isset($config["3GPDIV"])) { $config["3GPDIV"] = "postie-3gp-div";}
-    if (!isset($config["ATTACHMENTDIV"])) { $config["ATTACHMENTDIV"] = "postie-attachment-div";}
-    if (!isset($config["3GPCLASS"])) { $config["3GPCLASS"] = "postie-video";}
-    if (!isset($config["VIDEO_WIDTH"])) { $config["VIDEO_WIDTH"] = 128;}
-    if (!isset($config["PLAYER_WIDTH"])) { $config["PLAYER_WIDTH"] = 128;}
-    if (!isset($config["VIDEO_HEIGHT"])) { $config["VIDEO_HEIGHT"] = 112;}
-    if (!isset($config["PLAYER_HEIGHT"])) { $config["PLAYER_HEIGHT"] = 150;}
-    if (!isset($config["VIDEO_AUTOPLAY"])) { $config["VIDEO_AUTOPLAY"] = false;}
-    if (!isset($config["JPEGQUALITY"])) { $config["JPEGQUALITY"] = 80;}
-    if (!isset($config["AUTO_SMART_SHARP"])) { $config["AUTO_SMART_SHARP"] = false;}
     if (!isset($config["ALLOW_SUBJECT_IN_MAIL"])) { $config["ALLOW_SUBJECT_IN_MAIL"] = true;}
     if (!isset($config["DROP_SIGNATURE"])) { $config["DROP_SIGNATURE"] = true;}
     if (!isset($config["MESSAGE_START"])) { $config["MESSAGE_START"] = ":start";}
@@ -2080,85 +2073,44 @@ function GetDBConfig() {
     if (!isset($config["DEFAULT_POST_CATEGORY"])) { $config["DEFAULT_POST_CATEGORY"] =  NULL; }
     if (!isset($config["DEFAULT_POST_TAGS"])) { $config["DEFAULT_POST_TAGS"] =  NULL; }
     if (!isset($config["TIME_OFFSET"])) { $config["TIME_OFFSET"] =  get_option('gmt_offset'); }
-    if (!isset($config["3GP_QT"])) { $config["3GP_QT"] =  true; }
-    if (!isset($config["3GP_FFMPEG"])) { $config["3GP_FFMPEG"] = "/usr/bin/ffmpeg";}
     if (!isset($config["WRAP_PRE"])) { $config["WRAP_PRE"] =  'no'; }
     if (!isset($config["CONVERTURLS"])) { $config["CONVERTURLS"] =  true; }
     if (!isset($config["ADD_META"])) { $config["ADD_META"] =  'no'; }
-    if (!isset($config["USEIMAGETEMPLATE"]))  
-      $config["USEIMAGETEMPLATE"] = false; 
 
-    if (!isset($config["AUDIOTEMPLATE"])) { 
-      $config["AUDIOTEMPLATE"] ='
-          <embed type="application/x-shockwave-flash" ' .
-          'src="http://www.google.com/reader/ui/3247397568-audio-player.swf?audioUrl={FILELINK}" ' . 
-          'width="400" height="27" allowscriptaccess="never" quality="best" ' .
-          'bgcolor="#ffffff" wmode="window" flashvars="playerMode=embedded" />';
-    }
-    if (!isset($config["SELECTED_AUDIOTEMPLATE"])) { 
+    if (!isset($config["AUDIOTEMPLATE"])) 
+      $config["AUDIOTEMPLATE"] =$simple_link;
+    if (!isset($config["SELECTED_AUDIOTEMPLATE"])) 
       $config['SELECTED_AUDIOTEMPLATE'] = 'simple_link';
-    }
     include_once('templates/audio_templates.php');
     $config['AUDIOTEMPLATES']=$audioTemplates;
-    if (!isset($config["SELECTED_VIDEO1TEMPLATE"])) { 
+    if (!isset($config["SELECTED_VIDEO1TEMPLATE"])) 
       $config['SELECTED_VIDEO1TEMPLATE'] = 'simple_link';
-    }
     include_once('templates/video1_templates.php');
     $config['VIDEO1TEMPLATES']=$video1Templates;
-    if (!isset($config["VIDEO1TEMPLATE"])) { 
-      $config["VIDEO1TEMPLATE"] = '<object '.
-          'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
-          'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
-          'width="320"'.  'height="240"> '.
-          '<param name="src" value="{FILELINK}" /> '.
-          '<param name="autoplay" value="no" /> '.
-            '<param name="controller" value="true" /> '.
-           '<embed src="{FILELINK}" '.
-           'width="320" height="240"'.
-           'autoplay="no" controller="true" '.
-           'type="video/quicktime" '.
-           'pluginspage="http://www.apple.com/quicktime/download/" '.
-           'width="320" height="260">'.
-           '</embed> '.
-           '</object>';
-    }
-    if (!isset($config["VIDEO1TYPES"])) { 
-      $config['VIDEO1TYPES'] = 'mp4, 3gp, 3gpp2, 3gp2, mov';
-    }
-    if (!isset($config["SELECTED_VIDEO2TEMPLATE"])) { 
+    if (!isset($config["VIDEO1TEMPLATE"])) 
+      $config["VIDEO1TEMPLATE"] = $simple_link;
+    if (!isset($config["VIDEO1TYPES"])) 
+      $config['VIDEO1TYPES'] = 'mp4, 3gp, 3gpp, 3gpp2, 3gp2, mov';
+    if (!isset($config["SELECTED_VIDEO2TEMPLATE"])) 
       $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
-    }
     include_once('templates/video2_templates.php');
     $config['VIDEO2TEMPLATES']=$video2Templates;
-    if (!isset($config["VIDEO2TEMPLATE"])) { 
-      $config["VIDEO2TEMPLATE"] = '<object '.
-          'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
-          'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
-          'width="320"'.  'height="240"> '.
-          '<param name="src" value="{FILELINK}" /> '.
-          '<param name="autoplay" value="no" /> '.
-            '<param name="controller" value="true" /> '.
-           '<embed src="{FILELINK}" '.
-           'width="320" height="240"'.
-           'autoplay="no" controller="true" '.
-           'type="video/quicktime" '.
-           'pluginspage="http://www.apple.com/quicktime/download/" '.
-           'width="320" height="260">'.
-           '</embed> '.
-           '</object>';
-    }
-    if (!isset($config["VIDEO2TYPES"])) { 
+    if (!isset($config["VIDEO2TEMPLATE"])) 
+      $config["VIDEO2TEMPLATE"] = $simple_link;
+    if (!isset($config["VIDEO2TYPES"])) 
       $config['VIDEO2TYPES'] = 'x-flv';
-    }
     if (!isset($config["POST_STATUS"])) 
       $config["POST_STATUS"] = 'publish'; 
     if (!isset($config["IMAGE_NEW_WINDOW"])) 
       $config["IMAGE_NEW_WINDOW"] = false; 
     if (!isset($config["FILTERNEWLINES"]))  
       $config["FILTERNEWLINES"] = true; 
-    if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =
-      "<div class='imageframe alignleft'><a href='{IMAGE}'><img src='{THUMBNAIL}' alt='{CAPTION}' title='{CAPTION}' class='attachment' /></a><div class='imagecaption'>{CAPTION}</div></div>";
-    }
+    include_once('templates/image_templates.php');
+    if (!isset($config["SELECTED_IMAGETEMPLATE"]))
+      $config['SELECTED_IMAGETEMPLATE'] = 'wordpress_default';
+    $config['IMAGETEMPLATES']=$imageTemplates;
+    if (!isset($config["IMAGETEMPLATE"])) 
+      $config["IMAGETEMPLATE"] = $wordpress_default;
     return($config);
 }
 /**

@@ -294,13 +294,45 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                 <input name="IMAGE_PLACEHOLDER" type="text" id="IMAGE_PLACEHOLDER" value="<?php echo $config["IMAGE_PLACEHOLDER"]; ?>" size="50" /><br />
                 </td> 
             </tr> 
-            <?php echo BuildBooleanSelect("Use custom image
-            template","USEIMAGETEMPLATE",$config["USEIMAGETEMPLATE"],"If you don't like the default html output around images, you can enter your own below. My personal template is already there. See the readme for more details");?>
-            <tr> 
-                <th width="33%" valign="top" scope="row">                <td>
-                <textarea  cols="50" rows="6" name="IMAGETEMPLATE"
-                id="IMAGETEMPLATE"><?php echo $config["IMAGETEMPLATE"]; ?></textarea>
-                </td> 
+            <tr>
+            <th width="33%" valign="top" scope="row"><?php _e('Image
+            Template', 'postie') ?><br />
+            <span class='recommendation'><?php _e('Choose a default template,
+            then customize to your liking in the text box',
+            'postie');?></span><br /><br />
+            <span class='recommendation'><?php _e('Sizes for thumbnail, medium, and large images can be chosen in the <a href="options-media.php">Media Settings</a>. The samples here use the default sizes, and will not reflect the sizes you have chosen.', 'postie');?></span>
+            </th>
+            <td>
+  <input type='hidden' id='SELECTED_IMAGETEMPLATE' name='SELECTED_IMAGETEMPLATE'
+  value="<?php echo attribute_escape($config['SELECTED_IMAGETEMPLATE']) ?>" />
+  <input type='hidden' id='CURRENT_IMAGETEMPLATE' value="<?php echo
+attribute_escape($config['IMAGETEMPLATE']) ?>" />
+			 <select name='IMAGETEMPLATESELECT' id='IMAGETEMPLATESELECT' 
+       onchange="changeStyle('imageTemplatePreview','IMAGETEMPLATE',
+       'IMAGETEMPLATESELECT', 'SELECTED_IMAGETEMPLATE','smiling.jpg');" />
+			 <?php
+			 $styleOptions=unserialize($config['IMAGETEMPLATES']);
+			 $selected=$config['SELECTED_IMAGETEMPLATE'];
+			 foreach ($styleOptions as $key=>$value) {
+			   if ($key!='selected') {
+           if ($key==$selected) {
+					   $select=' selected=selected ';
+					 } else {
+						 $select=' ';
+					 }
+					 echo '<option' .  $select . 'value="'.
+					     attribute_escape($value) . '" >'.$key . '</option>';
+         }
+       }
+			 ?>
+			 </select>
+	     &nbsp;&nbsp;
+			 <?php _e('Preview', 'postie'); ?>
+			 <span id='imageTemplatePreview' alt='preview'></span>
+   <textarea onchange='changeStyle("imageTemplatePreview", "IMAGETEMPLATE",
+   "IMAGETEMPLATESELECT", "SELECTED_IMAGETEMPLATE", "smiling.jpg", true);' cols='70' rows='7' id="IMAGETEMPLATE"
+   name="IMAGETEMPLATE"><?php echo attribute_escape($config['IMAGETEMPLATE']) ?></textarea>
+			 </td>
             </tr> 
             <?php echo BuildBooleanSelect("Use custom image field","CUSTOM_IMAGE_FIELD",$config["CUSTOM_IMAGE_FIELD"],"When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'.");?>            
             </table> 
@@ -314,8 +346,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 <table class='form-table'>
 
             <tr><th scope='row'><?php _e('Video template 1', 'postie') ?><br />
-            <span class='recommendation'><?php _e('Choose a default template,
-            then customize to your liking in the text box', 'postie') ?></span></th>
+            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
 <?php $templateDir = get_option('siteurl') . '/' . PLUGINDIR .  '/postie/templates'; ?>
             <td>
   <input type='hidden' id='SELECTED_VIDEO1TEMPLATE' name='SELECTED_VIDEO1TEMPLATE'
@@ -343,7 +374,8 @@ attribute_escape($config['VIDEO1TEMPLATE']) ?>" />
 	     &nbsp;&nbsp;
 			 <?php _e('Preview', 'postie'); ?>
 			 <span id='video1TemplatePreview' alt='preview'></span>
-   <textarea onfocus='customStyle("SELECTED_VIDEO1TEMPLATE");' cols='70' rows='7' id="VIDEO1TEMPLATE"
+   <textarea onchange="changeStyle('video1TemplatePreview','VIDEO1TEMPLATE',
+   'VIDEO1TEMPLATESELECT', 'SELECTED_VIDEO1TEMPLATE','hi.mp4',true);" cols='70' rows='7' id="VIDEO1TEMPLATE"
    name="VIDEO1TEMPLATE"><?php echo attribute_escape($config['VIDEO1TEMPLATE']) ?></textarea>
 			 </td>
        </tr>
@@ -357,8 +389,7 @@ attribute_escape($config['VIDEO1TEMPLATE']) ?>" />
           value="<?php echo implode(', ', $config["VIDEO1TYPES"]); ?>" size="40" />                </td> 
       </tr> 
             <tr><th scope='row'><?php _e('Video template 2', 'postie') ?><br />
-            <span class='recommendation'><?php _e('Choose a default template,
-            then customize to your liking in the text box', 'postie') ?></span></th>
+            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
             <td>
   <input type='hidden' id='SELECTED_VIDEO2TEMPLATE' name='SELECTED_VIDEO2TEMPLATE'
   value="<?php echo attribute_escape($config['SELECTED_VIDEO2TEMPLATE']) ?>" />
@@ -385,7 +416,8 @@ attribute_escape($config['VIDEO2TEMPLATE']) ?>" />
 	     &nbsp;&nbsp;
 			 <?php _e('Preview', 'postie'); ?>
 			 <span id='video2TemplatePreview' alt='preview'></span>
-   <textarea onfocus='customStyle("SELECTED_VIDEO2TEMPLATE");' cols='70' rows='7' id="VIDEO2TEMPLATE"
+   <textarea onchange="changeStyle('video2TemplatePreview','VIDEO2TEMPLATE',
+   'VIDEO2TEMPLATESELECT', 'SELECTED_VIDEO2TEMPLATE','hi.flv',true);" cols='70' rows='7' id="VIDEO2TEMPLATE"
    name="VIDEO2TEMPLATE"><?php echo attribute_escape($config['VIDEO2TEMPLATE']) ?></textarea>
 			 </td>
        </tr>
@@ -399,8 +431,7 @@ attribute_escape($config['VIDEO2TEMPLATE']) ?>" />
           value="<?php echo implode(', ', $config["VIDEO2TYPES"]); ?>" size="40" />                </td> 
       </tr> 
         <tr><th scope='row'><?php _e('Audio template', 'postie') ?><br />
-        <span class='recommendation'><?php _e('Choose a default template,
-        then customize to your liking in the text box', 'postie') ?></span></th>
+        <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
         <td>
   <input type='hidden' id='SELECTED_AUDIOTEMPLATE' name='SELECTED_AUDIOTEMPLATE'
   value="<?php echo attribute_escape($config['SELECTED_AUDIOTEMPLATE']) ?>" />
@@ -428,7 +459,8 @@ attribute_escape($config['AUDIOTEMPLATE']) ?>" />
 	     &nbsp;&nbsp;
 			 <?php _e('Preview', 'postie'); ?>
 			 <span id='audioTemplatePreview' alt='preview'></span>
-   <textarea onfocus='customStyle("SELECTED_AUDIOTEMPLATE");' cols='70' rows='7' id="AUDIOTEMPLATE"
+   <textarea onchange="changeStyle('audioTemplatePreview','AUDIOTEMPLATE',
+       'AUDIOTEMPLATESELECT', 'SELECTED_AUDIOTEMPLATE','funky.mp3', true);" cols='70' rows='7' id="AUDIOTEMPLATE"
    name="AUDIOTEMPLATE"><?php echo attribute_escape($config['AUDIOTEMPLATE']) ?></textarea>
 			 </td>
             </table> 
@@ -462,23 +494,40 @@ jQuery(document).ready(function() {
 	});
 
 });
-function changeStyle(preview,template,select,selected,sample) {
+function changeStyle(preview,template,select,selected,sample,custom) {
 	var preview = document.getElementById(preview);
 	var pageStyles = document.getElementById(select);
 	var selectedStyle;
   var hiddenStyle=document.getElementById(selected);
-	for(i=0; i<pageStyles.options.length; i++) {
-		if (pageStyles.options[i].selected == true) {
-			selectedStyle=pageStyles.options[i];
-		}
-	}
-	hiddenStyle.value=selectedStyle.innerHTML
-	var previewHTML=selectedStyle.value;
-  var fileLink = '<?php echo $templateDir ?>/' + sample;
-  previewHTML=previewHTML.replace(/{FILELINK}/g, fileLink);
-	previewHTML=previewHTML.replace(/{FILENAME}/, sample);
-  preview.innerHTML=previewHTML;
   var pageStyle = document.getElementById(template);
+  if (custom==true) {
+    selectedStyle=pageStyles.options[pageStyles.options.length-1];
+    selectedStyle.value=pageStyle.value;
+    selectedStyle.selected=true;
+  } else {
+    for(i=0; i<pageStyles.options.length; i++) {
+      if (pageStyles.options[i].selected == true) {
+        selectedStyle=pageStyles.options[i];
+      }
+    }
+  }
+  hiddenStyle.value=selectedStyle.innerHTML
+  var previewHTML=selectedStyle.value;
+  var fileLink = '<?php echo $templateDir ?>/' + sample;
+  var thumb = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
+  '-150x150.jpg');
+  var medium = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
+  '-300x200.jpg');
+  var large = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
+  '-1024x682.jpg');
+  previewHTML=previewHTML.replace(/{FILELINK}/g, fileLink);
+  previewHTML=previewHTML.replace(/{IMAGE}/g, fileLink);
+	previewHTML=previewHTML.replace(/{FILENAME}/, sample);
+	previewHTML=previewHTML.replace(/{THUMB(NAIL|)}/, thumb);
+	previewHTML=previewHTML.replace(/{MEDIUM}/, medium);
+	previewHTML=previewHTML.replace(/{LARGE}/, large);
+	previewHTML=previewHTML.replace(/{CAPTION}/g, 'Spencer smiling');
+  preview.innerHTML=previewHTML;
   pageStyle.value=selectedStyle.value;
 }
 function restoreStyle(current,template) {
@@ -486,14 +535,12 @@ function restoreStyle(current,template) {
   var pageStyle = document.getElementById(template);
   pageStyle.value=defaultStyle;
 }
-function customStyle(selected) {
-	var hiddenStyle=document.getElementById(selected);
-	hiddenStyle.value='custom';
-}
-	changeStyle('audioTemplatePreview','AUDIOTEMPLATE', 'AUDIOTEMPLATESELECT',
-  'SELECTED_AUDIOTEMPLATE','funky.mp3');
-	changeStyle('video1TemplatePreview','VIDEO1TEMPLATE', 'VIDEO1TEMPLATESELECT',
-  'SELECTED_VIDEO1TEMPLATE','hi.mp4');
-	changeStyle('video2TemplatePreview','VIDEO2TEMPLATE', 'VIDEO2TEMPLATESELECT',
-  'SELECTED_VIDEO2TEMPLATE','hi.flv');
+changeStyle('audioTemplatePreview','AUDIOTEMPLATE', 'AUDIOTEMPLATESELECT',
+'SELECTED_AUDIOTEMPLATE','funky.mp3');
+changeStyle('imageTemplatePreview','IMAGETEMPLATE', 'IMAGETEMPLATESELECT',
+'SELECTED_AUDIOTEMPLATE','smiling.jpg');
+changeStyle('video1TemplatePreview','VIDEO1TEMPLATE', 'VIDEO1TEMPLATESELECT',
+'SELECTED_VIDEO1TEMPLATE','hi.mp4');
+changeStyle('video2TemplatePreview','VIDEO2TEMPLATE', 'VIDEO2TEMPLATESELECT',
+'SELECTED_VIDEO2TEMPLATE','hi.flv');
 </script>

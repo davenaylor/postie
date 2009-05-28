@@ -253,6 +253,13 @@ provider about this.
 2. Your wp-content/uploads directory is not writable by the webserver. Make
 sure that it is
 
+= Can I delete the wp-files directory needed by postie version <1.3.0? =
+
+If you have posts published already by older versions of postie, getting rid
+of those directories will delete any files you might have had associated with
+those old posts. If you don't have any such posts, then you can safely delete
+them.
+
 == History ==
 * 1.3.testing (2009.06.xx)
   * Now using default wordpress image and upload handling, which means:
@@ -269,6 +276,8 @@ sure that it is
       * Automatically turn links to youtube into an embedded player
       * Added option to embed audio files with custom templates
       * Video options are now template based
+      * Image options are now solely template based, with several new default
+        templates
   * Bug fixes
       * Uploading images from vodafone phones should now work
 
