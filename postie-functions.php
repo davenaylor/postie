@@ -277,8 +277,7 @@ function ConfigurePostie() {
   * @return array
   */ 
 function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
-    $protocol=NULL, $offset=NULL, $test=NULL) {
-  //$config = GetConfig();
+    $protocol=NULL, $offset=NULL, $test=NULL, $deleteMessages=true) {
   $emails = array();
   if (!$server || !$port || !$email) {
     die("Missing Configuration For Mail Server\n");
@@ -304,7 +303,7 @@ function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
         $emails = TestIMAPMessageFetch();
       } else {
         $emails = IMAPMessageFetch($server, $port, $email, 
-            $password, $protocol, $offset, $test); 
+            $password, $protocol, $offset, $test, $deleteMessages); 
       }
       break;
     case 'pop3':
@@ -313,7 +312,7 @@ function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
         $emails = TestPOP3MessageFetch();
       } else {
         $emails =POP3MessageFetch ($server, $port, $email, 
-            $password, $protocol, $offset, $test);
+            $password, $protocol, $offset, $test, $deleteMessages);
       }
   }
   if (!$emails)
@@ -337,10 +336,8 @@ function TestIMAPMessageFetch ( ) {
   *Handles fetching messages from an imap server
   */
 function IMAPMessageFetch ($server=NULL, $port=NULL, $email=NULL, 
-    $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL) {
-    if (!$config) {
-        $config = GetConfig();
-    }
+    $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL,
+    $deleteMessages=true) {
     require_once("postieIMAP.php");
 
     $mail_server = &PostieIMAP::Factory($protocol);
@@ -359,14 +356,14 @@ function IMAPMessageFetch ($server=NULL, $port=NULL, $email=NULL,
 	// loop through messages 
 	for ($i=1; $i <= $msg_count; $i++) {
 		$emails[$i] = $mail_server->fetchEmail($i);
-        if ( $config["DELETE_MAIL_AFTER_PROCESSING"]) {
+        if ($deleteMessages) {
 			$mail_server->deleteMessage($i);
 		}
         else {
             print("Not deleting messages!\n");
         }
 	}
-    if ( $config["DELETE_MAIL_AFTER_PROCESSING"]) {
+    if ( $deleteMessages) {
         $mail_server->expungeMessages();
     }
 	//clean up
@@ -386,10 +383,8 @@ function TestPOP3MessageFetch ( ) {
   *Retrieves email via POP3
   */
 function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL, 
-    $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL) {
-    if (!$config) {
-        $config = GetConfig();
-    }
+    $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL,
+    $deleteMessages=true) {
 	require_once(ABSPATH.WPINC.DIRECTORY_SEPARATOR.'class-pop3.php');
 	$pop3 = &new POP3();
     print("\nConnecting to $server:$port ($protocol))  \n");
@@ -415,7 +410,7 @@ function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL,
 	// loop through messages 
 	for ($i=1; $i <= $msg_count; $i++) {
 		$emails[$i] = implode ('',$pop3->get($i));
-        if ( $config["DELETE_MAIL_AFTER_PROCESSING"]) {
+        if ($deleteMessages) {
 			if( !$pop3->delete($i) ) {
 				echo 'Oops '.$pop3->ERROR.'\n';
 				$pop3->reset();
@@ -431,18 +426,6 @@ function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL,
 	//clean up
 	$pop3->quit();	
 	return $emails;
-}
-/**
-  * Determines if it is a writable directory
-  */
-function IsWritableDirectory($directory) {
-    if (!is_dir($directory)) {
-        die ("Sorry but ".$directory." is not a valid directory.");
-    }
-    if (!is_writable($directory)) {
-        die("The web server cannot write to ".$directory." please correct the permissions");
-    }
-
 }
 /**
   * This function handles putting the actual entry into the database
