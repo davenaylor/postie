@@ -1,4 +1,3 @@
-#!/usr/bin/php -q
 <?php
 
 //Load up some usefull libraries
@@ -27,11 +26,14 @@ $config['DELETE_MAIL_AFTER_PROCESSING']);
 foreach ($emails as $email) {
     //sanity check to see if there is any info in the message
     if ($email == NULL ) { 
-      print 'Dang, message is empty!'; 
+      $message= __('Dang, message is empty!', 'postie'); 
       continue; 
     } else if ($email=='already read') {
+      $message = "\n" . __("There does not seem to be any new mail.", 'postie') .
+      "\n";
       continue;
     }
+    $message='';
     
     $mimeDecodedEmail = DecodeMimeMail($email);
     $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
@@ -51,6 +53,7 @@ foreach ($emails as $email) {
         print("<p>Ignoring email - not authorized.\n");
     }
 } // end looping over messages
+print $message;
 print("</pre>\n");
     
 /* END PROGRAM */

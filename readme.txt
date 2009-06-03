@@ -280,6 +280,8 @@ them.
         templates
   * Bug fixes
       * Uploading images from vodafone phones should now work
+      * Correctly handling Windows-1252 encoding
+      * Correctly handling non-ascii characters in subject line
 
 * 1.2.2 (2009.05.xx)
   * Show empty categories for default category in options

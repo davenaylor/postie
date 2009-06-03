@@ -64,7 +64,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
     HandleMessageEncoding(
         $mimeDecodedEmail->headers["content-transfer-encoding"],
         $mimeDecodedEmail->ctype_parameters["charset"],
-        $mimeDecodedEmail->headers["date"]);
+        $mimeDecodedEmail->headers["date"], $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
     $message_date = $mimeDecodedEmail->headers['date'];
   }
   list($post_date,$post_date_gmt) = DeterminePostDate($content, $message_date);
@@ -316,7 +316,7 @@ function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
       }
   }
   if (!$emails)
-    die("\nThere does not seem to be any new mail.\n");
+    die("\n" . __('There does not seem to be any new mail.', 'postie') . "\n");
   return($emails);
 }
 /**
@@ -356,16 +356,13 @@ function IMAPMessageFetch ($server=NULL, $port=NULL, $email=NULL,
 	// loop through messages 
 	for ($i=1; $i <= $msg_count; $i++) {
 		$emails[$i] = $mail_server->fetchEmail($i);
-        if ($deleteMessages) {
+    if ($deleteMessages) {
 			$mail_server->deleteMessage($i);
 		}
-        else {
-            print("Not deleting messages!\n");
-        }
 	}
-    if ( $deleteMessages) {
-        $mail_server->expungeMessages();
-    }
+  if ( $deleteMessages) {
+    $mail_server->expungeMessages();
+  }
 	//clean up
 	$mail_server->disconnect();	
 	return $emails;
@@ -504,9 +501,12 @@ function BannedFileName($filename) {
 //tear apart the meta part for useful information
 function GetContent ($part,&$attachments, $post_id) {
   $config = GetConfig();
+  global $charset;
   $meta_return = NULL;	
   echo "primary= " . $part->ctype_primary . ", secondary = " .  $part->ctype_secondary . "\n";
-  echo "paramaters=" . print_r($part->ctype_parameters). "\n";
+  $tmpcharset=trim($part->ctype_parameters['charset']);
+  if ($tmpcharset!='') 
+    $charset=$tmpcharset;
   DecodeBase64Part($part);
   if (BannedFileName($part->ctype_parameters['name'])
       || BannedFileName($part->ctype_parameters['name'])) {
@@ -550,7 +550,7 @@ function GetContent ($part,&$attachments, $post_id) {
       case 'text':
           HandleMessageEncoding($part->headers["content-transfer-encoding"],
                                 $part->ctype_parameters["charset"],
-                                $part->body);
+                                $part->body, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
 
           //go through each sub-section
           if ($part->ctype_secondary=='enriched') {
@@ -942,11 +942,13 @@ function FilterNewLines ( $content ) {
     "/\r\n/",
     "/\r/",
     "/\n\n/",
+    "/\r\n\r\n/",
     "/\n/"
   );
   $replace = array (
           "\n",
           "\n",
+          'ACTUAL_NEW_LINE',
           'ACTUAL_NEW_LINE',
     'LINEBREAK'
   );
@@ -954,7 +956,7 @@ function FilterNewLines ( $content ) {
   // tags
   $result = preg_replace($search,$replace,$content);
   //$newContent='<p>' . preg_replace('/ACTUAL_NEW_LINE/',"</p>\n<p>",$result);
-  $newContent=preg_replace('/ACTUAL_NEW_LINE/',"\n\n",$result);
+  $newContent=preg_replace('/(ACTUAL_NEW_LINE|LINEBREAK\s*LINEBREAK)/',"\n\n",$result);
   //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
   if ($config['CONVERTNEWLINE']) {
     $newContent= preg_replace('/LINEBREAK/',"<br />\n",$newContent);
@@ -1024,36 +1026,76 @@ function IsUTF8Blog() {
   }
   return(false);
 }
-function HandleMessageEncoding($encoding, $charset,&$body) {
-    $charset = strtolower($charset);
-    $encoding = strtolower($encoding);
-    /*
-    if ($encoding == '') {
-      $encoding = '7bit';
-    }
-    */
-    HandleQuotedPrintable($encoding, $body);
-    if (isISO88591Blog()) {
-        ConvertToISO_8859_1($encoding,$charset,$body);
-    }
-    else {
-        ConvertToUTF_8($encoding,$charset,$body);
-    }
+function HandleMessageEncoding($encoding, $charset,&$body, 
+    $blogEncoding='utf-8', $dequote=true) {
+  $charset = strtolower($charset);
+  $encoding = strtolower($encoding);
+  /*
+  if ($encoding == '') {
+    $encoding = '7bit';
+  }
+  */
+  if ( $dequote && strtolower($encoding) == 'quoted-printable' ) {
+  //echo "handling quoted printable";
+    $body = quoted_printable_decode($body);
+  //echo "now body is:\n\n $body\n\n";
+  }
+  //HandleQuotedPrintable($encoding, $body, $dequote);
+  if ($blogEncoding=='utf-8') {
+      ConvertToISO_8859_1($encoding,$charset,$body);
+  }
+  else {
+      ConvertToUTF_8($encoding,$charset,$body);
+  }
 }
 function ConvertToUTF_8($encoding,$charset,&$body) {
-    $charset = strtolower($charset);
-    $encoding = strtolower($encoding);
-    switch($charset) {
-        case "iso-8859-1":
-            $body = utf8_encode($body);
-            break;
-        case "iso-2022-jp":
-            $body = iconv("ISO-2022-JP//TRANSLIT","UTF-8",$body);
-            break;
-        case "Windows-1252":
-            $body = iconv("Windows-1252//TRANSLIT","UTF-8",$body);
-            break;
-    }
+  $charset = strtolower($charset);
+  $encoding = strtolower($encoding);
+  switch($charset) {
+    case "iso-8859-1":
+      $body = utf8_encode($body);
+      break;
+    case "iso-2022-jp":
+      $body = iconv("ISO-2022-JP//TRANSLIT","UTF-8",$body);
+      break;
+    case ($charset=="windows-1252" || $charset=="cp-1252"  || 
+        $charset=="cp 1252"):
+      $body = cp1252_to_utf8($body);
+      break;
+  }
+}
+/* this function will convert windows-1252 (also known as cp-1252 to utf-8 */
+function cp1252_to_utf8($str) {
+  $cp1252_map = array (
+  "\xc2\x80" => "\xe2\x82\xac",
+  "\xc2\x82" => "\xe2\x80\x9a",
+  "\xc2\x83" => "\xc6\x92",    
+  "\xc2\x84" => "\xe2\x80\x9e",
+  "\xc2\x85" => "\xe2\x80\xa6",
+  "\xc2\x86" => "\xe2\x80\xa0",
+  "\xc2\x87" => "\xe2\x80\xa1",
+  "\xc2\x88" => "\xcb\x86",
+  "\xc2\x89" => "\xe2\x80\xb0",
+  "\xc2\x8a" => "\xc5\xa0",
+  "\xc2\x8b" => "\xe2\x80\xb9",
+  "\xc2\x8c" => "\xc5\x92",
+  "\xc2\x8e" => "\xc5\xbd",
+  "\xc2\x91" => "\xe2\x80\x98",
+  "\xc2\x92" => "\xe2\x80\x99",
+  "\xc2\x93" => "\xe2\x80\x9c",
+  "\xc2\x94" => "\xe2\x80\x9d",
+  "\xc2\x95" => "\xe2\x80\xa2",
+  "\xc2\x96" => "\xe2\x80\x93",
+  "\xc2\x97" => "\xe2\x80\x94",
+  "\xc2\x98" => "\xcb\x9c",
+  "\xc2\x99" => "\xe2\x84\xa2",
+  "\xc2\x9a" => "\xc5\xa1",
+  "\xc2\x9b" => "\xe2\x80\xba",
+  "\xc2\x9c" => "\xc5\x93",
+  "\xc2\x9e" => "\xc5\xbe",
+  "\xc2\x9f" => "\xc5\xb8"
+  );
+  return strtr ( utf8_encode ( $str ), $cp1252_map );
 }
 
 /**
@@ -1065,9 +1107,10 @@ function DecodeBase64Part( &$part ) {
     }
 }
 
-function HandleQuotedPrintable($encoding, &$body ) {
-    $config = GetConfig();
-    if ( $config["MESSAGE_DEQUOTE"] && strtolower($encoding) == 'quoted-printable' ) {
+function HandleQuotedPrintable($encoding, &$body,$dequote=true ) {
+    //$config = GetConfig();
+    if ( $dequote && strtolower($encoding) == 'quoted-printable' ) {
+    echo "handling quoted printable";
 			$body = quoted_printable_decode($body);
     }
 }
@@ -1718,32 +1761,33 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
   * @return array - (subject,content)
   */
 function GetSubject(&$mimeDecodedEmail,&$content) {
-    $config = GetConfig();
-    //assign the default title/subject
-    if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
-        if ($config["ALLOW_SUBJECT_IN_MAIL"]) {
-            list($subject,$content) = ParseInMessageSubject($content);
-        }
-        else {
-            $subject = $config["DEFAULT_TITLE"];
-        }
-        $mimeDecodedEmail->headers['subject'] = $subject;
-    } else {	
-        $subject = $mimeDecodedEmail->headers['subject'];
-        HandleMessageEncoding($mimeDecodedEmail->headers["content-transfer-encoding"],
-                              $mimeDecodedEmail->ctype_parameters["charset"],
-                              $subject);
-        if (!$config["ALLOW_HTML_IN_SUBJECT"]) {
-            $subject = htmlentities($subject);
-        }
+  $config = GetConfig();
+  global $charset;
+  //assign the default title/subject
+  if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
+    if ($config["ALLOW_SUBJECT_IN_MAIL"]) {
+        list($subject,$content) = ParseInMessageSubject($content);
     }
-    //This is for ISO-2022-JP - Can anyone confirm that this is still neeeded?
-     // escape sequence is 'ESC $ B' == 1b 24 42 hex.
-    if (strpos($subject, "\x1b\x24\x42") !== false) {
-        // found iso-2022-jp escape sequence in subject... convert!
-        $subject = iconv("ISO-2022-JP//TRANSLIT", "UTF-8", $subject);
+    else {
+        $subject = $config["DEFAULT_TITLE"];
     }
-    return($subject);
+    $mimeDecodedEmail->headers['subject'] = $subject;
+  } else {	
+    $subject = $mimeDecodedEmail->headers['subject'];
+    $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
+    HandleMessageEncoding($encoding, $charset,
+        $subject, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
+    if (!$config["ALLOW_HTML_IN_SUBJECT"]) {
+      $subject = htmlentities($subject);
+    }
+  }
+  //This is for ISO-2022-JP - Can anyone confirm that this is still neeeded?
+   // escape sequence is 'ESC $ B' == 1b 24 42 hex.
+  if (strpos($subject, "\x1b\x24\x42") !== false) {
+    // found iso-2022-jp escape sequence in subject... convert!
+    $subject = iconv("ISO-2022-JP//TRANSLIT", "UTF-8", $subject);
+  }
+  return($subject);
 }
 /** 
   * this function determines tags for the post
@@ -2165,13 +2209,6 @@ function HasFunctions($function_list,$display = true) {
     }
   }
   return(true);
-}
-/**
-  * This filter makes it easy to change the html from showing the thumbnail to the actual picture
-  */
-function filter_postie_thumbnail_with_full($content) {
-   $content = str_replace("thumb.","",$content);
-   return($content);
 }
 /**
   * This function tests to see if postie is its own directory
