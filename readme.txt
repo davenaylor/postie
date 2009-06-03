@@ -260,6 +260,14 @@ of those directories will delete any files you might have had associated with
 those old posts. If you don't have any such posts, then you can safely delete
 them.
 
+= How can I get rid of stupid stuff my e-mail provider adds to my messages? =
+
+To strip off stuff that they add at the beginning of a message, start your
+post with :start
+
+To strip off stuff that they add at the end of a message, end your
+post with :end
+
 == History ==
 * 1.3.testing (2009.06.xx)
   * Now using default wordpress image and upload handling, which means:
