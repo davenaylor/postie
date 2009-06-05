@@ -1354,11 +1354,8 @@ function postie_handle_upload( &$file, $overrides = false, $time = null ) {
 		return $upload_error_handler( $file, __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini.' ));
 
 	// A properly uploaded file will pass this test. There should be no reason to override this one.
-  /*
 	if (!file_exists( $file['tmp_name'] ) )
-    print_r($file);
 		return $upload_error_handler( $file, __( 'Specified file failed upload test.'));
-*/
 	// A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
 	if ( $test_type ) {
 		$wp_filetype = wp_check_filetype( $file['name'], $mimes );
