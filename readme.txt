@@ -224,8 +224,7 @@ No. Do not add an iframe in your footer to get postie to check mail
 periodically. To check e-mail periodically, either set-up a cron job, or use
 cronless postie. See installation instructions
 
-= My mail host requires SSL, but postie will not allow me to select pop3-ssl
-or imap-ssl =
+= My mail host requires SSL, but postie will not allow me to select pop3-ssl or imap-ssl =
 
 You must have php-imap installed on your server for this to work. Ask your
 hosting provider about this.
