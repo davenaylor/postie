@@ -2,8 +2,8 @@
 /*
 Plugin Name: Postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
-Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href='options-general.php?page=postie/postie.php'>Settings and options</a>) to configure your e-mail settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage and also the <a href='http://wordpress.org/extend/plugins/postie/faq'>FAQ</a>. Visit the <a href='http://forum.robfelty.com/forum/postie'>postie forum</a> for support.
-Version: 1.2.3
+Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href='options-general.php?page=postie/postie.php'>Settings and options</a>) to configure your e-mail settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://forum.robfelty.com/forum/postie'>postie forum</a> for support.
+Version: 1.3.alphaalphaalphatesting
 Author: Robert Felty
 Author URI: http://blog.robfelty.com/
 */
@@ -12,9 +12,19 @@ Author URI: http://blog.robfelty.com/
 $Id$
 * -= Requests Pending =-
 * German Umlats don't work
+* Problems under PHP5 
 * Problem with some mail server
 * Multiple emails should tie to a single account
 * Each user should be able to have a default category
+* WP Switcher not compatible
+* Setup poll
+    - web server
+    - mail clients
+    - plain/html
+    - phone/computer
+    - os of server
+    - os of client
+    - number of users posting
 * Test for calling from the command line
 * Support userid/domain  as a valid username
 * WP-switcher not compatiable http://www.alexking.org/index.php?content=software/wordpress/content.php#wp_120
@@ -27,6 +37,27 @@ $Id$
 */
 
 //Older Version History is in the HISTORY file
+//error_reporting(E_ALL);
+//ini_set("display_errors", 1);
+
+define("POSTIE_ROOT",dirname(__FILE__));
+
+
+function postie_loadjs_add_page() {
+	$postiepage = add_options_page('Postie', 'Postie', 8, POSTIE_ROOT.'/postie.php', 'postie_loadjs_options_page');
+	add_action( "admin_print_scripts-$postiepage", 'postie_loadjs_admin_head' );
+}
+
+function postie_loadjs_options_page() {
+	require_once POSTIE_ROOT.'/config_form.php';
+}
+
+function postie_loadjs_admin_head() {
+	$plugindir = get_settings('home').'/wp-content/plugins/'.dirname(plugin_basename(__FILE__));
+	wp_enqueue_script('loadjs', $plugindir . '/js/simpleTabs.jquery.js');
+	echo '<link type="text/css" rel="stylesheet" href="' .get_bloginfo('url') .'/wp-content/plugins/postie/css/style.css" />'."\n";
+	echo '<link type="text/css" rel="stylesheet" href="' .get_bloginfo('url') .'/wp-content/plugins/postie/css/simpleTabs.css" />'."\n";
+}
 
 
 if (isset($_GET["postie_read_me"])) {
@@ -40,7 +71,8 @@ if (isset($_GET["postie_read_me"])) {
 //Add Menu Configuration
 if (is_admin()) {
   require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR ."postie-functions.php");
-  add_action("admin_menu","PostieMenu");
+  //add_action("admin_menu","PostieMenu");
+  add_action('admin_menu', 'postie_loadjs_add_page');
   if(function_exists('load_plugin_textdomain')){
     $plugin_dir = WP_PLUGIN_DIR . '/' . basename(dirname(__FILE__));
     function postie_load_domain() {

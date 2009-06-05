@@ -1,0 +1,89 @@
+<h3>Frequently Asked Questions</h3>
+	<h4>Mail is not showing up right when I send html (rich formatted) e-mail!</h4>
+
+<p>Make sure you set the preferred text type to html</p>
+
+<h4>Do I need to any code to my theme for postie to work?</h4>
+
+<p>No. </p>
+
+<h4>I read somewhere to add an iframe to my footer. Should I do this?</h4>
+
+<p>No. Do not add an iframe in your footer to get postie to check mail
+periodically. To check e-mail periodically, either set-up a cron job, or use
+cronless postie. See installation instructions</p>
+
+<p>= My mail host requires SSL, but postie will not allow me to select pop3-ssl
+or imap-ssl =</p>
+
+<p>You must have php-imap installed on your server for this to work. Ask your
+hosting provider about this.</p>
+
+<h4>Can I use postie to check a gmail account?</h4>
+
+<p>Yes. You can use either pop3-ssl or imap-ssl with a gmail account. Before
+attempting to use with postie, make sure that you enable pop or imap in your
+gmail preferences.</p>
+
+<ul>
+<li>Pop3 settings:
+
+<ul>
+<li>protocol - pop3-ssl</li>
+<li>server - pop.gmail.com</li>
+<li>port - 995</li>
+<li>userid - your username (e.g. if your e-mail address is foo@gmail.com,
+this would be just foo)</li>
+<li>password - your password </li>
+</ul></li>
+<li>IMAP settings:
+
+<ul>
+<li>protocol - imap-ssl</li>
+<li>server - imap.gmail.com</li>
+<li>port - 993</li>
+<li>userid - your username (e.g. if your e-mail address is foo@gmail.com,
+this would be just foo)</li>
+<li>password - your password </li>
+</ul></li>
+</ul>
+
+<h4>My posts show up as being posted by 'admin' instead of me. Why?</h4>
+
+<p>If your admin account is linked to bar@gmail.com, and you send mail from
+bar@gmail.com, it will show up as being posted by admin. If you have a
+wordpress user named "John Doe", which is linked to johndoe@gmail.com, make
+sure that you send e-mails from johndoe@gmail.com. It doesn't matter which
+e-mail address postie is checking. That is, if you send mail from
+johndoe@gmail.com to foo@gmail.com, it gets posted as "John Doe". </p>
+
+<p>If you send an e-mail to your postie address from an e-mail address that is no
+t linked to a wordpress user, it will get posted as admin.</p>
+
+<h4>Images aren't showing up at all?</h4>
+
+<p>There are a couple possible reasons for this. First, check to see if you can
+add an image through wordpress's normal posting mechanism. If not, then there
+is probably 1 or 2 problems:
+1. Your server does not have the php-gd library installed. Ask your hosting
+provider about this.</p>
+
+<ol>
+<li>Your wp-content/uploads directory is not writable by the webserver. Make
+sure that it is</li>
+</ol>
+
+<h4>Can I delete the wp-files directory needed by postie version &lt;1.3.0?</h4>
+
+<p>If you have posts published already by older versions of postie, getting rid
+of those directories will delete any files you might have had associated with
+those old posts. If you don't have any such posts, then you can safely delete
+them.</p>
+
+<h4>How can I get rid of stupid stuff my e-mail provider adds to my messages?</h4>
+
+<p>To strip off stuff that they add at the beginning of a message, start your
+post with :start</p>
+
+<p>To strip off stuff that they add at the end of a message, end your
+post with :end</p>	

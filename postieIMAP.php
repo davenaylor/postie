@@ -21,6 +21,7 @@ class PostieIMAP {
     var $_self_cert;
     var $_tls_on;
     var $_connection;
+    var $_server_string;
 
     function PostieIMAP($protocol = "imap",$ssl_on = false,$self_cert = true) {
         $this->_connected = false;
@@ -69,12 +70,12 @@ class PostieIMAP {
         }
         if (eregi("google",$server)) {
             //Fix from Jim Hodgson http://www.jimhodgson.com/2006/07/19/postie/
-            $server_string = "{".$server.":".$port.$option."}INBOX";
+            $this->_server_string = "{".$server.":".$port.$option."}INBOX";
         }
         else {
-            $server_string = "{".$server.":".$port.$option."}";
+            $this->_server_string = "{".$server.":".$port.$option."}";
         }
-        $this->_connection = imap_open($server_string,$login,$password);
+        $this->_connection = imap_open($this->_server_string,$login,$password);
 
         if ($this->_connection) {
             $this->_connected = true;
@@ -86,7 +87,9 @@ class PostieIMAP {
       * @return integer
       */
     function getNumberOfMessages() {
-        return(imap_num_msg($this->_connection));
+      //$status= imap_status($this->_connection,$this->_server_string, SA_UNSEEN);
+      return(imap_num_msg($this->_connection));
+      //return($status->unseen);
     }
     /**
       * Gets the raw email message from the server
@@ -96,9 +99,14 @@ class PostieIMAP {
         if ($index < 1 || $index > ($this->getNumberOfMessages() + 1)) {
             die("Invalid IMAP/POP3 message index!");
         }
-        $email = imap_fetchheader($this->_connection,$index);
-        $email .= imap_body($this->_connection,$index);
-        return($email);
+        $header_info = imap_headerinfo($this->_connection, $index);
+        if ($header_info->Recent=='N' || $header_info->Unseen=='U') {
+          $email = imap_fetchheader($this->_connection,$index);
+          $email .= imap_body($this->_connection,$index);
+          return($email);
+        } else {
+          return('already read');
+        }
     }
     /**
       * Marks a message for deletion

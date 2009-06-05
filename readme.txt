@@ -4,8 +4,8 @@ Donate link: http://blog.robfelty.com/plugins/postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
-Tested up to: 2.8.beta
-Stable tag: 1.2.3
+Tested up to: 2.7.1
+Stable tag: 1.3.alphaalphaalphaalpha
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -15,31 +15,39 @@ Postie offers many advanced features for posting to your blog via e-mail,
 including the ability to assign categories by name, included pictures and
 videos, and automatically strip off signatures. It also has support for both
 imap and pop3, with the option for ssl with both.  For usage notes, see the
-[other notes](other_notes) page. Please also see the
-[FAQ](faq) page
+[other notes](other_notes) page
 
+= What's new in 1.3.alpha = 
+  Note that 1.3.alpha is still in an early stage. It has many new features,
+but if you are using a site which is mission critical, you might stick with
+1.2.3
 
-= What's new in? = 
-* 1.2.3 (2009.05.17)
-  * Fixed headers already sent bug
-  * Converted shortcode `<?` to proper `<?php` (thanks brack)
-  * Deleting mails after processing again
-
-* 1.2.2 (2009.05.15)
-  * Show empty categories for default category in options
-  * Image scaling fixed so that the smaller value of max image width and max
-    image height is used
-  * Fixed some issues with parsing html e-mail
-  * Got rid of stupid mime tag (thanks Jeroen)
-  * No longer adding slashes before calling wp_insert_post
-  * When using custom image field, each image has a unique key
-  * Added FAQ
+* Now using default wordpress image and upload handling, which means:
+    * No more creating special directories for postie
+    * No more confusion about imagemagick
+    * Can now use the [gallery] feature of wordpress
+    * Attachments are now connected to posts in the database
+    * All image resizing uses wordpress's default settings (under media)
+* Configuration, settings and documentation improvements
+    * Completely redesigned settings page (mostly thanks to Rainman)
+    * Reset configuration no longer deletes mailserver settings
+    * Now including help files and faq directly in settings page
+* More media features
+    * Automatically turn links to youtube into an embedded player
+    * Added option to embed audio files with custom templates
+    * Video options are now template based
+    * Image options are now solely template based, with several new default
+      templates
+* Bug fixes
+    * Uploading images from vodafone phones should now work
+    * Correctly handling Windows-1252 encoding
+    * Correctly handling non-ascii characters in subject line
 
 == Installation ==
-* Make sure all postie code is its own directory inside of wp-content/plugins/postie
-* Make two directories in your main wordpress directory wp-filez and wp-photos
-* Make sure these directories are writable by your web server (chmod 777 or chown to the webserver -- the permissions should be the same as wp-content/uploads)
-* make sure that the postie directory  that this file is in is moved to yourwebsite/wp-content/plugins
+* Either:
+    * Put the postie.zip file in wp-content/plugins/ and unzip it
+* Or:
+    * Use the automatic installer (WP 2.7+)
 * Login to WordPress as an administrator
 * Goto the Plugins tab in the WordPress Admin Site
 * Activate "Postie"
@@ -166,9 +174,8 @@ If you don't have access to cron, you can run postie without it.
   in many photo editing programs (for example Picasa), will add an IPTC caption)
 
 * Image templates
-  By default, postie wraps images in a div. You can specify the class of
-  the div in the options. You can also choose whether or not to open the
-  full-size image in a new window.
+  Postie now uses the default wordpress image template, but you can specify a
+different one if you wish.
 
   You can also specify a custom image template. I use the following custom
 template:
@@ -178,24 +185,15 @@ template:
   class="attachment" /&gt;&lt;/a&gt;&lt;div
 class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
      
-    * {IMAGE} gets replaced with the url to the full-size image
     * {THUMBNAIL} gets replaced with the url to the thumbnail image
+    * {MEDIUM} gets replaced with the url to the medium-sized image
+    * {LARGE} gets replaced with the url to the large-sized image
+    * {FULL} gets replaced with the url to the full-sized image
     * {FILENAME} gets replaced with the absolute path to the full-size image
     * {RELFILENAME} gets replaced with the relative path to the full-size image
     * {CAPTION} gets replaced with the caption you specified (if any)
-    * {WIDTH} gets replaced with the maximum width for resized photos
-    * {HEIGHT} gets replaced with the maximum height for resized photos
-
-* Rotation - if you include the text
-
-  rotate:90
-
-  or any other number - all images in the message will be rotated for you.
-
-* Images are renamed in a way that makes it impossible to accidentally
-  overwrite images you have already posted
-
-
+    * {WIDTH} gets replaced with width of the photo
+    * {HEIGHT} gets replaced with the height of the photo
 
 = Interoperability =
 * If your mail client doesn't support setting the subject (nokia) you
@@ -262,13 +260,56 @@ johndoe@gmail.com to foo@gmail.com, it gets posted as "John Doe".
 If you send an e-mail to your postie address from an e-mail address that is no
 t linked to a wordpress user, it will get posted as admin.
 
-== History ==
-* 1.2.3 (2009.05.17)
-  * Fixed headers already sent bug
-  * Converted shortcode `<?` to proper `<?php` (thanks brack)
-  * Deleting mails after processing again
+= Images aren't showing up at all? =
 
-* 1.2.2 (2009.05.15)
+There are a couple possible reasons for this. First, check to see if you can
+add an image through wordpress's normal posting mechanism. If not, then there
+is probably 1 or 2 problems:
+1. Your server does not have the php-gd library installed. Ask your hosting
+provider about this.
+
+2. Your wp-content/uploads directory is not writable by the webserver. Make
+sure that it is
+
+= Can I delete the wp-files directory needed by postie version <1.3.0? =
+
+If you have posts published already by older versions of postie, getting rid
+of those directories will delete any files you might have had associated with
+those old posts. If you don't have any such posts, then you can safely delete
+them.
+
+= How can I get rid of stupid stuff my e-mail provider adds to my messages? =
+
+To strip off stuff that they add at the beginning of a message, start your
+post with :start
+
+To strip off stuff that they add at the end of a message, end your
+post with :end
+
+== History ==
+* 1.3.testing (2009.06.xx)
+  * Now using default wordpress image and upload handling, which means:
+      * No more creating special directories for postie
+      * No more confusion about imagemagick
+      * Can now use the [gallery] feature of wordpress
+      * Attachments are now connected to posts in the database
+      * All image resizing uses wordpress's default settings (under media)
+  * Configuration, settings and documentation improvements
+      * Completely redesigned settings page (mostly thanks to Rainman)
+      * Reset configuration no longer deletes mailserver settings
+      * Now including help files and faq directly in settings page
+  * More media features
+      * Automatically turn links to youtube into an embedded player
+      * Added option to embed audio files with custom templates
+      * Video options are now template based
+      * Image options are now solely template based, with several new default
+        templates
+  * Bug fixes
+      * Uploading images from vodafone phones should now work
+      * Correctly handling Windows-1252 encoding
+      * Correctly handling non-ascii characters in subject line
+
+* 1.2.2 (2009.05.xx)
   * Show empty categories for default category in options
   * Image scaling fixed so that the smaller value of max image width and max
     image height is used
@@ -276,7 +317,7 @@ t linked to a wordpress user, it will get posted as admin.
   * Got rid of stupid mime tag (thanks Jeroen)
   * No longer adding slashes before calling wp_insert_post
   * When using custom image field, each image has a unique key
-  * Added FAQ
+
 
 * 1.2.1 (2009.05.07)
   * Got rid of stupid version checking

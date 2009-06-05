@@ -15,43 +15,43 @@ $messages[1] = __("Configuration successfully updated!",'postie');
 $messages[2] = __("Error - unable to save configuration",'postie');
 
 ?>
-<style type='text/css'>
-legend {font-weight:bold;
-        border:1px solid black;
-        background:white;
-        padding:.3em;}
-fieldset {border: 1px solid black;}
-</style>
 <?php if (isset($_GET['message'])) : ?>
 <div class="updated"><p><?php _e($messages[$_GET['message']], 'postie'); ?></p></div>
 <?php endif; ?>
 <div class="wrap"> 
-<h2><?php _e('Postie Options', 'postie') ?></h2> 
+<h2><img src="<?php echo '../wp-content/plugins/postie/images/mail.png'; ?>" alt="postie" /><?php _e('Postie Options', 'postie') ?></h2>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="reset" />
-    <p class="submit">
-            <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie')?> &raquo" type="submit">
-    </p>
+            <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie')?> &raquo" type="submit" class='button'>
 </form>
 <form name="postie-options" method="get" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/get_mail.php"?>"> 
-    <p class="submit">
-            <input name="Submit" value="<?php _e("Run Postie", 'postie');?> &raquo;" type="submit">
+            <input name="Submit" value="<?php _e("Run Postie", 'postie');?> &raquo;" type="submit" class='button'>
     <?php _e("(To run the check mail script manually)", 'postie');?>
-    </p>
 </form>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="test" />
-    <p class="submit">
-            <input name="Submit" value="<?php _e("Test Config", 'postie');?>&raquo;" type="submit">
-    <?php _e("this will run a special script to test your configuraiton options", 'postie');?>
-    </p>
+            <input name="Submit" value="<?php _e("Test Config", 'postie');?>&raquo;" type="submit" class='button'>
+    <?php _e("this will run a special script to test your configuration options", 'postie');?>
 </form>
 <form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
 	<input type="hidden" name="action" value="config" />
+<div id="simpleTabs">
+	<div class="simpleTabs-nav">
+	<ul>
+	<li id="simpleTabs-nav-1"><?php _e('Mailserver' , 'postie') ?></li>
+	<li id="simpleTabs-nav-2"><?php _e('User' , 'postie') ?></li>
+	<li id="simpleTabs-nav-3"><?php _e('Message' , 'postie') ?></li>
+	<li id="simpleTabs-nav-4"><?php _e('Image' , 'postie') ?></li>
+	<li id="simpleTabs-nav-5"><?php _e('Video and Audio' , 'postie') ?></li>
+	<li id="simpleTabs-nav-6"><?php _e('Help' , 'postie') ?></li>
+	<li id="simpleTabs-nav-7"><?php _e('FAQ' , 'postie') ?></li>
+  </ul>
+	</div>
+	<div id="simpleTabs-content-1" class="simpleTabs-content">
+	<table class='form-table'>
+    <tr><td colspan=2>
   <?php if (isset($config['CRONLESS']) && $config['CRONLESS']!='') {
   ?>
-        <fieldset class="options">
-    <legend><?php _e('Cronless postie settings', 'postie');?></legend>
   <p><?php _e('Cronless postie should check for mail', 'postie') ?>
   <select name='CRONLESS' id='CRONLESS'>
     <option value="weekly" <?php if($config["CRONLESS"] == "weekly") { echo "selected='selected'";} ?>><?php _e('Once weekly', 'postie') ?></option>
@@ -60,65 +60,55 @@ fieldset {border: 1px solid black;}
     <option value="twiceperhour" <?php if($config["CRONLESS"] == "twiceperhour") { echo "selected='selected'";} ?>><?php _e('twice per hour', 'postie') ?></option>
     <option value="tenminutes" <?php if($config["CRONLESS"] == "tenminutes") { echo "selected='selected'";} ?>><?php _e('every ten minutes', 'postie') ?></option>
   </select>
-  </fieldset>
   </p>
   <?php 
   }
   ?>
-	<table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
 
 
-
-
-
-
-    <tr><td colspan=2>
-        <fieldset class="options">
-    <legend><?php _e('E-mail and Mailserver Settings', 'postie');?></legend>
-
-
-	<table width="100%" cellspacing="2" cellpadding="5" class="editform">
 	<tr>
-        <th scope="row"><?php _e('Mail Protocol:', 'postie') ?></th>
-        <td>
-        <table>
-        <tr><td>
-        <select name="INPUT_PROTOCOL" id="INPUT_PROTOCOL">
-        <option value="pop3">POP3</option>
-        <?php if (HasIMAPSupport(false)):?>
-            <option value="imap" <?php if($config["INPUT_PROTOCOL"] == "imap") { echo "SELECTED";} ?>>IMAP</option>
-            <option value="pop3-ssl" <?php if($config["INPUT_PROTOCOL"] == "pop3-ssl") { echo "SELECTED";} ?>>POP3-SSL</option>
-            <option value="imap-ssl" <?php if($config["INPUT_PROTOCOL"] == "imap-ssl") { echo "SELECTED";} ?>>IMAP-SSL</option>
-        <?php else:?>
-            <option value="pop3" ><?php _e("IMAP/IMAP-SSL/POP3-SSL unavailable", 'postie');?></option>
-        <?php endif;?>
-        </select>
-        </td><td>
-        <code><?php _e("Standard Ports:", 'postie');?><br />
-              <?php _e("POP3", 'postie');?> - 110<br />
-              <?php _e("IMAP", 'postie');?> - 143<br />
-              <?php _e("IMAP-SSL", 'postie');?>- 993 <br />
-              <?php _e("POP3-SSL", 'postie');?> - 995 <br />
-              </code>
-        </td></tr></table></td>
-      <tr>
-        <th scope="row"><?php _e('Postie Time Correction:', 'postie') ?> </th>
-        <td><input name="TIME_OFFSET" type="text" id="TIME_OFFSET" size="2" value="<?php echo $config['TIME_OFFSET']; ?>" /> 
-        <?php _e('hours', 'postie') ?> 
-            <br />
-                <?php _e("Recommended");?>: <code><?php _e("Should be the same as your normal offset - but this lets you adjust it in cases where that doesn't work.", 'postie');?></code>
-                <br />
+    <th scope="row"><?php _e('Mail Protocol:', 'postie') ?>        </th>
+    <td>
+    <select name="INPUT_PROTOCOL" id="INPUT_PROTOCOL">
+    <option value="pop3">POP3</option>
+    <?php if (HasIMAPSupport(false)):?>
+        <option value="imap" <?php if($config["INPUT_PROTOCOL"] == "imap") { echo "SELECTED";} ?>>IMAP</option>
+        <option value="pop3-ssl" <?php if($config["INPUT_PROTOCOL"] == "pop3-ssl") { echo "SELECTED";} ?>>POP3-SSL</option>
+        <option value="imap-ssl" <?php if($config["INPUT_PROTOCOL"] == "imap-ssl") { echo "SELECTED";} ?>>IMAP-SSL</option>
+    <?php else:?>
+        <option value="pop3" ><?php _e("IMAP/IMAP-SSL/POP3-SSL unavailable", 'postie');?></option>
+    <?php endif;?>
+    </select>
+    </td>
+  </tr>
+  <tr>
+    <th scope="row"><?php _e('Port:', 'postie') ?><br />
+      <span class='recommendation'><?php _e("Standard Ports:", 'postie');?><br />
+            <?php _e("POP3", 'postie');?> - 110<br />
+            <?php _e("IMAP", 'postie');?> - 143<br />
+            <?php _e("IMAP-SSL", 'postie');?>- 993 <br />
+            <?php _e("POP3-SSL", 'postie');?> - 995 <br />
+            </span>
+    </th>
+    <td>
+    <input name="MAIL_SERVER_PORT" type="text" id="MAIL_SERVER_PORT" value="<?php echo $config["MAIL_SERVER_PORT"];?>" size="6" />
+    </td>
+  </tr>
+  <tr>
+    <th scope="row"><?php _e('Postie Time Correction:', 'postie') ?>
+        <br />
+            <span class='recommendation'><?php _e("Should be the same as your normal offset - but this lets you adjust it in cases where that doesn't work.", 'postie');?></span>
+     </th>
+    <td><input name="TIME_OFFSET" type="text" id="TIME_OFFSET" size="2" value="<?php echo $config['TIME_OFFSET']; ?>" /> 
+    <?php _e('hours', 'postie') ?> 
 
-        </td>
-      </tr>
-	</tr>
+    </td>
+  </tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Mail Server:', 'postie') ?></th>
 			<td><input name="MAIL_SERVER" type="text" id="MAIL_SERVER" value="<?php echo $config["MAIL_SERVER"];?>" size="40" />
-			<?php _e('Port:', 'postie') ?> 
-			<input name="MAIL_SERVER_PORT" type="text" id="MAIL_SERVER_PORT" value="<?php echo $config["MAIL_SERVER_PORT"];?>" size="6" />
-			</td>
-		</tr>
+      </td>
+      </tr>
 		<tr valign="top">
 			<th width="33%" scope="row"><?php _e('Mail Userid:', 'postie') ?></th>
 			<td><input name="MAIL_USERID" type="text" id="MAIL_USERID" value="<?php echo $config["MAIL_USERID"]; ?>" size="40" /></td>
@@ -130,17 +120,15 @@ fieldset {border: 1px solid black;}
 			</td>
 		</tr>
 	</table>
-</fieldset>
-    </td>
-    </tr>
+  </div>
+	<div id="simpleTabs-content-2" class="simpleTabs-content">
+            <table class='form-table'>
 
-    <tr><td colspan=2> 
-        <fieldset class="options"> 
-        <legend><?php _e('Authorization Settings', 'postie');?></legend> 
-            <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
             <?php echo BuildBooleanSelect("Allow Anyone To Post Via Email","TURN_AUTHORIZATION_OFF",$config["TURN_AUTHORIZATION_OFF"],"Changing this to yes is NOT RECOMMEDED - anything that gets sent in will automatically be posted. This could make it easier to compromise your server - YOU HAVE BEEN WARNED.");?>
         <tr>
-        <th scope="row"><?php _e('Roles That Can Post:', 'postie') ?></th>
+        <th scope="row"><?php _e('Roles That Can Post:', 'postie') ?>
+        <br />
+        <span class='recommendation'><?php _e("This allows you to grant access to other users to post if they have the proper access level", 'postie');?></span></th>
         <td>
         <table>
         <tr><th>Administrator role can always post.</th>
@@ -160,8 +148,6 @@ fieldset {border: 1px solid black;}
         }
         ?>
         </table>
-        <br />
-        <code><?php _e("This allows you to grant access to other users to post if they have the proper access level", 'postie');?></code>
         </td>
 	</tr>
             <tr> 
@@ -174,57 +160,20 @@ fieldset {border: 1px solid black;}
         "SELECTED";} ?>>Draft</option>
         <option value="pending" <?php if($config["POST_STATUS"] == "pending") { echo
         "SELECTED";} ?>>Pending Review</option>
-        </select><br />
-                <?php _e("Recommended", 'postie');?>: <code>plain</code>
-                <br />
-                </td> 
+        </select>                </td> 
             </tr> 
             <?php echo BuildTextArea("Authorized Addresses","AUTHORIZED_ADDRESSES",$config["AUTHORIZED_ADDRESSES"],"Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level.");?>
             <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Admin
-                username:') ?> </th> 
+                <th width="33%" valign="top" scope="row">
+                <?php _e('Admin username:') ?> </th> 
                 <td>
                 <input name="ADMIN_USERNAME" type="text" id="ADMIN_USERNAME"
-                value="<?php echo $config["ADMIN_USERNAME"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>admin</code>
-                <br />
-                </td> 
+                value="<?php echo $config["ADMIN_USERNAME"]; ?>" size="50" />                </td> 
             </tr> 
             </table> 
-        </fieldset> 
-    </td> 
-    </tr> 
-
-
-    <tr><td colspan=2> 
-        <fieldset class="options"> 
-        <legend><?php _e('Directory Settings', 'postie');?></legend> 
-            <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Directory For Photos:', 'postie') ?> </th> 
-                <td>
-                <input name="PHOTOSDIR" type="text" id="PHOTOSDIR" value="<?php echo $config["PHOTOSDIR"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>/wp-photos/</code>
-                <br />
-                </td> 
-            </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Directory For Files:', 'postie') ?> </th> 
-                <td>
-                <input name="FILESDIR" type="text" id="FILESDIR" value="<?php echo $config["FILESDIR"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>/wp-filez/</code>
-                <br />
-                </td> 
-            </tr> 
-            </table> 
-        </fieldset> 
-    </td> 
-    </tr> 
-
-    <tr><td colspan=2> 
-        <fieldset class="options"> 
-        <legend><?php _e('Message Settings', 'postie');?></legend> 
-            <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
+</div>
+	<div id="simpleTabs-content-3" class="simpleTabs-content">
+  <table class='form-table'>
             <tr valign="top">
                 <th scope="row"><?php _e('Default post by mail category:', 'postie') ?></th>
                 <td>
@@ -242,32 +191,30 @@ fieldset {border: 1px solid black;}
                         ?>
                 </select></td>
                 -->
-            </tr>
-            <tr valign="top">
-                <th scope="row"><?php _e('Default post by mail tag(s):
-                separated by commas', 'postie') ?></th>
-                <td><input type='text' name="DEFAULT_POST_TAGS"
-                id="DEFAULT_POST_TAGS" value='<?php echo
-                $config["DEFAULT_POST_TAGS"] ?>' />
-                </td>
-            </tr>
-            <tr> 
+          </tr>
+          <tr valign="top">
+            <th scope="row">
+            <?php _e('Default post by mail tag(s): separated by commas', 'postie') ?></th>
+            <td><input type='text' name="DEFAULT_POST_TAGS"
+            id="DEFAULT_POST_TAGS" value='<?php echo
+            $config["DEFAULT_POST_TAGS"] ?>' />
+            </td>
+          </tr>
+          <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Default Title:', 'postie') ?> </th> 
                 <td>
                 <input name="DEFAULT_TITLE" type="text" id="DEFAULT_TITLE" value="<?php echo $config["DEFAULT_TITLE"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>Live from the field</code>
                 <br />
                 </td> 
             </tr> 
             <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Prefered Text Type (HTML/plain):', 'postie') ?> </th> 
+                <th width="33%" valign="top" scope="row"><?php _e('Preferred
+                Text Type:', 'postie') ?> </th> 
                 <td>
         <select name="PREFER_TEXT_TYPE" id="PREFER_TEXT_TYPE">
         <option value="plain">plain</option>
         <option value="html" <?php if($config["PREFER_TEXT_TYPE"] == "html") { echo "SELECTED";} ?>>html</option>
         </select><br />
-                <?php _e("Recommended", 'postie');?>: <code>plain</code>
-                <br />
                 </td> 
             </tr> 
             <tr> 
@@ -277,10 +224,10 @@ fieldset {border: 1px solid black;}
                 <option value="no">no</option>
                 <option value="yes" <?php if($config["WRAP_PRE"] == "yes") { echo "SELECTED";} ?>>yes</option>
                 </select><br />
-                <?php _e("Recommended", 'postie');?>: <code>no</code>
                 <br />
                 </td> 
             </tr> 
+            <!--
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Add more meta information right before post:', 'postie') ?> </th> 
                 <td>
@@ -292,9 +239,10 @@ fieldset {border: 1px solid black;}
                 <br />
                 </td> 
             </tr> 
-            <?php echo BuildBooleanSelect("Filter
-            newlines","FILTERNEWLINES",$config["FILTERNEWLINES"], "Set to no
-            if using markdown or textitle syntax");?>
+            -->
+            <?php echo BuildBooleanSelect("Filter newlines",
+              "FILTERNEWLINES",$config["FILTERNEWLINES"],
+              "Set to no if using markdown or textitle syntax");?>
             <?php echo BuildBooleanSelect("Replace newline characters with
             html line breaks (&lt;br
             /&gt;)","CONVERTNEWLINE",$config["CONVERTNEWLINE"]);?>
@@ -306,246 +254,293 @@ fieldset {border: 1px solid black;}
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> </th> 
                 <td>
-                <input name="MESSAGE_ENCODING" type="text" id="MESSAGE_ENCODING" value="<?php echo $config["MESSAGE_ENCODING"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>UTF-8</code> - it should handle ISO-8859-1 as well
-                <br />
+                <input name="MESSAGE_ENCODING" type="text" id="MESSAGE_ENCODING" value="<?php echo $config["MESSAGE_ENCODING"]; ?>" size="10" />
+                <span class='recommendation'>UTF-8 <?php _e("should handle ISO-8859-1 as well", 'postie');?></span>
                 </td> 
             </tr> 
-            <?php echo BuildBooleanSelect("Decode Quoted Printable Data","MESSAGE_DEQUOTE",$config["MESSAGE_DEQUOTE"], "Should be yes in most cases.");?>
+            <?php echo BuildBooleanSelect("Decode Quoted Printable Data","MESSAGE_DEQUOTE",$config["MESSAGE_DEQUOTE"]);?>
             <?php echo BuildTextArea("Supported File Types","SUPPORTED_FILE_TYPES",$config["SUPPORTED_FILE_TYPES"],"Put each type on a single line.");?>
-            <?php echo BuildTextArea("Banned File
-            Names","BANNED_FILES_LIST",$config["BANNED_FILES_LIST"],"Put each
-            file name on a single line.Files matching this list will never be
-            posted to your blog. You can use wildcards such as *.xls, or *.* for
-            all files");?>
+            <?php echo BuildTextArea("Banned File Names","BANNED_FILES_LIST",$config["BANNED_FILES_LIST"],"Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files");?>
             <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Tag Of Message Start:', 'postie') ?> </th> 
+                <th width="33%" valign="top" scope="row"><?php _e('Tag Of
+                Message Start:', 'postie') ?> <br />
+                <span class='recommendation'><?php _e('Use to remove any text from a message that the email provider puts at the top of the message', 'postie') ?></span></th>
                 <td>
-                <p>This tag can be used to remove any text from a message that the email provider puts at the top of the message</p>
-                <input name="MESSAGE_START" type="text" id="MESSAGE_START" value="<?php echo $config["MESSAGE_START"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>:start</code>
-                <br />
+                <input name="MESSAGE_START" type="text" id="MESSAGE_START" value="<?php echo $config["MESSAGE_START"]; ?>" size="20" /><br />
                 </td> 
             </tr> 
             <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Tag Of Message End:', 'postie') ?> </th> 
+                <th width="33%" valign="top" scope="row"><?php _e('Tag Of
+                Message End:', 'postie') ?> <br />
+                <span class='recommendation'><?php _e('Use to remove any text from a message that the email provider puts at the end of the message', 'postie') ?></span></th>
                 <td>
-                <p>This tag can be used to remove any text from a message that the email provider puts at the bottom of the message</p>
-                <input name="MESSAGE_END" type="text" id="MESSAGE_END" value="<?php echo $config["MESSAGE_END"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>:end</code>
-                <br />
+                <input name="MESSAGE_END" type="text" id="MESSAGE_END" value="<?php echo $config["MESSAGE_END"]; ?>" size="20" /><br />
                 </td> 
             </tr> 
             <?php echo BuildBooleanSelect("Drop The Signature From Mail","DROP_SIGNATURE",$config["DROP_SIGNATURE"]);?>
             <?php echo BuildTextArea("Signature Patterns","SIG_PATTERN_LIST",$config["SIG_PATTERN_LIST"],"Put each pattern on a seperate line and make sure to escape any special characters.");?>
             </table> 
-        </fieldset> 
-    </td> 
-    </tr> 
+            </div>
+	<div id="simpleTabs-content-4" class="simpleTabs-content">
+  <table class='form-table'>
 
 
-    <tr><td colspan=2> 
-        <fieldset class="options"> 
-        <legend><?php _e('Image Settings', 'postie');?></legend> 
-            <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
-            <?php if (!HasGDInstalled()):?>
-                <tr>
-                    <th scope="row">No GD Support </th>
-                    <td>Currently your installation of PHP does not have GD installed so no image resizing can occur.
-                    <input type="hidden" name="RESIZE_LARGE_IMAGES" value="0">
-                    <input type="hidden" name="JPEGQUALITY"" value="80">
-                    </td>
-                </tr>
-            <?php else:?>
-                <?php echo BuildBooleanSelect("Post Images At End","IMAGES_APPEND",$config["IMAGES_APPEND"],"No means they will be put before the text of the message.");?>
-                <?php echo BuildBooleanSelect("Resize Large Images","RESIZE_LARGE_IMAGES",$config["RESIZE_LARGE_IMAGES"]);?>
-                <tr>
-                    <th scope="row"><?php _e('Maximum Image Width:', 'postie') ?> </th>
-                    <td><input name="MAX_IMAGE_WIDTH" type="text" id="MAX_IMAGE_WIDTH" value="<?php echo $config['MAX_IMAGE_WIDTH']; ?>" size="4" /> 
-                    <?php _e('pixels', 'postie') ?>
-                    <br /><?php _e("Recommended", 'postie');?>: <code>400</code><br />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('Maximum Image Height:', 'postie') ?> </th>
-                    <td><input name="MAX_IMAGE_HEIGHT" type="text" id="MAX_IMAGE_HEIGHT" value="<?php echo $config['MAX_IMAGE_HEIGHT']; ?>" size="4" /> 
-                    <?php _e('pixels', 'postie') ?>
-                    <br /><?php _e("Recommended", 'postie');?>: <code>Leave Blank</code><br />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('JPEG Compression:', 'postie') ?> </th>
-                    <td><input name="JPEGQUALITY" type="text" id="JPEGQUALITY" value="<?php echo $config['JPEGQUALITY']; ?>" size="3" />
-                    <?php _e('%', 'postie') ?>
-                    <br /><?php _e("Recommended", 'postie');?>: <code>80</code>%
-                    </td>
-                </tr>
-            <?php endif;?>
-            <?php echo BuildBooleanSelect("Use ImageMagick","USE_IMAGEMAGICK",$config["USE_IMAGEMAGICK"]);?>
-                <tr>
-                    <th scope="row"><?php _e('convert binary location:', 'postie') ?> </th>
-                    <td><input name="IMAGEMAGICK_CONVERT" type="text" id="IMAGEMAGICK_CONVERT" value="<?php echo $config['IMAGEMAGICK_CONVERT']; ?>" size="30" />
-                    <br /><?php _e("Recommended", 'postie');?>: <code>only needed if you are using ImageMagick <br /> should be /usr/bin/convert</code>
-                    </td>
-                </tr>
-            <?php echo BuildBooleanSelect("Automatic SmartSharp Mask","AUTO_SMART_SHARP",$config["AUTO_SMART_SHARP"],"This automatically smart sharpens the images that are posted. This feature is <b>EXPERIMENTAL</b>. It alsot takes a lot of processing power");?>
-
+            <?php echo BuildBooleanSelect("Post Images At
+            End","IMAGES_APPEND",$config["IMAGES_APPEND"],"No means they will be put before the text of the message.");?>     
             <?php echo BuildBooleanSelect("Start Image Count At 0","START_IMAGE_COUNT_AT_ZERO",$config["START_IMAGE_COUNT_AT_ZERO"]);?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Image Place Holder Tag:', 'postie') ?> </th> 
                 <td>
                 <input name="IMAGE_PLACEHOLDER" type="text" id="IMAGE_PLACEHOLDER" value="<?php echo $config["IMAGE_PLACEHOLDER"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>#img%#</code>
-                <br />
                 </td> 
             </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Image CSS Class:', 'postie') ?> </th> 
-                <td>
-                <input name="IMAGECLASS" type="text" id="IMAGECLASS" value="<?php echo $config["IMAGECLASS"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>postie-image</code>
-                <br />
-                </td> 
+            <tr>
+            <th width="33%" valign="top" scope="row"><?php _e('Image
+            Template', 'postie') ?><br />
+            <span class='recommendation'><?php _e('Choose a default template,
+            then customize to your liking in the text box',
+            'postie');?></span><br /><br />
+            <span class='recommendation'><?php _e('Sizes for thumbnail, medium, and large images can be chosen in the <a href="options-media.php">Media Settings</a>. The samples here use the default sizes, and will not reflect the sizes you have chosen.', 'postie');?></span>
+            </th>
+            <td>
+  <input type='hidden' id='SELECTED_IMAGETEMPLATE' name='SELECTED_IMAGETEMPLATE'
+  value="<?php echo attribute_escape($config['SELECTED_IMAGETEMPLATE']) ?>" />
+  <input type='hidden' id='CURRENT_IMAGETEMPLATE' value="<?php echo
+attribute_escape($config['IMAGETEMPLATE']) ?>" />
+			 <select name='IMAGETEMPLATESELECT' id='IMAGETEMPLATESELECT' 
+       onchange="changeStyle('imageTemplatePreview','IMAGETEMPLATE',
+       'IMAGETEMPLATESELECT', 'SELECTED_IMAGETEMPLATE','smiling.jpg');" />
+			 <?php
+			 $styleOptions=unserialize($config['IMAGETEMPLATES']);
+			 $selected=$config['SELECTED_IMAGETEMPLATE'];
+			 foreach ($styleOptions as $key=>$value) {
+			   if ($key!='selected') {
+           if ($key==$selected) {
+					   $select=' selected=selected ';
+					 } else {
+						 $select=' ';
+					 }
+					 echo '<option' .  $select . 'value="'.
+					     attribute_escape($value) . '" >'.$key . '</option>';
+         }
+       }
+			 ?>
+			 </select>
+	     &nbsp;&nbsp;
+			 <?php _e('Preview', 'postie'); ?>
+			 <span id='imageTemplatePreview' alt='preview'></span>
+   <textarea onchange='changeStyle("imageTemplatePreview", "IMAGETEMPLATE",
+   "IMAGETEMPLATESELECT", "SELECTED_IMAGETEMPLATE", "smiling.jpg", true);' cols='70' rows='7' id="IMAGETEMPLATE"
+   name="IMAGETEMPLATE"><?php echo attribute_escape($config['IMAGETEMPLATE']) ?></textarea>
+			 </td>
             </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Image CSS Style:', 'postie') ?> </th> 
-                <td>
-                <input name="IMAGESTYLE" type="text" id="IMAGESTYLE" value="<?php echo $config["IMAGESTYLE"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>border: none;</code>
-                <br />
-                </td> 
-            </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Image Div CSS:', 'postie') ?> </th> 
-                <td>
-                <input name="IMAGEDIV" type="text" id="IMAGEDIV" value="<?php echo $config["IMAGEDIV"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>postie-image-div</code><p>This is the CSS class of a div that wraps each image. Can be used to style the post</p>
-                <br />
-                </td> 
-            </tr> 
-            <?php echo BuildBooleanSelect("Open images in new
-            window","IMAGE_NEW_WINDOW",$config["IMAGE_NEW_WINDOW"],"Recommended:
-            no");?>
-            <?php echo BuildBooleanSelect("Use custom image
-            template","USEIMAGETEMPLATE",$config["USEIMAGETEMPLATE"],"If you
-            don't like the default html output around images, you can enter
-            your own below. My personal template is already there. See the
-            readme for more details");?>
-            <tr> 
-                <th width="33%" valign="top" scope="row">                <td>
-                <textarea  cols="50" rows="6" name="IMAGETEMPLATE"
-                id="IMAGETEMPLATE"><?php echo $config["IMAGETEMPLATE"]; ?></textarea>
-                </td> 
-            </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Attachment Div CSS:', 'postie') ?> </th> 
-                <td>
-                <input name="ATTACHMENTDIV" type="text" id="ATTACHMENTDIV" value="<?php echo $config["ATTACHMENTDIV"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>postie-attachment-div</code><p>This is the CSS class of a div that wraps each file attachment. Can be used to style the post</p>
-                <br />
-                </td> 
-            <?php echo BuildBooleanSelect("Use custom image
-            field","CUSTOM_IMAGE_FIELD",$config["CUSTOM_IMAGE_FIELD"],"When this option is set, images will not appear in the
-            post. Instead the url to the image will be input into a custom
-            field named 'image'.
-Recommended:
-            no");?>            </tr> 
+            <?php echo BuildBooleanSelect("Use custom image field","CUSTOM_IMAGE_FIELD",$config["CUSTOM_IMAGE_FIELD"],"When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'.");?>            
             </table> 
-        </fieldset> 
+   </div> 
+
+<!-- 
+##########   VIDEO AND AUDIO OPTIONS ###################
+-->
+
+	<div id="simpleTabs-content-5" class="simpleTabs-content">
+<table class='form-table'>
+
+            <tr><th scope='row'><?php _e('Video template 1', 'postie') ?><br />
+            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
+<?php $templateDir = get_option('siteurl') . '/' . PLUGINDIR .  '/postie/templates'; ?>
+            <td>
+  <input type='hidden' id='SELECTED_VIDEO1TEMPLATE' name='SELECTED_VIDEO1TEMPLATE'
+  value="<?php echo attribute_escape($config['SELECTED_VIDEO1TEMPLATE']) ?>" />
+  <input type='hidden' id='CURRENT_VIDEO1TEMPLATE' value="<?php echo
+attribute_escape($config['VIDEO1TEMPLATE']) ?>" />
+			 <select name='VIDEO1TEMPLATESELECT' id='VIDEO1TEMPLATESELECT' 
+       onchange="changeStyle('video1TemplatePreview','VIDEO1TEMPLATE', 'VIDEO1TEMPLATESELECT', 'SELECTED_VIDEO1TEMPLATE','hi.mp4');" />
+			 <?php
+			 $styleOptions=unserialize($config['VIDEO1TEMPLATES']);
+			 $selected=$config['SELECTED_VIDEO1TEMPLATE'];
+			 foreach ($styleOptions as $key=>$value) {
+			   if ($key!='selected') {
+           if ($key==$selected) {
+					   $select=' selected=selected ';
+					 } else {
+						 $select=' ';
+					 }
+					 echo '<option' .  $select . 'value="'.
+					     attribute_escape($value) . '" >'.$key . '</option>';
+         }
+       }
+			 ?>
+			 </select>
+	     &nbsp;&nbsp;
+			 <?php _e('Preview', 'postie'); ?>
+			 <span id='video1TemplatePreview' alt='preview'></span>
+   <textarea onchange="changeStyle('video1TemplatePreview','VIDEO1TEMPLATE',
+   'VIDEO1TEMPLATESELECT', 'SELECTED_VIDEO1TEMPLATE','hi.mp4',true);" cols='70' rows='7' id="VIDEO1TEMPLATE"
+   name="VIDEO1TEMPLATE"><?php echo attribute_escape($config['VIDEO1TEMPLATE']) ?></textarea>
+			 </td>
+       </tr>
+      <tr> 
+        <th width="33%" valign="top" scope="row">
+        <?php _e('Video 1 file types:') ?><br /><span class='recommendation'>
+        <?php _e('Use the video template 1 for these files types (separated by
+        commas)', 'postie') ?></span> </th> 
+          <td>
+          <input name="VIDEO1TYPES" type="text" id="VIDEO1TYPES"
+          value="<?php echo implode(', ', $config["VIDEO1TYPES"]); ?>" size="40" />                </td> 
+      </tr> 
+            <tr><th scope='row'><?php _e('Video template 2', 'postie') ?><br />
+            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
+            <td>
+  <input type='hidden' id='SELECTED_VIDEO2TEMPLATE' name='SELECTED_VIDEO2TEMPLATE'
+  value="<?php echo attribute_escape($config['SELECTED_VIDEO2TEMPLATE']) ?>" />
+  <input type='hidden' id='CURRENT_VIDEO2TEMPLATE' value="<?php echo
+attribute_escape($config['VIDEO2TEMPLATE']) ?>" />
+			 <select name='VIDEO2TEMPLATESELECT' id='VIDEO2TEMPLATESELECT' 
+       onchange="changeStyle('video2TemplatePreview','VIDEO2TEMPLATE', 'VIDEO2TEMPLATESELECT', 'SELECTED_VIDEO2TEMPLATE','hi.flv');" />
+			 <?php
+			 $styleOptions=unserialize($config['VIDEO2TEMPLATES']);
+			 $selected=$config['SELECTED_VIDEO2TEMPLATE'];
+			 foreach ($styleOptions as $key=>$value) {
+			   if ($key!='selected') {
+           if ($key==$selected) {
+					   $select=' selected=selected ';
+					 } else {
+						 $select=' ';
+					 }
+					 echo '<option' .  $select . 'value="'.
+					     attribute_escape($value) . '" >'.$key . '</option>';
+         }
+       }
+			 ?>
+			 </select>
+	     &nbsp;&nbsp;
+			 <?php _e('Preview', 'postie'); ?>
+			 <span id='video2TemplatePreview' alt='preview'></span>
+   <textarea onchange="changeStyle('video2TemplatePreview','VIDEO2TEMPLATE',
+   'VIDEO2TEMPLATESELECT', 'SELECTED_VIDEO2TEMPLATE','hi.flv',true);" cols='70' rows='7' id="VIDEO2TEMPLATE"
+   name="VIDEO2TEMPLATE"><?php echo attribute_escape($config['VIDEO2TEMPLATE']) ?></textarea>
+			 </td>
+       </tr>
+      <tr> 
+        <th width="33%" valign="top" scope="row">
+        <?php _e('Video 2 file types:') ?><br /><span class='recommendation'>
+        <?php _e('Use the video template 2 for these files types (separated by
+        commas)', 'postie') ?></span> </th> 
+          <td>
+          <input name="VIDEO2TYPES" type="text" id="VIDEO2TYPES"
+          value="<?php echo implode(', ', $config["VIDEO2TYPES"]); ?>" size="40" />                </td> 
+      </tr> 
+        <tr><th scope='row'><?php _e('Audio template', 'postie') ?><br />
+        <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
+        <td>
+  <input type='hidden' id='SELECTED_AUDIOTEMPLATE' name='SELECTED_AUDIOTEMPLATE'
+  value="<?php echo attribute_escape($config['SELECTED_AUDIOTEMPLATE']) ?>" />
+  <input type='hidden' id='CURRENT_AUDIOTEMPLATE' value="<?php echo
+attribute_escape($config['AUDIOTEMPLATE']) ?>" />
+			 <select name='AUDIOTEMPLATESELECT' id='AUDIOTEMPLATESELECT' 
+       onchange="changeStyle('audioTemplatePreview','AUDIOTEMPLATE',
+       'AUDIOTEMPLATESELECT', 'SELECTED_AUDIOTEMPLATE','funky.mp3');" />
+			 <?php
+			 $styleOptions=unserialize($config['AUDIOTEMPLATES']);
+			 $selected=$config['SELECTED_AUDIOTEMPLATE'];
+			 foreach ($styleOptions as $key=>$value) {
+			   if ($key!='selected') {
+           if ($key==$selected) {
+					   $select=' selected=selected ';
+					 } else {
+						 $select=' ';
+					 }
+					 echo '<option' .  $select . 'value="'.
+					     attribute_escape($value) . '" >'.$key . '</option>';
+         }
+       }
+			 ?>
+			 </select>
+	     &nbsp;&nbsp;
+			 <?php _e('Preview', 'postie'); ?>
+			 <span id='audioTemplatePreview' alt='preview'></span>
+   <textarea onchange="changeStyle('audioTemplatePreview','AUDIOTEMPLATE',
+       'AUDIOTEMPLATESELECT', 'SELECTED_AUDIOTEMPLATE','funky.mp3', true);" cols='70' rows='7' id="AUDIOTEMPLATE"
+   name="AUDIOTEMPLATE"><?php echo attribute_escape($config['AUDIOTEMPLATE']) ?></textarea>
+			 </td>
+            </table> 
     </td> 
     </tr> 
-
-
-    <tr><td colspan=2> 
-        <fieldset class="options"> 
-        <legend><?php _e('Video options', 'postie');?></legend> 
-            <table width="100%" cellspacing="2" cellpadding="5" class="editform"> 
-            <?php echo BuildBooleanSelect("Embed 3GP videos as QuickTime","3GP_QT",$config["3GP_QT"],"This controls if the video is just a link or embeded in the page using QuickTime");?>
-            <?php echo BuildBooleanSelect("Autoplay embedded
-            videos?","VIDEO_AUTOPLAY",$config["VIDEO_AUTOPLAY"],"When this is
-            set to yes, videos will start to play automatically.");?>
-                <tr>
-                    <th scope="row"><?php _e('Video width:', 'postie') ?> </th>
-                    <td><input name="VIDEO_WIDTH" type="text" id="VIDEO_WIDTH"
-                    value="<?php echo $config['VIDEO_WIDTH']; ?>" size="5" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('Video height:', 'postie') ?> </th>
-                    <td><input name="VIDEO_HEIGHT" type="text" id="VIDEO_HEIGHT"
-                    value="<?php echo $config['VIDEO_HEIGHT']; ?>" size="5" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('Video player width:', 'postie') ?> </th>
-                    <td><input name="PLAYER_WIDTH" type="text" id="PLAYER_WIDTH"
-                    value="<?php echo $config['PLAYER_WIDTH']; ?>" size="5" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('Video player height:', 'postie') ?> </th>
-                    <td><input name="PLAYER_HEIGHT" type="text" id="PLAYER_HEIGHT"
-                    value="<?php echo $config['PLAYER_HEIGHT']; ?>" size="5" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e('Location of ffmpeg:', 'postie') ?> </th>
-                    <td><input name="3GP_FFMPEG" type="text" id="3GP_FFMPEG" value="<?php echo $config['3GP_FFMPEG']; ?>" size="30" />
-                    <br /><?php _e("Recommended");?>: <code><?php _e("only needed if you are on a Linux server and use 3gp video,and don't embed the video. This allows postie to make thumbnail of the very first frame");?>  <br /><?php _e("should be /usr/bin/ffmpeg", 'postie');?></code>
-                    </td>
-                </tr>
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('3GP CSS Class:', 'postie') ?> </th> 
-                <td>
-                <input name="3GPCLASS" type="text" id="3GPCLASS" value="<?php echo $config["3GPCLASS"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>wp-mailvideo</code>
-                <br />
-                </td> 
-            </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('3GP Div CSS:', 'postie') ?> </th> 
-                <td>
-                <input name="3GPDIV" type="text" id="3GPDIV" value="<?php echo $config["3GPDIV"]; ?>" size="50" /><br />
-                <?php _e("Recommended", 'postie');?>: <code>postie-3gp-div</code><p>This is the CSS class of a div that wraps each 3GP video. Can be used to style the post</p>
-                <br />
-                </td> 
-            </tr> 
-            <?php echo BuildBooleanSelect("Use custom video
-            template","USEVIDEOTEMPLATE",$config["USEVIDEOTEMPLATE"],"If you
-            don't like the default html output around videos, you can enter
-            your own below. The default template is already there. See the
-            readme for more details");?>
-            <tr> 
-                <th width="33%" valign="top" scope="row">                <td>
-                <textarea  cols="50" rows="6" name="VIDEOTEMPLATE"
-                id="VIDEOTEMPLATE"><?php echo $config["VIDEOTEMPLATE"]; ?></textarea>
-                </td> 
-            </tr> 
-            </table> 
-        </fieldset> 
-    </td> 
-    </tr> 
-
-
-
-
-
-
-
-
-
-
-
-
-
 	</table> 
-	<p class="submit">
-		<input type="submit" name="Submit" value="<?php _e('Update Options', 'postie') ?> &raquo;" />
-	</p>
+  </div>
+	<div id="simpleTabs-content-6" class="simpleTabs-content">
+  <?php include('readme.html'); ?>
+  </div>
+	<div id="simpleTabs-content-7" class="simpleTabs-content">
+  <?php include('faq.html'); ?>
+  </div>
+		<input type="submit" name="Submit" value="<?php _e('Update Options', 'postie') ?> &raquo;" class='button' />
 </form> 
-
-<a href="http://validator.w3.org/check?uri=referer">valid xhtml</a>
-<a href="http://jigsaw.w3.org/css-validator/check/referer">valid css</a><br />
+<div id="w3c">
+    <a href="http://validator.w3.org/check?uri=referer"><img src="<?php echo '../wp-content/plugins/postie/images/valid-xhtml10-blue.png'; ?>" alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>
+    <a href="http://jigsaw.w3.org/css-validator/check/referer"><img style="border:0;width:88px;height:31px" src="<?php echo '../wp-content/plugins/postie/images/vcss-blue.gif'; ?>" alt="Valid CSS!" /></a>
+</div>
 Postie Version:
 $Id$
 </div>
+
+<script type="text/javascript">
+jQuery(document).ready(function() {
+	jQuery("#simpleTabs").simpleTabs({
+		fadeSpeed: "medium", // @param : low, medium, fast
+		defautContent: 1,    // @param : number ( simpleTabs-nav-number)
+		autoNav: "false",     // @param : true or false
+		closeTabs : "false"   // @param : true or false;
+	});
+
+});
+function changeStyle(preview,template,select,selected,sample,custom) {
+	var preview = document.getElementById(preview);
+	var pageStyles = document.getElementById(select);
+	var selectedStyle;
+  var hiddenStyle=document.getElementById(selected);
+  var pageStyle = document.getElementById(template);
+  if (custom==true) {
+    selectedStyle=pageStyles.options[pageStyles.options.length-1];
+    selectedStyle.value=pageStyle.value;
+    selectedStyle.selected=true;
+  } else {
+    for(i=0; i<pageStyles.options.length; i++) {
+      if (pageStyles.options[i].selected == true) {
+        selectedStyle=pageStyles.options[i];
+      }
+    }
+  }
+  hiddenStyle.value=selectedStyle.innerHTML
+  var previewHTML=selectedStyle.value;
+  var fileLink = '<?php echo $templateDir ?>/' + sample;
+  var thumb = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
+  '-150x150.jpg');
+  var medium = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
+  '-300x200.jpg');
+  var large = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
+  '-1024x682.jpg');
+  previewHTML=previewHTML.replace(/{FILELINK}/g, fileLink);
+  previewHTML=previewHTML.replace(/{IMAGE}/g, fileLink);
+	previewHTML=previewHTML.replace(/{FILENAME}/, sample);
+	previewHTML=previewHTML.replace(/{THUMB(NAIL|)}/, thumb);
+	previewHTML=previewHTML.replace(/{MEDIUM}/, medium);
+	previewHTML=previewHTML.replace(/{LARGE}/, large);
+	previewHTML=previewHTML.replace(/{CAPTION}/g, 'Spencer smiling');
+  preview.innerHTML=previewHTML;
+  pageStyle.value=selectedStyle.value;
+}
+function restoreStyle(current,template) {
+  var defaultStyle = document.getElementById(current).value;
+  var pageStyle = document.getElementById(template);
+  pageStyle.value=defaultStyle;
+}
+changeStyle('audioTemplatePreview','AUDIOTEMPLATE', 'AUDIOTEMPLATESELECT',
+'SELECTED_AUDIOTEMPLATE','funky.mp3');
+changeStyle('imageTemplatePreview','IMAGETEMPLATE', 'IMAGETEMPLATESELECT',
+'SELECTED_AUDIOTEMPLATE','smiling.jpg');
+changeStyle('video1TemplatePreview','VIDEO1TEMPLATE', 'VIDEO1TEMPLATESELECT',
+'SELECTED_VIDEO1TEMPLATE','hi.mp4');
+changeStyle('video2TemplatePreview','VIDEO2TEMPLATE', 'VIDEO2TEMPLATESELECT',
+'SELECTED_VIDEO2TEMPLATE','hi.flv');
+</script>

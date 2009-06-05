@@ -1,9 +1,10 @@
 <?php
+ini_set('xdebug.remote_mode', 'jit');
 /*
 $Id$
 */
+
 /*TODO 
- * check if image height is being consulted 
  * html purify
  * windows 1252 encoding
  */
@@ -12,7 +13,7 @@ $Id$
 #$config=GetConfig();
 
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
-define("POSTIE_ROOT",dirname(__FILE__));
+//define("POSTIE_ROOT",dirname(__FILE__));
 define("POSTIE_TABLE",$GLOBALS["table_prefix"]. "postie_config");
 
 /* this function is necessary for wildcard matching on non-posix systems */
@@ -31,7 +32,6 @@ if (!function_exists('fnmatch')) {
   */
 function PostEmail($poster,$mimeDecodedEmail) {
   $config = GetConfig();
-  $GLOBALS["POSTIE_IMAGE_ROTATION"] = 0;
   $attachments = array(
           "html" => array(), //holds the html for each image
           "cids" => array(), //holds the cids for HTML email
@@ -40,21 +40,19 @@ function PostEmail($poster,$mimeDecodedEmail) {
   print("<p>Message Id is :" . $mimeDecodedEmail->headers["message-id"] . "</p><br/>\n");
   print("<p>Email has following attachments:</p>");
   foreach($mimeDecodedEmail->parts as $parts) {
-    print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."</p><br />\n";
+    print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."</p>\n";
   }
   FilterTextParts($mimeDecodedEmail);
-#print("<p>Email has following attachments after filtering:");
-#    foreach($mimeDecodedEmail->parts as $parts) {
-#        print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."<br />\n";
-#    }
-  $content = GetContent($mimeDecodedEmail,$attachments);
+  $tmpPost=array('post_title'=> 'tmptitle',
+                 'post_content'=>'tmoPost');
+  /* in order to do attachments correctly, we need to associate the
+  attachments with a post. So we add the post here, then update it 
+  */
+  $post_id = wp_insert_post($tmpPost);
+  $content = GetContent($mimeDecodedEmail,$attachments,$post_id);
   $subject = GetSubject($mimeDecodedEmail,$content);
   if ($debug) {
     echo "the subject is $subject, right after calling GetSubject\n";
-  }
-  $rotation = GetRotation($mimeDecodedEmail,$content);
-  if ($rotation != "0" && count($attachments["image_files"])) {
-    RotateImages($rotation,$attachments["image_files"]);
   }
   $customImages = SpecialMessageParsing($content,$attachments);
   $post_excerpt = GetPostExcerpt($content);
@@ -66,13 +64,16 @@ function PostEmail($poster,$mimeDecodedEmail) {
     HandleMessageEncoding(
         $mimeDecodedEmail->headers["content-transfer-encoding"],
         $mimeDecodedEmail->ctype_parameters["charset"],
-        $mimeDecodedEmail->headers["date"]);
+        $mimeDecodedEmail->headers["date"], $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
     $message_date = $mimeDecodedEmail->headers['date'];
   }
   list($post_date,$post_date_gmt) = DeterminePostDate($content, $message_date);
 
   ubb2HTML($content);	
 
+  if ($config['CONVERTURLS']) 
+    $content=clickableLink($content);
+  
   if ($config['FILTERNEWLINES']) 
     $content = FilterNewLines($content);
   //$content = FixEmailQuotes($content);
@@ -82,24 +83,25 @@ function PostEmail($poster,$mimeDecodedEmail) {
   $post_tags = GetPostTags($content);
   $comment_status = AllowCommentsOnPost($content);
   
-  if ((empty($id) || is_null($id)) && 
-      $config['ADD_META']=='yes') {
-    if ($config['WRAP_PRE']=='yes') {
-      //BMS: removing metadata from post body?
-//$content = $postAuthorDetails['content'] . "<pre>\n" . $content . "</pre>\n";
-      $content = "<pre>\n" . $content . "</pre>\n";
+  if ((empty($id) || is_null($id))) {
+    $id=$post_id;
+    $isReply=false;
+    if ($config['ADD_META']=='yes') {
+      if ($config['WRAP_PRE']=='yes') {
+        $content = $postAuthorDetails['content'] . "<pre>\n" . $content . "</pre>\n";
+        $content = "<pre>\n" . $content . "</pre>\n";
+      } else {
+        $content = $postAuthorDetails['content'] . $content;
+        $content = $content;
+      }
     } else {
-//BMS: removing metadata from post body?
-      //$content = $postAuthorDetails['content'] . $content;
-      $content = $content;
+      if ($config['WRAP_PRE']=='yes') {
+        $content = "<pre>\n" . $content . "</pre>\n";
+      }
     }
   } else {
-    if ($config['WRAP_PRE']=='yes') {
-      $content = "<pre>\n" . $content . "</pre>\n";
-    }
-  }
-  if ($config['CONVERTURLS']) {
-    $content=clickableLink($content);
+    $isReply=true;
+    wp_delete_post($post_id);
   }
 
 
@@ -125,7 +127,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
       'post_status' => $post_status
   );
   DisplayEmailPost($details);
-  PostToDB($details); 
+  PostToDB($details,$isReply); 
 }
 /** FUNCTIONS **/
 
@@ -138,6 +140,8 @@ function clickableLink($text) {
 
   // pad it with a space so we can match things at the start of the 1st line.
   $ret = ' ' . $text;
+  // try to embed youtube videos
+  $ret = preg_replace("#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is", "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />", $ret);
 
   // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
   // xxxx can only be alpha characters.
@@ -265,13 +269,7 @@ function PostieMenu() {
   * This handles actually showing the form
   */
 function ConfigurePostie() {
-  //PostieAdminPermissions();
-  //if (current_user_can('config_postie')) {
-      include(POSTIE_ROOT . DIRECTORY_SEPARATOR. "config_form.php");
-  //}
-  //else {
-      //postie_read_me();
-  //}
+  include(POSTIE_ROOT . DIRECTORY_SEPARATOR. "config_form.php");
 }
 
 /**
@@ -279,8 +277,7 @@ function ConfigurePostie() {
   * @return array
   */ 
 function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
-    $protocol=NULL, $offset=NULL, $test=NULL) {
-  //$config = GetConfig();
+    $protocol=NULL, $offset=NULL, $test=NULL, $deleteMessages=true) {
   $emails = array();
   if (!$server || !$port || !$email) {
     die("Missing Configuration For Mail Server\n");
@@ -306,7 +303,7 @@ function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
         $emails = TestIMAPMessageFetch();
       } else {
         $emails = IMAPMessageFetch($server, $port, $email, 
-            $password, $protocol, $offset, $test); 
+            $password, $protocol, $offset, $test, $deleteMessages); 
       }
       break;
     case 'pop3':
@@ -315,11 +312,11 @@ function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
         $emails = TestPOP3MessageFetch();
       } else {
         $emails =POP3MessageFetch ($server, $port, $email, 
-            $password, $protocol, $offset, $test);
+            $password, $protocol, $offset, $test, $deleteMessages);
       }
   }
   if (!$emails)
-    die("\nThere does not seem to be any new mail.\n");
+    die("\n" . __('There does not seem to be any new mail.', 'postie') . "\n");
   return($emails);
 }
 /**
@@ -339,10 +336,8 @@ function TestIMAPMessageFetch ( ) {
   *Handles fetching messages from an imap server
   */
 function IMAPMessageFetch ($server=NULL, $port=NULL, $email=NULL, 
-    $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL) {
-    if (!$config) {
-        $config = GetConfig();
-    }
+    $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL,
+    $deleteMessages=true) {
     require_once("postieIMAP.php");
 
     $mail_server = &PostieIMAP::Factory($protocol);
@@ -361,16 +356,13 @@ function IMAPMessageFetch ($server=NULL, $port=NULL, $email=NULL,
 	// loop through messages 
 	for ($i=1; $i <= $msg_count; $i++) {
 		$emails[$i] = $mail_server->fetchEmail($i);
-        if ( $config["DELETE_MAIL_AFTER_PROCESSING"]) {
+    if ($deleteMessages) {
 			$mail_server->deleteMessage($i);
 		}
-        else {
-            print("Not deleting messages!\n");
-        }
 	}
-    if ( $config["DELETE_MAIL_AFTER_PROCESSING"]) {
-        $mail_server->expungeMessages();
-    }
+  if ( $deleteMessages) {
+    $mail_server->expungeMessages();
+  }
 	//clean up
 	$mail_server->disconnect();	
 	return $emails;
@@ -388,10 +380,8 @@ function TestPOP3MessageFetch ( ) {
   *Retrieves email via POP3
   */
 function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL, 
-    $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL) {
-    if (!$config) {
-        $config = GetConfig();
-    }
+    $password=NULL, $protocol=NULL, $offset=NULL, $test=NULL,
+    $deleteMessages=true) {
 	require_once(ABSPATH.WPINC.DIRECTORY_SEPARATOR.'class-pop3.php');
 	$pop3 = &new POP3();
     print("\nConnecting to $server:$port ($protocol))  \n");
@@ -417,7 +407,7 @@ function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL,
 	// loop through messages 
 	for ($i=1; $i <= $msg_count; $i++) {
 		$emails[$i] = implode ('',$pop3->get($i));
-        if ( $config["DELETE_MAIL_AFTER_PROCESSING"]) {
+        if ($deleteMessages) {
 			if( !$pop3->delete($i) ) {
 				echo 'Oops '.$pop3->ERROR.'\n';
 				$pop3->reset();
@@ -435,18 +425,6 @@ function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL,
 	return $emails;
 }
 /**
-  * Determines if it is a writable directory
-  */
-function IsWritableDirectory($directory) {
-    if (!is_dir($directory)) {
-        die ("Sorry but ".$directory." is not a valid directory.");
-    }
-    if (!is_writable($directory)) {
-        die("The web server cannot write to ".$directory." please correct the permissions");
-    }
-
-}
-/**
   * This function handles putting the actual entry into the database
   * @param array - categories to be posted to
   * @param array - details of the post
@@ -456,12 +434,11 @@ function PostToDB($details) {
   if ($config["POST_TO_DB"]) {
     //generate sql for insertion	    
     $_POST['publish'] = true; //Added to make subscribe2 work - it will only handle it if the global varilable _POST is set
-    if ($details['ID']==NULL) {
-      $post_ID = wp_insert_post($details);
+    if (!$isReply) {
+      $post_ID = wp_update_post($details);
     } else {
       // strip out quoted content
       $lines=preg_split("/[\r\n]/",$details['post_content']);
-      print_r($lines);
       $newContents='';
       foreach ($lines as $line) {
         //$match=preg_match("/^>.*/i",$line);
@@ -489,19 +466,17 @@ function PostToDB($details) {
       'comment_parent' => 0
       );
 
-      echo "the comment is:\n";
-      print_r($comment);
       $post_ID = wp_insert_comment($comment);
     }
     if ($config["CUSTOM_IMAGE_FIELD"]) {
       if (count($details['customImages'])>1) {
       $imageField=1;
         foreach ($details['customImages'] as $image) {
-          add_post_meta($post_ID, 'image'. $imageField, $image); 
+          add_post_meta($post_ID, 'image'. $imageField, $image);
           $imageField++;
         }
       } else {
-        add_post_meta($post_ID, 'image', $image); 
+        add_post_meta($post_ID, 'image', $image);
       }
     }
   }
@@ -524,16 +499,19 @@ function BannedFileName($filename) {
 }
 
 //tear apart the meta part for useful information
-function GetContent ($part,&$attachments) {
+function GetContent ($part,&$attachments, $post_id) {
   $config = GetConfig();
+  global $charset;
   $meta_return = NULL;	
-
+  echo "primary= " . $part->ctype_primary . ", secondary = " .  $part->ctype_secondary . "\n";
+  $tmpcharset=trim($part->ctype_parameters['charset']);
+  if ($tmpcharset!='') 
+    $charset=$tmpcharset;
   DecodeBase64Part($part);
   if (BannedFileName($part->ctype_parameters['name'])
       || BannedFileName($part->ctype_parameters['name'])) {
     return(NULL);
   }
-  
   if ($part->ctype_primary == "application"
       && $part->ctype_secondary == "octet-stream") {
     if ($part->disposition == "attachment") {
@@ -549,7 +527,7 @@ function GetContent ($part,&$attachments) {
       $mimeDecodedEmail = DecodeMIMEMail($part->body);
       FilterTextParts($mimeDecodedEmail);
       foreach($mimeDecodedEmail->parts as $section) {
-        $meta_return .= GetContent($section,$attachments);
+        $meta_return .= GetContent($section,$attachments,$post_id);
       }
     }
   }
@@ -559,20 +537,20 @@ function GetContent ($part,&$attachments) {
     FilterTextParts($mimeDecodedEmail);
     FilterAppleFile($mimeDecodedEmail);
     foreach($mimeDecodedEmail->parts as $section) {
-      $meta_return .= GetContent($section,$attachments);
+      $meta_return .= GetContent($section,$attachments,$post_id);
     }
   } else { 
     switch ( strtolower($part->ctype_primary) ) {
       case 'multipart':
         FilterTextParts($part);
         foreach ($part->parts as $section) {
-          $meta_return .= GetContent($section,$attachments);
+          $meta_return .= GetContent($section,$attachments,$post_id);
         }
         break;
       case 'text':
           HandleMessageEncoding($part->headers["content-transfer-encoding"],
                                 $part->ctype_parameters["charset"],
-                                $part->body);
+                                $part->body, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
 
           //go through each sub-section
           if ($part->ctype_secondary=='enriched') {
@@ -581,12 +559,12 @@ function GetContent ($part,&$attachments) {
           } elseif ($part->ctype_secondary=='html') {
             //strip excess HTML
             $meta_return .= HTML2HTML($part->body ) . "\n";
+            //$meta_return .= $part->body  . "\n";
           } else {
             //regular text, so just strip the pgp signature
             if (ALLOW_HTML_IN_BODY) {
               $meta_return .= $part->body  . "\n";
-            }
-            else {
+            } else {
               $meta_return .= htmlentities( $part->body ) . "\n";
             }
             $meta_return = StripPGP($meta_return);
@@ -594,86 +572,61 @@ function GetContent ($part,&$attachments) {
           break;
 
       case 'image':
-        $file = GenerateImageFileName($config["REALPHOTOSDIR"], $part->ctype_secondary);
-        //This makes sure there is no collision
-        $ctr = 0;
-        while(file_exists($file) && $ctr < 1000) {
-          $file = GenerateImageFileName($config["REALPHOTOSDIR"], $part->ctype_secondary);
-          $ctr++;
-        }
-        if ($ctr >= 1000) {
-          die("Unable to find a name for images that does not collide\n");
-        }
-        $fileName = basename($file);
-        $fp = fopen($file, 'w');
-        fwrite($fp, $part->body);
-        fclose($fp);
-        @exec ('chmod 755 ' . $file);
-        if ($config["USE_IMAGEMAGICK"] && $config["AUTO_SMART_SHARP"]) {
-                    ImageMagickSharpen($file);
-        }
-        $thumbImage = NULL;
-        $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
-        if ($config["RESIZE_LARGE_IMAGES"]) {
-            list($thumbImage, $fullImage, $caption) = ResizeImage($file,strtolower($part->ctype_secondary));
-        }
-        $attachments["image_files"][] = array(($thumbImage ? $config["REALPHOTOSDIR"] . $thumbImage:NULL),
-                                              $config["REALPHOTOSDIR"] . $fileName,
-                                              $part->ctype_secondary);
-        list($marime,$caption)=DetermineImageSize($file);
-        $marimex=$marime[0]+20;
-        $marimey=$marime[1]+20;
-        $onclick='';
-        if ($config['IMAGE_NEW_WINDOW']) {
-          $onclick='" onclick="window.open(' . "'"
-              . $config["URLPHOTOSDIR"] . $fullImage . "','"
-                . "full_size_image" . "','"
-                . "toolbar=0,scrollbars=0,location=0,status=0,menubar=0,resizable=1,height=" . $marimey . ",width=" . $marimex . "');" . "return false;";
-          }
-          if ($thumbImage) {
-            if ($config['USEIMAGETEMPLATE']) {
-              $attachments["html"][] .=
-                  parseImageTemplate($thumbImage,$fullImage,$caption);
-            } else {
-              $attachments["html"][] .= '<div class="' . 
-                  $config["IMAGEDIV"].'"><a href="' . 
-                  $config["URLPHOTOSDIR"] . $fullImage . 
-                  $onclick . '"><img src="' . $config["URLPHOTOSDIR"] . 
-                  $thumbImage . '" alt="' . $part->ctype_parameters['name'] .
-                  '" title="' . $part->ctype_parameters['name'] . 
-                  '" style="'.$config["IMAGESTYLE"].'" class="'.
-                  $config["IMAGECLASS"].'" /></a></div>' . "\n";
-            }
-            if ($cid) {
-              $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . 
-                  $fullImage,count($attachments["html"]) - 1);
-            }
-          } else {
-            if ($config['USEIMAGETEMPLATE']) {
-              $attachments["html"][]
-              .=parseImageTemplate('',$fileName,$caption);
-            } else {
-              $attachments["html"][] .= '<div class="' . $config["IMAGEDIV"].'"><img src="' . $config["URLPHOTOSDIR"] . $fileName 
-                                     . '" alt="' . $part->ctype_parameters['name'] . '" style="' 
-                                     . $config["IMAGESTYLE"] . '" class="' . $config["IMAGECLASS"] . '"  /></div>' . "\n";
-              if ($cid) {
-                $attachments["cids"][$cid] = array($config["URLPHOTOSDIR"] . $fileName,count($attachments["html"]) - 1);
-              }
-            }
-          }
+        $file_id = postie_media_handle_upload($part, $post_id);
+        echo "file_id=$file_id";
+        $file = wp_get_attachment_url($file_id);
 
-          break;
+        $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
+        $the_post=get_post($file_id);
+        /* TODO make these options */
+        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
+            $config['IMAGETEMPLATE']);
+        /*
+        $url=wp_get_attachment_link($file_id);
+        $align='left';
+        $size='medium';
+        if ($config['USEIMAGETEMPLATE']) {
+          add_filter('image_send_to_editor', 'parseImageTemplate', 1,7);
+        }
+        $attachments["html"][] .= get_image_send_to_editor($file_id,
+              $the_post->post_excerpt, $the_post->post_title, $align, 
+              $url, '', $size);
+        */
+        if ($cid) {
+          $attachments["cids"][$cid] = array($file,count($attachments["html"]) - 1);
+        }
+        break;
+      case 'audio':
+        $file_id = postie_media_handle_upload($part, $post_id);
+        $file = wp_get_attachment_url($file_id);
+        $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
+        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
+            $config['AUDIOTEMPLATE']);
+        break;
+      case 'video':
+        $file_id = postie_media_handle_upload($part, $post_id);
+        $file = wp_get_attachment_url($file_id);
+        $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
+        if (in_array($part->ctype_secondary,
+            $config['VIDEO1TYPES'])) {
+          $videoTemplate=$config['VIDEO1TEMPLATE'];
+        } else if (in_array($part->ctype_secondary,
+            $config['VIDEO2TYPES'])) {
+          $videoTemplate=$config['VIDEO2TEMPLATE'];
+        }
+        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary, 
+            $videoTemplate);
+        break;
+
       default:
-        if (in_array(strtolower($part->ctype_primary),$config["SUPPORTED_FILE_TYPES"])) {
-            //pgp signature - then forget it
-          if ( $part->ctype_secondary == 'pgp-signature' ) {break;}
-          //other attachments save to FILESDIR
-          $filename =  $part->ctype_parameters['name'];
-          $file = $config["REALFILESDIR"] . $filename;
-          $fp = fopen($file, 'w');
-          fwrite($fp, $part->body );
-          fclose($fp);
-          @exec ('chmod 755 ' . $file);
+        if (in_array(strtolower($part->ctype_primary),
+            $config["SUPPORTED_FILE_TYPES"])) {
+          //pgp signature - then forget it
+          if ( $part->ctype_secondary == 'pgp-signature' )
+            break;
+          //postie_upload_attachment($part);
+          $file_id = postie_media_handle_upload($part, $post_id);
+          $file = wp_get_attachment_url($file_id);
           $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
 
           if ($part->ctype_secondary == "3gpp"
@@ -689,17 +642,17 @@ function GetContent ($part,&$attachments) {
               if ($config['AUTOPLAY']) {
                 $autoplay='true';
               }
-              $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->' .
+              $attachments["html"][] = 
                   '<object '.
                       'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
                       'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
                       'width="' . $config['VIDEO_WIDTH'] . '" '.
                       'height="' . $config['VIDEO_HEIGHT'] . '"> '.
-                      '<param name="src" VALUE="'. $config["URLFILESDIR"] . $filename .'"> '.
-                      "<param name=\"autoplay\" VALUE=\"$autoplay\"> ".
-                        '<param name="controller" VALUE="true"> '.
+                      '<param name="src" value="'. $file. '" /> '.
+                      "<param name=\"autoplay\" value=\"$autoplay\" /> ".
+                        '<param name="controller" value="true" /> '.
                        '<embed '.
-                       'src="'. $config["URLFILESDIR"] . $filename .'" '.
+                       'src="'. $file. '" '.
                        'width="' . $config['VIDEO_WIDTH'] . '" '.
                        'height="' . $config['VIDEO_HEIGHT'] . '"'.
                        "autoplay=\"$autoplay\" ".
@@ -712,10 +665,8 @@ function GetContent ($part,&$attachments) {
                        '</object>';
             } else {
               if (file_exists($config["3GP_FFMPEG"])) {
-                $fileName = basename($file);
                 //options from http://www.getid3.org/phpBB2/viewtopic.php?p=1290&
-                $scaledFileName =  "thumb.".$fileName;
-                $scaledFile = $config["REALPHOTOSDIR"] . $scaledFileName;
+                $scaledFile = 'thumb-' . $file;
 
                 @exec (escapeshellcmd($config["3GP_FFMPEG"]) . 
                     " -i " .  escapeshellarg($file) .
@@ -723,9 +674,13 @@ function GetContent ($part,&$attachments) {
                     escapeshellarg($scaledFile) );
                 @exec ('chmod 755 ' . escapeshellarg($scaledFile));
 
-                $attachments["html"][] .= '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><div class="' . $config["3GPDIV"].'"><a href="' . $config["URLPHOTOSDIR"] . $fileName. '"><img src="' . $config["URLPHOTOSDIR"] . $scaledFileName . '" alt="' . $part->ctype_parameters['name'] . '" style="'.$config["IMAGESTYLE"].'" class="'.$config["IMAGECLASS"].'" /></a></div>' . "\n";
+                $attachments["html"][] .= '<div class="' . 
+                    $config["3GPDIV"].'"><a href="' . $file. '"><img src="' . 
+                    $scaledFileName . '" alt="' . 
+                    $part->ctype_parameters['name'] . ' /></a></div>' . "\n";
               } else {
-                $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><div class="' . $config["ATTACHMENTDIV"].'"><a href="' . $config["URLFILESDIR"] . $filename . '" class="' . $config["3GPCLASS"].'">' . $part->ctype_parameters['name'] . '</a></div>' . "\n";
+                $attachments["html"][] = '<div class="' .
+                $config["ATTACHMENTDIV"].'"><a href="' . $file. '" class="' . $config["3GPCLASS"].'">' . $part->ctype_parameters['name'] . '</a></div>' . "\n";
               }
             }
           } elseif ($part->ctype_secondary == "x-shockwave-flash") {
@@ -743,16 +698,18 @@ function GetContent ($part,&$attachments) {
                  'type="application/x-shockwave-flash"  '.
                  'width=""  '.  'height=""></embed> '.  '</object>'; 
           } else {
-              $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' --><a href="' . $config["URLFILESDIR"] . $filename . '">' . $part->ctype_parameters['name'] . '</a>' . "\n";
+            $attachments["html"][] = '<a href="' . $file . '">' . 
+                $part->ctype_parameters['name'] . '</a>' . "\n";
           }
           if ($cid) {
-            $attachments["cids"][$cid] = array($config["URLFILESDIR"] . $filename,count($attachments["html"]) - 1);
+            $attachments["cids"][$cid] = array($file,
+                count($attachments["html"]) - 1);
           }
         }
         break;
     }		
   }
-  return $meta_return;
+  return($meta_return);
 }
 
 function ubb2HTML(&$text) {
@@ -866,6 +823,8 @@ $replace = array (
   return ($content);
 }
 
+
+
 /**
 * Determines if the sender is a valid user.
 * @return integer|NULL
@@ -887,7 +846,9 @@ if ( empty($from) ) {
   $sql = 'SELECT id FROM '. $wpdb->users.' WHERE user_email=\'' . addslashes($from) . "' LIMIT 1;";
   $user_ID= $wpdb->get_var($sql);
   $user = new WP_User($user_ID);
-  if ($config["TURN_AUTHORIZATION_OFF"] || CheckEmailAddress($from) || CheckEmailAddress($resentFrom)) {
+  if ($config["TURN_AUTHORIZATION_OFF"] || 
+      CheckEmailAddress($from, $config['AUTHORIZED_ADDRESSES']) ||
+      CheckEmailAddress($resentFrom, $config['AUTHORIZED_ADDRESSES'])) {
     if (empty($user_ID)){
         print("$from is authorized to post as the administrator\n");
         $from = get_option("admin_email");
@@ -981,11 +942,13 @@ function FilterNewLines ( $content ) {
     "/\r\n/",
     "/\r/",
     "/\n\n/",
+    "/\r\n\r\n/",
     "/\n/"
   );
   $replace = array (
           "\n",
           "\n",
+          'ACTUAL_NEW_LINE',
           'ACTUAL_NEW_LINE',
     'LINEBREAK'
   );
@@ -993,7 +956,7 @@ function FilterNewLines ( $content ) {
   // tags
   $result = preg_replace($search,$replace,$content);
   //$newContent='<p>' . preg_replace('/ACTUAL_NEW_LINE/',"</p>\n<p>",$result);
-  $newContent=preg_replace('/ACTUAL_NEW_LINE/',"\n\n",$result);
+  $newContent=preg_replace('/(ACTUAL_NEW_LINE|LINEBREAK\s*LINEBREAK)/',"\n\n",$result);
   //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
   if ($config['CONVERTNEWLINE']) {
     $newContent= preg_replace('/LINEBREAK/',"<br />\n",$newContent);
@@ -1063,36 +1026,76 @@ function IsUTF8Blog() {
   }
   return(false);
 }
-function HandleMessageEncoding($encoding, $charset,&$body) {
-    $charset = strtolower($charset);
-    $encoding = strtolower($encoding);
-    /*
-    if ($encoding == '') {
-      $encoding = '7bit';
-    }
-    */
-    HandleQuotedPrintable($encoding, $body);
-    if (isISO88591Blog()) {
-        ConvertToISO_8859_1($encoding,$charset,$body);
-    }
-    else {
-        ConvertToUTF_8($encoding,$charset,$body);
-    }
+function HandleMessageEncoding($encoding, $charset,&$body, 
+    $blogEncoding='utf-8', $dequote=true) {
+  $charset = strtolower($charset);
+  $encoding = strtolower($encoding);
+  /*
+  if ($encoding == '') {
+    $encoding = '7bit';
+  }
+  */
+  if ( $dequote && strtolower($encoding) == 'quoted-printable' ) {
+  //echo "handling quoted printable";
+    $body = quoted_printable_decode($body);
+  //echo "now body is:\n\n $body\n\n";
+  }
+  //HandleQuotedPrintable($encoding, $body, $dequote);
+  if ($blogEncoding=='utf-8') {
+      ConvertToISO_8859_1($encoding,$charset,$body);
+  }
+  else {
+      ConvertToUTF_8($encoding,$charset,$body);
+  }
 }
 function ConvertToUTF_8($encoding,$charset,&$body) {
-    $charset = strtolower($charset);
-    $encoding = strtolower($encoding);
-    switch($charset) {
-        case "iso-8859-1":
-            $body = utf8_encode($body);
-            break;
-        case "iso-2022-jp":
-            $body = iconv("ISO-2022-JP//TRANSLIT","UTF-8",$body);
-            break;
-        case "Windows-1252":
-            $body = iconv("Windows-1252//TRANSLIT","UTF-8",$body);
-            break;
-    }
+  $charset = strtolower($charset);
+  $encoding = strtolower($encoding);
+  switch($charset) {
+    case "iso-8859-1":
+      $body = utf8_encode($body);
+      break;
+    case "iso-2022-jp":
+      $body = iconv("ISO-2022-JP//TRANSLIT","UTF-8",$body);
+      break;
+    case ($charset=="windows-1252" || $charset=="cp-1252"  || 
+        $charset=="cp 1252"):
+      $body = cp1252_to_utf8($body);
+      break;
+  }
+}
+/* this function will convert windows-1252 (also known as cp-1252 to utf-8 */
+function cp1252_to_utf8($str) {
+  $cp1252_map = array (
+  "\xc2\x80" => "\xe2\x82\xac",
+  "\xc2\x82" => "\xe2\x80\x9a",
+  "\xc2\x83" => "\xc6\x92",    
+  "\xc2\x84" => "\xe2\x80\x9e",
+  "\xc2\x85" => "\xe2\x80\xa6",
+  "\xc2\x86" => "\xe2\x80\xa0",
+  "\xc2\x87" => "\xe2\x80\xa1",
+  "\xc2\x88" => "\xcb\x86",
+  "\xc2\x89" => "\xe2\x80\xb0",
+  "\xc2\x8a" => "\xc5\xa0",
+  "\xc2\x8b" => "\xe2\x80\xb9",
+  "\xc2\x8c" => "\xc5\x92",
+  "\xc2\x8e" => "\xc5\xbd",
+  "\xc2\x91" => "\xe2\x80\x98",
+  "\xc2\x92" => "\xe2\x80\x99",
+  "\xc2\x93" => "\xe2\x80\x9c",
+  "\xc2\x94" => "\xe2\x80\x9d",
+  "\xc2\x95" => "\xe2\x80\xa2",
+  "\xc2\x96" => "\xe2\x80\x93",
+  "\xc2\x97" => "\xe2\x80\x94",
+  "\xc2\x98" => "\xcb\x9c",
+  "\xc2\x99" => "\xe2\x84\xa2",
+  "\xc2\x9a" => "\xc5\xa1",
+  "\xc2\x9b" => "\xe2\x80\xba",
+  "\xc2\x9c" => "\xc5\x93",
+  "\xc2\x9e" => "\xc5\xbe",
+  "\xc2\x9f" => "\xc5\xb8"
+  );
+  return strtr ( utf8_encode ( $str ), $cp1252_map );
 }
 
 /**
@@ -1104,9 +1107,10 @@ function DecodeBase64Part( &$part ) {
     }
 }
 
-function HandleQuotedPrintable($encoding, &$body ) {
-    $config = GetConfig();
-    if ( $config["MESSAGE_DEQUOTE"] && strtolower($encoding) == 'quoted-printable' ) {
+function HandleQuotedPrintable($encoding, &$body,$dequote=true ) {
+    //$config = GetConfig();
+    if ( $dequote && strtolower($encoding) == 'quoted-printable' ) {
+    echo "handling quoted printable";
 			$body = quoted_printable_decode($body);
     }
 }
@@ -1135,338 +1139,6 @@ function ConfirmTrailingDirectorySeperator($string) {
     return(false);
 }
 /**
-  * This function handles figuring out the size of the image
-  *@return array  - array(width,height)
-*/
-function DetermineImageSize($file) {
-    $config = GetConfig();
-    if ($config["USE_IMAGEMAGICK"]) {
-        list($size,$caption)=DetermineImageSizeWithImageMagick($file);
-    }
-    else {
-        list($size,$caption)=DetermineImageSizeWithGD($file);
-    }
-    return(array($size,$caption));
-}
-/**
-  * This function handles figuring out the size of the image
-  *@return array  - array(width,height)
-*/
-function DetermineImageSizeWithImageMagick($file) {
-  $config = GetConfig();
-  $size = array(0,0);
-  if (file_exists($config["IMAGEMAGICK_IDENTIFY"])) {
-    $geometry = @exec (escapeshellcmd($config["IMAGEMAGICK_IDENTIFY"]) . 
-                       " -ping " .
-                       escapeshellarg($file));
-    preg_match("/([0-9]+)x([0-9]+)/",$geometry,$matches);
-    if (isset($matches[1])) {
-      $size[0] = $matches[1];
-    }
-    if (isset($matches[2])) {
-      $size[1] = $matches[2];
-    }
-  }
-  if (file_exists($config["IMAGEMAGICK_CONVERT"])) {
-    $caption = @exec (escapeshellcmd($config["IMAGEMAGICK_CONVERT"]) . 
-                       " " .  escapeshellarg($file)) . '8BIMTEXT:- ';
-    preg_match('/Caption="(.*)"/', $caption, $matches);
-    if (isset($matches[1])) {
-      $caption = $matches[1];
-    } else {
-      $caption='';
-    }
-  }
-  return(array($size,$caption));
-}
-/**
-  * This function handles figuring out the size of the image
-  *@return array  - array(width,height)
-*/
-function DetermineImageSizeWithGD($file) {
-  $size = getimagesize($file, $info);
-  if(isset($info['APP13'])) {
-    $iptc = iptcparse($info['APP13']);
-    $caption= $iptc['2#120'][0];
-  }
-  return(array($size,$caption));
-}
-
-function ResizeImage($file,$type) {
-    $config = GetConfig();
-    list($sizeInfo,$caption) = DetermineImageSize($file);
-    $fileName = basename($file);
-    if (DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]) != 1) {
-        if ($config["USE_IMAGEMAGICK"]) {
-            list($scaledFileName, $fileName,$caption)=ResizeImageWithImageMagick($file,$type);
-        } else {
-            list($scaledFileName, $fileName,$caption)=ResizeImageWithGD($file,$type);
-        }
-    }
-    return(array($scaledFileName,$fileName, $caption));
-
-}
-function RotateImages($rotation,$imageList) {
-    $config = GetConfig();
-    foreach ($imageList as $data) {
-        if ($config["USE_IMAGEMAGICK"]) {
-            if ($data[0]) {
-                RotateImageWithImageMagick($data[0],$data[2],$rotation);
-            }
-            RotateImageWithImageMagick($data[1],$data[2],$rotation);
-        }
-        else {
-            if ($data[0]) {
-                RotateImageWithGD($data[0],$data[2],$rotation);
-            }
-            RotateImageWithGD($data[1],$data[2],$rotation);
-        }
-    }
-}
-function ImageMagickSharpen($source,$dest = null) {
-    $config = GetConfig();
-    if (!$dest) {
-        $dest = $source;
-    }
-    @exec (escapeshellcmd($config["IMAGEMAGICK_CONVERT"]) .  " ".
-             escapeshellarg($source) . " ".
-                '\( +clone -modulate 100,0 \) \( +clone -unsharp 0x1+200+0 \) \( -clone 0 -edge 3 -colorspace GRAY -colors 256 -level 20%,95% -gaussian 10 -level 10%,95% \) -colorspace RGB -fx "u[0]+(((u[2]+1)/(u[1]+1))-1)*u[0]*u[3]" ' .
-                escapeshellarg($dest) );
-    @exec ('chmod 755 ' . escapeshellarg($dest));
-
-}
-function RotateImageWithImageMagick($file,$type,$rotation) {
-    $config = GetConfig();
-    @exec (escapeshellcmd($config["IMAGEMAGICK_CONVERT"]) . 
-                " -rotate " .
-                escapeshellarg($rotation) .
-                " " .
-                escapeshellarg($file) .
-                " " .
-                escapeshellarg($file) );
-    @exec ('chmod 755 ' . escapeshellarg($file));
-}
-function RotateImageWithGD($file,$type,$rotation) {
-    $config = GetConfig();
-    $fileName = basename($file);
-        $sourceImage = NULL;
-        
-        switch($type) {
-            case "jpeg":
-            case "jpg":
-            case "pjpeg":
-                $typePrefix = "jpeg";
-                break;
-            case "gif":
-                $typePrefix = "gif";
-                break;
-            case "png":
-                $typePrefix = "png";
-                break;
-            default:
-                $typePrefix = NULL;
-                break;
-        }
-        if ($typePrefix) {
-            eval ('$sourceImage = imagecreatefrom'.$typePrefix.'($file);');
-            if (function_exists("imagerotate")) {
-                $rotatedImage = imagerotate($sourceImage,$rotation,0);
-            }
-            else {
-                $rotatedImage = CustomImageRotate($sourceImage,$rotation);
-            }
-            eval ('image'.$typePrefix.'($rotatedImage,$file);');
-            imagedestroy($sourceImage);
-            @exec ('chmod 755 ' . escapeshellarg($file));
-        }
-}
-/**
-  * This function handles rotating in GD when you do not have imagerotate available 
-  * Writen byu wulff at fyens dot dk
-  * From http://us2.php.net/manual/en/function.imagerotate.php#50487
-  */
-// $src_img - a GD image resource
-// $angle - degrees to rotate clockwise, in degrees
-// returns a GD image resource
-// USAGE:
-// $im = imagecreatefrompng('test.png');
-// $im = imagerotate($im, 15);
-// header('Content-type: image/png');
-// imagepng($im);
-function CustomImageRotate($src_img, $angle, $bicubic=false) {
- 
-   // convert degrees to radians
-   $angle = $angle + 180;
-   $angle = deg2rad($angle);
- 
-   $src_x = imagesx($src_img);
-   $src_y = imagesy($src_img);
- 
-   $center_x = floor($src_x/2);
-   $center_y = floor($src_y/2);
-
-   $cosangle = cos($angle);
-   $sinangle = sin($angle);
-
-   $corners=array(array(0,0), array($src_x,0), array($src_x,$src_y), array(0,$src_y));
-
-   foreach($corners as $key=>$value) {
-     $value[0]-=$center_x;        //Translate coords to center for rotation
-     $value[1]-=$center_y;
-     $temp=array();
-     $temp[0]=$value[0]*$cosangle+$value[1]*$sinangle;
-     $temp[1]=$value[1]*$cosangle-$value[0]*$sinangle;
-     $corners[$key]=$temp;   
-   }
-  
-   $min_x=1000000000000000;
-   $max_x=-1000000000000000;
-   $min_y=1000000000000000;
-   $max_y=-1000000000000000;
-  
-   foreach($corners as $key => $value) {
-     if($value[0]<$min_x)
-       $min_x=$value[0];
-     if($value[0]>$max_x)
-       $max_x=$value[0];
-  
-     if($value[1]<$min_y)
-       $min_y=$value[1];
-     if($value[1]>$max_y)
-       $max_y=$value[1];
-   }
-
-   $rotate_width=round($max_x-$min_x);
-   $rotate_height=round($max_y-$min_y);
-
-   $rotate=imagecreatetruecolor($rotate_width,$rotate_height);
-   imagealphablending($rotate, false);
-   imagesavealpha($rotate, true);
-
-   //Reset center to center of our image
-   $newcenter_x = ($rotate_width)/2;
-   $newcenter_y = ($rotate_height)/2;
-
-   for ($y = 0; $y < ($rotate_height); $y++) {
-     for ($x = 0; $x < ($rotate_width); $x++) {
-       // rotate...
-       $old_x = round((($newcenter_x-$x) * $cosangle + ($newcenter_y-$y) * $sinangle))
-         + $center_x;
-       $old_y = round((($newcenter_y-$y) * $cosangle - ($newcenter_x-$x) * $sinangle))
-         + $center_y;
-    
-       if ( $old_x >= 0 && $old_x < $src_x
-             && $old_y >= 0 && $old_y < $src_y ) {
-
-           $color = imagecolorat($src_img, $old_x, $old_y);
-       } else {
-         // this line sets the background colour
-         $color = imagecolorallocatealpha($src_img, 255, 255, 255, 127);
-       }
-       imagesetpixel($rotate, $x, $y, $color);
-     }
-   }
-  
-  return($rotate);
-}
-/*
-function DetermineScale($width,$height, $max_width, $max_height) {
-    if (!empty($max_width)) {
-            return($max_width/$width);
-    }
-    else if (!empty($max_height)) {
-            return($max_height/$height);
-    }
-    return(1);
-}
-*/
-function DetermineScale($width,$height, $max_width=0, $max_height=0) {
-  if ($max_width!=0 || $max_height!=0) {
-    $width_scale=($max_width/$width);
-    $height_scale=($max_height/$height);
-    if ($max_width==0) {
-      $scale=$height_scale;
-    } else if ($max_height==0) {
-      $scale=$width_scale;
-    } else {
-      $scale = $width_scale < $height_scale? $width_scale : $height_scale;
-    }
-    return($scale);
-  }
-  return(1);
-}
-
-function ResizeImageWithImageMagick($file,$type) {
-    //print("<h1>Using ImageMagick</h1>");
-    $config = GetConfig();
-    list($sizeInfo,$caption) = DetermineImageSize($file);
-    $fileName = basename($file);
-    $scaledFileName = "";
-    $scale = DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]);
-    if ($scale < 1) {
-            $scaledH = round($sizeInfo[1] * $scale );
-            $scaledW = round($sizeInfo[0] * $scale );
-            $scaledFileName =  "thumb.".$fileName;
-            $scaledFile = $config["REALPHOTOSDIR"] . $scaledFileName;
-            @exec (escapeshellcmd($config["IMAGEMAGICK_CONVERT"]) . 
-                        " -resize " .
-                        $scaledW .
-                        "x" . 
-                        $scaledH  . 
-                        " " .
-                        escapeshellarg($file) .
-                        " " .
-                        escapeshellarg($scaledFile) );
-
-            @exec ('chmod 755 ' . escapeshellarg($scaledFile));
-    }
-    return(array($scaledFileName,$fileName,$caption));
-
-}
-function ResizeImageWithGD($file,$type) {
-    $original_mem_limit = ini_get('memory_limit');
-    ini_set('memory_limit', -1);
-    $config = GetConfig();
-    list($sizeInfo,$caption) = DetermineImageSize($file);
-    $fileName = basename($file);
-    $scaledFileName = "";
-    $scale = DetermineScale($sizeInfo[0],$sizeInfo[1],$config["MAX_IMAGE_WIDTH"], $config["MAX_IMAGE_HEIGHT"]);
-    if ($scale < 1) {
-        $sourceImage = NULL;
-        switch($type) {
-            case "jpeg":
-            case "jpg":
-            case "pjpeg":
-                $sourceImage = imagecreatefromjpeg($file);
-                break;
-            case "gif":
-                $sourceImage = imagecreatefromgif($file);
-                break;
-            case "png":
-                $sourceImage = imagecreatefrompng($file);
-                break;
-        }
-        if ($sourceImage) {
-            $scaledH = round($sizeInfo[1] * $scale );
-            $scaledW = round($sizeInfo[0] * $scale );
-            $scaledFileName =  "thumb.".$fileName;
-            $scaledFile = $config["REALPHOTOSDIR"] . $scaledFileName;
-            $scaledImage = imagecreatetruecolor($scaledW,$scaledH);
-            imagecopyresampled($scaledImage,$sourceImage,0,0,0,0,
-                            $scaledW,$scaledH,
-                            $sizeInfo[0],$sizeInfo[1]);
-			imagejpeg($scaledImage,$scaledFile,$config["JPEGQUALITY"]);
-            @exec ('chmod 755 ' . escapeshellarg($scaledFile));
-            imagedestroy($scaledImage);
-            imagedestroy($sourceImage);
-        }
-    }
-    // Revert to original limit
-    ini_set('memory_limit', $original_mem_limit);
-    return(array($scaledFileName,$fileName,$caption));
-
-}
-/**
   * Checks for the comments tag
   * @return boolean
   */
@@ -1485,19 +1157,6 @@ function AllowCommentsOnPost(&$content) {
         }
     }
     return($comments_allowed);
-}
-/**
-  * This function figures out how much rotation should be applied to all images in the message
-  */
-function GetRotation(&$mimeDecodedEmail,&$content) {
-    $rotation = 0;
-    if (eregi("rotate:([0-9]+)",$content,$matches)
-        && trim($matches[1])) {
-        $delay = (($days * 24 + $hours) * 60 + $minutes) * 60;
-        $rotation = $matches[1];
-        $content = ereg_replace("rotate:$matches[1]","",$content);
-    }
-    return($rotation);
 }
 /**
   * Needed to be able to modify the content to remove the usage of the delay tag
@@ -1574,7 +1233,169 @@ function FilterAppleFile(&$mimeDecodedEmail) {
         $mimeDecodedEmail->parts = $newParts; //This is now the filtered list of just the preferred type.
     }
 }
-/**
+function postie_media_handle_upload($part, $post_id, $post_data = array()) {
+  $overrides = array('test_form'=>false);
+        //$overrides = array('test_form'=>false, 'test_size'=>false,
+         //                  'test_type'=>false);
+  $tmpFile=tempnam('/tmp', 'postie');
+  $fp = fopen($tmpFile, 'w');
+  fwrite($fp, $part->body);
+  fclose($fp);
+  if ($part->ctype_parameters['name']=='') {
+    $name = $part->d_parameters['filename'];
+  } else {
+    $name =  $part->ctype_parameters['name'];
+  }
+  $the_file = array('name' => $name,
+                    'type' => $part->ctype_secondary,
+                    'tmp_name' => $tmpFile,
+                    'size' => filesize($tmpFile),
+                    'error' => ''
+                    );
+
+  print_r($the_file);
+  $time = current_time('mysql');
+  if ( $post = get_post($post_id) ) {
+    if ( substr( $post->post_date, 0, 4 ) > 0 )
+      $time = $post->post_date;
+  }
+
+  $file = postie_handle_upload($the_file, $overrides, $time);
+  print_r($file);
+  //unlink($tmpFile);
+
+  if ( isset($file['error']) )
+    return new WP_Error( 'upload_error', $file['error'] );
+
+  $url = $file['url'];
+  $type = $file['type'];
+  $file = $file['file'];
+  $title = preg_replace('/\.[^.]+$/', '', basename($file));
+  $content = '';
+
+  // use image exif/iptc data for title and caption defaults if possible
+  if ( $image_meta = @wp_read_image_metadata($file) ) {
+    if ( trim($image_meta['title']) )
+      $title = $image_meta['title'];
+    if ( trim($image_meta['caption']) )
+      $content = $image_meta['caption'];
+  }
+
+  // Construct the attachment array
+  $attachment = array_merge( array(
+    'post_mime_type' => $type,
+    'guid' => $url,
+    'post_parent' => $post_id,
+    'post_title' => $title,
+    'post_excerpt' => $content,
+    'post_content' => $content,
+  ), $post_data );
+
+  // Save the data
+  $id = wp_insert_attachment($attachment, $file, $post_id);
+  echo "id=$id\n";
+  if ( !is_wp_error($id) ) {
+    wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
+  }
+
+  return $id;
+
+}
+
+function postie_handle_upload( &$file, $overrides = false, $time = null ) {
+	// The default error handler.
+	if (! function_exists( 'wp_handle_upload_error' ) ) {
+		function wp_handle_upload_error( &$file, $message ) {
+			return array( 'error'=>$message );
+		}
+	}
+
+	// You may define your own function and pass the name in $overrides['upload_error_handler']
+	$upload_error_handler = 'wp_handle_upload_error';
+
+	// You may define your own function and pass the name in $overrides['unique_filename_callback']
+	$unique_filename_callback = null;
+
+	// $_POST['action'] must be set and its value must equal $overrides['action'] or this:
+	$action = 'wp_handle_upload';
+
+	// Courtesy of php.net, the strings that describe the error indicated in $_FILES[{form field}]['error'].
+	$upload_error_strings = array( false,
+		__( "The uploaded file exceeds the <code>upload_max_filesize</code> directive in <code>php.ini</code>." ),
+		__( "The uploaded file exceeds the <em>MAX_FILE_SIZE</em> directive that was specified in the HTML form." ),
+		__( "The uploaded file was only partially uploaded." ),
+		__( "No file was uploaded." ),
+		'',
+		__( "Missing a temporary folder." ),
+		__( "Failed to write file to disk." ));
+
+	// All tests are on by default. Most can be turned off by $override[{test_name}] = false;
+	$test_form = true;
+	$test_size = true;
+
+	// If you override this, you must provide $ext and $type!!!!
+	$test_type = true;
+	$mimes = false;
+
+	// Install user overrides. Did we mention that this voids your warranty?
+	if ( is_array( $overrides ) )
+		extract( $overrides, EXTR_OVERWRITE );
+
+	// A correct form post will pass this test.
+	if ( $test_form && (!isset( $_POST['action'] ) || ($_POST['action'] != $action ) ) )
+		return $upload_error_handler( $file, __( 'Invalid form submission.' ));
+
+	// A successful upload will pass this test. It makes no sense to override this one.
+	if ( $file['error'] > 0 )
+		return $upload_error_handler( $file, $upload_error_strings[$file['error']] );
+
+	// A non-empty file will pass this test.
+	if ( $test_size && !($file['size'] > 0 ) )
+		return $upload_error_handler( $file, __( 'File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini.' ));
+
+	// A properly uploaded file will pass this test. There should be no reason to override this one.
+	if (!file_exists( $file['tmp_name'] ) )
+		return $upload_error_handler( $file, __( 'Specified file failed upload test.'));
+	// A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
+	if ( $test_type ) {
+		$wp_filetype = wp_check_filetype( $file['name'], $mimes );
+
+		extract( $wp_filetype );
+
+		if ( ( !$type || !$ext ) && !current_user_can( 'unfiltered_upload' ) )
+			return $upload_error_handler( $file, __( 'File type does not meet security guidelines. Try another.' ));
+
+		if ( !$ext )
+			$ext = ltrim(strrchr($file['name'], '.'), '.');
+
+		if ( !$type )
+			$type = $file['type'];
+	}
+
+	// A writable uploads dir will pass this test. Again, there's no point overriding this one.
+	if ( ! ( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] ) )
+		return $upload_error_handler( $file, $uploads['error'] );
+
+	$filename = wp_unique_filename( $uploads['path'], $file['name'], $unique_filename_callback );
+
+	// Move the file to the uploads dir
+	$new_file = $uploads['path'] . "/$filename";
+	if ( false === @ rename( $file['tmp_name'], $new_file ) ) {
+		return $upload_error_handler( $file, sprintf( __('The uploaded file could not be moved to %s.' ), $uploads['path'] ) );
+	}
+
+	// Set correct file permissions
+	$stat = stat( dirname( $new_file ));
+	$perms = $stat['mode'] & 0000666;
+	@ chmod( $new_file, $perms );
+
+	// Compute the URL
+	$url = $uploads['url'] . "/$filename";
+
+	$return = apply_filters( 'wp_handle_upload', array( 'file' => $new_file, 'url' => $url, 'type' => $type ) );
+
+	return $return;
+}/**
   * Searches for the existance of a certain MIME TYPE in the tree of mime attachments
   * @param primary mime
   * @param secondary mime
@@ -1717,14 +1538,14 @@ function DisplayMIMEPartTypes($mimeDecodedEmail) {
   * @param string - email address
   * @return boolean
   */
-function CheckEmailAddress($address) {
+function CheckEmailAddress($address, $authorized) {
     $config = GetConfig();
     $address = strtolower($address);
-    if (!is_array($config["AUTHORIZED_ADDRESSES"])
-            || !count($config["AUTHORIZED_ADDRESSES"])) {
+    if (!is_array($authorized)
+            || !count($authorized)) {
         return false;
     }
-    return(in_array($address,$config["AUTHORIZED_ADDRESSES"]));
+    return(in_array($address,$authorized));
 }
 /**
   *This method works around a problemw with email address with extra <> in the email address
@@ -1759,36 +1580,111 @@ function GetNameFromEmail($address) {
     return($name);
 }
 
-function parseImageTemplate($thumbImage,$fullImage,$caption) {
-  $config=GetConfig();
-  echo "using custom image template\n";
-  if ($thumbImage=='') {
-    $imageTemplate=str_replace('{THUMBNAIL}',
-        $config['URLPHOTOSDIR'] . $fullImage,
-        $config['IMAGETEMPLATE']);
-    $imageTemplate=str_replace("<a href='{IMAGE}'>",
-        '', $imageTemplate);
-    $imageTemplate=str_replace("</a>",
-        '', $imageTemplate);
-  } else {
-    $imageTemplate=str_replace('{THUMBNAIL}',
-        $config['URLPHOTOSDIR'] . $thumbImage, $config['IMAGETEMPLATE']);
-    $imageTemplate=str_replace('{IMAGE}',
-        $config['URLPHOTOSDIR'] . $fullImage, $imageTemplate);
+function parseTemplate($id, $type, $template, $size='medium') {
+
+/* we check template for thumb, thumbnail, large, full and use that as
+size. If not found, we default to medium */
+  if ($type=='image') {
+    $sizes=array('thumbnail', 'medium', 'large');
+    $hwstrings=array();
+    $widths=array();
+    $heights=array();
+    for ($i=0; $i<count($sizes); $i++) {
+      list( $img_src[$i], $widths[$i], $heights[$i] ) = image_downsize($id,
+          $sizes[$i]);
+      $hwstrings[$i] = image_hwstring($widths[$i], $heights[$i]);
+    }
   }
-  $imageTemplate=str_replace('{FILENAME}',
-      $config['REALPHOTOSDIR'] . $fullImage, $imageTemplate);
-  $imageTemplate=str_replace('{RELFILENAME}',
-      $config['RELPHOTOSDIR'] . $fullImage, $imageTemplate);
-  $imageTemplate=str_replace('{WIDTH}',
-      $config['MAX_IMAGE_WIDTH']. 'px' ,$imageTemplate);
-  $imageTemplate=str_replace('{HEIGHT}',
-      $config['MAX_IMAGE_HEIGHT']. 'px' ,$imageTemplate);
-  if ($caption!='') {
-    $imageTemplate=str_replace('{CAPTION}', $caption, $imageTemplate);
+  $attachment=get_post($id);
+  $the_parent=get_post($attachment->post_parent);
+  $uploadDir=wp_upload_dir();
+  $fileName=basename($attachment->guid);
+  $absFileName=$uploadDir['path'] .'/'. $fileName;
+  $relFileName=str_replace(ABSPATH,'', $absFileName);
+  $fileLink=wp_get_attachment_url($id);
+  $pageLink=get_attachment_link($id);
+
+  $template=str_replace('{TITLE}', $attachment->post_title, $template);
+  $template=str_replace('{ID}', $id, $template);
+  $template=str_replace('{THUMBNAIL}', $img_src[0], $template);
+  $template=str_replace('{THUMB}', $img_src[0], $template);
+  $template=str_replace('{MEDIUM}', $img_src[1], $template);
+  $template=str_replace('{LARGE}', $img_src[2], $template);
+  $template=str_replace('{FULL}', $fileLink, $template);
+  $template=str_replace('{FILELINK}', $fileLink, $template);
+  $template=str_replace('{PAGELINK}', $pageLink, $template);
+  $template=str_replace('{THUMBWIDTH}', $widths[0] . 'px', $template);
+  $template=str_replace('{THUMBHEIGHT}', $heights[0] . 'px', $template);
+  $template=str_replace('{MEDIUMWIDTH}', $widths[0] . 'px', $template);
+  $template=str_replace('{MEDIUMHEIGHT}', $heights[0] . 'px', $template);
+  $template=str_replace('{LARGEWIDTH}', $widths[0] . 'px', $template);
+  $template=str_replace('{LARGEHEIGHT}', $heights[0] . 'px', $template);
+  $template=str_replace('{FILENAME}', $fileName, $template);
+  $template=str_replace('{IMAGE}', $fileLink, $template);
+  $template=str_replace('{URL}', $fileLink, $template);
+  $template=str_replace('{RELFILENAME}', $relFileName, $template);
+  $template=str_replace('{POSTTITLE}', $the_parent->post_title, $template);
+  if ($attachment->post_excerpt!='') {
+    $template=str_replace('{CAPTION}', $attachment->post_excerpt, $template);
+  } else {
+    $template=str_replace('{CAPTION}', '', $template);
+  }
+  return($template);
+} 
+function parseImageTemplate($html, $id, $alt, $title, $align, $url,
+    $size='medium') {
+  $config=GetConfig();
+
+  $htmlalt = ( empty($alt) ) ? $title : $alt;
+
+  $html = get_image_tag($id, $htmlalt, $title, $align, $size);
+
+  $rel = $rel ? ' rel="attachment wp-att-'.attr($id).'"' : '';
+
+  if ( $url )
+    $html = '<a href="' . clean_url($url) . "\"$rel>$html</a>";
+
+
+/* we check template for thumb, thumbnail, large, full and use that as
+size. If not found, we default to medium */
+  $imageTemplate=$config['IMAGETEMPLATE'];
+  if (strpos($imageTemplate, '{THUMBNAIL}')!==false  ||
+      strpos($imageTemplate, '{THUMB}')!==false) {
+    $size='thumbnail';
+  } else if (strpos($imageTemplate, '{LARGE}')!==false) {
+    $size='large';
+  } else if (strpos($imageTemplate, '{FULL}')!==false) {
+    $size='full';
+  }
+  list( $img_src, $width, $height ) = image_downsize($id, $size);
+  $hwstring = image_hwstring($width, $height);
+  $uploadDir=wp_upload_dir();
+  $absFileName=$uploadDir['path'] .'/'. basename($img_src);
+  $relFileName=str_replace(ABSPATH,'', $absFileName);
+  $fileLink=wp_get_attachment_url($id);
+  $pageLink=get_attachment_link($id);
+
+  $imageTemplate=str_replace('{THUMBNAIL}', $img_src, $imageTemplate);
+  $imageTemplate=str_replace('{THUMB}', $img_src, $imageTemplate);
+  $imageTemplate=str_replace('{MEDIUM}', $img_src, $imageTemplate);
+  $imageTemplate=str_replace('{LARGE}', $img_src, $imageTemplate);
+  $imageTemplate=str_replace('{FULL}', $img_src, $imageTemplate);
+  $imageTemplate=str_replace('{FILELINK}', $fileLink, $imageTemplate);
+  $imageTemplate=str_replace('{PAGELINK}', $pageLink, $imageTemplate);
+  $imageTemplate=str_replace('{WIDTH}', $width . 'px', $imageTemplate);
+  $imageTemplate=str_replace('{HEIGHT}', $height . 'px', $imageTemplate);
+  $imageTemplate=str_replace('{FILENAME}', $absFileName, $imageTemplate);
+  $imageTemplate=str_replace('{RELFILENAME}', $relFileName, $imageTemplate);
+  if ($alt!='') {
+    $imageTemplate=str_replace('{CAPTION}', $alt, $imageTemplate);
   }
   return($imageTemplate);
 } 
+
+function parseAudioTemplate($file, $audioTemplate) {
+  $html = str_replace('{FILELINK}', $file, $audioTemplate);
+  return($html);
+}
 /**
   * When sending in HTML email the html refers to the content-id(CID) of the image - this replaces
   * the cid place holder with the actual url of the image sent in
@@ -1832,7 +1728,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
          stristr($content, $eimg_placeholder_temp) ) {
       // look for caption
       $caption='';
-      if ( preg_match("/caption=['\"](.*)['\"]/", $content, $matches))  {
+      if ( preg_match("/$img_placeholder_temp caption=['\"](.*)['\"]/", $content, $matches))  {
         $caption =$matches[1];
         $img_placeholder_temp.=' ' . $matches[0];
         $eimg_placeholder_temp.=' ' . $matches[0];
@@ -1842,14 +1738,17 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
       $eimg_placeholder_temp.='#';
       $content = str_replace($img_placeholder_temp, $value, $content);
       $content = str_replace($eimg_placeholder_temp, $value, $content);
-      print(htmlspecialchars("value=$value",ENT_QUOTES));
-      print(htmlspecialchars("content=$content",ENT_QUOTES));
+      print(htmlspecialchars("value=$value\n",ENT_QUOTES));
+      print(htmlspecialchars("content=\n***\n$content\n***\n",ENT_QUOTES));
     } else {
       $value = str_replace('{CAPTION}', '', $value);
-      if ($config["IMAGES_APPEND"]) {
-        $content .= $value;
-      } else {
-        $content = $value . $content;
+      /* if using the gallery shortcode, don't add pictures at all */
+      if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches))  {
+        if ($config["IMAGES_APPEND"]) {
+          $content .= $value;
+        } else {
+          $content = $value . $content;
+        }
       }
     }
   }
@@ -1859,32 +1758,33 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
   * @return array - (subject,content)
   */
 function GetSubject(&$mimeDecodedEmail,&$content) {
-    $config = GetConfig();
-    //assign the default title/subject
-    if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
-        if ($config["ALLOW_SUBJECT_IN_MAIL"]) {
-            list($subject,$content) = ParseInMessageSubject($content);
-        }
-        else {
-            $subject = $config["DEFAULT_TITLE"];
-        }
-        $mimeDecodedEmail->headers['subject'] = $subject;
-    } else {	
-        $subject = $mimeDecodedEmail->headers['subject'];
-        HandleMessageEncoding($mimeDecodedEmail->headers["content-transfer-encoding"],
-                              $mimeDecodedEmail->ctype_parameters["charset"],
-                              $subject);
-        if (!$config["ALLOW_HTML_IN_SUBJECT"]) {
-            $subject = htmlentities($subject);
-        }
+  $config = GetConfig();
+  global $charset;
+  //assign the default title/subject
+  if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
+    if ($config["ALLOW_SUBJECT_IN_MAIL"]) {
+        list($subject,$content) = ParseInMessageSubject($content);
     }
-    //This is for ISO-2022-JP - Can anyone confirm that this is still neeeded?
-     // escape sequence is 'ESC $ B' == 1b 24 42 hex.
-    if (strpos($subject, "\x1b\x24\x42") !== false) {
-        // found iso-2022-jp escape sequence in subject... convert!
-        $subject = iconv("ISO-2022-JP//TRANSLIT", "UTF-8", $subject);
+    else {
+        $subject = $config["DEFAULT_TITLE"];
     }
-    return($subject);
+    $mimeDecodedEmail->headers['subject'] = $subject;
+  } else {	
+    $subject = $mimeDecodedEmail->headers['subject'];
+    $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
+    HandleMessageEncoding($encoding, $charset,
+        $subject, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
+    if (!$config["ALLOW_HTML_IN_SUBJECT"]) {
+      $subject = htmlentities($subject);
+    }
+  }
+  //This is for ISO-2022-JP - Can anyone confirm that this is still neeeded?
+   // escape sequence is 'ESC $ B' == 1b 24 42 hex.
+  if (strpos($subject, "\x1b\x24\x42") !== false) {
+    // found iso-2022-jp escape sequence in subject... convert!
+    $subject = iconv("ISO-2022-JP//TRANSLIT", "UTF-8", $subject);
+  }
+  return($subject);
 }
 /** 
   * this function determines tags for the post
@@ -1920,7 +1820,7 @@ function GetPostExcerpt(&$content) {
   if ( preg_match('/:excerptstart ?(.*):excerptend/s', $content, $matches))  {
     $content = str_replace($matches[0], "", $content);
     $post_excerpt = $matches[1];
-    print_r($matches);
+    //print_r($matches);
   }
   return($post_excerpt);
 }
@@ -2003,17 +1903,6 @@ function DisplayEmailPost($details) {
   print '<b>Posted content:</b></p><hr />' . $details["post_content"] . '<hr /><pre>';
 }
 /**
-  * This function confirms that everything is setup correctly
-  */
-function TestWPMailInstallation() {
-    $config = GetConfig();
-    IsWritableDirectory($config["REALPHOTOSDIR"]);
-    IsWritableDirectory($config["REALFILESDIR"]);
-    if (!TestPostieDirectory) {
-        print("<p>Postie should be in its own directory in wp-content/plugins/postie</p>");
-    }
-}
-/**
   * Takes a value and builds a simple simple yes/no select box
   * @param string
   * @param string
@@ -2027,10 +1916,10 @@ function BuildBooleanSelect($label,$id,$current_value,$recommendation = NULL) {
     <option value=\"1\">".__("Yes", 'postie')."</option>
     <option value=\"0\" ". (!$current_value ? "SELECTED" : NULL) .
     ">".__("No", 'postie').'</option>
-	</select>
-    <br />';
+	</select>';
     if ($recommendation!=NULL) {
-      $string.='<code>'.__($recommendation, 'postie').'</code><br/>';
+      $string.='<span class="recommendation">'.__($recommendation,
+      'postie').'</span>';
     }
     $string.="</td>\n</tr>";
     return($string);
@@ -2043,16 +1932,14 @@ function BuildBooleanSelect($label,$id,$current_value,$recommendation = NULL) {
   *@param string
   */
 function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
-   $string = "<tr>
-	<th scope=\"row\">".__($label, 'postie').":</th></tr>";
+  $string = "<tr> <th scope=\"row\">".__($label, 'postie').":";
+  if ($recommendation) {
+    $string.="<br /><span class='recommendation'>".__($recommendation,
+    'postie')."</span>";
+  }
+  $string.="</th>";
 
-    if ($recommendation) {
-        $string .= "<tr><td>&nbsp;</td><td><code>".__($recommendation,
-        'postie')."</code></td></tr>";
-    }
-   $string .=" <tr>
-    <td>&nbsp;</td>
-	<td><textarea cols=40 rows=5 name=\"$id\" id=\"$id\">";
+   $string .="<td><textarea cols=40 rows=5 name=\"$id\" id=\"$id\">";
         if (is_array($current_value)) {
             foreach($current_value as $item) {
                 $string .= "$item\n";
@@ -2081,14 +1968,15 @@ function SetupConfiguration() {
   */
 function ResetPostieConfig() {
 	global $wpdb;
-    //Get rid of the old table
-    $wpdb->query("DROP TABLE ". POSTIE_TABLE .";");
-    $config = GetConfig();
-    $key_arrays = GetListOfArrayConfig();
-    foreach($key_arrays as $key) {
-        $config[$key] = join("\n",$config[$key]);
-    }
-    UpdatePostieConfig($config);
+  //Get rid of old values
+  $query ="delete from  ". POSTIE_TABLE . "  WHERE label NOT IN ('MAIL_PASSWORD', 'MAIL_SERVER', 'MAIL_SERVER_PORT', 'MAIL_USERID', 'INPUT_PROTOCOL');";
+  $results=$wpdb->query($wpdb->prepare($query));
+  $config = GetConfig();
+  $key_arrays = GetListOfArrayConfig();
+  foreach($key_arrays as $key) {
+      $config[$key] = join("\n",$config[$key]);
+  }
+  UpdatePostieConfig($config);
 }
 /**
   * This function handles updating the configuration 
@@ -2101,8 +1989,14 @@ function UpdatePostieConfig($data) {
     foreach($config as $key => $value) {
         if (isset($data[$key])) {
             if (in_array($key,$key_arrays)) { //This is stored as an array
+                $data[$key]=trim($data[$key]);
+                if (strstr($data[$key], "\n")) {
+                  $delim = "\n";
+                } else {
+                  $delim = ',';
+                }
                 $config[$key] = array();
-                $values = explode("\n",$data[$key]);
+                $values = explode($delim,$data[$key]);
                 foreach($values as $item) {
                     if (trim($item)) {
                         $config[$key][] = trim($item);
@@ -2170,31 +2064,13 @@ function ReadDBConfig() {
   */
 function GetDBConfig() {
     $config = ReadDBConfig();
-    if (!isset($config["PHOTOSDIR"])) { $config["PHOTOSDIR"] = DIRECTORY_SEPARATOR."wp-photos".DIRECTORY_SEPARATOR;}
     if (!isset($config["ADMIN_USERNAME"])) { $config["ADMIN_USERNAME"] =
     'admin'; }
-    if (!isset($config["FILESDIR"])) { $config["FILESDIR"] = DIRECTORY_SEPARATOR."wp-filez".DIRECTORY_SEPARATOR;}
     if (!isset($config["PREFER_TEXT_TYPE"])) { $config["PREFER_TEXT_TYPE"] = "plain";}
-    if (!isset($config["RESIZE_LARGE_IMAGES"])) { $config["RESIZE_LARGE_IMAGES"] = true;}
-    if (!isset($config["MAX_IMAGE_WIDTH"])) { $config["MAX_IMAGE_WIDTH"] = 400;}
-    if (!isset($config["MAX_IMAGE_HEIGHT"])) { $config["MAX_IMAGE_HEIGHT"] = "";}
     if (!isset($config["DEFAULT_TITLE"])) { $config["DEFAULT_TITLE"] = "Live From The Field";}
     if (!isset($config["INPUT_PROTOCOL"])) { $config["INPUT_PROTOCOL"] = "pop3";}
     if (!isset($config["IMAGE_PLACEHOLDER"])) { $config["IMAGE_PLACEHOLDER"] = "#img%#";}
     if (!isset($config["IMAGES_APPEND"])) { $config["IMAGES_APPEND"] = true;}
-    if (!isset($config["IMAGECLASS"])) { $config["IMAGECLASS"] = "postie-image";}
-    if (!isset($config["IMAGEDIV"])) { $config["IMAGEDIV"] = "postie-image-div";}
-    if (!isset($config["3GPDIV"])) { $config["3GPDIV"] = "postie-3gp-div";}
-    if (!isset($config["ATTACHMENTDIV"])) { $config["ATTACHMENTDIV"] = "postie-attachment-div";}
-    if (!isset($config["3GPCLASS"])) { $config["3GPCLASS"] = "postie-video";}
-    if (!isset($config["VIDEO_WIDTH"])) { $config["VIDEO_WIDTH"] = 128;}
-    if (!isset($config["PLAYER_WIDTH"])) { $config["PLAYER_WIDTH"] = 128;}
-    if (!isset($config["VIDEO_HEIGHT"])) { $config["VIDEO_HEIGHT"] = 112;}
-    if (!isset($config["PLAYER_HEIGHT"])) { $config["PLAYER_HEIGHT"] = 150;}
-    if (!isset($config["VIDEO_AUTOPLAY"])) { $config["VIDEO_AUTOPLAY"] = false;}
-    if (!isset($config["IMAGESTYLE"])) { $config["IMAGESTYLE"] = "border: none;";}
-    if (!isset($config["JPEGQUALITY"])) { $config["JPEGQUALITY"] = 80;}
-    if (!isset($config["AUTO_SMART_SHARP"])) { $config["AUTO_SMART_SHARP"] = false;}
     if (!isset($config["ALLOW_SUBJECT_IN_MAIL"])) { $config["ALLOW_SUBJECT_IN_MAIL"] = true;}
     if (!isset($config["DROP_SIGNATURE"])) { $config["DROP_SIGNATURE"] = true;}
     if (!isset($config["MESSAGE_START"])) { $config["MESSAGE_START"] = ":start";}
@@ -2206,11 +2082,8 @@ function GetDBConfig() {
     if (!isset($config["MESSAGE_ENCODING"])) { $config["MESSAGE_ENCODING"] = "UTF-8"; }
     if (!isset($config["MESSAGE_DEQUOTE"])) { $config["MESSAGE_DEQUOTE"] = true; }
     if (!isset($config["TURN_AUTHORIZATION_OFF"])) { $config["TURN_AUTHORIZATION_OFF"] = false;}
-    if (!isset($config["USE_IMAGEMAGICK"])) { $config["USE_IMAGEMAGICK"] = false;}
     if (!isset($config["CUSTOM_IMAGE_FIELD"])) { $config["CUSTOM_IMAGE_FIELD"] = false;}
     if (!isset($config["CONVERTNEWLINE"])) { $config["CONVERTNEWLINE"] = false;}
-    if (!isset($config["IMAGEMAGICK_CONVERT"])) { $config["IMAGEMAGICK_CONVERT"] = "/usr/bin/convert";}
-    if (!isset($config["IMAGEMAGICK_IDENTIFY"])) { $config["IMAGEMAGICK_IDENTIFY"] = "/usr/bin/identify";}
 
 
     if (!isset($config["SIG_PATTERN_LIST"])) { $config["SIG_PATTERN_LIST"] = array('--','- --',"\?--");}
@@ -2224,47 +2097,44 @@ function GetDBConfig() {
     if (!isset($config["DEFAULT_POST_CATEGORY"])) { $config["DEFAULT_POST_CATEGORY"] =  NULL; }
     if (!isset($config["DEFAULT_POST_TAGS"])) { $config["DEFAULT_POST_TAGS"] =  NULL; }
     if (!isset($config["TIME_OFFSET"])) { $config["TIME_OFFSET"] =  get_option('gmt_offset'); }
-    if (!isset($config["3GP_QT"])) { $config["3GP_QT"] =  true; }
-    if (!isset($config["3GP_FFMPEG"])) { $config["3GP_FFMPEG"] = "/usr/bin/ffmpeg";}
     if (!isset($config["WRAP_PRE"])) { $config["WRAP_PRE"] =  'no'; }
     if (!isset($config["CONVERTURLS"])) { $config["CONVERTURLS"] =  true; }
     if (!isset($config["ADD_META"])) { $config["ADD_META"] =  'no'; }
-    if (!isset($config["USEIMAGETEMPLATE"]))  
-      $config["USEIMAGETEMPLATE"] = false; 
-    if (!isset($config["USEVIDEOTEMPLATE"])) 
-      $config["USEVIDEOTEMPLATE"] = false; 
+
+    if (!isset($config["AUDIOTEMPLATE"])) 
+      $config["AUDIOTEMPLATE"] =$simple_link;
+    if (!isset($config["SELECTED_AUDIOTEMPLATE"])) 
+      $config['SELECTED_AUDIOTEMPLATE'] = 'simple_link';
+    include_once('templates/audio_templates.php');
+    $config['AUDIOTEMPLATES']=$audioTemplates;
+    if (!isset($config["SELECTED_VIDEO1TEMPLATE"])) 
+      $config['SELECTED_VIDEO1TEMPLATE'] = 'simple_link';
+    include_once('templates/video1_templates.php');
+    $config['VIDEO1TEMPLATES']=$video1Templates;
+    if (!isset($config["VIDEO1TEMPLATE"])) 
+      $config["VIDEO1TEMPLATE"] = $simple_link;
+    if (!isset($config["VIDEO1TYPES"])) 
+      $config['VIDEO1TYPES'] = 'mp4, 3gp, 3gpp, 3gpp2, 3gp2, mov';
+    if (!isset($config["SELECTED_VIDEO2TEMPLATE"])) 
+      $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
+    include_once('templates/video2_templates.php');
+    $config['VIDEO2TEMPLATES']=$video2Templates;
+    if (!isset($config["VIDEO2TEMPLATE"])) 
+      $config["VIDEO2TEMPLATE"] = $simple_link;
+    if (!isset($config["VIDEO2TYPES"])) 
+      $config['VIDEO2TYPES'] = 'x-flv';
     if (!isset($config["POST_STATUS"])) 
       $config["POST_STATUS"] = 'publish'; 
     if (!isset($config["IMAGE_NEW_WINDOW"])) 
       $config["IMAGE_NEW_WINDOW"] = false; 
     if (!isset($config["FILTERNEWLINES"]))  
       $config["FILTERNEWLINES"] = true; 
-    if (!isset($config["IMAGETEMPLATE"])) { $config["IMAGETEMPLATE"] =
-      "<div class='imageframe alignleft'><a href='{IMAGE}'><img src='{THUMBNAIL}' alt='{CAPTION}' title='{CAPTION}' class='attachment' /></a><div class='imagecaption'>{CAPTION}</div></div>";
-    }
-    if (!isset($config["VIDEOTEMPLATE"])) { $config["VIDEOTEMPLATE"] =
-        '<object '.
-            'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
-            'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
-            'width="' . $config['VIDEO_WIDTH'] . '" '.
-            'height="' . $config['VIDEO_HEIGHT'] . '"> '.
-            '<param name="src" VALUE="'. 
-            $config["URLFILESDIR"] . $filename .'"> '.
-            '<param name="autoplay" VALUE="no"> '.
-              '<param name="controller" VALUE="true"> '.
-             '<embed '.
-             'src="'. $config["URLFILESDIR"] . $filename .'" '.
-             'width="' . $config['VIDEO_WIDTH'] . '" '.
-             'height="' . $config['VIDEO_HEIGHT'] . '"'.
-             'autoplay="no" '.
-             'controller="true" '.
-             'type="video/quicktime" '.
-             'pluginspage="http://www.apple.com/quicktime/download/" '.
-             'width="' . $config['PLAYER_WIDTH'] . '" '.
-             'height="' . $config['PLAYER_HEIGHT'] . '">'.
-             '</embed> '.
-             '</object>';
-    }
+    include_once('templates/image_templates.php');
+    if (!isset($config["SELECTED_IMAGETEMPLATE"]))
+      $config['SELECTED_IMAGETEMPLATE'] = 'wordpress_default';
+    $config['IMAGETEMPLATES']=$imageTemplates;
+    if (!isset($config["IMAGETEMPLATE"])) 
+      $config["IMAGETEMPLATE"] = $wordpress_default;
     return($config);
 }
 /**
@@ -2273,37 +2143,19 @@ function GetDBConfig() {
   */
 function GetConfig() {
   $config = GetDBConfig();
-  if (!ConfirmTrailingDirectorySeperator($config["PHOTOSDIR"])) {
-    $config["PHOTOSDIR"] .= DIRECTORY_SEPARATOR;
-  }
-  if (!ConfirmTrailingDirectorySeperator($config["FILESDIR"])) {
-    $config["FILESDIR"] .= DIRECTORY_SEPARATOR;
-  }
   //These should only be modified if you are testing
   $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
   $config["POST_TO_DB"] = true;
   $config["TEST_EMAIL"] = false;
   $config["TEST_EMAIL_ACCOUNT"] = "blogtest";
   $config["TEST_EMAIL_PASSWORD"] = "yourpassword";
+  if (file_exists(POSTIE_ROOT . '/postie_test_variables.php')) { 
+    include(POSTIE_ROOT . '/postie_test_variables.php');
+  }
   //include(POSTIE_ROOT . "/../postie-test.php");
   // These are computed
-  #$config["TIME_OFFSET"] = get_option('gmt_offset');
-  if ($config["USE_IMAGEMAGICK"]) {
-     if (!file_exists($config["IMAGEMAGICK_IDENTIFY"])
-         ||!file_exists($config["IMAGEMAGICK_CONVERT"])) {
-       $config["RESIZE_LARGE_IMAGES"] = false;
-     }
-  } else {
-    if (!HasGDInstalled(false)) {
-      $config["RESIZE_LARGE_IMAGES"] = false;
-    }
-  }
+  $config["TIME_OFFSET"] = get_option('gmt_offset');
   $config["POSTIE_ROOT"] = POSTIE_ROOT;
-  $config["URLPHOTOSDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["PHOTOSDIR"]);
-  $config["REALPHOTOSDIR"] = realpath(ABSPATH . $config["PHOTOSDIR"]). DIRECTORY_SEPARATOR;
-  $config["RELPHOTOSDIR"] =  $config["PHOTOSDIR"]. DIRECTORY_SEPARATOR;
-  $config["URLFILESDIR"] = get_option('siteurl') . ConvertFilePathToUrl($config["FILESDIR"]);
-  $config["REALFILESDIR"] = realpath(ABSPATH . $config["FILESDIR"]) . DIRECTORY_SEPARATOR;
   for ($i = 0; $i < count($config["AUTHORIZED_ADDRESSES"]); $i++) {
     $config["AUTHORIZED_ADDRESSES"][$i] = strtolower($config["AUTHORIZED_ADDRESSES"][$i]);
   }
@@ -2321,7 +2173,7 @@ function ConvertFilePathToUrl($path) {
   *@return array
   */
 function GetListOfArrayConfig() {
-    return(array("SUPPORTED_FILE_TYPES","AUTHORIZED_ADDRESSES","SIG_PATTERN_LIST","BANNED_FILES_LIST"));
+    return(array("SUPPORTED_FILE_TYPES","AUTHORIZED_ADDRESSES","SIG_PATTERN_LIST","BANNED_FILES_LIST", "VIDEO1TYPES", "VIDEO2TYPES"));
 }
 /**
   * Detects if they can do IMAP
@@ -2339,18 +2191,6 @@ function HasIconvInstalled($display = true) {
   $function_list = array("iconv");
   return(HasFunctions($function_list,$display));
 }
-function HasGDInstalled($display = true) {
-  $function_list = array("getimagesize",
-                         "imagecreatefromjpeg",
-                         "imagecreatefromgif",
-                         "imagecreatefrompng",
-                         "imagecreatetruecolor",
-                         "imagecreatetruecolor",
-                         "imagecopyresampled",
-                         "imagejpeg",
-                         "imagedestroy");
-  return(HasFunctions($function_list,$display));
-}
 /**
   * Handles verifing that a list of functions exists
   * @return boolean
@@ -2366,13 +2206,6 @@ function HasFunctions($function_list,$display = true) {
     }
   }
   return(true);
-}
-/**
-  * This filter makes it easy to change the html from showing the thumbnail to the actual picture
-  */
-function filter_postie_thumbnail_with_full($content) {
-   $content = str_replace("thumb.","",$content);
-   return($content);
 }
 /**
   * This function tests to see if postie is its own directory
@@ -2422,14 +2255,6 @@ function UpdatePostiePermissions($role_access) {
             }
         }
     }
-}
-function TestWPVersion() {
-    //fix from Mathew Boedicker
-    $version_parts = explode('.', get_bloginfo('version'));
-    if ((count($version_parts) > 0) && (intval($version_parts[0]) >= 2)) {
-        return true;
-    }
-    return false;
 }
 function DebugEmailOutput(&$email,&$mimeDecodedEmail) {
     $config = GetConfig();
