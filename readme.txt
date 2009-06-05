@@ -287,7 +287,7 @@ To strip off stuff that they add at the end of a message, end your
 post with :end
 
 == History ==
-* 1.3.testing (2009.06.xx)
+* 1.3.alpha (2009.06.05)
   * Now using default wordpress image and upload handling, which means:
       * No more creating special directories for postie
       * No more confusion about imagemagick
@@ -309,7 +309,12 @@ post with :end
       * Correctly handling Windows-1252 encoding
       * Correctly handling non-ascii characters in subject line
 
-* 1.2.2 (2009.05.xx)
+* 1.2.3 (2009.05.17)
+  * Fixed headers already sent bug
+  * Converted shortcode `<?` to proper `<?php` (thanks brack)
+  * Deleting mails after processing again
+
+* 1.2.2 (2009.05.15)
   * Show empty categories for default category in options
   * Image scaling fixed so that the smaller value of max image width and max
     image height is used
