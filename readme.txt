@@ -204,6 +204,9 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
   if you send an HTML and plain text message
 * Automatically confirms that you are installed correctly
 
+== Screenshots ==
+
+1. Postie options (showing video and audio templates)
 
 == Frequently Asked Questions ==
 
