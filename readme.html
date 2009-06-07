@@ -59,6 +59,10 @@ you only get one visit every 30 minutes, then it might take 30 minutes for a
 post to show up.</li>
 </ul>	<hr />
 		
+		<h3>Screenshots</h3>
+	<ol>
+<li>Postie options (showing video and audio templates)</li>
+</ol>	<hr />
 	
 	<h3>Options and Settings</h3>
 <ul>
@@ -143,12 +147,8 @@ tags: foo, bar</li>
 <h4>Image Handling</h4>
 
 <ul>
-<li>Postie has a filter to make it easy to show full images on individual pages.</li>
-<li>Tells you if you have GD installed for resizing images</li>
 <li>Allows you to attach images to your email and automatically post
 them to your blog</li>
-<li>Large images are automatically thumbnailed and linked to the larger
-image (Requires GD)</li>
 <li>You can publish images in the text of your message by using #img1#
 #img2# - each one will be replaced with the HTML for the image
 you attached</li>
@@ -198,7 +198,7 @@ if you send an HTML and plain text message</li>
 </ul>
 <h3>History</h3>
 <ul>
-<li><p>1.3.testing (2009.06.xx)</p>
+<li><p>1.3.alpha (2009.06.05)</p>
 
 <ul>
 <li>Now using default wordpress image and upload handling, which means:
@@ -234,7 +234,14 @@ templates</li>
 <li>Correctly handling non-ascii characters in subject line</li>
 </ul></li>
 </ul></li>
-<li><p>1.2.2 (2009.05.xx)</p>
+<li><p>1.2.3 (2009.05.17)</p>
+
+<ul>
+<li>Fixed headers already sent bug</li>
+<li>Converted shortcode <code>&lt;?</code> to proper <code>&lt;?php</code> (thanks brack)</li>
+<li>Deleting mails after processing again</li>
+</ul></li>
+<li><p>1.2.2 (2009.05.15)</p>
 
 <ul>
 <li>Show empty categories for default category in options</li>

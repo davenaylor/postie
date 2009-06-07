@@ -6,7 +6,8 @@ $Id$
 
 /*TODO 
  * html purify
- * windows 1252 encoding
+ * USE built-in php message decoding to improve speed
+ * Add custom fields
  */
 #global $config,$debug;
 #$debug=true;
@@ -629,78 +630,8 @@ function GetContent ($part,&$attachments, $post_id) {
           $file = wp_get_attachment_url($file_id);
           $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
 
-          if ($part->ctype_secondary == "3gpp"
-             || $part->ctype_secondary == "octet-stream"
-             || $part->ctype_secondary == "3g2"
-             || $part->ctype_secondary == "3gp"
-             || $part->ctype_secondary == "mp4"
-             || $part->ctype_secondary == "quicktime"
-             ||  $part->ctype_secondary == "3gpp2") {
-            if ($config["3GP_QT"]) {
-               //Shamelessly borrowed from http://www.postneo.com/2003/12/19/embedding-3gpp-in-html
-              $autoplay='false';
-              if ($config['AUTOPLAY']) {
-                $autoplay='true';
-              }
-              $attachments["html"][] = 
-                  '<object '.
-                      'classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '.
-                      'codebase="http://www.apple.com/qtactivex/qtplugin.cab" '.
-                      'width="' . $config['VIDEO_WIDTH'] . '" '.
-                      'height="' . $config['VIDEO_HEIGHT'] . '"> '.
-                      '<param name="src" value="'. $file. '" /> '.
-                      "<param name=\"autoplay\" value=\"$autoplay\" /> ".
-                        '<param name="controller" value="true" /> '.
-                       '<embed '.
-                       'src="'. $file. '" '.
-                       'width="' . $config['VIDEO_WIDTH'] . '" '.
-                       'height="' . $config['VIDEO_HEIGHT'] . '"'.
-                       "autoplay=\"$autoplay\" ".
-                       'controller="true" '.
-                       'type="video/quicktime" '.
-                       'pluginspage="http://www.apple.com/quicktime/download/" '.
-                       'width="' . $config['PLAYER_WIDTH'] . '" '.
-                       'height="' . $config['PLAYER_HEIGHT'] . '">'.
-                       '</embed> '.
-                       '</object>';
-            } else {
-              if (file_exists($config["3GP_FFMPEG"])) {
-                //options from http://www.getid3.org/phpBB2/viewtopic.php?p=1290&
-                $scaledFile = 'thumb-' . $file;
-
-                @exec (escapeshellcmd($config["3GP_FFMPEG"]) . 
-                    " -i " .  escapeshellarg($file) .
-                    " -y -ss 00:00:01 -vframes 1 -an -sameq -f gif " . 
-                    escapeshellarg($scaledFile) );
-                @exec ('chmod 755 ' . escapeshellarg($scaledFile));
-
-                $attachments["html"][] .= '<div class="' . 
-                    $config["3GPDIV"].'"><a href="' . $file. '"><img src="' . 
-                    $scaledFileName . '" alt="' . 
-                    $part->ctype_parameters['name'] . ' /></a></div>' . "\n";
-              } else {
-                $attachments["html"][] = '<div class="' .
-                $config["ATTACHMENTDIV"].'"><a href="' . $file. '" class="' . $config["3GPCLASS"].'">' . $part->ctype_parameters['name'] . '</a></div>' . "\n";
-              }
-            }
-          } elseif ($part->ctype_secondary == "x-shockwave-flash") {
-            $attachments["html"][] = '<!--Mime Type of File is '.$part->ctype_primary."/".$part->ctype_secondary.' -->'.
-                '<object '.
-                 'classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"  '.
-                 'codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,29,0" '.
-                 'width=""  '.  'height=""> '.
-                 '<param name="movie" value="'. $config["URLFILESDIR"] . 
-                 $filename .'"> '.
-                 '<param name="quality" value="high"> '.
-                 '<embed  '.  'src="'. $config["URLFILESDIR"] . $filename .'"  '.
-                 'width=""  '.  'height=""  '.  'quality="high"  '.
-                 'pluginspage="http://www.macromedia.com/go/getflashplayer"  '.
-                 'type="application/x-shockwave-flash"  '.
-                 'width=""  '.  'height=""></embed> '.  '</object>'; 
-          } else {
-            $attachments["html"][] = '<a href="' . $file . '">' . 
-                $part->ctype_parameters['name'] . '</a>' . "\n";
-          }
+          $attachments["html"][] = '<a href="' . $file . '">' . 
+              $part->ctype_parameters['name'] . '</a>' . "\n";
           if ($cid) {
             $attachments["cids"][$cid] = array($file,
                 count($attachments["html"]) - 1);
@@ -1280,6 +1211,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
     if ( trim($image_meta['caption']) )
       $content = $image_meta['caption'];
   }
+  print_r(exif_read_data($file));
 
   // Construct the attachment array
   $attachment = array_merge( array(
@@ -1521,6 +1453,9 @@ function DecodeMIMEMail($email) {
     $params['decode_bodies'] = false;
     $params['decode_headers'] = true;
     $params['input'] = $email;
+    //$decoded = imap_mime_header_decode($email);
+    //print_r($decoded);
+    //return($decoded);
     return(Mail_mimeDecode::decode($params));
 }
     

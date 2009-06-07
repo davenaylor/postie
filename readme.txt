@@ -4,7 +4,7 @@ Donate link: http://blog.robfelty.com/plugins/postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
-Tested up to: 2.7.1
+Tested up to: 2.8
 Stable tag: 1.3.alpha
 
 The Postie plugin allows you to blog via e-mail, including many advanced
@@ -157,12 +157,8 @@ If you don't have access to cron, you can run postie without it.
 * You can also set a default tag to be applied if no tags are included.
 
 = Image Handling =
-* Postie has a filter to make it easy to show full images on individual pages.
-* Tells you if you have GD installed for resizing images
 * Allows you to attach images to your email and automatically post
   them to your blog
-* Large images are automatically thumbnailed and linked to the larger
-  image (Requires GD)
 * You can publish images in the text of your message by using #img1#
   #img2# - each one will be replaced with the HTML for the image
   you attached

@@ -386,7 +386,7 @@ attribute_escape($config['VIDEO1TEMPLATE']) ?>" />
         commas)', 'postie') ?></span> </th> 
           <td>
           <input name="VIDEO1TYPES" type="text" id="VIDEO1TYPES"
-          value="<?php echo implode(', ', $config["VIDEO1TYPES"]); ?>" size="40" />                </td> 
+          value="<?php if ($config['VIDEO1TYPES']!='') echo implode(', ', $config["VIDEO1TYPES"]); ?>" size="40" />                </td> 
       </tr> 
             <tr><th scope='row'><?php _e('Video template 2', 'postie') ?><br />
             <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
@@ -428,7 +428,7 @@ attribute_escape($config['VIDEO2TEMPLATE']) ?>" />
         commas)', 'postie') ?></span> </th> 
           <td>
           <input name="VIDEO2TYPES" type="text" id="VIDEO2TYPES"
-          value="<?php echo implode(', ', $config["VIDEO2TYPES"]); ?>" size="40" />                </td> 
+          value="<?php if ($config['VIDEO2TYPES']!='') echo implode(', ', $config["VIDEO2TYPES"]); ?>" size="40" />                </td> 
       </tr> 
         <tr><th scope='row'><?php _e('Audio template', 'postie') ?><br />
         <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
