@@ -1211,7 +1211,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
     if ( trim($image_meta['caption']) )
       $content = $image_meta['caption'];
   }
-  print_r(exif_read_data($file));
+  //print_r(exif_read_data($file));
 
   // Construct the attachment array
   $attachment = array_merge( array(
