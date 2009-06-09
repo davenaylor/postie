@@ -1695,6 +1695,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
 function GetSubject(&$mimeDecodedEmail,&$content) {
   $config = GetConfig();
   global $charset;
+  echo "charset=$charset, encoding=$encoding\n";
   //assign the default title/subject
   if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
     if ($config["ALLOW_SUBJECT_IN_MAIL"]) {
