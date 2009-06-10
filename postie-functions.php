@@ -502,12 +502,9 @@ function BannedFileName($filename) {
 //tear apart the meta part for useful information
 function GetContent ($part,&$attachments, $post_id) {
   $config = GetConfig();
-  global $charset;
+  global $charset, $encoding;
   $meta_return = NULL;	
   echo "primary= " . $part->ctype_primary . ", secondary = " .  $part->ctype_secondary . "\n";
-  $tmpcharset=trim($part->ctype_parameters['charset']);
-  if ($tmpcharset!='') 
-    $charset=$tmpcharset;
   DecodeBase64Part($part);
   if (BannedFileName($part->ctype_parameters['name'])
       || BannedFileName($part->ctype_parameters['name'])) {
@@ -549,6 +546,12 @@ function GetContent ($part,&$attachments, $post_id) {
         }
         break;
       case 'text':
+        $tmpcharset=trim($part->ctype_parameters['charset']);
+        if ($tmpcharset!='') 
+          $charset=$tmpcharset;
+        $tmpencoding=trim($part->headers['content-transfer-encoding']);
+        if ($tmpencoding!='') 
+          $encoding=$tmpencoding;
           HandleMessageEncoding($part->headers["content-transfer-encoding"],
                                 $part->ctype_parameters["charset"],
                                 $part->body, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
@@ -982,6 +985,7 @@ function HandleMessageEncoding($encoding, $charset,&$body,
 function ConvertToUTF_8($encoding,$charset,&$body) {
   $charset = strtolower($charset);
   $encoding = strtolower($encoding);
+
   switch($charset) {
     case "iso-8859-1":
       $body = utf8_encode($body);
@@ -993,6 +997,11 @@ function ConvertToUTF_8($encoding,$charset,&$body) {
         $charset=="cp 1252"):
       $body = cp1252_to_utf8($body);
       break;
+    case ($charset=="windows-1256" || $charset=="cp-1256"  || 
+        $charset=="cp 1256"):
+      $body = iconv("Windows-1256//TRANSLIT","UTF-8",$body);
+      break;
+
   }
 }
 /* this function will convert windows-1252 (also known as cp-1252 to utf-8 */
@@ -1170,8 +1179,12 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
          //                  'test_type'=>false);
   $tmpFile=tempnam('/tmp', 'postie');
   $fp = fopen($tmpFile, 'w');
-  fwrite($fp, $part->body);
-  fclose($fp);
+  if ($fp) {
+    fwrite($fp, $part->body);
+    fclose($fp);
+  } else {
+    echo "could not write to temp file: '$tmpFile' ";
+  }
   if ($part->ctype_parameters['name']=='') {
     $name = $part->d_parameters['filename'];
   } else {
@@ -1694,7 +1707,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
   */
 function GetSubject(&$mimeDecodedEmail,&$content) {
   $config = GetConfig();
-  global $charset;
+  global $charset, $encoding;
   echo "charset=$charset, encoding=$encoding\n";
   //assign the default title/subject
   if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
@@ -1836,6 +1849,7 @@ function DisplayEmailPost($details) {
   print '<b>Comment Status</b>: ' . $details["comment_status"] . '<br />' . "\n";
   print '<b>Subject</b>: ' . $details["post_title"]. '<br />' . "\n";
   print '<b>Postname</b>: ' . $details["post_name"] . '<br />' . "\n";
+  print '<b>Post Id</b>: ' . $details["ID"] . '<br />' . "\n";
   print '<b>Posted content:</b></p><hr />' . $details["post_content"] . '<hr /><pre>';
 }
 /**

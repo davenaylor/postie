@@ -285,6 +285,10 @@ To strip off stuff that they add at the end of a message, end your
 post with :end
 
 == History ==
+* 1.3.beta (2009.06.xx)
+  * Mores fixes for character issues in subject
+  * Now handling Windows-1256 (arabic) character set
+
 * 1.3.alpha (2009.06.05)
   * Now using default wordpress image and upload handling, which means:
       * No more creating special directories for postie
