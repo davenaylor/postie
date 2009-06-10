@@ -1563,10 +1563,10 @@ size. If not found, we default to medium */
   $template=str_replace('{PAGELINK}', $pageLink, $template);
   $template=str_replace('{THUMBWIDTH}', $widths[0] . 'px', $template);
   $template=str_replace('{THUMBHEIGHT}', $heights[0] . 'px', $template);
-  $template=str_replace('{MEDIUMWIDTH}', $widths[0] . 'px', $template);
-  $template=str_replace('{MEDIUMHEIGHT}', $heights[0] . 'px', $template);
-  $template=str_replace('{LARGEWIDTH}', $widths[0] . 'px', $template);
-  $template=str_replace('{LARGEHEIGHT}', $heights[0] . 'px', $template);
+  $template=str_replace('{MEDIUMWIDTH}', $widths[1] . 'px', $template);
+  $template=str_replace('{MEDIUMHEIGHT}', $heights[1] . 'px', $template);
+  $template=str_replace('{LARGEWIDTH}', $widths[2] . 'px', $template);
+  $template=str_replace('{LARGEHEIGHT}', $heights[2] . 'px', $template);
   $template=str_replace('{FILENAME}', $fileName, $template);
   $template=str_replace('{IMAGE}', $fileLink, $template);
   $template=str_replace('{URL}', $fileLink, $template);
