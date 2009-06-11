@@ -1678,8 +1678,8 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
       $caption='';
       if ( preg_match("/$img_placeholder_temp caption=['\"](.*)['\"]/", $content, $matches))  {
         $caption =$matches[1];
-        $img_placeholder_temp.=' ' . $matches[0];
-        $eimg_placeholder_temp.=' ' . $matches[0];
+        $img_placeholder_temp=$matches[0];
+        $eimg_placeholder_temp=$matches[0];
       }
       $value = str_replace('{CAPTION}', $caption, $value);
       $img_placeholder_temp.='#';
