@@ -63,8 +63,8 @@ function postie_decron() {
 function more_reccurences() {
   return array(
   'weekly' => array('interval' => 604800, 'display' => 'Once Weekly'),
-  'twiceperhour' => array('interval' => 1800, 'display' => 'Twice per hour
-  '), 'tenminutes' =>array('interval' => 600, 'display' => 'Every 10 minutes')
+  'twiceperhour' => array('interval' => 1800, 'display' => 'Twice per hour '),
+  'tenminutes' =>array('interval' => 600, 'display' => 'Every 10 minutes')
   );
 }
 add_filter('cron_schedules', 'more_reccurences');
