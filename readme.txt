@@ -288,6 +288,7 @@ post with :end
 * 1.3.beta (2009.06.xx)
   * Mores fixes for character issues in subject
   * Now handling Windows-1256 (arabic) character set
+  * Fixed image uploading on windows servers
 
 * 1.3.alpha (2009.06.05)
   * Now using default wordpress image and upload handling, which means:

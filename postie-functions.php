@@ -1179,7 +1179,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   $overrides = array('test_form'=>false);
         //$overrides = array('test_form'=>false, 'test_size'=>false,
          //                  'test_type'=>false);
-  $tmpFile=tempnam('/tmp', 'postie');
+  $tmpFile=tempnam(getenv('TEMP'), 'postie');
   $fp = fopen($tmpFile, 'w');
   if ($fp) {
     fwrite($fp, $part->body);
