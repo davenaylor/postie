@@ -75,8 +75,10 @@ function PostEmail($poster,$mimeDecodedEmail) {
   if ($config['CONVERTURLS']) 
     $content=clickableLink($content);
   
-  if ($config['FILTERNEWLINES']) 
+  if ($config['FILTERNEWLINES']) {
     $content = FilterNewLines($content);
+    $content = FilterNewLines($post_excerpt);
+  }
   //$content = FixEmailQuotes($content);
   
   $id=checkReply($subject); 
