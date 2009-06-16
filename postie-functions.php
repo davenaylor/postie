@@ -432,7 +432,7 @@ function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL,
   * @param array - categories to be posted to
   * @param array - details of the post
   */
-function PostToDB($details) {
+function PostToDB($details,$isReply) {
   $config = GetConfig();
   if ($config["POST_TO_DB"]) {
     //generate sql for insertion	    
