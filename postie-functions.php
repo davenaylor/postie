@@ -75,10 +75,8 @@ function PostEmail($poster,$mimeDecodedEmail) {
   if ($config['CONVERTURLS']) 
     $content=clickableLink($content);
   
-  if ($config['FILTERNEWLINES']) {
+  if ($config['FILTERNEWLINES']) 
     $content = FilterNewLines($content);
-    $content = FilterNewLines($post_excerpt);
-  }
   //$content = FixEmailQuotes($content);
   
   $id=checkReply($subject); 
@@ -1773,6 +1771,8 @@ function GetPostExcerpt(&$content) {
     $post_excerpt = $matches[1];
     //print_r($matches);
   }
+  if ($config['FILTERNEWLINES']) 
+    $post_excerpt = FilterNewLines($post_excerpt);
   return($post_excerpt);
 }
 /**
