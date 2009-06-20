@@ -290,6 +290,8 @@ post with :end
   * Now handling Windows-1256 (arabic) character set
   * Fixed image uploading on windows servers
   * Fixed replying to message adds comment
+  * TODO: fix delay
+  * Uploading pictures via MMS should now work
 
 * 1.3.alpha (2009.06.05)
   * Now using default wordpress image and upload handling, which means:
