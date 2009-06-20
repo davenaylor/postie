@@ -466,6 +466,7 @@ function PostToDB($details,$isReply) {
       'comment_type' =>'', 
       'comment_parent' => 0
       );
+      print_r($comment);
 
       $post_ID = wp_insert_comment($comment);
     }
@@ -1186,7 +1187,11 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
     echo "could not write to temp file: '$tmpFile' ";
   }
   if ($part->ctype_parameters['name']=='') {
-    $name = $part->d_parameters['filename'];
+    if ($part->ctype_parameters['name']!='') {
+      $name = $part->d_parameters['filename'];
+    } else {
+      $name = 'postie-media';
+    }
   } else {
     $name =  $part->ctype_parameters['name'];
   }
