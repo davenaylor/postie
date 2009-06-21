@@ -1,5 +1,6 @@
 <?php
-ini_set('xdebug.remote_mode', 'jit');
+$revisions= WP_POST_REVISIONS;
+define('WP_POST_REVISIONS', false);
 /*
 $Id$
 */
@@ -45,11 +46,13 @@ function PostEmail($poster,$mimeDecodedEmail) {
   }
   FilterTextParts($mimeDecodedEmail);
   $tmpPost=array('post_title'=> 'tmptitle',
+                 'post_status' => 'draft',
                  'post_content'=>'tmoPost');
   /* in order to do attachments correctly, we need to associate the
   attachments with a post. So we add the post here, then update it 
   */
   $post_id = wp_insert_post($tmpPost);
+  echo "id=$post_id\n";
   $content = GetContent($mimeDecodedEmail,$attachments,$post_id);
   $subject = GetSubject($mimeDecodedEmail,$content);
   if ($debug) {
@@ -68,15 +71,14 @@ function PostEmail($poster,$mimeDecodedEmail) {
         $mimeDecodedEmail->headers["date"], $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
     $message_date = $mimeDecodedEmail->headers['date'];
   }
-  list($post_date,$post_date_gmt) = DeterminePostDate($content, $message_date);
+  list($post_date,$post_date_gmt) = DeterminePostDate($content,
+      $message_date,$config['TIME_OFFSET']);
 
   ubb2HTML($content);	
 
   if ($config['CONVERTURLS']) 
     $content=clickableLink($content);
   
-  if ($config['FILTERNEWLINES']) 
-    $content = FilterNewLines($content);
   //$content = FixEmailQuotes($content);
   
   $id=checkReply($subject); 
@@ -102,11 +104,35 @@ function PostEmail($poster,$mimeDecodedEmail) {
     }
   } else {
     $isReply=true;
+    // strip out quoted content
+    $lines=explode("\n",$content);
+    //$lines=preg_split('/([\r\n]|<br \/>)/',$content);
+    print_r($lines);
+    $newContents='';
+    foreach ($lines as $line) {
+      //$match=preg_match("/^>.*/i",$line);
+      //echo "line=$line,  match=$match";
+      if (preg_match("/^>.*/i",$line)==0 &&
+         preg_match("/^(from|subject|to|date):.*?/i",$line)==0 && 
+         preg_match("/^-+.*?(from|subject|to|date).*?/i",$line)==0 && 
+         preg_match("/^on.*?wrote:$/i",$line)==0 && 
+         preg_match("/^-+\s*forwarded\s*message\s*-+/i",$line)==0) {
+        $newContents.="$line\n";
+      }
+    }
+    $content=$newContents;
     wp_delete_post($post_id);
   }
+  if ($config['FILTERNEWLINES']) 
+    $content = FilterNewLines($content);
 
 
-  $post_status=$config['POST_STATUS'];
+  $now = date('U');
+  if (strtotime($post_date)>$now) {
+    $post_status='future';
+  } else {
+    $post_status=$config['POST_STATUS'];
+  }
   $details = array(
       'post_author'  => $poster,
       'comment_author'  => $postAuthorDetails['author'],
@@ -128,7 +154,8 @@ function PostEmail($poster,$mimeDecodedEmail) {
       'post_status' => $post_status
   );
   DisplayEmailPost($details);
-  PostToDB($details,$isReply); 
+  PostToDB($details,$isReply, $config['POST_TO_DB'],
+      $config['CUSTOM_IMAGE_FIELD']); 
 }
 /** FUNCTIONS **/
 
@@ -223,7 +250,7 @@ function checkReply(&$subject) {
   
   global $wpdb;
   // see if subject starts with Re:
-  if (preg_match("/(^Re:) (.*)/", $subject, $matches)) {
+  if (preg_match("/(^Re:) (.*)/i", $subject, $matches)) {
     $subject=trim($matches[2]);
     // strip out category info into temporary variable
     $tmpSubject=$subject;
@@ -430,35 +457,21 @@ function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL,
   * @param array - categories to be posted to
   * @param array - details of the post
   */
-function PostToDB($details,$isReply) {
-  $config = GetConfig();
-  if ($config["POST_TO_DB"]) {
+function PostToDB($details,$isReply, $postToDb=true, $customImageField=false) {
+  print_r($details);
+  if ($postToDb) {
     //generate sql for insertion	    
-    $_POST['publish'] = true; //Added to make subscribe2 work - it will only handle it if the global varilable _POST is set
+    //$_POST['publish'] = true; //Added to make subscribe2 work - it will only handle it if the global varilable _POST is set
     if (!$isReply) {
       $post_ID = wp_update_post($details);
     } else {
-      // strip out quoted content
-      $lines=preg_split("/[\r\n]/",$details['post_content']);
-      $newContents='';
-      foreach ($lines as $line) {
-        //$match=preg_match("/^>.*/i",$line);
-        //echo "line=$line,  match=$match";
-        if (preg_match("/^>.*/i",$line)==0 &&
-           preg_match("/^(from|subject|to|date):.*?/i",$line)==0 && 
-           preg_match("/^-+.*?(from|subject|to|date).*?/i",$line)==0 && 
-           preg_match("/^on.*?wrote:$/i",$line)==0 && 
-           preg_match("/^-+\s*forwarded\s*message\s*-+/i",$line)==0) {
-          $newContents.="$line\n";
-        }
-      }
       $comment = array(
       'comment_author'=>$details['comment_author'],
       'comment_post_ID' =>$details['ID'], 
       'comment_author_email' => $details['email_author'],
       'comment_date' =>$details['post_date'],
       'comment_date_gmt' =>$details['post_date_gmt'], 
-      'comment_content' =>$newContents,
+      'comment_content' =>$details['post_content'],
       'comment_author_url' =>'',
       'comment_author_IP' =>'',
       'comment_approved' =>1,
@@ -469,7 +482,7 @@ function PostToDB($details,$isReply) {
 
       $post_ID = wp_insert_comment($comment);
     }
-    if ($config["CUSTOM_IMAGE_FIELD"]) {
+    if ($customImageField) {
       if (count($details['customImages'])>1) {
       $imageField=1;
         foreach ($details['customImages'] as $image) {
@@ -503,6 +516,10 @@ function BannedFileName($filename) {
 function GetContent ($part,&$attachments, $post_id) {
   $config = GetConfig();
   global $charset, $encoding;
+  if (function_exists(imap_mime_header_decode)) {
+    $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
+    $charset = $element->charset;
+  }
   $meta_return = NULL;	
   echo "primary= " . $part->ctype_primary . ", secondary = " .  $part->ctype_secondary . "\n";
   DecodeBase64Part($part);
@@ -835,8 +852,9 @@ function StartFilter(&$content,$start) {
 function RemoveSignature( &$content,$filterList = array('--','- --' )) {
 $arrcontent = explode("\n", $content);
 $i = 0;
+echo "countarr = " . count($arrcontent) . "\n";
 for ($i = 0; $i<=count($arrcontent); $i++) {
-  $line = $arrcontent[$i];
+  $line = trim($arrcontent[$i]);
   $nextline = $arrcontent[$i+1];
       foreach ($filterList as $pattern) {
           if (preg_match("/^$pattern/",trim($line))) {
@@ -890,6 +908,9 @@ function FilterNewLines ( $content ) {
   // tags
   $result = preg_replace($search,$replace,$content);
   //$newContent='<p>' . preg_replace('/ACTUAL_NEW_LINE/',"</p>\n<p>",$result);
+ 
+  echo "content = $content\n";
+  echo "newContent = $result\n";
   $newContent=preg_replace('/(ACTUAL_NEW_LINE|LINEBREAK\s*LINEBREAK)/',"\n\n",$result);
   //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
   if ($config['CONVERTNEWLINE']) {
@@ -1056,28 +1077,6 @@ function HandleQuotedPrintable($encoding, &$body,$dequote=true ) {
 }
 
 
-function GenerateImageFileName($dir,$type) {
-    static $ctr;
-    $config = GetConfig();
-    $ctr++;
-    $type = strtolower($type);
-    if ($type == "jpeg"
-            || $type = "pjpeg") {
-        $type = "jpg";
-    }
-    if ($config["TEST_EMAIL"]) {
-        return($dir . "TEST-" . date("Ymd-His-",time()) . $ctr . "." . $type);
-    }
-    else {
-        return($dir . date("Ymd-His-",time()) . $ctr . "." . $type);
-    }
-}
-function ConfirmTrailingDirectorySeperator($string) {
-    if (substr($string,strlen($string) - 1,1) == DIRECTORY_SEPARATOR) {
-        return(true);
-    }
-    return(false);
-}
 /**
   * Checks for the comments tag
   * @return boolean
@@ -1101,8 +1100,7 @@ function AllowCommentsOnPost(&$content) {
 /**
   * Needed to be able to modify the content to remove the usage of the delay tag
   */
-function DeterminePostDate(&$content, $message_date = NULL) {
-    $config = GetConfig();
+function DeterminePostDate(&$content, $message_date = NULL, $offset=0) {
     $delay = 0;
     if ($debug) {
       echo "inside Determine Post Date, message_date = $message_date\n";
@@ -1127,13 +1125,13 @@ function DeterminePostDate(&$content, $message_date = NULL) {
     else {
         $dateInSeconds = time() + $delay;
     }
-    $post_date = gmdate('Y-m-d H:i:s',$dateInSeconds + ($config["TIME_OFFSET"] * 3600));
+    $post_date = gmdate('Y-m-d H:i:s',$dateInSeconds + ($offset * 3600));
     $post_date_gmt = gmdate('Y-m-d H:i:s',$dateInSeconds);
 
-    //echo "--------------------DELAY------------\n";
-    //echo "delay=$delay, dateInSeconds = $dateInSeconds\n";
-    //echo "post_date=$post_date\n";
-    //echo "--------------------DELAY------------\n";
+    echo "--------------------DELAY------------\n";
+    echo "delay=$delay, dateInSeconds = $dateInSeconds\n";
+    echo "post_date=$post_date\n";
+    echo "--------------------DELAY------------\n";
     return(array($post_date,$post_date_gmt));
 }
 /**
@@ -1713,6 +1711,10 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
 function GetSubject(&$mimeDecodedEmail,&$content) {
   $config = GetConfig();
   global $charset, $encoding;
+  if (function_exists(imap_mime_header_decode)) {
+    $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
+    $charset = $element->charset;
+  }
   echo "charset=$charset, encoding=$encoding\n";
   //assign the default title/subject
   if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
@@ -2281,4 +2283,5 @@ function VodafoneHandler(&$content, &$attachments){
     }
 
 }
+define('WP_POST_REVISIONS', $revisions);
 ?>

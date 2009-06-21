@@ -292,6 +292,8 @@ post with :end
   * Fixed replying to message adds comment
   * TODO: fix delay
   * Uploading pictures via MMS should now work
+  * TODO: add private post function
+    http://forum.robfelty.com/topic/how-to-private-posts-from-postie?replies=2#post-1515
 
 * 1.3.alpha (2009.06.05)
   * Now using default wordpress image and upload handling, which means:
