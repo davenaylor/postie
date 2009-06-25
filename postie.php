@@ -9,7 +9,7 @@ Author URI: http://blog.robfelty.com/
 */
 
 /*
-$Id$
+$Id:$
 * -= Requests Pending =-
 * German Umlats don't work
 * Problems under PHP5 
