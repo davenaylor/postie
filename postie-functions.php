@@ -51,9 +51,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   attachments with a post. So we add the post here, then update it 
   */
   $post_id = wp_insert_post($tmpPost);
-  echo "id=$post_id\n";
   $content = GetContent($mimeDecodedEmail,$attachments,$post_id, $config);
-  echo "the content is now: $content\n";
   $subject = GetSubject($mimeDecodedEmail,$content, $config);
   if ($debug) {
     echo "the subject is $subject, right after calling GetSubject\n";
@@ -109,7 +107,6 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
     // strip out quoted content
     $lines=explode("\n",$content);
     //$lines=preg_split('/([\r\n]|<br \/>)/',$content);
-    print_r($lines);
     $newContents='';
     foreach ($lines as $line) {
       //$match=preg_match("/^>.*/i",$line);
@@ -460,7 +457,6 @@ function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL,
   * @param array - details of the post
   */
 function PostToDB($details,$isReply, $postToDb=true, $customImageField=false) {
-  print_r($details);
   if ($postToDb) {
     //generate sql for insertion	    
     //$_POST['publish'] = true; //Added to make subscribe2 work - it will only handle it if the global varilable _POST is set
@@ -580,7 +576,6 @@ function GetContent ($part,&$attachments, $post_id, $config) {
             //strip excess HTML
             //$meta_return .= HTML2HTML($part->body ) . "\n";
             $meta_return .= $part->body  . "\n";
-            echo "META_RETURN = \n" . htmlentities($meta_return);
           } else {
             //regular text, so just strip the pgp signature
             if (ALLOW_HTML_IN_BODY) {
@@ -594,7 +589,6 @@ function GetContent ($part,&$attachments, $post_id, $config) {
 
       case 'image':
         $file_id = postie_media_handle_upload($part, $post_id);
-        echo "file_id=$file_id";
         $file = wp_get_attachment_url($file_id);
 
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
@@ -602,7 +596,6 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         /* TODO make these options */
         $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
             $config['IMAGETEMPLATE']);
-        echo "parsetemplate returns " . print_r($attachments['html']);
         /*
         $url=wp_get_attachment_link($file_id);
         $align='left';
@@ -853,7 +846,6 @@ function StartFilter(&$content,$start) {
 function RemoveSignature( &$content,$filterList = array('--','- --' )) {
 $arrcontent = explode("\n", $content);
 $i = 0;
-echo "countarr = " . count($arrcontent) . "\n";
 for ($i = 0; $i<=count($arrcontent); $i++) {
   $line = trim($arrcontent[$i]);
   $nextline = $arrcontent[$i+1];
@@ -1110,10 +1102,12 @@ function DeterminePostDate(&$content, $message_date = NULL, $offset=0) {
     $post_date = gmdate('Y-m-d H:i:s',$dateInSeconds + ($offset * 3600));
     $post_date_gmt = gmdate('Y-m-d H:i:s',$dateInSeconds);
 
+/*
     echo "--------------------DELAY------------\n";
     echo "delay=$delay, dateInSeconds = $dateInSeconds\n";
     echo "post_date=$post_date\n";
     echo "--------------------DELAY------------\n";
+    */
     return(array($post_date,$post_date_gmt));
 }
 /**
@@ -1164,7 +1158,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   } else {
     echo "could not write to temp file: '$tmpFile' ";
   }
-  print_r($part->ctype_parameters);
+  //print_r($part->ctype_parameters);
   if ($part->ctype_parameters['name']=='') {
     if ($part->ctype_parameters['name']!='') {
       $name = $part->d_parameters['filename'];
@@ -1181,7 +1175,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
                     'error' => ''
                     );
 
-  print_r($the_file);
+  //print_r($the_file);
   $time = current_time('mysql');
   if ( $post = get_post($post_id) ) {
     if ( substr( $post->post_date, 0, 4 ) > 0 )
@@ -1189,7 +1183,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   }
 
   $file = postie_handle_upload($the_file, $overrides, $time);
-  print_r($file);
+  //print_r($file);
   //unlink($tmpFile);
 
   if ( isset($file['error']) )
@@ -1222,7 +1216,6 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
 
   // Save the data
   $id = wp_insert_attachment($attachment, $file, $post_id);
-  echo "id=$id\n";
   if ( !is_wp_error($id) ) {
     wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
   }
@@ -1512,7 +1505,6 @@ function GetNameFromEmail($address) {
 }
 
 function parseTemplate($id, $type, $template, $size='medium') {
-  echo "template = $template\n";
 
 /* we check template for thumb, thumbnail, large, full and use that as
 size. If not found, we default to medium */
@@ -1621,8 +1613,6 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
     } else {
       $value = str_replace('{CAPTION}', '', $value);
       /* if using the gallery shortcode, don't add pictures at all */
-      echo "should add image html here\n";
-      echo "image content = $content\n";
       if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches))  {
         if ($config["IMAGES_APPEND"]) {
           $content .= $value;
@@ -1642,7 +1632,6 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
   if (function_exists(imap_mime_header_decode)) {
     $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
     $charset = $element->charset;
-    print_r($element);
   }
   //assign the default title/subject
   if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
@@ -1684,7 +1673,6 @@ function GetPostTags(&$content, $defaultTags) {
     $post_tags = preg_split("/,\s*/", $matches[1]);
   }
   if (!count($post_tags)) {
-      echo "using default tags " . $defaultTags. "\n";
       $post_tags =  $defaultTags;
   }
   return($post_tags);
@@ -1780,7 +1768,7 @@ function DisplayEmailPost($details) {
   print '<b>Postname</b>: ' . $details["post_name"] . '<br />' . "\n";
   print '<b>Post Id</b>: ' . $details["ID"] . '<br />' . "\n";
   print '<b>Posted content:</b></p><hr />' .
-  htmlentities($details["post_content"]) . '<hr /><pre>';
+  $details["post_content"] . '<hr /><pre>';
 }
 /**
   * Takes a value and builds a simple simple yes/no select box
