@@ -17,7 +17,7 @@ error_reporting(2037);
 //Retreive emails 
 echo 'This is the postie plugin
 $Revision:$
-$Date:$
+$Date$
 ';
 print("<pre>\n");
 $config = GetConfig();
