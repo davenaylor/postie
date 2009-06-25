@@ -44,10 +44,11 @@ foreach ($emails as $email) {
     */
 
     //Check poster to see if a valid person
-    $poster = ValidatePoster($mimeDecodedEmail);
+    $poster = ValidatePoster($mimeDecodedEmail, $config);
     if (!empty($poster)) {
-        DebugEmailOutput($email,$mimeDecodedEmail); 
-        PostEmail($poster,$mimeDecodedEmail);
+        if ($config['TEST_EMAIL']) 
+          DebugEmailOutput($email,$mimeDecodedEmail); 
+        PostEmail($poster,$mimeDecodedEmail, $config);
     }
     else {
         print("<p>Ignoring email - not authorized.\n");

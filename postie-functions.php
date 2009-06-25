@@ -32,8 +32,7 @@ if (!function_exists('fnmatch')) {
 /**
   * This is the main handler for all of the processing
   */
-function PostEmail($poster,$mimeDecodedEmail) {
-  $config = GetConfig();
+function PostEmail($poster,$mimeDecodedEmail,$config) {
   $attachments = array(
           "html" => array(), //holds the html for each image
           "cids" => array(), //holds the cids for HTML email
@@ -44,7 +43,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
   foreach($mimeDecodedEmail->parts as $parts) {
     print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."</p>\n";
   }
-  FilterTextParts($mimeDecodedEmail);
+  FilterTextParts($mimeDecodedEmail, $config['PREFER_TEXT_TYPE']);
   $tmpPost=array('post_title'=> 'tmptitle',
                  'post_status' => 'draft',
                  'post_content'=>'tmoPost');
@@ -53,13 +52,15 @@ function PostEmail($poster,$mimeDecodedEmail) {
   */
   $post_id = wp_insert_post($tmpPost);
   echo "id=$post_id\n";
-  $content = GetContent($mimeDecodedEmail,$attachments,$post_id);
-  $subject = GetSubject($mimeDecodedEmail,$content);
+  $content = GetContent($mimeDecodedEmail,$attachments,$post_id, $config);
+  echo "the content is now: $content\n";
+  $subject = GetSubject($mimeDecodedEmail,$content, $config);
   if ($debug) {
     echo "the subject is $subject, right after calling GetSubject\n";
   }
-  $customImages = SpecialMessageParsing($content,$attachments);
-  $post_excerpt = GetPostExcerpt($content);
+  $customImages = SpecialMessageParsing($content,$attachments, $config);
+  $post_excerpt = GetPostExcerpt($content, $config['FILTERNEWLINES'], 
+      $config['CONVERTNEWLINE']);
   $postAuthorDetails=getPostAuthorDetails($subject,$content,
       $mimeDecodedEmail);
   $message_date = NULL;
@@ -82,8 +83,9 @@ function PostEmail($poster,$mimeDecodedEmail) {
   //$content = FixEmailQuotes($content);
   
   $id=checkReply($subject); 
-  $post_categories = GetPostCategories($subject);
-  $post_tags = GetPostTags($content);
+  $post_categories = GetPostCategories($subject,
+      $config['DEFAULT_POST_CATEGORY']);
+  $post_tags = GetPostTags($content, $config['DEFAULT_POST_TAGS']);
   $comment_status = AllowCommentsOnPost($content);
   
   if ((empty($id) || is_null($id))) {
@@ -124,7 +126,7 @@ function PostEmail($poster,$mimeDecodedEmail) {
     wp_delete_post($post_id);
   }
   if ($config['FILTERNEWLINES']) 
-    $content = FilterNewLines($content);
+    $content = FilterNewLines($content, $config['CONVERTNEWLINE']);
 
 
   $now = date('U');
@@ -174,14 +176,14 @@ function clickableLink($text) {
   // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
   // xxxx can only be alpha characters.
   // yyyy is anything up to the first space, newline, comma, double quote or <
-  $ret = preg_replace("#(^|[\n ])([\w]+?://[\w\#$%&~/.\-;:=,?@\[\]+]*)#is",
+  $ret = preg_replace("#(^|[\n ])<?([\w]+?://[\w\#$%&~/.\-;:=,?@\[\]+]*)>?#is",
   "\\1<a href=\"\\2\" >\\2</a>", $ret);
 
   // matches a "www|ftp.xxxx.yyyy[/zzzz]" kinda lazy URL thing
   // Must contain at least 2 dots. xxxx contains either alphanum, or "-"
   // zzzz is optional.. will contain everything up to the first space, newline,
   // comma, double quote or <.
-  $ret = preg_replace("#(^|[\n ])((www|ftp)\.[\w\#$%&~/.\-;:=,?@\[\]+]*)#is",
+  $ret = preg_replace("#(^|[\n ])<?((www|ftp)\.[\w\#$%&~/.\-;:=,?@\[\]+]*)>?#is",
   "\\1<a href=\"http://\\2\" >\\2</a>", $ret);
 
   // matches an email@domain type address at the start of a line, or after a space.
@@ -501,9 +503,8 @@ function PostToDB($details,$isReply, $postToDb=true, $customImageField=false) {
   * @param string
   * @return boolean
   */
-function BannedFileName($filename) {
-  $config = GetConfig();
-  foreach ($config["BANNED_FILES_LIST"] as $bannedFile) {
+function BannedFileName($filename, $bannedFiles) {
+  foreach ($bannedFiles as $bannedFile) {
     if (fnmatch($bannedFile, $filename)) {
       print("<p>Ignoreing $filename - it is on the banned files list.");
       return(true);
@@ -513,8 +514,7 @@ function BannedFileName($filename) {
 }
 
 //tear apart the meta part for useful information
-function GetContent ($part,&$attachments, $post_id) {
-  $config = GetConfig();
+function GetContent ($part,&$attachments, $post_id, $config) {
   global $charset, $encoding;
   if (function_exists(imap_mime_header_decode)) {
     $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
@@ -523,10 +523,9 @@ function GetContent ($part,&$attachments, $post_id) {
   $meta_return = NULL;	
   echo "primary= " . $part->ctype_primary . ", secondary = " .  $part->ctype_secondary . "\n";
   DecodeBase64Part($part);
-  if (BannedFileName($part->ctype_parameters['name'])
-      || BannedFileName($part->ctype_parameters['name'])) {
+  if (BannedFileName($part->ctype_parameters['name'],
+      $config['BANNED_FILES_LIST']))
     return(NULL);
-  }
   if ($part->ctype_primary == "application"
       && $part->ctype_secondary == "octet-stream") {
     if ($part->disposition == "attachment") {
@@ -540,26 +539,26 @@ function GetContent ($part,&$attachments, $post_id) {
       }
     } else {
       $mimeDecodedEmail = DecodeMIMEMail($part->body);
-      FilterTextParts($mimeDecodedEmail);
+      FilterTextParts($mimeDecodedEmail, $config['PREFER_TEXT_TYPE']);
       foreach($mimeDecodedEmail->parts as $section) {
-        $meta_return .= GetContent($section,$attachments,$post_id);
+        $meta_return .= GetContent($section,$attachments,$post_id, $config);
       }
     }
   }
   if ($part->ctype_primary == "multipart"
       && $part->ctype_secondary == "appledouble") {
     $mimeDecodedEmail = DecodeMIMEMail("Content-Type: multipart/mixed; boundary=".$part->ctype_parameters["boundary"]."\n".$part->body);
-    FilterTextParts($mimeDecodedEmail);
+    FilterTextParts($mimeDecodedEmail, $config['PREFER_TEXT_TYPE']);
     FilterAppleFile($mimeDecodedEmail);
     foreach($mimeDecodedEmail->parts as $section) {
-      $meta_return .= GetContent($section,$attachments,$post_id);
+      $meta_return .= GetContent($section,$attachments,$post_id, $config);
     }
   } else { 
     switch ( strtolower($part->ctype_primary) ) {
       case 'multipart':
-        FilterTextParts($part);
+        FilterTextParts($part, $config['PREFER_TEXT_TYPE']);
         foreach ($part->parts as $section) {
-          $meta_return .= GetContent($section,$attachments,$post_id);
+          $meta_return .= GetContent($section,$attachments,$post_id, $config);
         }
         break;
       case 'text':
@@ -579,8 +578,9 @@ function GetContent ($part,&$attachments, $post_id) {
             $meta_return .= etf2HTML($part->body ) . "\n";
           } elseif ($part->ctype_secondary=='html') {
             //strip excess HTML
-            $meta_return .= HTML2HTML($part->body ) . "\n";
-            //$meta_return .= $part->body  . "\n";
+            //$meta_return .= HTML2HTML($part->body ) . "\n";
+            $meta_return .= $part->body  . "\n";
+            echo "META_RETURN = \n" . htmlentities($meta_return);
           } else {
             //regular text, so just strip the pgp signature
             if (ALLOW_HTML_IN_BODY) {
@@ -602,6 +602,7 @@ function GetContent ($part,&$attachments, $post_id) {
         /* TODO make these options */
         $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
             $config['IMAGETEMPLATE']);
+        echo "parsetemplate returns " . print_r($attachments['html']);
         /*
         $url=wp_get_attachment_link($file_id);
         $align='left';
@@ -740,18 +741,18 @@ $replace = array (
 // This function cleans up HTML in the e-mail
 function HTML2HTML ( $content ) {
 $search = array(
-  '/<html>/',
-  '/<\/html>/',
-  '/<title>/',
-  '/<\/title>/',
-  '/<body[^<]*>/',
-  '/<\/body>/',
-  '/<head>/',
-  '/<\/head>/',
-  '/<meta[^<]*>/',
-  '/<style[^<]*>[^<]*<\/style>/',
+  '/<html [^<]*>/is',
+  '/<\/html>/i',
+  '/<\/?title>/i',
+  '/<body[^<]*>/i',
+  '/<\/body>/i',
+  '/<\/?head>/i',
+  '/<meta[^<]*>/i',
+  '/<style[^<]*>.*<\/style>/is',
+  '/<!--.*?-->/is',
+  '/<\/?o:[^<]*>/i',
   '/<!DOCTYPE[^<]*>/',
-  '/<img src=[\'"][^<]*>/'
+  //'/<img src=[\'"][^<]*>/'
 //		'/<img src="cid:(.*)" .*>/'
 );
 
@@ -780,9 +781,8 @@ $replace = array (
 * Determines if the sender is a valid user.
 * @return integer|NULL
 */
-function ValidatePoster( &$mimeDecodedEmail ) {
+function ValidatePoster( &$mimeDecodedEmail, $config ) {
   global $wpdb;
-  $config = GetConfig();
   $poster = NULL;
   $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
   $resentFrom = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["resent-from"]));
@@ -818,7 +818,8 @@ if ( empty($from) ) {
   if (!$poster) {
       echo 'Invalid sender: ' . htmlentities($from) . "! Not adding email!\n";
       if ($config["FORWARD_REJECTED_MAIL"]) {
-          if (ForwardRejectedMailToAdmin($mimeDecodedEmail)) { 
+          if (ForwardRejectedMailToAdmin($mimeDecodedEmail,
+          $config['TEST_EMAIL'])) { 
               echo "A copy of the message has been forwarded to the administrator.\n"; 
           } else {
               echo "The message was unable to be forwarded to the adminstrator.\n";
@@ -888,8 +889,7 @@ for ($i = 0; $i<=count($arrcontent); $i++) {
 }
 
 //filter content for new lines
-function FilterNewLines ( $content ) {
-  $config=GetConfig();
+function FilterNewLines ( $content, $convertNewLines=false ) {
   $search = array (
     "/\r\n/",
     "/\r/",
@@ -909,11 +909,9 @@ function FilterNewLines ( $content ) {
   $result = preg_replace($search,$replace,$content);
   //$newContent='<p>' . preg_replace('/ACTUAL_NEW_LINE/',"</p>\n<p>",$result);
  
-  echo "content = $content\n";
-  echo "newContent = $result\n";
   $newContent=preg_replace('/(ACTUAL_NEW_LINE|LINEBREAK\s*LINEBREAK)/',"\n\n",$result);
   //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
-  if ($config['CONVERTNEWLINE']) {
+  if ($convertNewLines) {
     $newContent= preg_replace('/LINEBREAK/',"<br />\n",$newContent);
     if ($debug) {
       echo "converting newlines\n";
@@ -957,29 +955,14 @@ function StripPGP ( $content ) {
   return $return;
 }
 
-function ConvertToISO_8859_1($encoding,$charset, &$body ) {
-  $config = GetConfig();
+function ConvertToISO_8859_1($encoding,$charset, &$body, $blogEncoding ) {
   $charset = strtolower($charset);
   $encoding = strtolower($encoding);
-  if( (strtolower($config["MESSAGE_ENCODING"]) == "iso-8859-1") && (strtolower($charset) != 'iso-8859-1')) {
+  if (strtolower($blogEncoding == "iso-8859-1") && (strtolower($charset) != 'iso-8859-1')) {
     if( $encoding == 'base64' || $encoding == 'quoted-printable' ) {
       $body = utf8_decode($body);
     }
   }
-}
-function IsISO88591Blog() {
-  $config = GetConfig();
-  if( (strtolower($config["MESSAGE_ENCODING"]) == "iso-8859-1")) {
-      return(true);
-  }
-  return(false);
-}
-function IsUTF8Blog() {
-  $config = GetConfig();
-  if( (strtolower($config["MESSAGE_ENCODING"]) == "utf-8")) {
-      return(true);
-  }
-  return(false);
 }
 function HandleMessageEncoding($encoding, $charset,&$body, 
     $blogEncoding='utf-8', $dequote=true) {
@@ -996,8 +979,8 @@ function HandleMessageEncoding($encoding, $charset,&$body,
   //echo "now body is:\n\n $body\n\n";
   }
   //HandleQuotedPrintable($encoding, $body, $dequote);
-  if ($blogEncoding=='utf-8') {
-      ConvertToISO_8859_1($encoding,$charset,$body);
+  if ($blogEncoding=='iso-8859-1') {
+      ConvertToISO_8859_1($encoding,$charset,$body, $blogEncoding);
   }
   else {
       ConvertToUTF_8($encoding,$charset,$body);
@@ -1069,7 +1052,6 @@ function DecodeBase64Part( &$part ) {
 }
 
 function HandleQuotedPrintable($encoding, &$body,$dequote=true ) {
-    //$config = GetConfig();
     if ( $dequote && strtolower($encoding) == 'quoted-printable' ) {
     echo "handling quoted printable";
 			$body = quoted_printable_decode($body);
@@ -1137,15 +1119,14 @@ function DeterminePostDate(&$content, $message_date = NULL, $offset=0) {
 /**
   * This function takes the content of the message - looks for a subject at the begining surrounded by # and then removes that from the content
   */
-function ParseInMessageSubject($content) {
-    $config = GetConfig();
+function ParseInMessageSubject($content, $defaultTitle) {
     if (substr($content,0,1) != "#") {
         //print("<p>Didn't start with # '".substr(ltrim($content),0,10)."'");
-        return(array($config["DEFAULT_TITLE"],$content));
+        return(array($defaultTitle,$content));
     }
     $subjectEndIndex = strpos($content,"#",1);
     if (!$subjectEndIndex > 0) {
-        return(array($config["DEFAULT_TITLE"],$content));
+        return(array($defaultTitle,$content));
     }
     $subject = substr($content,1,$subjectEndIndex - 1);
     $content = substr($content,$subjectEndIndex + 1,strlen($content));
@@ -1367,32 +1348,32 @@ function SearchForMIMEType($part,$primary,$secondary) {
   * that type is present it filters out all other text types. If it is not - then nothing is done
   *@param object
   */
-function FilterTextParts(&$mimeDecodedEmail) {
-    $config = GetConfig();
-    $newParts = array();
-    $found = false;
-    for ($i = 0; $i < count($mimeDecodedEmail->parts); $i++)  {
-        if (in_array($mimeDecodedEmail->parts[$i]->ctype_primary,array("text","multipart"))) {
-            if (SearchForMIMEType($mimeDecodedEmail->parts[$i],"text",$config["PREFER_TEXT_TYPE"])) {
-            $newParts[] = &$mimeDecodedEmail->parts[$i];
-            $found = true;
-            }
-        }
-        else {
-            $newParts[] = &$mimeDecodedEmail->parts[$i];
-        }
+function FilterTextParts(&$mimeDecodedEmail, $preferTextType) {
+  $newParts = array();
+  $found = false;
+  for ($i = 0; $i < count($mimeDecodedEmail->parts); $i++)  {
+    if (in_array($mimeDecodedEmail->parts[$i]->ctype_primary,
+        array("text","multipart"))) {
+      if (SearchForMIMEType($mimeDecodedEmail->parts[$i],"text",
+          $preferTextType)) {
+        $newParts[] = &$mimeDecodedEmail->parts[$i];
+        $found = true;
+      }
+    } else {
+      $newParts[] = &$mimeDecodedEmail->parts[$i];
     }
-    if ($found && $newParts) {
-        $mimeDecodedEmail->parts = $newParts; //This is now the filtered list of just the preferred type.
-    }
+  }
+  if ($found && $newParts) {
+    //This is now the filtered list of just the preferred type.
+    $mimeDecodedEmail->parts = $newParts; 
+  }
 }
 /**
   *This forwards on the mail to the admin for review
   *It execpts an object containing the entire message
   */
-function ForwardRejectedMailToAdmin( &$mail_content) {
-    $config = GetConfig();
-    if ($config["TEST_EMAIL"]) {
+function ForwardRejectedMailToAdmin( &$mail_content,$testEmail=false) {
+    if ($testEmail) {
         return;
     }
 	$user = get_userdata('1');
@@ -1490,7 +1471,6 @@ function DisplayMIMEPartTypes($mimeDecodedEmail) {
   * @return boolean
   */
 function CheckEmailAddress($address, $authorized) {
-    $config = GetConfig();
     $address = strtolower($address);
     if (!is_array($authorized)
             || !count($authorized)) {
@@ -1532,6 +1512,7 @@ function GetNameFromEmail($address) {
 }
 
 function parseTemplate($id, $type, $template, $size='medium') {
+  echo "template = $template\n";
 
 /* we check template for thumb, thumbnail, large, full and use that as
 size. If not found, we default to medium */
@@ -1582,60 +1563,7 @@ size. If not found, we default to medium */
   }
   return($template);
 } 
-function parseImageTemplate($html, $id, $alt, $title, $align, $url,
-    $size='medium') {
-  $config=GetConfig();
 
-  $htmlalt = ( empty($alt) ) ? $title : $alt;
-
-  $html = get_image_tag($id, $htmlalt, $title, $align, $size);
-
-  $rel = $rel ? ' rel="attachment wp-att-'.attr($id).'"' : '';
-
-  if ( $url )
-    $html = '<a href="' . clean_url($url) . "\"$rel>$html</a>";
-
-
-/* we check template for thumb, thumbnail, large, full and use that as
-size. If not found, we default to medium */
-  $imageTemplate=$config['IMAGETEMPLATE'];
-  if (strpos($imageTemplate, '{THUMBNAIL}')!==false  ||
-      strpos($imageTemplate, '{THUMB}')!==false) {
-    $size='thumbnail';
-  } else if (strpos($imageTemplate, '{LARGE}')!==false) {
-    $size='large';
-  } else if (strpos($imageTemplate, '{FULL}')!==false) {
-    $size='full';
-  }
-  list( $img_src, $width, $height ) = image_downsize($id, $size);
-  $hwstring = image_hwstring($width, $height);
-  $uploadDir=wp_upload_dir();
-  $absFileName=$uploadDir['path'] .'/'. basename($img_src);
-  $relFileName=str_replace(ABSPATH,'', $absFileName);
-  $fileLink=wp_get_attachment_url($id);
-  $pageLink=get_attachment_link($id);
-
-  $imageTemplate=str_replace('{THUMBNAIL}', $img_src, $imageTemplate);
-  $imageTemplate=str_replace('{THUMB}', $img_src, $imageTemplate);
-  $imageTemplate=str_replace('{MEDIUM}', $img_src, $imageTemplate);
-  $imageTemplate=str_replace('{LARGE}', $img_src, $imageTemplate);
-  $imageTemplate=str_replace('{FULL}', $img_src, $imageTemplate);
-  $imageTemplate=str_replace('{FILELINK}', $fileLink, $imageTemplate);
-  $imageTemplate=str_replace('{PAGELINK}', $pageLink, $imageTemplate);
-  $imageTemplate=str_replace('{WIDTH}', $width . 'px', $imageTemplate);
-  $imageTemplate=str_replace('{HEIGHT}', $height . 'px', $imageTemplate);
-  $imageTemplate=str_replace('{FILENAME}', $absFileName, $imageTemplate);
-  $imageTemplate=str_replace('{RELFILENAME}', $relFileName, $imageTemplate);
-  if ($alt!='') {
-    $imageTemplate=str_replace('{CAPTION}', $alt, $imageTemplate);
-  }
-  return($imageTemplate);
-} 
-
-function parseAudioTemplate($file, $audioTemplate) {
-  $html = str_replace('{FILELINK}', $file, $audioTemplate);
-  return($html);
-}
 /**
   * When sending in HTML email the html refers to the content-id(CID) of the image - this replaces
   * the cid place holder with the actual url of the image sent in
@@ -1665,8 +1593,7 @@ function ReplaceImageCIDs(&$content,&$attachments) {
   * @param string - text of post
   * @param array - array of HTML for images for post
   */
-function ReplaceImagePlaceHolders(&$content,$attachments) {
-  $config = GetConfig();
+function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
   ($config["START_IMAGE_COUNT_AT_ZERO"] ? $startIndex = 0 :$startIndex = 1);
   foreach ( $attachments as $i => $value ) {
     // looks for ' #img1# ' etc... and replaces with image
@@ -1694,6 +1621,8 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
     } else {
       $value = str_replace('{CAPTION}', '', $value);
       /* if using the gallery shortcode, don't add pictures at all */
+      echo "should add image html here\n";
+      echo "image content = $content\n";
       if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches))  {
         if ($config["IMAGES_APPEND"]) {
           $content .= $value;
@@ -1708,18 +1637,18 @@ function ReplaceImagePlaceHolders(&$content,$attachments) {
   *This function handles finding and setting the correct subject
   * @return array - (subject,content)
   */
-function GetSubject(&$mimeDecodedEmail,&$content) {
-  $config = GetConfig();
+function GetSubject(&$mimeDecodedEmail,&$content, $config) {
   global $charset, $encoding;
   if (function_exists(imap_mime_header_decode)) {
     $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
     $charset = $element->charset;
+    print_r($element);
   }
-  echo "charset=$charset, encoding=$encoding\n";
   //assign the default title/subject
   if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
     if ($config["ALLOW_SUBJECT_IN_MAIL"]) {
-        list($subject,$content) = ParseInMessageSubject($content);
+        list($subject,$content) =
+        ParseInMessageSubject($content,$config['DEFAULT_TITLE']);
     }
     else {
         $subject = $config["DEFAULT_TITLE"];
@@ -1746,8 +1675,7 @@ function GetSubject(&$mimeDecodedEmail,&$content) {
   * this function determines tags for the post
   *
   */
-function GetPostTags(&$content) {
-  $config = GetConfig();
+function GetPostTags(&$content, $defaultTags) {
   global $wpdb;
   $post_tags = array();
   //try and determine tags
@@ -1756,8 +1684,8 @@ function GetPostTags(&$content) {
     $post_tags = preg_split("/,\s*/", $matches[1]);
   }
   if (!count($post_tags)) {
-      echo "using default tags " . $config["DEFAULT_POST_TAGS"]. "\n";
-      $post_tags =  $config["DEFAULT_POST_TAGS"];
+      echo "using default tags " . $defaultTags. "\n";
+      $post_tags =  $defaultTags;
   }
   return($post_tags);
 }
@@ -1765,29 +1693,22 @@ function GetPostTags(&$content) {
   * this function determines excerpt for the post
   *
   */
-function GetPostExcerpt(&$content) {
-  $config = GetConfig();
+function GetPostExcerpt(&$content, $filterNewLines, $convertNewLines) {
   global $wpdb;
   $post_excerpt = '';
-  //try and determine excerpt
-    //echo "CONTENT ------
-          //$content 
-           //-------";
   if ( preg_match('/:excerptstart ?(.*):excerptend/s', $content, $matches))  {
     $content = str_replace($matches[0], "", $content);
     $post_excerpt = $matches[1];
-    //print_r($matches);
+    if ($filterNewLines) 
+      $post_excerpt = FilterNewLines($post_excerpt, $convertNewLines);
   }
-  if ($config['FILTERNEWLINES']) 
-    $post_excerpt = FilterNewLines($post_excerpt);
   return($post_excerpt);
 }
 /**
   * This function determines categories for the post
   * @return array
   */
-function GetPostCategories(&$subject) {
-    $config = GetConfig();
+function GetPostCategories(&$subject, $defaultCategory) {
     global $wpdb;
     $post_categories = array();
     $matches = array();
@@ -1833,7 +1754,7 @@ function GetPostCategories(&$subject) {
         }
     }
     if (!count($post_categories)) {
-        $post_categories[] =  $config["DEFAULT_POST_CATEGORY"];
+        $post_categories[] =  $defaultCategory;
     }
     return($post_categories);
 }
@@ -1841,7 +1762,6 @@ function GetPostCategories(&$subject) {
   *This function just outputs a simple html report about what is being posted in
   */
 function DisplayEmailPost($details) {
-  $config = GetConfig();
   if ($debug) {
     print_r($config);
     print_r($details);
@@ -1859,7 +1779,8 @@ function DisplayEmailPost($details) {
   print '<b>Subject</b>: ' . $details["post_title"]. '<br />' . "\n";
   print '<b>Postname</b>: ' . $details["post_name"] . '<br />' . "\n";
   print '<b>Post Id</b>: ' . $details["ID"] . '<br />' . "\n";
-  print '<b>Posted content:</b></p><hr />' . $details["post_content"] . '<hr /><pre>';
+  print '<b>Posted content:</b></p><hr />' .
+  htmlentities($details["post_content"]) . '<hr /><pre>';
 }
 /**
   * Takes a value and builds a simple simple yes/no select box
@@ -1963,7 +1884,7 @@ function UpdatePostieConfig($data) {
                 }
             }
             else {
-                $config[$key] = $data[$key];
+                $config[$key] = FilterNewLines($data[$key]);
             }
         }
     }
@@ -2064,11 +1985,11 @@ function GetDBConfig() {
       $config["AUDIOTEMPLATE"] =$simple_link;
     if (!isset($config["SELECTED_AUDIOTEMPLATE"])) 
       $config['SELECTED_AUDIOTEMPLATE'] = 'simple_link';
-    include_once('templates/audio_templates.php');
+    include('templates/audio_templates.php');
     $config['AUDIOTEMPLATES']=$audioTemplates;
     if (!isset($config["SELECTED_VIDEO1TEMPLATE"])) 
       $config['SELECTED_VIDEO1TEMPLATE'] = 'simple_link';
-    include_once('templates/video1_templates.php');
+    include('templates/video1_templates.php');
     $config['VIDEO1TEMPLATES']=$video1Templates;
     if (!isset($config["VIDEO1TEMPLATE"])) 
       $config["VIDEO1TEMPLATE"] = $simple_link;
@@ -2076,7 +1997,7 @@ function GetDBConfig() {
       $config['VIDEO1TYPES'] = 'mp4, 3gp, 3gpp, 3gpp2, 3gp2, mov';
     if (!isset($config["SELECTED_VIDEO2TEMPLATE"])) 
       $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
-    include_once('templates/video2_templates.php');
+    include('templates/video2_templates.php');
     $config['VIDEO2TEMPLATES']=$video2Templates;
     if (!isset($config["VIDEO2TEMPLATE"])) 
       $config["VIDEO2TEMPLATE"] = $simple_link;
@@ -2088,7 +2009,7 @@ function GetDBConfig() {
       $config["IMAGE_NEW_WINDOW"] = false; 
     if (!isset($config["FILTERNEWLINES"]))  
       $config["FILTERNEWLINES"] = true; 
-    include_once('templates/image_templates.php');
+    include('templates/image_templates.php');
     if (!isset($config["SELECTED_IMAGETEMPLATE"]))
       $config['SELECTED_IMAGETEMPLATE'] = 'wordpress_default';
     $config['IMAGETEMPLATES']=$imageTemplates;
@@ -2216,22 +2137,18 @@ function UpdatePostiePermissions($role_access) {
     }
 }
 function DebugEmailOutput(&$email,&$mimeDecodedEmail) {
-    $config = GetConfig();
-    if ($config["TEST_EMAIL"]) {
-        $file = fopen("test_emails/" . $mimeDecodedEmail->headers["message-id"].".txt","w");
-        fwrite($file, $email);
-        fclose($file);
-        $file = fopen("test_emails/" . $mimeDecodedEmail->headers["message-id"]."-mime.txt","w");
-        fwrite($file, print_r($mimeDecodedEmail,true));
-        fclose($file);
-    }
+  $file = fopen("test_emails/" . $mimeDecodedEmail->headers["message-id"].".txt","w");
+  fwrite($file, $email);
+  fclose($file);
+  $file = fopen("test_emails/" . $mimeDecodedEmail->headers["message-id"]."-mime.txt","w");
+  fwrite($file, print_r($mimeDecodedEmail,true));
+  fclose($file);
 }
 /** 
   * This function provides a hook to be able to write special parses for provider emails that are difficult to work with 
   * If you want to extend this functionality - write a new function and call it from here
   */
-function SpecialMessageParsing(&$content, &$attachments){
-  $config = GetConfig();
+function SpecialMessageParsing(&$content, &$attachments, $config){
   if ( preg_match('/You have been sent a message from Vodafone mobile/',$content)) {
     VodafoneHandler($content, $attachments); //Everything for this type of message is handled below
       return;
@@ -2250,7 +2167,7 @@ function SpecialMessageParsing(&$content, &$attachments){
       ReplaceImageCIDs($content,$attachments);
   }
   if (!$config['CUSTOM_IMAGE_FIELD']) {
-    ReplaceImagePlaceHolders($content,$attachments["html"]);
+    ReplaceImagePlaceHolders($content,$attachments["html"], $config);
   } else {
     $customImages=array();
     foreach ($attachments["html"] as $value) {

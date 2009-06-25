@@ -290,8 +290,11 @@ post with :end
   * Now handling Windows-1256 (arabic) character set
   * Fixed image uploading on windows servers
   * Fixed replying to message adds comment
-  * TODO: fix delay
   * Uploading pictures via MMS should now work
+  * Fixed some issues with e-mails from outloook 12
+  * Greatly reduced number of database queries
+  * No longer requiring config_handler.php
+  * TODO: fix delay
   * TODO: add private post function
     http://forum.robfelty.com/topic/how-to-private-posts-from-postie?replies=2#post-1515
 

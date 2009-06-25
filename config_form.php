@@ -1,13 +1,43 @@
+<div class="wrap"> 
+<h2><a style='text-decoration:none' href='options-general.php?page=postie/postie.php'><img src="<?php echo
+'../wp-content/plugins/postie/images/mail.png'; ?>" alt="postie" /><?php
+_e('Postie Options', 'postie') ?></a></h2>
 <?php
-//require_once('admin.php');
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
+if (isset($_POST["action"])) {
+  switch($_POST["action"]) {
+    case "reset":
+      ResetPostieConfig();
+      $message = 1;
+      break;
+    case "cronless":
+      check_postie();
+      $message = 1;
+      break;
+    case "test":
+      include('postie_test.php');
+      exit;
+      break;
+    case "runpostie":
+      echo "Checking for mail manually\n";
+      include('get_mail.php');
+      exit;
+      break;
+    case "config":
+      if( UpdatePostieConfig($_POST)) {
+        $message = 1;
+      }
+      else {
+        $message = 2;
+      }
+      break;
+    default:
+      $message = 2;
+      break;
+  }
+}
 global $wpdb,$wp_roles;
 
-//        if (!TestWPVersion()) {
- //           print("<h1>Warning!</h1>
-  //                  <p>Postie only works on on Word Press version 2.0 and above</p>");
-   //     exit();
-    //    }
 $title = __('Postie Options', 'postie');
 $parent_file = 'options-general.php';
 $config = GetConfig();
@@ -18,23 +48,21 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 <?php if (isset($_GET['message'])) : ?>
 <div class="updated"><p><?php _e($messages[$_GET['message']], 'postie'); ?></p></div>
 <?php endif; ?>
-<div class="wrap"> 
-<h2><img src="<?php echo '../wp-content/plugins/postie/images/mail.png'; ?>" alt="postie" /><?php _e('Postie Options', 'postie') ?></h2>
-<form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
+<form name="postie-options" method="post"> 
 	<input type="hidden" name="action" value="reset" />
             <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie')?> &raquo" type="submit" class='button'>
 </form>
-<form name="postie-options" method="get" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/get_mail.php"?>"> 
+<form name="postie-options" method='post'> 
+	<input type="hidden" name="action" value="runpostie" />
             <input name="Submit" value="<?php _e("Run Postie", 'postie');?> &raquo;" type="submit" class='button'>
     <?php _e("(To run the check mail script manually)", 'postie');?>
 </form>
-<form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
+<form name="postie-options" method="post">
 	<input type="hidden" name="action" value="test" />
             <input name="Submit" value="<?php _e("Test Config", 'postie');?>&raquo;" type="submit" class='button'>
     <?php _e("this will run a special script to test your configuration options", 'postie');?>
 </form>
-<form name="postie-options" method="post" action="<?php echo  get_option('siteurl') . "/wp-content/plugins/postie/config_handler.php"?>"> 
-	<input type="hidden" name="action" value="config" />
+<form name="postie-options" method="post">	<input type="hidden" name="action" value="config" />
 <div id="simpleTabs">
 	<div class="simpleTabs-nav">
 	<ul>
@@ -439,9 +467,10 @@ attribute_escape($config['VIDEO2TEMPLATE']) ?>" />
 attribute_escape($config['AUDIOTEMPLATE']) ?>" />
 			 <select name='AUDIOTEMPLATESELECT' id='AUDIOTEMPLATESELECT' 
        onchange="changeStyle('audioTemplatePreview','AUDIOTEMPLATE',
-       'AUDIOTEMPLATESELECT', 'SELECTED_AUDIOTEMPLATE','funky.mp3');" />
+       'AUDIOTEMPLATESELECT', 'SELECTED_AUDIOTEMPLATE','funky.mp3', false);" />
 			 <?php
 			 $styleOptions=unserialize($config['AUDIOTEMPLATES']);
+       echo "audiotemplates= " . $config['AUDIOTEMPLATES'];
 			 $selected=$config['SELECTED_AUDIOTEMPLATE'];
 			 foreach ($styleOptions as $key=>$value) {
 			   if ($key!='selected') {
@@ -536,11 +565,11 @@ function restoreStyle(current,template) {
   pageStyle.value=defaultStyle;
 }
 changeStyle('audioTemplatePreview','AUDIOTEMPLATE', 'AUDIOTEMPLATESELECT',
-'SELECTED_AUDIOTEMPLATE','funky.mp3');
+'SELECTED_AUDIOTEMPLATE','funky.mp3', false);
 changeStyle('imageTemplatePreview','IMAGETEMPLATE', 'IMAGETEMPLATESELECT',
-'SELECTED_AUDIOTEMPLATE','smiling.jpg');
+'SELECTED_AUDIOTEMPLATE','smiling.jpg', false);
 changeStyle('video1TemplatePreview','VIDEO1TEMPLATE', 'VIDEO1TEMPLATESELECT',
-'SELECTED_VIDEO1TEMPLATE','hi.mp4');
+'SELECTED_VIDEO1TEMPLATE','hi.mp4', false);
 changeStyle('video2TemplatePreview','VIDEO2TEMPLATE', 'VIDEO2TEMPLATESELECT',
-'SELECTED_VIDEO2TEMPLATE','hi.flv');
+'SELECTED_VIDEO2TEMPLATE','hi.flv', false);
 </script>
