@@ -15,11 +15,11 @@ require_once (dirname(__FILE__). DIRECTORY_SEPARATOR . 'postie-functions.php');
 error_reporting(2037);
 
 //Retreive emails 
-echo 'This is the postie plugin
-$Revision:$
-$Date$
-';
 print("<pre>\n");
+print('This is the postie plugin
+$Revision$
+$Date$
+');
 $config = GetConfig();
 //print_r($config);
 $emails = FetchMail($config['MAIL_SERVER'], $config['MAIL_SERVER_PORT'],
