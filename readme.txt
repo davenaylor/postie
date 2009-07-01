@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.8
-Stable tag: 1.3.alpha
+Stable tag: 1.3.beta
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -17,31 +17,39 @@ videos, and automatically strip off signatures. It also has support for both
 imap and pop3, with the option for ssl with both.  For usage notes, see the
 [other notes](other_notes) page
 
-= What's new in 1.3.alpha = 
-  Note that 1.3.alpha is still in an early stage. It has many new features,
-but if you are using a site which is mission critical, you might stick with
-1.2.3
+= What's new? = 
 
-* Now using default wordpress image and upload handling, which means:
-    * No more creating special directories for postie
-    * No more confusion about imagemagick
-    * Can now use the [gallery] feature of wordpress
-    * Attachments are now connected to posts in the database
-    * All image resizing uses wordpress's default settings (under media)
-* Configuration, settings and documentation improvements
-    * Completely redesigned settings page (mostly thanks to Rainman)
-    * Reset configuration no longer deletes mailserver settings
-    * Now including help files and faq directly in settings page
-* More media features
-    * Automatically turn links to youtube into an embedded player
-    * Added option to embed audio files with custom templates
-    * Video options are now template based
-    * Image options are now solely template based, with several new default
-      templates
-* Bug fixes
-    * Uploading images from vodafone phones should now work
-    * Correctly handling Windows-1252 encoding
-    * Correctly handling non-ascii characters in subject line
+* 1.3.beta (2009.07.01)
+  * Mores fixes for character issues in subject
+  * Now handling Windows-1256 (arabic) character set
+  * Fixed image uploading on windows servers
+  * Fixed replying to message adds comment
+  * Uploading pictures via MMS should now work
+  * Fixed some issues with e-mails from outloook 12
+  * Greatly reduced number of database queries
+  * No longer requiring config_handler.php
+
+* 1.3.alpha (2009.06.05)
+  * Now using default wordpress image and upload handling, which means:
+      * No more creating special directories for postie
+      * No more confusion about imagemagick
+      * Can now use the [gallery] feature of wordpress
+      * Attachments are now connected to posts in the database
+      * All image resizing uses wordpress's default settings (under media)
+  * Configuration, settings and documentation improvements
+      * Completely redesigned settings page (mostly thanks to Rainman)
+      * Reset configuration no longer deletes mailserver settings
+      * Now including help files and faq directly in settings page
+  * More media features
+      * Automatically turn links to youtube into an embedded player
+      * Added option to embed audio files with custom templates
+      * Video options are now template based
+      * Image options are now solely template based, with several new default
+        templates
+  * Bug fixes
+      * Uploading images from vodafone phones should now work
+      * Correctly handling Windows-1252 encoding
+      * Correctly handling non-ascii characters in subject line
 
 == Installation ==
 * Either:
@@ -285,7 +293,7 @@ To strip off stuff that they add at the end of a message, end your
 post with :end
 
 == History ==
-* 1.3.beta (2009.06.xx)
+* 1.3.beta (2009.07.01)
   * Mores fixes for character issues in subject
   * Now handling Windows-1256 (arabic) character set
   * Fixed image uploading on windows servers
@@ -294,9 +302,6 @@ post with :end
   * Fixed some issues with e-mails from outloook 12
   * Greatly reduced number of database queries
   * No longer requiring config_handler.php
-  * TODO: fix delay
-  * TODO: add private post function
-    http://forum.robfelty.com/topic/how-to-private-posts-from-postie?replies=2#post-1515
 
 * 1.3.alpha (2009.06.05)
   * Now using default wordpress image and upload handling, which means:

@@ -9,6 +9,9 @@ $Id$
  * html purify
  * USE built-in php message decoding to improve speed
  * Add custom fields
+ * fix delay
+ * add private post function
+   http://forum.robfelty.com/topic/how-to-private-posts-from-postie?replies=2#post-1515
  */
 #global $config,$debug;
 #$debug=true;
@@ -1842,7 +1845,7 @@ function ResetPostieConfig() {
   $config = GetConfig();
   $key_arrays = GetListOfArrayConfig();
   foreach($key_arrays as $key) {
-      $config[$key] = join("\n",$config[$key]);
+    $config[$key] = join("\n",$config[$key]);
   }
   UpdatePostieConfig($config);
 }
@@ -1982,7 +1985,8 @@ function GetDBConfig() {
     if (!isset($config["VIDEO1TEMPLATE"])) 
       $config["VIDEO1TEMPLATE"] = $simple_link;
     if (!isset($config["VIDEO1TYPES"])) 
-      $config['VIDEO1TYPES'] = 'mp4, 3gp, 3gpp, 3gpp2, 3gp2, mov';
+      $config['VIDEO1TYPES'] = array('mp4', '3gp', '3gpp', '3gpp2', '3gp2',
+          'mov');
     if (!isset($config["SELECTED_VIDEO2TEMPLATE"])) 
       $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
     include('templates/video2_templates.php');
@@ -1990,7 +1994,7 @@ function GetDBConfig() {
     if (!isset($config["VIDEO2TEMPLATE"])) 
       $config["VIDEO2TEMPLATE"] = $simple_link;
     if (!isset($config["VIDEO2TYPES"])) 
-      $config['VIDEO2TYPES'] = 'x-flv';
+      $config['VIDEO2TYPES'] = array('x-flv');
     if (!isset($config["POST_STATUS"])) 
       $config["POST_STATUS"] = 'publish'; 
     if (!isset($config["IMAGE_NEW_WINDOW"])) 

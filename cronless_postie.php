@@ -4,7 +4,7 @@ Plugin Name: Cronless Postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Description: Checks e-mail periodically using wordpress's built-in scheduling mechanism
 Author: Robert Felty
-Version: 1.3.development
+Version: 1.3.beta
 Author URI: http://blog.robfelty.com
 */ 
 
