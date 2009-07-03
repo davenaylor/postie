@@ -19,6 +19,11 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 
 = What's new? = 
 
+* 1.3.0 (2009.07.xx)
+  * No longer including wp-config.php
+  * Added mpeg4 to default list of videotypes
+  * If tmpdir is not writable, try a different tmpdir
+
 * 1.3.beta (2009.07.01)
   * Mores fixes for character issues in subject
   * Now handling Windows-1256 (arabic) character set

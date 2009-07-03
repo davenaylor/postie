@@ -17,7 +17,7 @@ $Id$
 #$debug=true;
 #$config=GetConfig();
 
-include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
+//include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
 //define("POSTIE_ROOT",dirname(__FILE__));
 define("POSTIE_TABLE",$GLOBALS["table_prefix"]. "postie_config");
 
@@ -625,12 +625,15 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         $file_id = postie_media_handle_upload($part, $post_id);
         $file = wp_get_attachment_url($file_id);
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
+        print_r($config['VIDEO1TYPES']);
         if (in_array($part->ctype_secondary,
             $config['VIDEO1TYPES'])) {
           $videoTemplate=$config['VIDEO1TEMPLATE'];
         } else if (in_array($part->ctype_secondary,
             $config['VIDEO2TYPES'])) {
           $videoTemplate=$config['VIDEO2TEMPLATE'];
+        } else {
+          $videoTemplate='<a href="{FILELINK}">{FILENAME}</a>';
         }
         $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary, 
             $videoTemplate);
@@ -1154,6 +1157,10 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
         //$overrides = array('test_form'=>false, 'test_size'=>false,
          //                  'test_type'=>false);
   $tmpFile=tempnam(getenv('TEMP'), 'postie');
+  if (!is_writable($tmpFile)) {
+    $uploadDir=wp_upload_dir();
+    $tmpFile=tempnam($uploadDir['path'], 'postie');
+  }
   $fp = fopen($tmpFile, 'w');
   if ($fp) {
     fwrite($fp, $part->body);
@@ -1985,8 +1992,8 @@ function GetDBConfig() {
     if (!isset($config["VIDEO1TEMPLATE"])) 
       $config["VIDEO1TEMPLATE"] = $simple_link;
     if (!isset($config["VIDEO1TYPES"])) 
-      $config['VIDEO1TYPES'] = array('mp4', '3gp', '3gpp', '3gpp2', '3gp2',
-          'mov');
+      $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', 
+          '3gp2', 'mov');
     if (!isset($config["SELECTED_VIDEO2TEMPLATE"])) 
       $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
     include('templates/video2_templates.php');
