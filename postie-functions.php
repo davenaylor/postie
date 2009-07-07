@@ -41,7 +41,8 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
           "cids" => array(), //holds the cids for HTML email
           "image_files" => array() //holds the files for each image
           );
-  print("<p>Message Id is :" . $mimeDecodedEmail->headers["message-id"] . "</p><br/>\n");
+  print("<p>Message Id is :" .
+      htmlentities($mimeDecodedEmail->headers["message-id"]) . "</p><br/>\n");
   print("<p>Email has following attachments:</p>");
   foreach($mimeDecodedEmail->parts as $parts) {
     print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."</p>\n";
@@ -567,6 +568,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         $tmpencoding=trim($part->headers['content-transfer-encoding']);
         if ($tmpencoding!='') 
           $encoding=$tmpencoding;
+
           HandleMessageEncoding($part->headers["content-transfer-encoding"],
                                 $part->ctype_parameters["charset"],
                                 $part->body, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
@@ -1641,7 +1643,8 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
   global $charset, $encoding;
   if (function_exists(imap_mime_header_decode)) {
     $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
-    $charset = $element->charset;
+    if ($element->charset!='')
+      $charset = $element->charset;
   }
   //assign the default title/subject
   if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
@@ -1655,7 +1658,13 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
     $mimeDecodedEmail->headers['subject'] = $subject;
   } else {	
     $subject = $mimeDecodedEmail->headers['subject'];
-    $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
+    if ($mimeDecodedEmail->headers["content-transfer-encoding"]!='') {
+      $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
+    } else if ($mimeDecodedEmail->headers["content-transfer-encoding"]!='') {
+      $encoding = $mimeDecodedEmail->ctype_parameters["content-transfer-encoding"];
+    } else if ($encoding=='') {
+      $encoding='7bit';
+    }
     HandleMessageEncoding($encoding, $charset,
         $subject, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
     if (!$config["ALLOW_HTML_IN_SUBJECT"]) {
