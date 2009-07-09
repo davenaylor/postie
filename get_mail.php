@@ -16,10 +16,8 @@ error_reporting(2037);
 
 //Retreive emails 
 print("<pre>\n");
-print('This is the postie plugin
-$Revision$
-$Date$
-');
+print("This is the postie plugin\n");
+include('Revision');
 $config = GetConfig();
 //print_r($config);
 $emails = FetchMail($config['MAIL_SERVER'], $config['MAIL_SERVER_PORT'],

@@ -23,6 +23,7 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
   * No longer including wp-config.php
   * Added mpeg4 to default list of videotypes
   * If tmpdir is not writable, try a different tmpdir
+  * More subject encoding fixes
 
 * 1.3.beta (2009.07.01)
   * Mores fixes for character issues in subject
