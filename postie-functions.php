@@ -1563,7 +1563,7 @@ size. If not found, we default to medium */
   if ($attachment->post_excerpt!='') {
     $template=str_replace('{CAPTION}', $attachment->post_excerpt, $template);
   } else {
-    $template=str_replace('{CAPTION}', '', $template);
+    //$template=str_replace('{CAPTION}', '', $template);
   }
   return($template);
 } 
@@ -1598,6 +1598,7 @@ function ReplaceImageCIDs(&$content,&$attachments) {
   * @param array - array of HTML for images for post
   */
 function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
+  //echo "first content is: $content\n";
   ($config["START_IMAGE_COUNT_AT_ZERO"] ? $startIndex = 0 :$startIndex = 1);
   foreach ( $attachments as $i => $value ) {
     // looks for ' #img1# ' etc... and replaces with image
@@ -1614,14 +1615,15 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
         $caption =$matches[1];
         $img_placeholder_temp=$matches[0];
         $eimg_placeholder_temp=$matches[0];
+      //  echo "caption=$caption\n";
       }
       $value = str_replace('{CAPTION}', $caption, $value);
       $img_placeholder_temp.='#';
       $eimg_placeholder_temp.='#';
       $content = str_replace($img_placeholder_temp, $value, $content);
       $content = str_replace($eimg_placeholder_temp, $value, $content);
-      print(htmlspecialchars("value=$value\n",ENT_QUOTES));
-      print(htmlspecialchars("content=\n***\n$content\n***\n",ENT_QUOTES));
+      //print(htmlspecialchars("value=$value\n",ENT_QUOTES));
+      //print(htmlspecialchars("content=\n***\n$content\n***\n",ENT_QUOTES));
     } else {
       $value = str_replace('{CAPTION}', '', $value);
       /* if using the gallery shortcode, don't add pictures at all */

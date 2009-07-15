@@ -25,6 +25,10 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
   * If tmpdir is not writable, try a different tmpdir
   * More subject encoding fixes
   * Updated image templates, which were causing problems for cron
+  * Fixed in text captions
+  * TODO: name clashes
+  * TODO: custom icons
+  * TODO: add filters
 
 * 1.3.beta (2009.07.01)
   * Mores fixes for character issues in subject
