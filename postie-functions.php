@@ -1906,19 +1906,23 @@ function UpdatePostieConfig($data) {
   *@param array
   */
 function WriteConfig($config) {
-    global $wpdb;
-    foreach($config as $key=>$value) {
-        $label = apply_filters('content_save_pre', $key);
-        $q = $wpdb->query("DELETE FROM ". POSTIE_TABLE . " WHERE label = '$label';");
-        if (!is_array($value)) {
-            $q = $wpdb->query("INSERT INTO ". POSTIE_TABLE . " (label,value) VALUES ('$label','".apply_filters('content_save_pre', $value)."');");
-        }
-        else {
-            foreach($value as $item) {
-                $q = $wpdb->query("INSERT INTO ". POSTIE_TABLE . " (label,value) VALUES ('$label','".apply_filters('content_save_pre', $item)."');");
-            }
-        }
+  global $wpdb;
+  foreach($config as $key=>$value) {
+    $label = apply_filters('content_save_pre', $key);
+    $q = $wpdb->query($wpdb->prepare("DELETE FROM ". POSTIE_TABLE . "
+        WHERE label = '$label';"));
+    if (!is_array($value)) {
+      $q = $wpdb->query($wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
+          (label,value) VALUES
+          ('$label','".apply_filters('content_save_pre', $value)."');"));
+    } else {
+      foreach($value as $item) {
+        $q = $wpdb->query($wpdb->prepare("INSERT INTO ". POSTIE_TABLE
+            . " (label,value) VALUES
+            ('$label','".apply_filters('content_save_pre', $item)."');"));
+      }
     }
+  }
 }
 /**
   *This handles actually reading the config from the database
