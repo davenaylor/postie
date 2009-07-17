@@ -1,6 +1,9 @@
 <?php
 $revisions= WP_POST_REVISIONS;
 define('WP_POST_REVISIONS', false);
+$original_mem_limit = ini_get('memory_limit');
+ini_set('memory_limit', -1);
+
 /*
 $Id$
 */
@@ -1790,6 +1793,7 @@ function DisplayEmailPost($details) {
   print '<b>Post Id</b>: ' . $details["ID"] . '<br />' . "\n";
   print '<b>Posted content:</b></p><hr />' .
   $details["post_content"] . '<hr /><pre>';
+  echo  "Memory used: ". memory_get_peak_usage(). "\n";
 }
 /**
   * Takes a value and builds a simple simple yes/no select box
@@ -1914,7 +1918,8 @@ function WriteConfig($config) {
     if (!is_array($value)) {
       $q = $wpdb->query($wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
           (label,value) VALUES
-          ('$label','".apply_filters('content_save_pre', $value)."');"));
+          ('$label','". $value ."');"));
+          //('$label','".apply_filters('content_save_pre', $value)."');"));
     } else {
       foreach($value as $item) {
         $q = $wpdb->query($wpdb->prepare("INSERT INTO ". POSTIE_TABLE
@@ -2024,9 +2029,9 @@ function GetDBConfig() {
     if (!isset($config["FILTERNEWLINES"]))  
       $config["FILTERNEWLINES"] = true; 
     include('templates/image_templates.php');
+    $config['IMAGETEMPLATES']=$imageTemplates;
     if (!isset($config["SELECTED_IMAGETEMPLATE"]))
       $config['SELECTED_IMAGETEMPLATE'] = 'wordpress_default';
-    $config['IMAGETEMPLATES']=$imageTemplates;
     if (!isset($config["IMAGETEMPLATE"])) 
       $config["IMAGETEMPLATE"] = $wordpress_default;
     return($config);
@@ -2215,4 +2220,5 @@ function VodafoneHandler(&$content, &$attachments){
 
 }
 define('WP_POST_REVISIONS', $revisions);
+ini_set('memory_limit', $original_mem_limit);
 ?>

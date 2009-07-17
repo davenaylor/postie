@@ -12,7 +12,7 @@ require_once (dirname(__FILE__). DIRECTORY_SEPARATOR . 'postie-functions.php');
 
 /* END OF USER VARIABLES */
 //some variables
-error_reporting(2037);
+//error_reporting(2037);
 
 //Retreive emails 
 print("<pre>\n");
@@ -26,6 +26,7 @@ $config['TIME_OFFSET'], $config['TEST_EMAIL'],
 $config['DELETE_MAIL_AFTER_PROCESSING']);
 //loop through messages
 foreach ($emails as $email) {
+  echo "memory at beginning of e-mail processing:" . xdebug_memory_usage() . "\n";
     //sanity check to see if there is any info in the message
     if ($email == NULL ) { 
       $message= __('Dang, message is empty!', 'postie'); 
@@ -55,6 +56,7 @@ foreach ($emails as $email) {
     else {
         print("<p>Ignoring email - not authorized.\n");
     }
+  echo "memory at end of e-mail processing:" . xdebug_memory_usage() . "\n";
 } // end looping over messages
 print $message;
 print("</pre>\n");

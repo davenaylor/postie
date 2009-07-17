@@ -26,6 +26,7 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
   * More subject encoding fixes
   * Updated image templates, which were causing problems for cron
   * Fixed in text captions
+  * Fixed SQL problems when updating options
   * TODO: name clashes
   * TODO: custom icons
   * TODO: add filters
