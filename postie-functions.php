@@ -47,9 +47,9 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   print("<p>Message Id is :" .
       htmlentities($mimeDecodedEmail->headers["message-id"]) . "</p><br/>\n");
   print("<p>Email has following attachments:</p>");
-  foreach($mimeDecodedEmail->parts as $parts) {
-    print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."</p>\n";
-  }
+  //foreach($mimeDecodedEmail->parts as $parts) {
+   // print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."</p>\n";
+  //}
   FilterTextParts($mimeDecodedEmail, $config['PREFER_TEXT_TYPE']);
   $tmpPost=array('post_title'=> 'tmptitle',
                  'post_status' => 'draft',
@@ -857,15 +857,18 @@ function StartFilter(&$content,$start) {
 function RemoveSignature( &$content,$filterList = array('--','- --' )) {
 $arrcontent = explode("\n", $content);
 $i = 0;
+$pattern='/^(';
+$pattern.=implode('|',$filterList);
+$pattern.=')/';
+echo "pattern=$pattern";
 for ($i = 0; $i<=count($arrcontent); $i++) {
   $line = trim($arrcontent[$i]);
   $nextline = $arrcontent[$i+1];
-      foreach ($filterList as $pattern) {
-          if (preg_match("/^$pattern/",trim($line))) {
-              //print("<p>Found in $line");
-              break 2;
-          }
-      } 
+  if (preg_match($pattern,trim($line))) {
+  //if (!strpos(trim($line), $pattern)==0) {
+    //print("<p>Found in $line");
+    break;
+  }
   $strcontent .= $line ."\n";
 }
   $content = $strcontent;
@@ -1828,19 +1831,19 @@ function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
   $string = "<tr> <th scope=\"row\">".__($label, 'postie').":";
   if ($recommendation) {
     $string.="<br /><span class='recommendation'>".__($recommendation,
-    'postie')."</span>";
+        'postie')."</span>";
   }
   $string.="</th>";
 
-   $string .="<td><textarea cols=40 rows=5 name=\"$id\" id=\"$id\">";
-        if (is_array($current_value)) {
-            foreach($current_value as $item) {
-                $string .= "$item\n";
-            }
-        }
-    $string .= "</textarea></td>
+  $string .="<td><textarea cols=40 rows=5 name=\"$id\" id=\"$id\">";
+  if (is_array($current_value)) {
+    foreach($current_value as $item) {
+      $string .= "$item\n";
+    }
+  }
+  $string .= "</textarea></td>
 	</tr>";
-    return($string);
+  return($string);
 }
 /**
   *Handles the creation of the table needed to store all the data
@@ -1984,7 +1987,8 @@ function GetDBConfig() {
     if (!isset($config["CONVERTNEWLINE"])) { $config["CONVERTNEWLINE"] = false;}
 
 
-    if (!isset($config["SIG_PATTERN_LIST"])) { $config["SIG_PATTERN_LIST"] = array('--','- --',"\?--");}
+    if (!isset($config["SIG_PATTERN_LIST"])) { $config["SIG_PATTERN_LIST"] =
+        array('--','- --');}
     if (!isset($config["BANNED_FILES_LIST"])) { $config["BANNED_FILES_LIST"] = array();}
     if (!isset($config["SUPPORTED_FILE_TYPES"])) { $config["SUPPORTED_FILE_TYPES"] = array("video","application");}
     if (!isset($config["AUTHORIZED_ADDRESSES"])) { $config["AUTHORIZED_ADDRESSES"] = array();}
