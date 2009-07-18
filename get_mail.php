@@ -26,7 +26,8 @@ $config['TIME_OFFSET'], $config['TEST_EMAIL'],
 $config['DELETE_MAIL_AFTER_PROCESSING']);
 //loop through messages
 foreach ($emails as $email) {
-  echo "memory at beginning of e-mail processing:" . memory_get_usage() . "\n";
+  if (function_exists('memory_get_usage')
+    echo "memory at start of e-mail processing:" . memory_get_usage() . "\n";
     //sanity check to see if there is any info in the message
     if ($email == NULL ) { 
       $message= __('Dang, message is empty!', 'postie'); 
@@ -56,7 +57,8 @@ foreach ($emails as $email) {
     else {
         print("<p>Ignoring email - not authorized.\n");
     }
-  echo "memory at end of e-mail processing:" . memory_get_usage() . "\n";
+  if (function_exists('memory_get_usage')
+    echo "memory at end of e-mail processing:" . memory_get_usage() . "\n";
 } // end looping over messages
 print $message;
 print("</pre>\n");
