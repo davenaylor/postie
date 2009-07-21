@@ -519,7 +519,7 @@ function BannedFileName($filename, $bannedFiles) {
 //tear apart the meta part for useful information
 function GetContent ($part,&$attachments, $post_id, $config) {
   global $charset, $encoding;
-  if (function_exists(imap_mime_header_decode)) {
+  if (function_exists(imap_mime_header_decode) && $charset=='') {
     $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
     $charset = $element->charset;
   }
@@ -1011,7 +1011,9 @@ function ConvertToUTF_8($encoding,$charset,&$body) {
         $charset=="cp 1256"):
       $body = iconv("Windows-1256//TRANSLIT","UTF-8",$body);
       break;
-
+    case 'koi8-r':
+      $body = iconv("koi8-r//TRANSLIT","UTF-8",$body);
+      break;
   }
 }
 /* this function will convert windows-1252 (also known as cp-1252 to utf-8 */
@@ -1651,6 +1653,7 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
   global $charset, $encoding;
   if (function_exists(imap_mime_header_decode)) {
     $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
+    print_r($element);
     if ($element->charset!='')
       $charset = $element->charset;
   }
@@ -1673,6 +1676,7 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
     } else if ($encoding=='') {
       $encoding='7bit';
     }
+    echo "encoding = $encoding, charset = $charset\n";
     HandleMessageEncoding($encoding, $charset,
         $subject, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
     if (!$config["ALLOW_HTML_IN_SUBJECT"]) {
