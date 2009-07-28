@@ -188,6 +188,8 @@ $messages[2] = __("Error - unable to save configuration",'postie');
         "SELECTED";} ?>>Draft</option>
         <option value="pending" <?php if($config["POST_STATUS"] == "pending") { echo
         "SELECTED";} ?>>Pending Review</option>
+        <option value="private" <?php if($config["POST_STATUS"] == "private") { echo
+        "SELECTED";} ?>>Private</option>
         </select>                </td> 
             </tr> 
             <?php echo BuildTextArea("Authorized Addresses","AUTHORIZED_ADDRESSES",$config["AUTHORIZED_ADDRESSES"],"Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level.");?>

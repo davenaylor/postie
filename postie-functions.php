@@ -90,7 +90,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   $id=checkReply($subject); 
   $post_categories = GetPostCategories($subject,
       $config['DEFAULT_POST_CATEGORY']);
-  $post_tags = GetPostTags($content, $config['DEFAULT_POST_TAGS']);
+  $post_tags = postie_get_tags($content, $config['DEFAULT_POST_TAGS']);
   $comment_status = AllowCommentsOnPost($content);
   
   if ((empty($id) || is_null($id))) {
@@ -1695,7 +1695,7 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
   * this function determines tags for the post
   *
   */
-function GetPostTags(&$content, $defaultTags) {
+function postie_get_tags(&$content, $defaultTags) {
   global $wpdb;
   $post_tags = array();
   //try and determine tags
