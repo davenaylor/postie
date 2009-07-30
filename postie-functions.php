@@ -71,11 +71,11 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   $message_date = NULL;
   if (array_key_exists("date",$mimeDecodedEmail->headers)
         && !empty($mimeDecodedEmail->headers["date"])) {
-    HandleMessageEncoding(
+    $message_date=HandleMessageEncoding(
         $mimeDecodedEmail->headers["content-transfer-encoding"],
         $mimeDecodedEmail->ctype_parameters["charset"],
         $mimeDecodedEmail->headers["date"], $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
-    $message_date = $mimeDecodedEmail->headers['date'];
+    //$message_date = $mimeDecodedEmail->headers['date'];
   }
   list($post_date,$post_date_gmt) = DeterminePostDate($content,
       $message_date,$config['TIME_OFFSET']);
@@ -519,10 +519,12 @@ function BannedFileName($filename, $bannedFiles) {
 //tear apart the meta part for useful information
 function GetContent ($part,&$attachments, $post_id, $config) {
   global $charset, $encoding;
+  /*
   if (function_exists(imap_mime_header_decode) && $charset=='') {
     $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
     $charset = $element->charset;
   }
+  */
   $meta_return = NULL;	
   echo "primary= " . $part->ctype_primary . ", secondary = " .  $part->ctype_secondary . "\n";
   DecodeBase64Part($part);
@@ -572,7 +574,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         if ($tmpencoding!='') 
           $encoding=$tmpencoding;
 
-          HandleMessageEncoding($part->headers["content-transfer-encoding"],
+          $part->body=HandleMessageEncoding($part->headers["content-transfer-encoding"],
                                 $part->ctype_parameters["charset"],
                                 $part->body, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
 
@@ -860,7 +862,6 @@ $i = 0;
 $pattern='/^(';
 $pattern.=implode('|',$filterList);
 $pattern.=')/';
-echo "pattern=$pattern";
 for ($i = 0; $i<=count($arrcontent); $i++) {
   $line = trim($arrcontent[$i]);
   $nextline = $arrcontent[$i+1];
@@ -961,7 +962,7 @@ function StripPGP ( $content ) {
   return $return;
 }
 
-function ConvertToISO_8859_1($encoding,$charset, &$body, $blogEncoding ) {
+function ConvertToISO_8859_1($encoding,$charset, $body, $blogEncoding ) {
   $charset = strtolower($charset);
   $encoding = strtolower($encoding);
   if (strtolower($blogEncoding == "iso-8859-1") && (strtolower($charset) != 'iso-8859-1')) {
@@ -969,8 +970,9 @@ function ConvertToISO_8859_1($encoding,$charset, &$body, $blogEncoding ) {
       $body = utf8_decode($body);
     }
   }
+  return($body);
 }
-function HandleMessageEncoding($encoding, $charset,&$body, 
+function HandleMessageEncoding($encoding, $charset,$body, 
     $blogEncoding='utf-8', $dequote=true) {
   $charset = strtolower($charset);
   $encoding = strtolower($encoding);
@@ -986,13 +988,14 @@ function HandleMessageEncoding($encoding, $charset,&$body,
   }
   //HandleQuotedPrintable($encoding, $body, $dequote);
   if ($blogEncoding=='iso-8859-1') {
-      ConvertToISO_8859_1($encoding,$charset,$body, $blogEncoding);
+      $text=ConvertToISO_8859_1($encoding,$charset,$body, $blogEncoding);
   }
   else {
-      ConvertToUTF_8($encoding,$charset,$body);
+      $text=ConvertToUTF_8($encoding,$charset,$body);
   }
+  return($text);
 }
-function ConvertToUTF_8($encoding,$charset,&$body) {
+function ConvertToUTF_8($encoding,$charset,$body) {
   $charset = strtolower($charset);
   $encoding = strtolower($encoding);
 
@@ -1015,6 +1018,7 @@ function ConvertToUTF_8($encoding,$charset,&$body) {
       $body = iconv("koi8-r//TRANSLIT","UTF-8",$body);
       break;
   }
+  return($body);
 }
 /* this function will convert windows-1252 (also known as cp-1252 to utf-8 */
 function cp1252_to_utf8($str) {
@@ -1461,7 +1465,7 @@ function DecodeMIMEMail($email) {
     $params = array();
     $params['include_bodies'] = true;
     $params['decode_bodies'] = false;
-    $params['decode_headers'] = true;
+    $params['decode_headers'] = false;
     $params['input'] = $email;
     //$decoded = imap_mime_header_decode($email);
     //print_r($decoded);
@@ -1651,12 +1655,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
   */
 function GetSubject(&$mimeDecodedEmail,&$content, $config) {
   global $charset, $encoding;
-  if (function_exists(imap_mime_header_decode)) {
-    $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
-    print_r($element);
-    if ($element->charset!='')
-      $charset = $element->charset;
-  }
+  //echo "encoding = $encoding, charset = $charset\n";
   //assign the default title/subject
   if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
     if ($config["ALLOW_SUBJECT_IN_MAIL"]) {
@@ -1668,7 +1667,7 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
     }
     $mimeDecodedEmail->headers['subject'] = $subject;
   } else {	
-    $subject = $mimeDecodedEmail->headers['subject'];
+    //$subject = $mimeDecodedEmail->headers['subject'];
     if ($mimeDecodedEmail->headers["content-transfer-encoding"]!='') {
       $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
     } else if ($mimeDecodedEmail->headers["content-transfer-encoding"]!='') {
@@ -1676,9 +1675,28 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
     } else if ($encoding=='') {
       $encoding='7bit';
     }
-    echo "encoding = $encoding, charset = $charset\n";
-    HandleMessageEncoding($encoding, $charset,
-        $subject, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
+    if (function_exists(imap_mime_header_decode)) {
+      //$elements=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
+      //$text = "=?utf-8?b?w6XDpMO2?= unicode";
+      $text=$mimeDecodedEmail->headers['subject'];
+      //echo "text='$text'\n";
+      $elements = imap_mime_header_decode($text);
+      for ($i=0; $i<count($elements); $i++) {
+          //echo "Charset: {$elements[$i]->charset}\n";
+          //echo "Text: ". utf8_encode($elements[$i]->text). "\n\n";
+          $subject.=HandleMessageEncoding($encoding, $elements[$i]->charset,
+              $elements[$i]->text, $config['MESSAGE_ENCODING'], 
+              $config['MESSAGE_DEQUOTE']);
+      }
+      //echo "now subject= $subject\n";
+      //if ($element->charset!='') {
+        //$charset = $element[0]->charset;
+        //echo "charset='$charset'\n";
+      // }
+    }
+    //echo "encoding = $encoding, charset = $charset\n";
+    //HandleMessageEncoding($encoding, $charset,
+        //$subject, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
     if (!$config["ALLOW_HTML_IN_SUBJECT"]) {
       $subject = htmlentities($subject);
     }
