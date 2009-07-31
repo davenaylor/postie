@@ -38,7 +38,7 @@ foreach ($emails as $email) {
       continue;
     }
     $message='';
-    $mimeDecodedEmail = DecodeMimeMail($email);
+    $mimeDecodedEmail = DecodeMimeMail($email, true);
     $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
     /*
     if ($from != "") {

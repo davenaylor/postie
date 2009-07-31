@@ -13,6 +13,11 @@ $Id$
  * USE built-in php message decoding to improve speed
  * Add custom fields
  * fix delay
+ * support for flexible upload plugin
+ * confirm post
+ * return reject to sender
+ * icons
+ * iso 8859-2 support
  * add private post function
    http://forum.robfelty.com/topic/how-to-private-posts-from-postie?replies=2#post-1515
  */
@@ -162,6 +167,9 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   DisplayEmailPost($details);
   PostToDB($details,$isReply, $config['POST_TO_DB'],
       $config['CUSTOM_IMAGE_FIELD']); 
+  if ($config['CONFIRMATION_EMAIL'])
+    MailToRecipients($mimeDecodedEmail, false,
+        array($postAuthorDetails['email']), false, false); 
 }
 /** FUNCTIONS **/
 
@@ -822,16 +830,16 @@ if ( empty($from) ) {
           $poster = $user_ID;
   }
   if (!$poster) {
-      echo 'Invalid sender: ' . htmlentities($from) . "! Not adding email!\n";
-      if ($config["FORWARD_REJECTED_MAIL"]) {
-          if (ForwardRejectedMailToAdmin($mimeDecodedEmail,
-          $config['TEST_EMAIL'])) { 
-              echo "A copy of the message has been forwarded to the administrator.\n"; 
-          } else {
-              echo "The message was unable to be forwarded to the adminstrator.\n";
-          }
+    echo 'Invalid sender: ' . htmlentities($from) . "! Not adding email!\n";
+    if ($config["FORWARD_REJECTED_MAIL"]) {
+      if (MailToRecipients($mimeDecodedEmail, $config['TEST_EMAIL'], 
+          array(), $config['RETURN_TO_SENDER'])) { 
+        echo "A copy of the message has been forwarded to the administrator.\n"; 
+      } else {
+        echo "The message was unable to be forwarded to the adminstrator.\n";
       }
-      return;
+    }
+    return;
   } 
   return $poster;
 }
@@ -1386,70 +1394,94 @@ function FilterTextParts(&$mimeDecodedEmail, $preferTextType) {
   }
 }
 /**
-  *This forwards on the mail to the admin for review
-  *It execpts an object containing the entire message
+  * This function can be used to send confirmation or rejection e-mails
+  * It accepts an object containing the entire message
   */
-function ForwardRejectedMailToAdmin( &$mail_content,$testEmail=false) {
-    if ($testEmail) {
-        return;
-    }
+function MailToRecipients( &$mail_content,$testEmail=false,
+    $recipients=array(), $returnToSender, $reject=true) {
+  if ($testEmail) {
+      return;
+  }
 	$user = get_userdata('1');
 	$myname = $user->user_nicename;
 	$myemailadd = get_option("admin_email");
 	$blogname = get_option("blogname");
-	$recipients = $myemailadd;
+	$blogurl = get_option("siteurl");
+	array_push($recipients, $myemailadd);
 	if (count($recipients) == 0) {
 		return false;
 	}
+  //print_r($mail_content);
 
     $from = trim($mail_content->headers["from"]);
     $subject = $mail_content->headers['subject'];
+  if ($returnToSender) {
+    array_push($recipients, $from);
+  }
     
+  $headers = "From: Wordpress <" .$myemailadd .">\r\n";
 	// Set email subject
-	$alert_subject = $blogname . ": Unauthorized Post Attempt";
-
-	// Set sender details
-	$headers = "From: " .$from ."\r\n";
-    if (isset($mail_content->headers["mime-version"])) {
-        $headers .= "Mime-Version: ". $mail_content->headers["mime-version"] . "\r\n";
+  if ($reject) {
+    $alert_subject = $blogname . ": Unauthorized Post Attempt from $from";
+    if ($mail_content->ctype_parameters['boundary']) {
+      $boundary = $mail_content->ctype_parameters["boundary"];
+    } else {
+      $boundary=uniqid("B_");
     }
-    if (isset($mail_content->headers["content-type"])) {
-        $headers .= "Content-Type: ". $mail_content->headers["content-type"] . "\r\n";
+    // Set sender details
+    /*
+      if (isset($mail_content->headers["mime-version"])) {
+          $headers .= "Mime-Version: ". $mail_content->headers["mime-version"] . "\r\n";
+      }
+      if (isset($mail_content->headers["content-type"])) {
+          $headers .= "Content-Type: ". $mail_content->headers["content-type"] . "\r\n";
+      }
+      */
+
+      $headers.="Content-Type:multipart/alternative; boundary=\"$boundary\"\r\n";
+    // SDM 20041123
+    foreach ($recipients as $recipient) {
+      $recipient = trim($recipient);
+      if (! empty($recipient)) {
+        $headers .= "Cc: " . $recipient . "\r\n";
+      }
     }
-
-	// SDM 20041123
-	foreach ($recipients as $recipient) {
-		$recipient = trim($recipient);
-		if (! empty($recipient)) {
-			$headers .= "Bcc: " . $recipient . "\r\n";
-		}
-	}
-
-	// construct mail message
-	$message = "An unauthorized message has been sent to " . $blogname . " from " . $from. ". The subject of this message was: '" . $subject . "'.";
-	$message .= "\n\nIf you wish to allow posts from this address, please add " . $from. " to the registered users list and manually add the content of the e-mail found below.";
-	$message .= "\n\nOtherwise, the e-mail has already been deleted from the server and you can ignore this message.";
-	$message .= "\n\nIf you would like to prevent posstie from forwarding mail
-  in the future, please change the FORWARD_REJECTED_MAIL setting in the Postie
-  settings panel"; 
-	$message .= "\n\nThe original content of the e-mail has been attached.\n\n";
-    $boundary = "--".$mail_content->ctype_parameters["boundary"] ."\n";
-
-    $mailtext = $boundary;
+    	// construct mail message
+    $message = "An unauthorized message has been sent to $blogname.\n";
+    $message .= "Sender: $from\n";
+    $message .= "Subject: $subject\n";
+    $message .= "\n\nIf you wish to allow posts from this address, please add " . $from. " to the registered users list and manually add the content of the e-mail found below.";
+    $message .= "\n\nOtherwise, the e-mail has already been deleted from the server and you can ignore this message.";
+    $message .= "\n\nIf you would like to prevent postie from forwarding mail
+    in the future, please change the FORWARD_REJECTED_MAIL setting in the Postie
+    settings panel"; 
+    $message .= "\n\nThe original content of the e-mail has been attached.\n\n";
+    $mailtext = "--$boundary\r\n";
     $mailtext .= "Content-Type: text/plain;format=flowed;charset=\"iso-8859-1\";reply-type=original\n";
     $mailtext .= "Content-Transfer-Encoding: 7bit\n";
     $mailtext .= "\n";
-    $mailtext .= $message;
-    foreach ($mail_content->parts as $part) {
-        $mailtext .= $boundary;
-        $mailtext .= "Content-Type: ".$part->headers["content-type"] . "\n";
-        $mailtext .= "Content-Transfer-Encoding: ".$part->headers["content-transfer-encoding"] . "\n";
-        if (isset($part->headers["content-disposition"])) {
-            $mailtext .= "Content-Disposition: ".$part->headers["content-disposition"] . "\n";
-        }
-        $mailtext .= "\n";
-        $mailtext .= $part->body;
+    $mailtext .= "$message\n";
+    if ($mail_content->parts) {
+      $mailparts=$mail_content->parts;
+    } else {
+      $mailparts[]=$mail_content;
     }
+    foreach ($mailparts as $part) {
+      $mailtext .= "--$boundary\r\n";
+      $mailtext .= "Content-Type: ".$part->headers["content-type"] . "\n";
+      $mailtext .= "Content-Transfer-Encoding: ".$part->headers["content-transfer-encoding"] . "\n";
+      if (isset($part->headers["content-disposition"])) {
+          $mailtext .= "Content-Disposition: ".$part->headers["content-disposition"] . "\n";
+      }
+      $mailtext .= "\n";
+      $mailtext .= $part->body;
+    }
+  } else {
+    $alert_subject = "Successfully posted to $blogname";
+    $mailtext = "Your post '$subject' has been successfully published to " . 
+        "$blogname <$blogurl>.\n";
+  }
+
 	
 	// Send message
 	mail($myemailadd, $alert_subject, $mailtext, $headers);
@@ -1461,11 +1493,11 @@ function ForwardRejectedMailToAdmin( &$mail_content,$testEmail=false) {
   * @param string
   * @return array
   */
-function DecodeMIMEMail($email) {
+function DecodeMIMEMail($email, $decodeHeaders=false) {
     $params = array();
     $params['include_bodies'] = true;
     $params['decode_bodies'] = false;
-    $params['decode_headers'] = false;
+    $params['decode_headers'] = $decodeHeaders;
     $params['input'] = $email;
     //$decoded = imap_mime_header_decode($email);
     //print_r($decoded);
@@ -1655,7 +1687,6 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
   */
 function GetSubject(&$mimeDecodedEmail,&$content, $config) {
   global $charset, $encoding;
-  //echo "encoding = $encoding, charset = $charset\n";
   //assign the default title/subject
   if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
     if ($config["ALLOW_SUBJECT_IN_MAIL"]) {
@@ -1694,9 +1725,6 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
         //echo "charset='$charset'\n";
       // }
     }
-    //echo "encoding = $encoding, charset = $charset\n";
-    //HandleMessageEncoding($encoding, $charset,
-        //$subject, $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
     if (!$config["ALLOW_HTML_IN_SUBJECT"]) {
       $subject = htmlentities($subject);
     }
@@ -1987,44 +2015,76 @@ function ReadDBConfig() {
   */
 function GetDBConfig() {
     $config = ReadDBConfig();
-    if (!isset($config["ADMIN_USERNAME"])) { $config["ADMIN_USERNAME"] =
-    'admin'; }
-    if (!isset($config["PREFER_TEXT_TYPE"])) { $config["PREFER_TEXT_TYPE"] = "plain";}
-    if (!isset($config["DEFAULT_TITLE"])) { $config["DEFAULT_TITLE"] = "Live From The Field";}
-    if (!isset($config["INPUT_PROTOCOL"])) { $config["INPUT_PROTOCOL"] = "pop3";}
-    if (!isset($config["IMAGE_PLACEHOLDER"])) { $config["IMAGE_PLACEHOLDER"] = "#img%#";}
-    if (!isset($config["IMAGES_APPEND"])) { $config["IMAGES_APPEND"] = true;}
-    if (!isset($config["ALLOW_SUBJECT_IN_MAIL"])) { $config["ALLOW_SUBJECT_IN_MAIL"] = true;}
-    if (!isset($config["DROP_SIGNATURE"])) { $config["DROP_SIGNATURE"] = true;}
-    if (!isset($config["MESSAGE_START"])) { $config["MESSAGE_START"] = ":start";}
-    if (!isset($config["MESSAGE_END"])) { $config["MESSAGE_END"] = ":end";}
-    if (!isset($config["FORWARD_REJECTED_MAIL"])) { $config["FORWARD_REJECTED_MAIL"] = true;}
-    if (!isset($config["ALLOW_HTML_IN_SUBJECT"])) { $config["ALLOW_HTML_IN_SUBJECT"] = true;}
-    if (!isset($config["ALLOW_HTML_IN_BODY"])) { $config["ALLOW_HTML_IN_BODY"] = true;}
-    if (!isset($config["START_IMAGE_COUNT_AT_ZERO"])) { $config["START_IMAGE_COUNT_AT_ZERO"] = false;}
-    if (!isset($config["MESSAGE_ENCODING"])) { $config["MESSAGE_ENCODING"] = "UTF-8"; }
-    if (!isset($config["MESSAGE_DEQUOTE"])) { $config["MESSAGE_DEQUOTE"] = true; }
-    if (!isset($config["TURN_AUTHORIZATION_OFF"])) { $config["TURN_AUTHORIZATION_OFF"] = false;}
-    if (!isset($config["CUSTOM_IMAGE_FIELD"])) { $config["CUSTOM_IMAGE_FIELD"] = false;}
-    if (!isset($config["CONVERTNEWLINE"])) { $config["CONVERTNEWLINE"] = false;}
-
-
-    if (!isset($config["SIG_PATTERN_LIST"])) { $config["SIG_PATTERN_LIST"] =
-        array('--','- --');}
-    if (!isset($config["BANNED_FILES_LIST"])) { $config["BANNED_FILES_LIST"] = array();}
-    if (!isset($config["SUPPORTED_FILE_TYPES"])) { $config["SUPPORTED_FILE_TYPES"] = array("video","application");}
-    if (!isset($config["AUTHORIZED_ADDRESSES"])) { $config["AUTHORIZED_ADDRESSES"] = array();}
-    if (!isset($config["MAIL_SERVER"])) { $config["MAIL_SERVER"] = NULL; }
-    if (!isset($config["MAIL_SERVER_PORT"])) { $config["MAIL_SERVER_PORT"] =  NULL; }
-    if (!isset($config["MAIL_USERID"])) { $config["MAIL_USERID"] =  NULL; }
-    if (!isset($config["MAIL_PASSWORD"])) { $config["MAIL_PASSWORD"] =  NULL; }
-    if (!isset($config["DEFAULT_POST_CATEGORY"])) { $config["DEFAULT_POST_CATEGORY"] =  NULL; }
-    if (!isset($config["DEFAULT_POST_TAGS"])) { $config["DEFAULT_POST_TAGS"] =  NULL; }
-    if (!isset($config["TIME_OFFSET"])) { $config["TIME_OFFSET"] =  get_option('gmt_offset'); }
-    if (!isset($config["WRAP_PRE"])) { $config["WRAP_PRE"] =  'no'; }
-    if (!isset($config["CONVERTURLS"])) { $config["CONVERTURLS"] =  true; }
-    if (!isset($config["ADD_META"])) { $config["ADD_META"] =  'no'; }
-
+    if (!isset($config["ADMIN_USERNAME"])) 
+      $config["ADMIN_USERNAME"] = 'admin'; 
+    if (!isset($config["PREFER_TEXT_TYPE"])) 
+      $config["PREFER_TEXT_TYPE"] = "plain";
+    if (!isset($config["DEFAULT_TITLE"])) 
+      $config["DEFAULT_TITLE"] = "Live From The Field";
+    if (!isset($config["INPUT_PROTOCOL"])) 
+      $config["INPUT_PROTOCOL"] = "pop3";
+    if (!isset($config["IMAGE_PLACEHOLDER"])) 
+      $config["IMAGE_PLACEHOLDER"] = "#img%#";
+    if (!isset($config["IMAGES_APPEND"])) 
+      $config["IMAGES_APPEND"] = true;
+    if (!isset($config["ALLOW_SUBJECT_IN_MAIL"])) 
+      $config["ALLOW_SUBJECT_IN_MAIL"] = true;
+    if (!isset($config["DROP_SIGNATURE"]))
+      $config["DROP_SIGNATURE"] = true;
+    if (!isset($config["MESSAGE_START"])) 
+      $config["MESSAGE_START"] = ":start";
+    if (!isset($config["MESSAGE_END"])) 
+      $config["MESSAGE_END"] = ":end";
+    if (!isset($config["FORWARD_REJECTED_MAIL"])) 
+      $config["FORWARD_REJECTED_MAIL"] = true;
+    if (!isset($config["RETURN_TO_SENDER"])) 
+      $config["RETURN_TO_SENDER"] = false;
+    if (!isset($config["CONFIRMATION_EMAIL"])) 
+      $config["CONFIRMATION_EMAIL"] = false;
+    if (!isset($config["ALLOW_HTML_IN_SUBJECT"])) 
+      $config["ALLOW_HTML_IN_SUBJECT"] = true;
+    if (!isset($config["ALLOW_HTML_IN_BODY"])) 
+      $config["ALLOW_HTML_IN_BODY"] = true;
+    if (!isset($config["START_IMAGE_COUNT_AT_ZERO"])) 
+      $config["START_IMAGE_COUNT_AT_ZERO"] = false;
+    if (!isset($config["MESSAGE_ENCODING"])) 
+      $config["MESSAGE_ENCODING"] = "UTF-8"; 
+    if (!isset($config["MESSAGE_DEQUOTE"])) 
+      $config["MESSAGE_DEQUOTE"] = true; 
+    if (!isset($config["TURN_AUTHORIZATION_OFF"])) 
+      $config["TURN_AUTHORIZATION_OFF"] = false;
+    if (!isset($config["CUSTOM_IMAGE_FIELD"])) 
+      $config["CUSTOM_IMAGE_FIELD"] = false;
+    if (!isset($config["CONVERTNEWLINE"])) 
+      $config["CONVERTNEWLINE"] = false;
+    if (!isset($config["SIG_PATTERN_LIST"])) 
+      $config["SIG_PATTERN_LIST"] = array('--','- --');
+    if (!isset($config["BANNED_FILES_LIST"]))
+      $config["BANNED_FILES_LIST"] = array();
+    if (!isset($config["SUPPORTED_FILE_TYPES"]))
+      $config["SUPPORTED_FILE_TYPES"] = array("video","application");
+    if (!isset($config["AUTHORIZED_ADDRESSES"])) 
+      $config["AUTHORIZED_ADDRESSES"] = array();
+    if (!isset($config["MAIL_SERVER"])) 
+      $config["MAIL_SERVER"] = NULL; 
+    if (!isset($config["MAIL_SERVER_PORT"])) 
+      $config["MAIL_SERVER_PORT"] =  NULL; 
+    if (!isset($config["MAIL_USERID"])) 
+      $config["MAIL_USERID"] =  NULL; 
+    if (!isset($config["MAIL_PASSWORD"])) 
+      $config["MAIL_PASSWORD"] =  NULL; 
+    if (!isset($config["DEFAULT_POST_CATEGORY"])) 
+      $config["DEFAULT_POST_CATEGORY"] =  NULL; 
+    if (!isset($config["DEFAULT_POST_TAGS"])) 
+      $config["DEFAULT_POST_TAGS"] =  NULL; 
+    if (!isset($config["TIME_OFFSET"])) 
+      $config["TIME_OFFSET"] =  get_option('gmt_offset'); 
+    if (!isset($config["WRAP_PRE"])) 
+      $config["WRAP_PRE"] =  'no'; 
+    if (!isset($config["CONVERTURLS"])) 
+      $config["CONVERTURLS"] =  true; 
+    if (!isset($config["ADD_META"]))  
+      $config["ADD_META"] =  'no'; 
     if (!isset($config["AUDIOTEMPLATE"])) 
       $config["AUDIOTEMPLATE"] =$simple_link;
     if (!isset($config["SELECTED_AUDIOTEMPLATE"])) 

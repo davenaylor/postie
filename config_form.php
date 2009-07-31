@@ -277,6 +277,8 @@ $messages[2] = __("Error - unable to save configuration",'postie');
             html line breaks (&lt;br
             /&gt;)","CONVERTNEWLINE",$config["CONVERTNEWLINE"]);?>
             <?php echo BuildBooleanSelect("Forward Rejected Mail","FORWARD_REJECTED_MAIL",$config["FORWARD_REJECTED_MAIL"]);?>
+            <?php echo BuildBooleanSelect("Return rejected mail to sender","RETURN_TO_SENDER",$config["RETURN_TO_SENDER"]);?>
+            <?php echo BuildBooleanSelect("Send post confirmation e-mail to sender","CONFIRMATION_EMAIL",$config["CONFIRMATION_EMAIL"]);?>
             <?php echo BuildBooleanSelect("Allow Subject In Mail","ALLOW_SUBJECT_IN_MAIL",$config["ALLOW_SUBJECT_IN_MAIL"]);?>
             <?php echo BuildBooleanSelect("Allow HTML In Mail Subject","ALLOW_HTML_IN_SUBJECT",$config["ALLOW_HTML_IN_SUBJECT"]);?>
             <?php echo BuildBooleanSelect("Allow HTML In Mail Body","ALLOW_HTML_IN_BODY",$config["ALLOW_HTML_IN_BODY"]);?>
