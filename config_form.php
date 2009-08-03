@@ -71,8 +71,9 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 	<li id="simpleTabs-nav-3"><?php _e('Message' , 'postie') ?></li>
 	<li id="simpleTabs-nav-4"><?php _e('Image' , 'postie') ?></li>
 	<li id="simpleTabs-nav-5"><?php _e('Video and Audio' , 'postie') ?></li>
-	<li id="simpleTabs-nav-6"><?php _e('Help' , 'postie') ?></li>
-	<li id="simpleTabs-nav-7"><?php _e('FAQ' , 'postie') ?></li>
+	<li id="simpleTabs-nav-6"><?php _e('Attachments' , 'postie') ?></li>
+	<li id="simpleTabs-nav-7"><?php _e('Help' , 'postie') ?></li>
+	<li id="simpleTabs-nav-8"><?php _e('FAQ' , 'postie') ?></li>
   </ul>
 	</div>
 	<div id="simpleTabs-content-1" class="simpleTabs-content">
@@ -502,9 +503,71 @@ attribute_escape($config['AUDIOTEMPLATE']) ?>" />
 	</table> 
   </div>
 	<div id="simpleTabs-content-6" class="simpleTabs-content">
-  <?php include('readme.html'); ?>
+<table class='form-table'>
+
+            <tr><th scope='row'><?php _e('Attachment icon set', 'postie') ?><br />
+            <td>
+  <input type='hidden' id='ICON_SET' name='ICON_SET'
+  value="<?php echo attribute_escape($config['ICON_SET']) ?>" />
+			 <select name='ICON_SET_SELECT' id='ICON_SET_SELECT' 
+       onchange="changeIconSet(this);" />
+			 <?php
+			 $styleOptions=$config['ICON_SETS'];
+			 $selected=$config['ICON_SET'];
+			 foreach ($styleOptions as $key) {
+			   if ($key!='selected') {
+           if ($key==$selected) {
+					   $select=' selected=selected ';
+					 } else {
+						 $select=' ';
+					 }
+					 echo '<option' .  $select . 'value="'.
+					     attribute_escape($key) . '" >'.$key . '</option>';
+         }
+       }
+			 ?>
+			 </select>
+			 </td>
+       </tr>
+            <tr><th scope='row'><?php _e('Attachment icon size (in pixels)', 'postie') ?><br />
+            <td>
+  <input type='hidden' id='ICON_SIZE' name='ICON_SIZE'
+  value="<?php echo attribute_escape($config['ICON_SIZE']) ?>" />
+			 <select name='ICON_SIZE_SELECT' id='ICON_SIZE_SELECT' 
+       onchange="changeIconSet(this, true);" />
+			 <?php
+			 $styleOptions=$config['ICON_SIZES'];
+			 $selected=$config['ICON_SIZE'];
+			 foreach ($styleOptions as $key) {
+			   if ($key!='selected') {
+           if ($key==$selected) {
+					   $select=' selected=selected ';
+					 } else {
+						 $select=' ';
+					 }
+					 echo '<option' .  $select . 'value="'.
+					     attribute_escape($key) . '" >'.$key . '</option>';
+         }
+       }
+			 ?>
+			 </select>
+			 </td>
+       </tr>
+       <tr>
+       <th style='height:64px'>
+			 <?php _e('Preview', 'postie'); ?>
+       </th>
+       <td>
+			 <span id='ATTACHMENT_PREVIEW'></span>
+			 </td>
+       </tr>
+    </tr> 
+	</table> 
   </div>
 	<div id="simpleTabs-content-7" class="simpleTabs-content">
+  <?php include('readme.html'); ?>
+  </div>
+	<div id="simpleTabs-content-8" class="simpleTabs-content">
   <?php include('faq.html'); ?>
   </div>
 		<input type="submit" name="Submit" value="<?php _e('Update Options', 'postie') ?> &raquo;" class='button' />
@@ -517,6 +580,7 @@ Postie Version:
 $Id$
 </div>
 
+<?php $iconDir = get_option('siteurl') . '/' . PLUGINDIR .  '/postie/icons'; ?>
 <script type="text/javascript">
 jQuery(document).ready(function() {
 	jQuery("#simpleTabs").simpleTabs({
@@ -527,6 +591,33 @@ jQuery(document).ready(function() {
 	});
 
 });
+function changeIconSet(selectBox, size) {
+  var iconSet=document.getElementById('ICON_SET');
+  var iconSize=document.getElementById('ICON_SIZE');
+  var preview=document.getElementById('ATTACHMENT_PREVIEW');
+  var iconDir = '<?php echo $iconDir ?>/';
+  if (size==true) {
+    var hiddenInput=iconSize
+  } else {
+    var hiddenInput=iconSet;
+  }
+  for(i=0; i<selectBox.options.length; i++) {
+    if (selectBox.options[i].selected == true) {
+      hiddenInput.value=selectBox.options[i].value;
+    }
+  }
+  var fileTypes= new Array('doc', 'pdf', 'xls', 'ppt');
+  preview.innerHTML='';
+  for (j=0; j<fileTypes.length; j++) {
+    preview.innerHTML+="<img src='" + iconDir + iconSet.value + '/' +
+        fileTypes[j] + '-' + iconSize.value + ".png' />";
+  }
+    preview.innerHTML+='<br />Here is some sample text with a link to a' +
+       'word document that I think you might find interesting<br />' +
+       "<a href='#'><img style='text-decoration:none' src='" +
+       iconDir + iconSet.value + '/doc' +   
+       '-' + iconSize.value + ".png' />Interesting document</a>"; 
+}
 function changeStyle(preview,template,select,selected,sample,custom) {
 	var preview = document.getElementById(preview);
 	var pageStyles = document.getElementById(select);
@@ -576,4 +667,5 @@ changeStyle('video1TemplatePreview','VIDEO1TEMPLATE', 'VIDEO1TEMPLATESELECT',
 'SELECTED_VIDEO1TEMPLATE','hi.mp4', false);
 changeStyle('video2TemplatePreview','VIDEO2TEMPLATE', 'VIDEO2TEMPLATESELECT',
 'SELECTED_VIDEO2TEMPLATE','hi.flv', false);
+changeIconSet(document.getElementById('ICON_SET_SELECT'));
 </script>

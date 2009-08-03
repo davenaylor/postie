@@ -26,7 +26,6 @@ $Id$
 #$config=GetConfig();
 
 //include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
-//define("POSTIE_ROOT",dirname(__FILE__));
 define("POSTIE_TABLE",$GLOBALS["table_prefix"]. "postie_config");
 
 /* this function is necessary for wildcard matching on non-posix systems */
@@ -183,7 +182,9 @@ function clickableLink($text) {
   // pad it with a space so we can match things at the start of the 1st line.
   $ret = ' ' . $text;
   // try to embed youtube videos
-  $ret = preg_replace("#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is", "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />", $ret);
+  $youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
+  $youtube_replace= "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" /><br />";
+  $ret = preg_replace($youtube,$youtube_replace, $ret);
 
   // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
   // xxxx can only be alpha characters.
@@ -614,17 +615,6 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         /* TODO make these options */
         $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
             $config['IMAGETEMPLATE']);
-        /*
-        $url=wp_get_attachment_link($file_id);
-        $align='left';
-        $size='medium';
-        if ($config['USEIMAGETEMPLATE']) {
-          add_filter('image_send_to_editor', 'parseImageTemplate', 1,7);
-        }
-        $attachments["html"][] .= get_image_send_to_editor($file_id,
-              $the_post->post_excerpt, $the_post->post_title, $align, 
-              $url, '', $size);
-        */
         if ($cid) {
           $attachments["cids"][$cid] = array($file,count($attachments["html"]) - 1);
         }
@@ -660,13 +650,19 @@ function GetContent ($part,&$attachments, $post_id, $config) {
           //pgp signature - then forget it
           if ( $part->ctype_secondary == 'pgp-signature' )
             break;
-          //postie_upload_attachment($part);
           $file_id = postie_media_handle_upload($part, $post_id);
           $file = wp_get_attachment_url($file_id);
           $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
-
-          $attachments["html"][] = '<a href="' . $file . '">' . 
-              $part->ctype_parameters['name'] . '</a>' . "\n";
+          if ($config['ICON_SET']!='none') {
+            $icon=chooseAttachmentIcon($file, $part->ctype_primary,
+                $part->ctype_secondary, $config['ICON_SET'],
+                $config['ICON_SIZE']);
+          } else {
+            $icon ='';
+          }
+          $attachments["html"][] = "<a style='text-decoration:none'" . 
+          ' href="' . $file . '">' . $icon . 
+              $part->ctype_parameters['name'] . '</a><br />' . "\n";
           if ($cid) {
             $attachments["cids"][$cid] = array($file,
                 count($attachments["html"]) - 1);
@@ -1560,6 +1556,46 @@ function GetNameFromEmail($address) {
     return($name);
 }
 
+/** 
+  * Choose an appropriate file icon based on the extension and mime type of
+  * the attachment
+  */
+function chooseAttachmentIcon($file, $primary, $secondary, $iconSet='silver',
+    $size='32') {
+  $fileName=basename($file); 
+  $parts=explode('.', $fileName);
+  $ext=$parts[count($parts)-1];
+  echo "file='$fileName', ext=$ext, primary=$primary, secondary=$secondary\n";
+  $docExts=array('doc', 'docx');
+  $docMimes=array('msword', 'vnd.ms-word',
+      'vnd.openxmlformats-officedocument.wordprocessingml.document');
+  $pptExts=array('ppt','pptx');
+  $pptMimes=array('mspowerpoint', 'vnd.ms-powerpoint',
+      'vnd.openxmlformats-officedocument.');
+  $xlsExts=array('xls', 'xlsx');
+  $xlsMimes=array('msexcel', 'vnd.ms-excel', 
+      'vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  if ($ext=='pdf' && $secondary=='pdf') {
+    $fileType='pdf';
+  } else if (in_array($ext, $docExts) && in_array($secondary, $docMimes)) { 
+    $fileType='doc';
+  } else if (in_array($ext, $pptExts) && in_array($secondary, $pptMimes)) { 
+    $fileType='ppt';
+  } else if (in_array($ext, $xlsExts) && in_array($secondary, $xlsMimes)) { 
+    $fileType='xls';
+  } else {
+    $fileType='default';
+  }
+  echo "fileType=$fileType\n";
+  $fileName="/icons/$iconSet/$fileType-$size.png";
+  echo "fileName=$fileName\n";
+  if (!file_exists(POSTIE_ROOT . $fileName))
+    $fileName="/icons/$iconSet/default-$size.png";
+  $iconHtml="<img src='" . POSTIE_URL . $fileName . "' alt='$fileType icon' />";
+  return($iconHtml);
+
+}
+
 function parseTemplate($id, $type, $template, $size='medium') {
 
 /* we check template for thumb, thumbnail, large, full and use that as
@@ -2085,6 +2121,14 @@ function GetDBConfig() {
       $config["CONVERTURLS"] =  true; 
     if (!isset($config["ADD_META"]))  
       $config["ADD_META"] =  'no'; 
+    $config['ICON_SETS']=array('silver','black','white','none');
+    if (!isset($config["ICON_SET"])) 
+      $config["ICON_SET"] = 'silver';
+    $config['ICON_SIZES']=array(32,48,64);
+    if (!isset($config["ICON_SIZE"])) 
+      $config["ICON_SIZE"] = 32;
+    if (!isset($config["ATTACHMENT_ICONS"])) 
+      $config["ATTACHMENT_ICONS"] = false;
     if (!isset($config["AUDIOTEMPLATE"])) 
       $config["AUDIOTEMPLATE"] =$simple_link;
     if (!isset($config["SELECTED_AUDIOTEMPLATE"])) 

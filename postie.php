@@ -41,6 +41,7 @@ $Id$
 //ini_set("display_errors", 1);
 
 define("POSTIE_ROOT",dirname(__FILE__));
+define("POSTIE_URL", WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)));
 
 
 function postie_loadjs_add_page() {
