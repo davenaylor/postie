@@ -146,6 +146,8 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   $details = array(
       'post_author'  => $poster,
       'comment_author'  => $postAuthorDetails['author'],
+      'comment_author_url'  => $postAuthorDetails['comment_author_url'],
+      'user_ID' => $postAuthorDetails['user_ID'],
       'email_author'  => $postAuthorDetails['email'],
       'post_date'   => $post_date,
       'post_date_gmt'  => $post_date_gmt,
@@ -229,9 +231,18 @@ function getPostAuthorDetails(&$subject,&$content,&$mimeDecodedEmail) {
     }
   } else {
     $theDate=$mimeDecodedEmail->headers['date'];
-    $theAuthor=GetNameFromEmail($mimeDecodedEmail->headers['from']);
     $theEmail = RemoveExtraCharactersInEmailAddress(trim(
         $mimeDecodedEmail->headers["from"]));
+    $regAuthor=get_user_by('email', $theEmail);
+    if ($regAuthor) {
+      $theAuthor=$regAuthor->user_login;
+      $theUrl=$regAuthor->user_url;
+      $theID= $regAuthor->ID;
+    } else {
+      $theAuthor=GetNameFromEmail($mimeDecodedEmail->headers['from']);
+      $theUrl='';
+      $theID='';
+    }
   }
   // now get rid of forwarding info in the content
   $lines=preg_split("/\r\n/",$content);
@@ -249,6 +260,8 @@ function getPostAuthorDetails(&$subject,&$content,&$mimeDecodedEmail) {
                " posted:</div>",
   'emaildate' => $theDate,
   'author' => $theAuthor,
+  'comment_author_url' => $theUrl,
+  'user_ID' => $theID,
   'email' => $theEmail
   );
   return($theDetails);
@@ -486,12 +499,13 @@ function PostToDB($details,$isReply, $postToDb=true, $customImageField=false) {
       'comment_date' =>$details['post_date'],
       'comment_date_gmt' =>$details['post_date_gmt'], 
       'comment_content' =>$details['post_content'],
-      'comment_author_url' =>'',
+      'comment_author_url' =>$details['comment_author_url'],
       'comment_author_IP' =>'',
       'comment_approved' =>1,
       'comment_agent' =>'', 
       'comment_type' =>'', 
-      'comment_parent' => 0
+      'comment_parent' => 0,
+      'user_id' => $details['user_ID']
       );
 
       $post_ID = wp_insert_comment($comment);
@@ -630,7 +644,6 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         $file_id = postie_media_handle_upload($part, $post_id);
         $file = wp_get_attachment_url($file_id);
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
-        print_r($config['VIDEO1TYPES']);
         if (in_array($part->ctype_secondary,
             $config['VIDEO1TYPES'])) {
           $videoTemplate=$config['VIDEO1TEMPLATE'];
@@ -2349,6 +2362,45 @@ function VodafoneHandler(&$content, &$attachments){
     }
 
 }
+/* this is included in WP 2.8+. We are using our own (unmodified) version for
+   backwards compatibility */
+if (!function_exists('get_user_by')) {
+  function get_user_by($field, $value) {
+    global $wpdb;
+
+    switch ($field) {
+      case 'id':
+        return get_userdata($value);
+        break;
+      case 'slug':
+        $user_id = wp_cache_get($value, 'userslugs');
+        $field = 'user_nicename';
+        break;
+      case 'email':
+        $user_id = wp_cache_get($value, 'useremail');
+        $field = 'user_email';
+        break;
+      case 'login':
+        $value = sanitize_user( $value );
+        $user_id = wp_cache_get($value, 'userlogins');
+        $field = 'user_login';
+        break;
+      default:
+        return false;
+    }
+
+     if ( false !== $user_id )
+      return get_userdata($user_id);
+
+    if ( !$user = $wpdb->get_row( $wpdb->prepare("SELECT * FROM $wpdb->users WHERE $field = %s", $value) ) )
+      return false;
+
+    _fill_user($user);
+
+    return $user;
+  }
+}
+
 define('WP_POST_REVISIONS', $revisions);
 ini_set('memory_limit', $original_mem_limit);
 ?>
