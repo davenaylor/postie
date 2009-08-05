@@ -309,10 +309,12 @@ post with :end
 
 Simply upload the icons you want to the postie/icons/custom directory. You
 must name the icons according to the following scheme:
-<filetype>-<size>.png
+{filetype}-{size}.png
 
 For example, for word documents, you could use:
+
 `doc-32.png`
+
 for a 32x32 pixel icon. (You can actually create any size icon you want, but
 if you name it 32, then it will only be used if you select to use size 32
 icons)
