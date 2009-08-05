@@ -651,7 +651,10 @@ function GetContent ($part,&$attachments, $post_id, $config) {
             $config['VIDEO2TYPES'])) {
           $videoTemplate=$config['VIDEO2TEMPLATE'];
         } else {
-          $videoTemplate='<a href="{FILELINK}">{FILENAME}</a>';
+          $icon=chooseAttachmentIcon($file, $part->ctype_primary,
+              $part->ctype_secondary, $config['ICON_SET'],
+              $config['ICON_SIZE']);
+          $videoTemplate='<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
         }
         $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary, 
             $videoTemplate);
@@ -665,17 +668,14 @@ function GetContent ($part,&$attachments, $post_id, $config) {
             break;
           $file_id = postie_media_handle_upload($part, $post_id);
           $file = wp_get_attachment_url($file_id);
+          echo "file=$file\n";
           $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
-          if ($config['ICON_SET']!='none') {
-            $icon=chooseAttachmentIcon($file, $part->ctype_primary,
-                $part->ctype_secondary, $config['ICON_SET'],
-                $config['ICON_SIZE']);
-          } else {
-            $icon ='';
-          }
-          $attachments["html"][] = "<a style='text-decoration:none'" . 
-          ' href="' . $file . '">' . $icon . 
-              $part->ctype_parameters['name'] . '</a><br />' . "\n";
+          $icon=chooseAttachmentIcon($file, $part->ctype_primary,
+              $part->ctype_secondary, $config['ICON_SET'],
+              $config['ICON_SIZE']);
+          $attachments["html"][] = '<a href="' . $file . 
+              '" style="text-decoration:none">' . $icon . 
+              $part->ctype_parameters['name'] . '</a>' . "\n";
           if ($cid) {
             $attachments["cids"][$cid] = array($file,
                 count($attachments["html"]) - 1);
@@ -836,12 +836,7 @@ if ( empty($from) ) {
   } else if ($user->has_cap("post_via_postie")) {
     $poster = $user_ID;
   }
-  $validSMTP=true; 
-  $config['SMTP']=array('gmail.com', 'martha2.acu.edu', 'smtp.acu.edu');
-  if (!empty($config['SMTP'])) {
-    $validSMTP=checkSMTP($mimeDecodedEmail, $config['SMTP']);
-    echo "validSMTP=$validSMTP\n";
-  } 
+  $validSMTP=checkSMTP($mimeDecodedEmail, $config['SMTP']);
   if (!$poster || !$validSMTP) {
     echo 'Invalid sender: ' . htmlentities($from) . "! Not adding email!\n";
     if ($config["FORWARD_REJECTED_MAIL"]) {
@@ -858,6 +853,9 @@ if ( empty($from) ) {
 }
 
 function checkSMTP($mimeDecodedEmail, $smtpservers) {
+  if (empty($smtpservers))
+    return(true);
+  print_r($mimeDecodedEmail->headers['received']);
   foreach ($mimeDecodedEmail->headers['received'] as $received) {
     foreach ($smtpservers as $smtp) {
       if (stristr($received, $smtp))
@@ -1201,7 +1199,7 @@ function FilterAppleFile(&$mimeDecodedEmail) {
     }
 }
 function postie_media_handle_upload($part, $post_id, $post_data = array()) {
-  $overrides = array('test_form'=>false);
+  $overrides = array('test_form'=>false, 'test_type'=>false);
         //$overrides = array('test_form'=>false, 'test_size'=>false,
          //                  'test_type'=>false);
   $tmpFile=tempnam(getenv('TEMP'), 'postie');
@@ -1226,14 +1224,17 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   } else {
     $name =  $part->ctype_parameters['name'];
   }
+  $parts=explode('.', $name);
+  $ext=$parts[count($parts)-1];
   $the_file = array('name' => $name,
+                    'ext' => $ext,
                     'type' => $part->ctype_secondary,
                     'tmp_name' => $tmpFile,
                     'size' => filesize($tmpFile),
                     'error' => ''
                     );
 
-  //print_r($the_file);
+  print_r($the_file);
   $time = current_time('mysql');
   if ( $post = get_post($post_id) ) {
     if ( substr( $post->post_date, 0, 4 ) > 0 )
@@ -1241,7 +1242,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   }
 
   $file = postie_handle_upload($the_file, $overrides, $time);
-  //print_r($file);
+  print_r($file);
   //unlink($tmpFile);
 
   if ( isset($file['error']) )
@@ -1591,6 +1592,9 @@ function GetNameFromEmail($address) {
   */
 function chooseAttachmentIcon($file, $primary, $secondary, $iconSet='silver',
     $size='32') {
+  if ($config['ICON_SET']=='none')
+    return('');
+  echo "file=$file\n";
   $fileName=basename($file); 
   $parts=explode('.', $fileName);
   $ext=$parts[count($parts)-1];
@@ -1604,14 +1608,30 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet='silver',
   $xlsExts=array('xls', 'xlsx');
   $xlsMimes=array('msexcel', 'vnd.ms-excel', 
       'vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  $iWorkMimes=array('zip', 'octet-stream');
+  $mpgExts=array('mpg', 'mpeg');
+  $mp3Exts=array('mp3');
+  $mp4Exts=array('mp4', 'm4v');
+  $mp4Mimes=array('mp4', 'mpeg4');
+  $aacExts=array('m4a', 'aac');
+  $aviExts=array('avi');
+  $movExts=array('mov');
   if ($ext=='pdf' && $secondary=='pdf') {
     $fileType='pdf';
+  } else if ($ext=='pages' && in_array($secondary, $iWorkMimes)) {
+    $fileType='pages';
+  } else if ($ext=='numbers' && in_array($secondary, $iWorkMimes)) {
+    $fileType='numbers';
+  } else if ($ext=='key' && in_array($secondary, $iWorkMimes)) {
+    $fileType='key';
   } else if (in_array($ext, $docExts) && in_array($secondary, $docMimes)) { 
     $fileType='doc';
   } else if (in_array($ext, $pptExts) && in_array($secondary, $pptMimes)) { 
     $fileType='ppt';
   } else if (in_array($ext, $xlsExts) && in_array($secondary, $xlsMimes)) { 
     $fileType='xls';
+  } else if (in_array($ext, $mp4Exts) && in_array($secondary, $mp4Mimes)) { 
+    $fileType='mp4';
   } else {
     $fileType='default';
   }
@@ -1674,7 +1694,7 @@ size. If not found, we default to medium */
   } else {
     //$template=str_replace('{CAPTION}', '', $template);
   }
-  return($template);
+  return($template . '<br />');
 } 
 
 /**
@@ -1956,7 +1976,7 @@ function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
   }
   $string.="</th>";
 
-  $string .="<td><textarea cols=40 rows=5 name=\"$id\" id=\"$id\">";
+  $string .="<td><textarea cols=40 rows=3 name=\"$id\" id=\"$id\">";
   if (is_array($current_value)) {
     foreach($current_value as $item) {
       $string .= "$item\n";
@@ -2156,14 +2176,12 @@ function GetDBConfig() {
       $config["CONVERTURLS"] =  true; 
     if (!isset($config["ADD_META"]))  
       $config["ADD_META"] =  'no'; 
-    $config['ICON_SETS']=array('silver','black','white','none');
+    $config['ICON_SETS']=array('silver','black','white','custom', 'none');
     if (!isset($config["ICON_SET"])) 
       $config["ICON_SET"] = 'silver';
     $config['ICON_SIZES']=array(32,48,64);
     if (!isset($config["ICON_SIZE"])) 
       $config["ICON_SIZE"] = 32;
-    if (!isset($config["ATTACHMENT_ICONS"])) 
-      $config["ATTACHMENT_ICONS"] = false;
     if (!isset($config["AUDIOTEMPLATE"])) 
       $config["AUDIOTEMPLATE"] =$simple_link;
     if (!isset($config["SELECTED_AUDIOTEMPLATE"])) 
@@ -2199,6 +2217,8 @@ function GetDBConfig() {
       $config['SELECTED_IMAGETEMPLATE'] = 'wordpress_default';
     if (!isset($config["IMAGETEMPLATE"])) 
       $config["IMAGETEMPLATE"] = $wordpress_default;
+    if (!isset($config["SMTP"])) 
+      $config["SMTP"] = array();
     return($config);
 }
 /**
@@ -2226,18 +2246,13 @@ function GetConfig() {
   return $config;
 }
 /**
-  * Converts from one directory structure to url
-  * @return string
-  */
-function ConvertFilePathToUrl($path) {
-    return(str_replace(DIRECTORY_SEPARATOR , "/", $path));
-}
-/**
   * Returns a list of config keys that should be arrays
   *@return array
   */
 function GetListOfArrayConfig() {
-    return(array("SUPPORTED_FILE_TYPES","AUTHORIZED_ADDRESSES","SIG_PATTERN_LIST","BANNED_FILES_LIST", "VIDEO1TYPES", "VIDEO2TYPES"));
+  return(array('SUPPORTED_FILE_TYPES','AUTHORIZED_ADDRESSES',
+      'SIG_PATTERN_LIST','BANNED_FILES_LIST', 'VIDEO1TYPES', 
+      'VIDEO2TYPES', 'SMTP'));
 }
 /**
   * Detects if they can do IMAP

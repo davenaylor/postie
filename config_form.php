@@ -211,21 +211,12 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                 <?php
                 $defaultCat=$config['DEFAULT_POST_CATEGORY'];
                 wp_dropdown_categories("name=DEFAULT_POST_CATEGORY&hierarchical=1&selected=$defaultCat&hide_empty=0"); ?>
-                <!--
-                <td><select name="DEFAULT_POST_CATEGORY" id="DEFAULT_POST_CATEGORY">
-                        <?php
-                        $categories = $wpdb->get_results("SELECT * FROM $wpdb->terms ORDER BY name");
-                        foreach ($categories as $category) {
-                            $selected = ($category->term_id == $config["DEFAULT_POST_CATEGORY"] ? "SELECTED": NULL); 
-                            echo "\n\t<option value='$category->term_id' $selected>$category->name</option>";
-                        }
-                        ?>
-                </select></td>
-                -->
           </tr>
           <tr valign="top">
             <th scope="row">
-            <?php _e('Default post by mail tag(s): separated by commas', 'postie') ?></th>
+            <?php _e('Default post by mail tag(s)', 'postie') ?><br /><span
+            class='recommendation'><?php _e('separated by commas', 'postie')
+            ?></span></th>
             <td><input type='text' name="DEFAULT_POST_TAGS"
             id="DEFAULT_POST_TAGS" value='<?php echo
             $config["DEFAULT_POST_TAGS"] ?>' />
@@ -248,52 +239,10 @@ $messages[2] = __("Error - unable to save configuration",'postie');
         </select><br />
                 </td> 
             </tr> 
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Wrap content in pre tags:', 'postie') ?> </th> 
-                <td>
-                <select name="WRAP_PRE" id="WRAP_PRE">
-                <option value="no">no</option>
-                <option value="yes" <?php if($config["WRAP_PRE"] == "yes") { echo "SELECTED";} ?>>yes</option>
-                </select><br />
-                <br />
-                </td> 
-            </tr> 
-            <!--
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Add more meta information right before post:', 'postie') ?> </th> 
-                <td>
-                <select name="ADD_META" id="ADD_META">
-                <option value="no">no</option>
-                <option value="yes" <?php if($config["ADD_META"] == "yes") { echo "SELECTED";} ?>>yes</option>
-                </select><br />
-                <?php _e("Recommended", 'postie');?>: <code>no</code>
-                <br />
-                </td> 
-            </tr> 
-            -->
-            <?php echo BuildBooleanSelect("Filter newlines",
-              "FILTERNEWLINES",$config["FILTERNEWLINES"],
-              "Set to no if using markdown or textitle syntax");?>
-            <?php echo BuildBooleanSelect("Replace newline characters with
-            html line breaks (&lt;br
-            /&gt;)","CONVERTNEWLINE",$config["CONVERTNEWLINE"]);?>
             <?php echo BuildBooleanSelect("Forward Rejected Mail","FORWARD_REJECTED_MAIL",$config["FORWARD_REJECTED_MAIL"]);?>
-            <?php echo BuildBooleanSelect("Return rejected mail to sender","RETURN_TO_SENDER",$config["RETURN_TO_SENDER"]);?>
-            <?php echo BuildBooleanSelect("Send post confirmation e-mail to sender","CONFIRMATION_EMAIL",$config["CONFIRMATION_EMAIL"]);?>
             <?php echo BuildBooleanSelect("Allow Subject In Mail","ALLOW_SUBJECT_IN_MAIL",$config["ALLOW_SUBJECT_IN_MAIL"]);?>
             <?php echo BuildBooleanSelect("Allow HTML In Mail Subject","ALLOW_HTML_IN_SUBJECT",$config["ALLOW_HTML_IN_SUBJECT"]);?>
             <?php echo BuildBooleanSelect("Allow HTML In Mail Body","ALLOW_HTML_IN_BODY",$config["ALLOW_HTML_IN_BODY"]);?>
-            <?php echo BuildBooleanSelect("Automatically convert urls to links","CONVERTURLS",$config["CONVERTURLS"]);?>
-            <tr> 
-                <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> </th> 
-                <td>
-                <input name="MESSAGE_ENCODING" type="text" id="MESSAGE_ENCODING" value="<?php echo $config["MESSAGE_ENCODING"]; ?>" size="10" />
-                <span class='recommendation'>UTF-8 <?php _e("should handle ISO-8859-1 as well", 'postie');?></span>
-                </td> 
-            </tr> 
-            <?php echo BuildBooleanSelect("Decode Quoted Printable Data","MESSAGE_DEQUOTE",$config["MESSAGE_DEQUOTE"]);?>
-            <?php echo BuildTextArea("Supported File Types","SUPPORTED_FILE_TYPES",$config["SUPPORTED_FILE_TYPES"],"Put each type on a single line.");?>
-            <?php echo BuildTextArea("Banned File Names","BANNED_FILES_LIST",$config["BANNED_FILES_LIST"],"Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files");?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Tag Of
                 Message Start:', 'postie') ?> <br />
@@ -310,9 +259,36 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                 <input name="MESSAGE_END" type="text" id="MESSAGE_END" value="<?php echo $config["MESSAGE_END"]; ?>" size="20" /><br />
                 </td> 
             </tr> 
+            </table>
+  <a style='cursor:pointer' onclick='showAdvanced("message-advanced", "message-advanced-arrow");'><span id="message-advanced-arrow">&#9654;</span> Advanced options</a>
+  <div id="message-advanced" style='display:none;'>
+  <table class='form-table'>
+            <?php echo BuildBooleanSelect("Wrap content in pre tags","WRAP_PRE",$config["WRAP_PRE"]);?>
+            <?php echo BuildBooleanSelect("Filter newlines",
+              "FILTERNEWLINES",$config["FILTERNEWLINES"],
+              "Set to no if using markdown or textitle syntax");?>
+            <?php echo BuildBooleanSelect("Replace newline characters with
+            html line breaks (&lt;br
+            /&gt;)","CONVERTNEWLINE",$config["CONVERTNEWLINE"]);?>
+            <?php echo BuildBooleanSelect("Return rejected mail to sender","RETURN_TO_SENDER",$config["RETURN_TO_SENDER"]);?>
+            <?php echo BuildBooleanSelect("Send post confirmation e-mail to sender","CONFIRMATION_EMAIL",$config["CONFIRMATION_EMAIL"]);?>
+            <?php echo BuildBooleanSelect("Automatically convert urls to links","CONVERTURLS",$config["CONVERTURLS"]);?>
+            <tr> 
+                <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> </th> 
+                <td>
+                <input name="MESSAGE_ENCODING" type="text" id="MESSAGE_ENCODING" value="<?php echo $config["MESSAGE_ENCODING"]; ?>" size="10" />
+                <span class='recommendation'>UTF-8 <?php _e("should handle ISO-8859-1 as well", 'postie');?></span>
+                </td> 
+            </tr> 
+            <?php echo BuildBooleanSelect("Decode Quoted Printable Data","MESSAGE_DEQUOTE",$config["MESSAGE_DEQUOTE"]);?>
+            <?php echo BuildTextArea("Supported File Types","SUPPORTED_FILE_TYPES",$config["SUPPORTED_FILE_TYPES"],"Put each type on a single line.");?>
+            <?php echo BuildTextArea("Banned File Names","BANNED_FILES_LIST",$config["BANNED_FILES_LIST"],"Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files");?>
             <?php echo BuildBooleanSelect("Drop The Signature From Mail","DROP_SIGNATURE",$config["DROP_SIGNATURE"]);?>
-            <?php echo BuildTextArea("Signature Patterns","SIG_PATTERN_LIST",$config["SIG_PATTERN_LIST"],"Put each pattern on a seperate line and make sure to escape any special characters.");?>
+            <?php echo BuildTextArea("Signature Patterns","SIG_PATTERN_LIST",$config["SIG_PATTERN_LIST"],"Put each pattern on a separate line and make sure to escape any special characters.");?>
+            <?php echo BuildTextArea("Allowed SMTP
+            servers","SMTP",$config["SMTP"],"Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check stmp servers.");?>
             </table> 
+            </div> <!-- advanced options -->
             </div>
 	<div id="simpleTabs-content-4" class="simpleTabs-content">
   <table class='form-table'>
@@ -659,6 +635,19 @@ function restoreStyle(current,template) {
   var pageStyle = document.getElementById(template);
   pageStyle.value=defaultStyle;
 }
+
+function showAdvanced(advancedId, arrowId) {
+  var advanced = document.getElementById(advancedId);
+  var arrow = document.getElementById(arrowId);
+  if (advanced.style.display=='none') {
+    advanced.style.display='block';
+    arrow.innerHTML='&#9660;';
+  } else {
+    advanced.style.display='none';
+    arrow.innerHTML='&#9654;';
+  }
+}
+
 changeStyle('audioTemplatePreview','AUDIOTEMPLATE', 'AUDIOTEMPLATESELECT',
 'SELECTED_AUDIOTEMPLATE','funky.mp3', false);
 changeStyle('imageTemplatePreview','IMAGETEMPLATE', 'IMAGETEMPLATESELECT',

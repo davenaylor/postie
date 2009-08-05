@@ -305,6 +305,33 @@ post with :start
 To strip off stuff that they add at the end of a message, end your
 post with :end
 
+= How can I add custom attachment icons? =
+
+Simply upload the icons you want to the postie/icons/custom directory. You
+must name the icons according to the following scheme:
+<filetype>-<size>.png
+
+For example, for word documents, you could use:
+`doc-32.png`
+for a 32x32 pixel icon. (You can actually create any size icon you want, but
+if you name it 32, then it will only be used if you select to use size 32
+icons)
+
+See the other directories in icons for more examples.
+
+Currently the following filetypes are supported:
+
+* doc - microsoft word (including docx)
+* ppt - microsoft powerpoint (including pptx)
+* xls - microsoft excel (including xlsx)
+* numbers - iWork numbres spreadsheet
+* pages - iWork pages document
+* key - iWork keynote presentation
+* pdf - portable document format
+* rtf - rich text format
+* txt - plain text document
+
+
 == CHANGELOG ==
 
 = 1.3.0 (2009.07.xx) =
@@ -319,6 +346,7 @@ post with :end
       * Added option to only allow e-mails from a specified list of smtp
         servers
       * Better handling of comment authors (thanks to Petter for suggestion)
+      * Simplified message options (now includes an advanced options section)
   * Bug fixes
       * No longer including wp-config.php
       * If tmpdir is not writable, try a different tmpdir
