@@ -311,10 +311,14 @@ post with :end
   * Features
       * Added mpeg4 to default list of videotypes
       * Added support for KOI8-R character set (cyrillic)
+      * Added support for iso-8859-2 character set (eastern european)
       * Added option to include custom icons for attachments
       * Added option to send confirmation message to sender
       * Enhanced e-mails for unauthorized users
       * Added option to send unauthorized e-mail back to sender
+      * Added option to only allow e-mails from a specified list of smtp
+        servers
+      * Better handling of comment authors (thanks to Petter for suggestion)
   * Bug fixes
       * No longer including wp-config.php
       * If tmpdir is not writable, try a different tmpdir

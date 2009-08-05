@@ -824,21 +824,25 @@ if ( empty($from) ) {
       CheckEmailAddress($from, $config['AUTHORIZED_ADDRESSES']) ||
       CheckEmailAddress($resentFrom, $config['AUTHORIZED_ADDRESSES'])) {
     if (empty($user_ID)){
-        print("$from is authorized to post as the administrator\n");
-        $from = get_option("admin_email");
-        $adminUser=$config['ADMIN_USERNAME'];
-        echo "adminUser='$adminUser'";
-        $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
-        user_login  = '$adminUser'");
-    }
-    else {
+      print("$from is authorized to post as the administrator\n");
+      $from = get_option("admin_email");
+      $adminUser=$config['ADMIN_USERNAME'];
+      echo "adminUser='$adminUser'";
+      $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
+      user_login  = '$adminUser'");
+    } else {
       $poster = $user_ID;
     }
+  } else if ($user->has_cap("post_via_postie")) {
+    $poster = $user_ID;
   }
-  else if ($user->has_cap("post_via_postie")) {
-          $poster = $user_ID;
-  }
-  if (!$poster) {
+  $validSMTP=true; 
+  $config['SMTP']=array('gmail.com', 'martha2.acu.edu', 'smtp.acu.edu');
+  if (!empty($config['SMTP'])) {
+    $validSMTP=checkSMTP($mimeDecodedEmail, $config['SMTP']);
+    echo "validSMTP=$validSMTP\n";
+  } 
+  if (!$poster || !$validSMTP) {
     echo 'Invalid sender: ' . htmlentities($from) . "! Not adding email!\n";
     if ($config["FORWARD_REJECTED_MAIL"]) {
       if (MailToRecipients($mimeDecodedEmail, $config['TEST_EMAIL'], 
@@ -851,6 +855,16 @@ if ( empty($from) ) {
     return;
   } 
   return $poster;
+}
+
+function checkSMTP($mimeDecodedEmail, $smtpservers) {
+  foreach ($mimeDecodedEmail->headers['received'] as $received) {
+    foreach ($smtpservers as $smtp) {
+      if (stristr($received, $smtp))
+        return(true);
+    }
+  }
+  return(false);
 }
 
 /**
@@ -1033,6 +1047,9 @@ function ConvertToUTF_8($encoding,$charset,$body) {
       break;
     case 'koi8-r':
       $body = iconv("koi8-r//TRANSLIT","UTF-8",$body);
+      break;
+    case 'iso-8859-2':
+      $body = iconv("iso-8859-2//TRANSLIT","UTF-8",$body);
       break;
   }
   return($body);
@@ -1529,12 +1546,11 @@ function DisplayMIMEPartTypes($mimeDecodedEmail) {
   * @return boolean
   */
 function CheckEmailAddress($address, $authorized) {
-    $address = strtolower($address);
-    if (!is_array($authorized)
-            || !count($authorized)) {
-        return false;
-    }
-    return(in_array($address,$authorized));
+  $address = strtolower($address);
+  if (!is_array($authorized) || !count($authorized)) {
+    return false;
+  }
+  return(in_array($address,$authorized));
 }
 /**
   *This method works around a problemw with email address with extra <> in the email address
@@ -1735,7 +1751,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
   * @return array - (subject,content)
   */
 function GetSubject(&$mimeDecodedEmail,&$content, $config) {
-  global $charset, $encoding;
+  global $charset;
   //assign the default title/subject
   if ( $mimeDecodedEmail->headers['subject'] == NULL ) {
     if ($config["ALLOW_SUBJECT_IN_MAIL"]) {
@@ -1750,23 +1766,29 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
     //$subject = $mimeDecodedEmail->headers['subject'];
     if ($mimeDecodedEmail->headers["content-transfer-encoding"]!='') {
       $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
-    } else if ($mimeDecodedEmail->headers["content-transfer-encoding"]!='') {
+    } else if ($mimeDecodedEmail->ctype_parameters["content-transfer-encoding"]!='') {
       $encoding = $mimeDecodedEmail->ctype_parameters["content-transfer-encoding"];
-    } else if ($encoding=='') {
+    } else {
       $encoding='7bit';
     }
     if (function_exists(imap_mime_header_decode)) {
       //$elements=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
       //$text = "=?utf-8?b?w6XDpMO2?= unicode";
       $text=$mimeDecodedEmail->headers['subject'];
+      //$text="test emails with ISO 8859-2 cahracters ąęśćółńżźĄĘŚÓŁŃŻŹ";
       //echo "text='$text'\n";
       $elements = imap_mime_header_decode($text);
+      print_r($elements);
       for ($i=0; $i<count($elements); $i++) {
-          //echo "Charset: {$elements[$i]->charset}\n";
-          //echo "Text: ". utf8_encode($elements[$i]->text). "\n\n";
-          $subject.=HandleMessageEncoding($encoding, $elements[$i]->charset,
-              $elements[$i]->text, $config['MESSAGE_ENCODING'], 
-              $config['MESSAGE_DEQUOTE']);
+        $thischarset=$elements[$i]->charset;
+        if ($thischarset=='default')
+          $thischarset=$charset;
+        //echo "Charset: {$thischarset}\n";
+        //echo "Text: ". utf8_encode($elements[$i]->text). "\n\n";
+        $subject.=HandleMessageEncoding($encoding, $thischarset,
+            $elements[$i]->text, $config['MESSAGE_ENCODING'], 
+            $config['MESSAGE_DEQUOTE']);
+        //echo "subject=$subject\n";
       }
       //echo "now subject= $subject\n";
       //if ($element->charset!='') {
