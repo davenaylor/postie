@@ -1199,7 +1199,7 @@ function FilterAppleFile(&$mimeDecodedEmail) {
     }
 }
 function postie_media_handle_upload($part, $post_id, $post_data = array()) {
-  $overrides = array('test_form'=>false, 'test_type'=>false);
+  $overrides = array('test_form'=>false);
         //$overrides = array('test_form'=>false, 'test_size'=>false,
          //                  'test_type'=>false);
   $tmpFile=tempnam(getenv('TEMP'), 'postie');
@@ -1224,17 +1224,20 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   } else {
     $name =  $part->ctype_parameters['name'];
   }
-  $parts=explode('.', $name);
-  $ext=$parts[count($parts)-1];
   $the_file = array('name' => $name,
-                    'ext' => $ext,
-                    'type' => $part->ctype_secondary,
                     'tmp_name' => $tmpFile,
                     'size' => filesize($tmpFile),
                     'error' => ''
                     );
+  if (stristr('.zip', $name)) {
+    $parts=explode('.', $name);
+    $ext=$parts[count($parts)-1];
+    $type=$part->primary . '/' . $part->secondary;
+    $the_file['ext'] = $ext;
+    $the_file['type'] = $type;
+    $overrides['test_type'] = false;
+  }
 
-  print_r($the_file);
   $time = current_time('mysql');
   if ( $post = get_post($post_id) ) {
     if ( substr( $post->post_date, 0, 4 ) > 0 )
@@ -1249,11 +1252,12 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
     return new WP_Error( 'upload_error', $file['error'] );
 
   $url = $file['url'];
-  $type = $file['type'];
+  $type= $file['type'];
   $file = $file['file'];
   $title = preg_replace('/\.[^.]+$/', '', basename($file));
   $content = '';
 
+  print_r($the_file);
   // use image exif/iptc data for title and caption defaults if possible
   if ( $image_meta = @wp_read_image_metadata($file) ) {
     if ( trim($image_meta['title']) )
