@@ -1941,7 +1941,8 @@ function DisplayEmailPost($details) {
   print '<b>Post Id</b>: ' . $details["ID"] . '<br />' . "\n";
   print '<b>Posted content:</b></p><hr />' .
   $details["post_content"] . '<hr /><pre>';
-  echo  "Memory used: ". memory_get_peak_usage(). "\n";
+  if (function_exists('memory_get_peak_usage'))
+    echo  "Memory used: ". memory_get_peak_usage(). "\n";
 }
 /**
   * Takes a value and builds a simple simple yes/no select box
