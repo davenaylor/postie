@@ -512,13 +512,13 @@ function PostToDB($details,$isReply, $postToDb=true, $customImageField=false) {
     }
     if ($customImageField) {
       if (count($details['customImages'])>1) {
-      $imageField=1;
+        $imageField=1;
         foreach ($details['customImages'] as $image) {
           add_post_meta($post_ID, 'image'. $imageField, $image);
           $imageField++;
         }
       } else {
-        add_post_meta($post_ID, 'image', $image);
+        add_post_meta($post_ID, 'image', $details['customImages'][0]);
       }
     }
   }
@@ -855,7 +855,6 @@ if ( empty($from) ) {
 function checkSMTP($mimeDecodedEmail, $smtpservers) {
   if (empty($smtpservers))
     return(true);
-  print_r($mimeDecodedEmail->headers['received']);
   foreach ($mimeDecodedEmail->headers['received'] as $received) {
     foreach ($smtpservers as $smtp) {
       if (stristr($received, $smtp))
@@ -1245,7 +1244,6 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   }
 
   $file = postie_handle_upload($the_file, $overrides, $time);
-  print_r($file);
   //unlink($tmpFile);
 
   if ( isset($file['error']) )
@@ -1257,7 +1255,6 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   $title = preg_replace('/\.[^.]+$/', '', basename($file));
   $content = '';
 
-  print_r($the_file);
   // use image exif/iptc data for title and caption defaults if possible
   if ( $image_meta = @wp_read_image_metadata($file) ) {
     if ( trim($image_meta['title']) )
@@ -1265,7 +1262,6 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
     if ( trim($image_meta['caption']) )
       $content = $image_meta['caption'];
   }
-  //print_r(exif_read_data($file));
 
   // Construct the attachment array
   $attachment = array_merge( array(
@@ -1442,7 +1438,6 @@ function MailToRecipients( &$mail_content,$testEmail=false,
 	if (count($recipients) == 0) {
 		return false;
 	}
-  //print_r($mail_content);
 
     $from = trim($mail_content->headers["from"]);
     $subject = $mail_content->headers['subject'];
@@ -1531,8 +1526,6 @@ function DecodeMIMEMail($email, $decodeHeaders=false) {
     $params['decode_headers'] = $decodeHeaders;
     $params['input'] = $email;
     //$decoded = imap_mime_header_decode($email);
-    //print_r($decoded);
-    //return($decoded);
     return(Mail_mimeDecode::decode($params));
 }
     
@@ -1802,7 +1795,6 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
       //$text="test emails with ISO 8859-2 cahracters ąęśćółńżźĄĘŚÓŁŃŻŹ";
       //echo "text='$text'\n";
       $elements = imap_mime_header_decode($text);
-      print_r($elements);
       for ($i=0; $i<count($elements); $i++) {
         $thischarset=$elements[$i]->charset;
         if ($thischarset=='default')
@@ -2375,7 +2367,7 @@ function SpecialMessageParsing(&$content, &$attachments, $config){
   } else {
     $customImages=array();
     foreach ($attachments["html"] as $value) {
-      preg_match('/<img src="([^"]*)"/', $value, $matches);
+      preg_match("/src=['\"]([^'\"]*)['\"]/", $value, $matches);
       array_push($customImages,$matches[1]);
     }
 

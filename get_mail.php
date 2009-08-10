@@ -5,10 +5,6 @@ include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR
 require_once (dirname(__FILE__). DIRECTORY_SEPARATOR . 'mimedecode.php');
 require_once (dirname(__FILE__). DIRECTORY_SEPARATOR . 'postie-functions.php');
 	
-//if (!TestWPVersion()) {
-    //print("<p>Postie Only Works For Word Press 2.0 and above.</p>");
-    //exit();
-//}
 
 /* END OF USER VARIABLES */
 //some variables

@@ -357,6 +357,7 @@ Currently the following filetypes are supported:
       * Fixed in text captions
       * Fixed SQL problems when updating options
       * Fixed name clashes with other plugins
+      * Fixed custom image field
   * TODO: add filters
 
 =  1.3.beta (2009.07.01) =
