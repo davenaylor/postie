@@ -1614,11 +1614,10 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet='silver',
     $size='32') {
   if ($config['ICON_SET']=='none')
     return('');
-  echo "file=$file\n";
   $fileName=basename($file); 
   $parts=explode('.', $fileName);
   $ext=$parts[count($parts)-1];
-  echo "file='$fileName', ext=$ext, primary=$primary, secondary=$secondary\n";
+  //echo "file='$fileName', ext=$ext, primary=$primary, secondary=$secondary\n";
   $docExts=array('doc', 'docx');
   $docMimes=array('msword', 'vnd.ms-word',
       'vnd.openxmlformats-officedocument.wordprocessingml.document');
@@ -1670,9 +1669,9 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet='silver',
   } else {
     $fileType='default';
   }
-  echo "fileType=$fileType\n";
+  //echo "fileType=$fileType\n";
   $fileName="/icons/$iconSet/$fileType-$size.png";
-  echo "fileName=$fileName\n";
+  //echo "fileName=$fileName\n";
   if (!file_exists(POSTIE_ROOT . $fileName))
     $fileName="/icons/$iconSet/default-$size.png";
   $iconHtml="<img src='" . POSTIE_URL . $fileName . "' alt='$fileType icon' />";
