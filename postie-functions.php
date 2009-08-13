@@ -39,20 +39,11 @@ if (!function_exists('fnmatch')) {
     );
   }
 }
- /*
- * testing some stuff for wordpress mu here to make youtube embedding work
-function um_kses_init() {
-  kses_remove_filters();
-}
-  add_action( 'init', 'um_kses_init', 11 );
-  add_action( 'set_current_user', 'um_kses_init', 11 );
-  */
 
 /**
   * This is the main handler for all of the processing
   */
 function PostEmail($poster,$mimeDecodedEmail,$config) {
-  // Remove KSES if user has unfiltered_html cap
 
   $attachments = array(
           "html" => array(), //holds the html for each image
@@ -98,7 +89,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   ubb2HTML($content);	
 
   if ($config['CONVERTURLS']) 
-    $content=clickableLink($content);
+    $content=clickableLink($content, $config['SHORTCODE']);
   
   //$content = FixEmailQuotes($content);
   
@@ -186,7 +177,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
 /** FUNCTIONS **/
 
 
-function clickableLink($text) {
+function clickableLink($text, $shortcode=false) {
   # this functions deserves credit to the fine folks at phpbb.com
 
   $text = preg_replace('#(script|about|applet|activex|chrome):#is', "\\1:",
@@ -196,7 +187,11 @@ function clickableLink($text) {
   $ret = ' ' . $text;
   // try to embed youtube videos
   $youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
-  $youtube_replace= "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" /><br />";
+  if ($shortcode) {
+    $youtube_replace= "\\1[youtube \\3]\\4";
+  } else {
+    $youtube_replace= "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />\\4"; 
+  }
   $ret = preg_replace($youtube,$youtube_replace, $ret);
 
   // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
@@ -2200,6 +2195,8 @@ function GetDBConfig() {
       $config["WRAP_PRE"] =  'no'; 
     if (!isset($config["CONVERTURLS"])) 
       $config["CONVERTURLS"] =  true; 
+    if (!isset($config["SHORTCODE"])) 
+      $config["SHORTCODE"] =  false; 
     if (!isset($config["ADD_META"]))  
       $config["ADD_META"] =  'no'; 
     $config['ICON_SETS']=array('silver','black','white','custom', 'none');
@@ -2339,29 +2336,27 @@ function TestForMarkdown() {
   * This function handles setting up the basic permissions
   */
 function PostieAdminPermissions() {
-    global $wp_roles;
-    $admin = $wp_roles->get_role("administrator");
-    $admin->add_cap("config_postie");
-    $admin->add_cap("post_via_postie");
-
+  global $wp_roles;
+  $admin = $wp_roles->get_role("administrator");
+  $admin->add_cap("config_postie");
+  $admin->add_cap("post_via_postie");
 }
-function UpdatePostiePermissions($role_access) {
-    global $wp_roles;
-    PostieAdminPermissions();
-    if (!is_array($role_access)) {
-        $role_access = array();
+function UpdatePostiePermissions($role_access, $unfiltered=true) {
+  global $wp_roles;
+  PostieAdminPermissions();
+  if (!is_array($role_access)) {
+    $role_access = array();
+  }
+  foreach($wp_roles->role_names as $roleId => $name) {
+    $role = &$wp_roles->get_role($roleId);
+    if ($roleId != "administrator") {
+      if ($role_access[$roleId]) {
+        $role->add_cap("post_via_postie");
+      } else { 
+        $role->remove_cap("post_via_postie");
+      }
     }
-    foreach($wp_roles->role_names as $roleId => $name) {
-        $role = &$wp_roles->get_role($roleId);
-        if ($roleId != "administrator") {
-            if ($role_access[$roleId]) {
-                $role->add_cap("post_via_postie");
-            }
-            else {
-                $role->remove_cap("post_via_postie");
-            }
-        }
-    }
+  }
 }
 function DebugEmailOutput(&$email,&$mimeDecodedEmail) {
   $file = fopen("test_emails/" . $mimeDecodedEmail->headers["message-id"].".txt","w");

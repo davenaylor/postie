@@ -273,6 +273,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
             <?php echo BuildBooleanSelect("Return rejected mail to sender","RETURN_TO_SENDER",$config["RETURN_TO_SENDER"]);?>
             <?php echo BuildBooleanSelect("Send post confirmation e-mail to sender","CONFIRMATION_EMAIL",$config["CONFIRMATION_EMAIL"]);?>
             <?php echo BuildBooleanSelect("Automatically convert urls to links","CONVERTURLS",$config["CONVERTURLS"]);?>
+            <?php echo BuildBooleanSelect("Use shortcode for embedding video (youtube and others)","SHORTCODE",$config["SHORTCODE"]);?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> </th> 
                 <td>
