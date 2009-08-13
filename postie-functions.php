@@ -39,10 +39,21 @@ if (!function_exists('fnmatch')) {
     );
   }
 }
+ /*
+ * testing some stuff for wordpress mu here to make youtube embedding work
+function um_kses_init() {
+  kses_remove_filters();
+}
+  add_action( 'init', 'um_kses_init', 11 );
+  add_action( 'set_current_user', 'um_kses_init', 11 );
+  */
+
 /**
   * This is the main handler for all of the processing
   */
 function PostEmail($poster,$mimeDecodedEmail,$config) {
+  // Remove KSES if user has unfiltered_html cap
+
   $attachments = array(
           "html" => array(), //holds the html for each image
           "cids" => array(), //holds the cids for HTML email
@@ -455,8 +466,11 @@ function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL,
 
 	//Check to see if there is any mail, if not die
 	$msg_count = $pop3->login($email, $password);
-	if (!$msg_count) {
+	if ($msg_count===false) {
 		$pop3->quit();
+    // we should die if $msg_count is false, but the core wordpress pop3 needs
+    // to be fixed before we can do that
+  //  die("there was a problem logging in. Please check username and password.");
         return(array());
 	}
 
@@ -637,8 +651,17 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         $file_id = postie_media_handle_upload($part, $post_id);
         $file = wp_get_attachment_url($file_id);
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
+        if (in_array($part->ctype_secondary,
+            $config['AUDIOTYPES'])) {
+          $audioTemplate=$config['AUDIOTEMPLATE'];
+        } else {
+          $icon=chooseAttachmentIcon($file, $part->ctype_primary,
+              $part->ctype_secondary, $config['ICON_SET'],
+              $config['ICON_SIZE']);
+          $audioTemplate='<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
+        }
         $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
-            $config['AUDIOTEMPLATE']);
+            $audioTemplate);
         break;
       case 'video':
         $file_id = postie_media_handle_upload($part, $post_id);
@@ -684,7 +707,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         break;
     }		
   }
-  return($meta_return);
+  return(apply_filters('GetContent', $meta_return));
 }
 
 function ubb2HTML(&$text) {
@@ -829,7 +852,7 @@ if ( empty($from) ) {
       $adminUser=$config['ADMIN_USERNAME'];
       echo "adminUser='$adminUser'";
       $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
-      user_login  = '$adminUser'");
+          user_login  = '$adminUser'");
     } else {
       $poster = $user_ID;
     }
@@ -1606,13 +1629,18 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet='silver',
   $xlsMimes=array('msexcel', 'vnd.ms-excel', 
       'vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   $iWorkMimes=array('zip', 'octet-stream');
-  $mpgExts=array('mpg', 'mpeg');
+  $mpgExts=array('mpg', 'mpeg', 'mp2');
+  $mpgMimes=array('mpg', 'mpeg', 'mp2');
   $mp3Exts=array('mp3');
+  $mp3Mimes=array('mp3', 'mpeg3','mpeg');
   $mp4Exts=array('mp4', 'm4v');
   $mp4Mimes=array('mp4', 'mpeg4');
   $aacExts=array('m4a', 'aac');
+  $aacMimes=array('m4a', 'aac', 'mp4');
   $aviExts=array('avi');
+  $aviMimes=array('avi', 'x-msvideo');
   $movExts=array('mov');
+  $movMimes=array('mov', 'quicktime');
   if ($ext=='pdf' && $secondary=='pdf') {
     $fileType='pdf';
   } else if ($ext=='pages' && in_array($secondary, $iWorkMimes)) {
@@ -1629,6 +1657,16 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet='silver',
     $fileType='xls';
   } else if (in_array($ext, $mp4Exts) && in_array($secondary, $mp4Mimes)) { 
     $fileType='mp4';
+  } else if (in_array($ext, $movExts) && in_array($secondary, $movMimes)) { 
+    $fileType='mov';
+  } else if (in_array($ext, $aviExts) && in_array($secondary, $aviMimes)) { 
+    $fileType='avi';
+  } else if (in_array($ext, $mp3Exts) && in_array($secondary, $mp3Mimes)) { 
+    $fileType='mp3';
+  } else if (in_array($ext, $mpgExts) && in_array($secondary, $mpgMimes)) { 
+    $fileType='mpg';
+  } else if (in_array($ext, $aacExts) && in_array($secondary, $aacMimes)) { 
+    $fileType='aac';
   } else {
     $fileType='default';
   }
@@ -2017,34 +2055,33 @@ function ResetPostieConfig() {
   *@return boolean
   */
 function UpdatePostieConfig($data) {
-    SetupConfiguration();
-    $key_arrays = GetListOfArrayConfig();
-    $config = GetDBConfig();
-    foreach($config as $key => $value) {
-        if (isset($data[$key])) {
-            if (in_array($key,$key_arrays)) { //This is stored as an array
-                $data[$key]=trim($data[$key]);
-                if (strstr($data[$key], "\n")) {
-                  $delim = "\n";
-                } else {
-                  $delim = ',';
-                }
-                $config[$key] = array();
-                $values = explode($delim,$data[$key]);
-                foreach($values as $item) {
-                    if (trim($item)) {
-                        $config[$key][] = trim($item);
-                    }
-                }
-            }
-            else {
-                $config[$key] = FilterNewLines($data[$key]);
-            }
+  SetupConfiguration();
+  $key_arrays = GetListOfArrayConfig();
+  $config = GetDBConfig();
+  foreach($config as $key => $value) {
+    if (isset($data[$key])) {
+      if (in_array($key,$key_arrays)) { //This is stored as an array
+        $data[$key]=trim($data[$key]);
+        if (strstr($data[$key], "\n")) {
+          $delim = "\n";
+        } else {
+          $delim = ',';
         }
+        $config[$key] = array();
+        $values = explode($delim,$data[$key]);
+        foreach($values as $item) {
+          if (trim($item)) {
+            $config[$key][] = trim($item);
+          }
+        }
+      } else {
+        $config[$key] = FilterNewLines($data[$key]);
+      }
     }
-    WriteConfig($config);
-    UpdatePostiePermissions($data["ROLE_ACCESS"]);
-    return(1);
+  }
+  WriteConfig($config);
+  UpdatePostiePermissions($data["ROLE_ACCESS"]);
+  return(1);
 }
 /**
   * This handles actually writing out the changes
@@ -2056,18 +2093,11 @@ function WriteConfig($config) {
     $label = apply_filters('content_save_pre', $key);
     $q = $wpdb->query($wpdb->prepare("DELETE FROM ". POSTIE_TABLE . "
         WHERE label = '$label';"));
-    if (!is_array($value)) {
-      $q = $wpdb->query($wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
-          (label,value) VALUES
-          ('$label','". $value ."');"));
-          //('$label','".apply_filters('content_save_pre', $value)."');"));
-    } else {
-      foreach($value as $item) {
-        $q = $wpdb->query($wpdb->prepare("INSERT INTO ". POSTIE_TABLE
-            . " (label,value) VALUES
-            ('$label','".apply_filters('content_save_pre', $item)."');"));
-      }
-    }
+    if (is_array($value)) 
+      $value=serialize($value);
+    $q = $wpdb->query($wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
+        (label,value) VALUES
+        ('$label','". $value ."');"));
   }
 }
 /**
@@ -2075,25 +2105,25 @@ function WriteConfig($config) {
   * @return array
   */
 function ReadDBConfig() {
-    SetupConfiguration();
-    $config = array();
-    global $wpdb;
-    $data = $wpdb->get_results("SELECT label,value FROM ". POSTIE_TABLE .";");
-    if (is_array($data)) {
-        foreach($data as $row) {
-            if (in_array($row->label,GetListOfArrayConfig())) {
-                if (!is_array($config[$row->label])) {
-                    $config[$row->label] = array();
-                }
-                $config[$row->label][] = $row->value;
-            }
-            else {
-                $config[$row->label] = $row->value;
-            }
+  SetupConfiguration();
+  $config = array();
+  global $wpdb;
+  $data = $wpdb->get_results("SELECT label,value FROM ". POSTIE_TABLE .";");
+  if (is_array($data)) {
+    foreach($data as $row) {
+      if (in_array($row->label,GetListOfArrayConfig())) {
+        /*
+        if (!is_array($config[$row->label])) {
+            $config[$row->label] = array();
         }
+        */
+        $config[$row->label] = unserialize($row->value);
+      } else {
+        $config[$row->label] = $row->value;
+      }
     }
-
-    return($config);
+  }
+  return($config);
 }
 /**
   * This handles the configs that are stored in the data base
@@ -2194,6 +2224,8 @@ function GetDBConfig() {
     if (!isset($config["VIDEO1TYPES"])) 
       $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', 
           '3gp2', 'mov');
+    if (!isset($config["AUDIOTYPES"])) 
+      $config['AUDIOTYPES'] = array('m4a', 'mp3', 'ogg', 'wav');
     if (!isset($config["SELECTED_VIDEO2TEMPLATE"])) 
       $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
     include('templates/video2_templates.php');
@@ -2249,7 +2281,7 @@ function GetConfig() {
 function GetListOfArrayConfig() {
   return(array('SUPPORTED_FILE_TYPES','AUTHORIZED_ADDRESSES',
       'SIG_PATTERN_LIST','BANNED_FILES_LIST', 'VIDEO1TYPES', 
-      'VIDEO2TYPES', 'SMTP'));
+      'VIDEO2TYPES', 'AUDIOTYPES', 'SMTP'));
 }
 /**
   * Detects if they can do IMAP

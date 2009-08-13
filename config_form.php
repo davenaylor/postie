@@ -473,6 +473,16 @@ attribute_escape($config['AUDIOTEMPLATE']) ?>" />
        'AUDIOTEMPLATESELECT', 'SELECTED_AUDIOTEMPLATE','funky.mp3', true);" cols='70' rows='7' id="AUDIOTEMPLATE"
    name="AUDIOTEMPLATE"><?php echo attribute_escape($config['AUDIOTEMPLATE']) ?></textarea>
 			 </td>
+      </tr>
+      <tr> 
+        <th width="33%" valign="top" scope="row">
+        <?php _e('Audio file types:') ?><br /><span class='recommendation'>
+        <?php _e('Use the audio template for these files types (separated by
+        commas)', 'postie') ?></span> </th> 
+          <td>
+          <input name="AUDIOTYPES" type="text" id="AUDIOTYPES"
+          value="<?php if ($config['AUDIOTYPES']!='') echo implode(', ', $config["AUDIOTYPES"]); ?>" size="40" />                </td> 
+      </tr> 
             </table> 
     </td> 
     </tr> 
