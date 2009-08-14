@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.8
-Stable tag: 1.3.beta
+Stable tag: 1.3.0
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -19,50 +19,31 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 
 = What's new? = 
 
-* 1.3.0 (2009.07.xx)
-  * No longer including wp-config.php
-  * Added mpeg4 to default list of videotypes
-  * If tmpdir is not writable, try a different tmpdir
-  * More subject encoding fixes
-  * Updated image templates, which were causing problems for cron
-  * Fixed in text captions
-  * Fixed SQL problems when updating options
-  * Added support for KOI8-R character set (cyrillic)
-  * TODO: name clashes
-  * TODO: custom icons
-  * TODO: add filters
-
-* 1.3.beta (2009.07.01)
-  * Mores fixes for character issues in subject
-  * Now handling Windows-1256 (arabic) character set
-  * Fixed image uploading on windows servers
-  * Fixed replying to message adds comment
-  * Uploading pictures via MMS should now work
-  * Fixed some issues with e-mails from outloook 12
-  * Greatly reduced number of database queries
-  * No longer requiring config_handler.php
-
-* 1.3.alpha (2009.06.05)
-  * Now using default wordpress image and upload handling, which means:
-      * No more creating special directories for postie
-      * No more confusion about imagemagick
-      * Can now use the [gallery] feature of wordpress
-      * Attachments are now connected to posts in the database
-      * All image resizing uses wordpress's default settings (under media)
-  * Configuration, settings and documentation improvements
-      * Completely redesigned settings page (mostly thanks to Rainman)
-      * Reset configuration no longer deletes mailserver settings
-      * Now including help files and faq directly in settings page
-  * More media features
-      * Automatically turn links to youtube into an embedded player
-      * Added option to embed audio files with custom templates
-      * Video options are now template based
-      * Image options are now solely template based, with several new default
-        templates
-  * Bug fixes
-      * Uploading images from vodafone phones should now work
-      * Correctly handling Windows-1252 encoding
-      * Correctly handling non-ascii characters in subject line
+* 1.3.0 (2009.08.14) 
+    * Features
+        * Added mpeg4 to default list of videotypes
+        * Added support for KOI8-R character set (cyrillic)
+        * Added support for iso-8859-2 character set (eastern european)
+        * Added option to include custom icons for attachments
+        * Added option to send confirmation message to sender
+        * Enhanced e-mails for unauthorized users
+        * Added option to send unauthorized e-mail back to sender
+        * Added option to only allow e-mails from a specified list of smtp
+          servers
+        * Added option to use shortcode for embedding videos (works with the
+          videos plugin http://www.daburna.de/download/videos-plugin.zip
+        * Better handling of comment authors (thanks to Petter for suggestion)
+        * Simplified message options (now includes an advanced options section)
+        * Added filter ability for post content
+    * Bug fixes
+        * No longer including wp-config.php
+        * If tmpdir is not writable, try a different tmpdir
+        * More subject encoding fixes
+        * Updated image templates, which were causing problems for cron
+        * Fixed in text captions
+        * Fixed SQL problems when updating options
+        * Fixed name clashes with other plugins
+        * Fixed custom image field
 
 == Installation ==
 * Either:
@@ -336,7 +317,7 @@ Currently the following filetypes are supported:
 
 == CHANGELOG ==
 
-= 1.3.0 (2009.07.xx) =
+= 1.3.0 (2009.08.14) =
   * Features
       * Added mpeg4 to default list of videotypes
       * Added support for KOI8-R character set (cyrillic)
@@ -347,8 +328,11 @@ Currently the following filetypes are supported:
       * Added option to send unauthorized e-mail back to sender
       * Added option to only allow e-mails from a specified list of smtp
         servers
+      * Added option to use shortcode for embedding videos (works with the
+        videos plugin http://www.daburna.de/download/videos-plugin.zip
       * Better handling of comment authors (thanks to Petter for suggestion)
       * Simplified message options (now includes an advanced options section)
+      * Added filter ability for post content
   * Bug fixes
       * No longer including wp-config.php
       * If tmpdir is not writable, try a different tmpdir
@@ -358,7 +342,6 @@ Currently the following filetypes are supported:
       * Fixed SQL problems when updating options
       * Fixed name clashes with other plugins
       * Fixed custom image field
-  * TODO: add filters
 
 =  1.3.beta (2009.07.01) =
   * Mores fixes for character issues in subject
