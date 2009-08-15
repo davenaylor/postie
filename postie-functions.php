@@ -903,6 +903,8 @@ function StartFilter(&$content,$start) {
 * @param array - a list of patterns to determine if it is a sig block
 */
 function RemoveSignature( &$content,$filterList = array('--','- --' )) {
+  if (empty($filterList))
+    return;
 $arrcontent = explode("\n", $content);
 $i = 0;
 $pattern='/^(';
