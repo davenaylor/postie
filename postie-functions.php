@@ -153,7 +153,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
       'email_author'  => $postAuthorDetails['email'],
       'post_date'   => $post_date,
       'post_date_gmt'  => $post_date_gmt,
-      'post_content'  => $content,
+      'post_content'  => apply_filters('content_save_pre',$content),
       'post_title'  =>  $subject,
       'post_modified'  => $post_date,
       'post_modified_gmt' => $post_date_gmt,
@@ -550,6 +550,7 @@ function BannedFileName($filename, $bannedFiles) {
 
 //tear apart the meta part for useful information
 function GetContent ($part,&$attachments, $post_id, $config) {
+  print_r($part);
   global $charset, $encoding;
   /*
   if (function_exists(imap_mime_header_decode) && $charset=='') {
@@ -827,11 +828,12 @@ function ValidatePoster( &$mimeDecodedEmail, $config ) {
   $poster = NULL;
   $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
   $resentFrom = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["resent-from"]));
-
+/*
 if ( empty($from) ) { 
       echo 'Invalid Sender - Emtpy! ';
       return;
   }
+  */
 
   //See if the email address is one of the special authorized ones
   print("Confirming Access For $from \n");
@@ -2046,6 +2048,30 @@ function ResetPostieConfig() {
   }
   UpdatePostieConfig($config);
 }
+
+function UpdateArrayConfig() {
+  global $wpdb;
+  $key_arrays = GetListOfArrayConfig();
+  $data = $wpdb->get_results("SELECT label,value FROM ". POSTIE_TABLE .";");
+  if (is_array($data)) {
+    foreach($data as $row) {
+      if (in_array($row->label,$key_arrays)) {
+        if (unserialize($row->value)) {
+          $config[$row->label] = unserialize($row->value);
+        } else {
+          if (!is_array($config[$row->label])) {
+            $config[$row->label] = array();
+          }
+          $config[$row->label][] = $row->value;
+        }
+      } else {
+        $config[$row->label] = $row->value;
+      }
+    }
+  }
+  WriteConfig($config);
+  echo "updating database";
+}
 /**
   * This function handles updating the configuration 
   *@return boolean
@@ -2086,14 +2112,16 @@ function UpdatePostieConfig($data) {
 function WriteConfig($config) {
   global $wpdb;
   foreach($config as $key=>$value) {
-    $label = apply_filters('content_save_pre', $key);
+    $label = $key;
     $q = $wpdb->query($wpdb->prepare("DELETE FROM ". POSTIE_TABLE . "
         WHERE label = '$label';"));
-    if (is_array($value)) 
+    if (is_array($value))  {
       $value=serialize($value);
-    $q = $wpdb->query($wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
+    }
+    $theQuery=$wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
         (label,value) VALUES
-        ('$label','". $value ."');"));
+        ('$label','". $value ."');");
+    $q = $wpdb->query($theQuery);
   }
 }
 /**
@@ -2108,11 +2136,6 @@ function ReadDBConfig() {
   if (is_array($data)) {
     foreach($data as $row) {
       if (in_array($row->label,GetListOfArrayConfig())) {
-        /*
-        if (!is_array($config[$row->label])) {
-            $config[$row->label] = array();
-        }
-        */
         $config[$row->label] = unserialize($row->value);
       } else {
         $config[$row->label] = $row->value;

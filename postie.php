@@ -83,6 +83,7 @@ if (is_admin()) {
     add_action('init', 'postie_load_domain'); 
   }
 }
+register_activation_hook(__FILE__, 'UpdateArrayConfig');
 /* Version info
 $Id$
 */
