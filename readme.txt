@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.8
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -19,6 +19,13 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 
 = What's new? = 
 
+* 1.3.1 (2009.08.24)
+    * Changed GetContent filter to postie_content
+    * Added postie_subject filter
+    * Added database upgrade hook on activation
+    * Fixed bug where content would be empty if trying to remove signature,
+      and signature list was emtpy
+ 
 * 1.3.0 (2009.08.14) 
     * Features
         * Added mpeg4 to default list of videotypes
@@ -53,7 +60,7 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 * Login to WordPress as an administrator
 * Goto the Plugins tab in the WordPress Admin Site
 * Activate "Postie"
-* Goto to the "Settings" tab and click on the sub-tab "Configure Postie" to configure it.
+* Goto to the "Settings" tab and click on the sub-tab "Postie" to configure it.
 * Make sure you enter the mailserver information correctly, including the type
   of connection and the port number. Common port configurations:
   * pop3: 110 
@@ -93,18 +100,6 @@ If you don't have access to cron, you can run postie without it.
   you only get one visit every 30 minutes, then it might take 30 minutes for a
   post to show up.
 
-== Options and Settings ==
-
-* You can set the starting characters for you signature so that it
-  is removed from the posting message
-* You can set a list of banned file names so if you provider adds
-  images to your post they don't show up in the blog
-* If you post from an email address that is not a valid author the
-  email post will be forwarded to the admin
-* You can control if you want HTML allowed in the body or subject
-  of your post
-* Lets you set a default subject when you don't set one
-* Defaults to posting to the default category you set in Word Press
 
 == Usage ==
 * If you put in :start - the message processing won't start until it sees that string
@@ -314,8 +309,25 @@ Currently the following filetypes are supported:
 * rtf - rich text format
 * txt - plain text document
 
+= Can I add special text to the body of the post when using postie? =
+
+Yes. You can create your own function, and use the postie_post filter
+Two short examples are included in the filterPostie.php file
+
+= Can I add special text to the title of the post when using postie? =
+
+Yes. You can create your own function, and use the postie_post filter
+Two short examples are included in the filterPostie.php file
+
 
 == CHANGELOG ==
+
+= 1.3.1 (2009.08.24) =
+    * Changed GetContent filter to postie_post
+    * Added database upgrade hook on activation
+    * Fixed bug where content would be empty if trying to remove signature,
+      and signature list was emtpy
+    * Updated FAQ and readme
 
 = 1.3.0 (2009.08.14) =
   * Features

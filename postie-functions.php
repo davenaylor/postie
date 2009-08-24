@@ -167,6 +167,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
       'customImages' => $customImages,
       'post_status' => $post_status
   );
+  $details = apply_filters('postie_post', $details);
   DisplayEmailPost($details);
   PostToDB($details,$isReply, $config['POST_TO_DB'],
       $config['CUSTOM_IMAGE_FIELD']); 
@@ -550,7 +551,6 @@ function BannedFileName($filename, $bannedFiles) {
 
 //tear apart the meta part for useful information
 function GetContent ($part,&$attachments, $post_id, $config) {
-  print_r($part);
   global $charset, $encoding;
   /*
   if (function_exists(imap_mime_header_decode) && $charset=='') {
@@ -703,7 +703,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         break;
     }		
   }
-  return(apply_filters('GetContent', $meta_return));
+  return($meta_return);
 }
 
 function ubb2HTML(&$text) {

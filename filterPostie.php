@@ -1,0 +1,60 @@
+<?php
+/*
+Plugin Name: Postie Filter
+Plugin URI: http://blog.robfelty.com/plugins/postie
+Description: Adds my own custom filter to messages posted by postie
+Version: 1.3.1
+Author: Robert Felty
+Author URI: http://blog.robfelty.com/
+*/
+
+/* 
+ * Any filter function you write should accept one argument, which is the post
+ array, which contains the following fields:
+  'post_author'  
+  'comment_author'  
+  'comment_author_url'  
+  'user_ID' 
+  'email_author'  
+  'post_date'   
+  'post_date_gmt'  
+  'post_content'  
+  'post_title'  
+  'post_modified'  
+  'post_modified_gmt' 
+  'ping_status' 
+  'post_category' 
+  'tags_input' 
+  'comment_status' 
+  'post_name' 
+  'post_excerpt' 
+  'ID' 
+  'customImages' 
+  'post_status' 
+
+Your function can modify any of these fields. It should then return the array
+back.
+
+Two example functions are provided here
+*/
+
+function filter_content($post) {
+  //this function prepends a link to bookmark the category of the post
+  $this_cat = get_the_category($post['ID']);
+  //var_dump($this_cat);
+  $link = '<a href="' . get_category_link($this_cat[0]->term_id) . 
+      '">Bookmark this category</a>' .  "\n";
+  $post['post_content'] = $link . $post['post_content'];
+  return ($post);
+}
+
+function filter_title($post) {
+  //this function appends "(via postie)" to the title (subject)
+  $post['post_title']= $post['post_title'] . ' (via postie)';
+  return ($post);
+}
+
+add_filter('postie_post', 'filter_title');
+add_filter('postie_post', 'filter_content');
+
+?>
