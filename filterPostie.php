@@ -54,7 +54,25 @@ function filter_title($post) {
   return ($post);
 }
 
+function auto_tag($post) {
+  // this function automatically inserts tags for a post
+  $my_tags=array('cooking', 'latex', 'wordpress');
+  foreach ($my_tags as $my_tag) {
+    if (stripos($post['post_content'], $my_tag)!==false)
+      array_push($post['tags_input'], $my_tag);
+  }
+  return ($post);
+}
+
+function add_custom_field($post) {
+  //this function appends "(via postie)" to the title (subject)
+  add_post_meta($post['ID'], 'postie', 'postie');
+  return ($post);
+}
+
 add_filter('postie_post', 'filter_title');
 add_filter('postie_post', 'filter_content');
+add_filter('postie_post', 'add_custom_field');
+add_filter('postie_post', 'auto_tag');
 
 ?>

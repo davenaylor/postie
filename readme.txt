@@ -322,6 +322,9 @@ Two short examples are included in the filterPostie.php file
 
 == CHANGELOG ==
 
+= 1.3.2 (2009.xx.xx) =
+    * tags are now always an array, even if no default tags are set 
+
 = 1.3.1 (2009.08.24) =
     * Changed GetContent filter to postie_post
     * Added database upgrade hook on activation

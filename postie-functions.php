@@ -1816,7 +1816,7 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
     }
     $mimeDecodedEmail->headers['subject'] = $subject;
   } else {	
-    //$subject = $mimeDecodedEmail->headers['subject'];
+    $subject = $mimeDecodedEmail->headers['subject'];
     if ($mimeDecodedEmail->headers["content-transfer-encoding"]!='') {
       $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
     } else if ($mimeDecodedEmail->ctype_parameters["content-transfer-encoding"]!='') {
@@ -1868,12 +1868,12 @@ function postie_get_tags(&$content, $defaultTags) {
   global $wpdb;
   $post_tags = array();
   //try and determine tags
-  if ( preg_match('/tags: ?(.*)\n/', $content, $matches))  {
+  if ( preg_match('/tags: ?(.*)\n/i', $content, $matches))  {
     $content = str_replace($matches[0], "", $content);
     $post_tags = preg_split("/,\s*/", $matches[1]);
   }
-  if (!count($post_tags)) {
-      $post_tags =  $defaultTags;
+  if (!count($post_tags) && $defaultTags!='') {
+      $post_tags =  preg_split("/,\s*/", $defaultTags);
   }
   return($post_tags);
 }
