@@ -1814,7 +1814,7 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
     }
     $mimeDecodedEmail->headers['subject'] = $subject;
   } else {	
-    //$subject = $mimeDecodedEmail->headers['subject'];
+    $subject = $mimeDecodedEmail->headers['subject'];
     if ($mimeDecodedEmail->headers["content-transfer-encoding"]!='') {
       $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
     } else if ($mimeDecodedEmail->ctype_parameters["content-transfer-encoding"]!='') {
@@ -1823,6 +1823,7 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
       $encoding='7bit';
     }
     if (function_exists(imap_mime_header_decode)) {
+      $subject='';
       //$elements=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
       //$text = "=?utf-8?b?w6XDpMO2?= unicode";
       $text=$mimeDecodedEmail->headers['subject'];
@@ -1866,7 +1867,7 @@ function postie_get_tags(&$content, $defaultTags) {
   global $wpdb;
   $post_tags = array();
   //try and determine tags
-  if ( preg_match('/tags: ?(.*)\n/', $content, $matches))  {
+  if ( preg_match('/tags: ?(.*)\n/i', $content, $matches))  {
     $content = str_replace($matches[0], "", $content);
     $post_tags = preg_split("/,\s*/", $matches[1]);
   }
