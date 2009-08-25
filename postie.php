@@ -87,4 +87,14 @@ register_activation_hook(__FILE__, 'UpdateArrayConfig');
 /* Version info
 $Id$
 */
+$config=GetConfig();
+//print_r($config);
+if ($config['MAIL_SERVER']=='') {
+  function postie_enter_info() {
+    echo "
+    <div id='postie-info' class='updated fade'><p><strong>".__('Akismet is almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your WordPress.com API key</a> for it to work.'), "plugins.php?page=akismet-key-config")."</p></div>
+    ";
+  }
+  add_action('admin_notices', 'postie_enter_info');
+}
 ?>
