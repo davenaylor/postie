@@ -93,22 +93,20 @@ function postie_warnings() {
   if ($config['MAIL_SERVER']=='' && !isset($_POST['submit'])) {
     function postie_enter_info() {
       echo "
-      <div id='postie-info-warning' class='updated fade'><p><strong>".__('Postie is
-      almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter
-      your email settings</a> for it to work.'), "options-general.php?page=postie/postie.php")."</p></div>
-      ";
+      <div id='postie-info-warning' class='updated fade'><p><strong>".
+      __('Postie is almost ready.', 'postie')."</strong> "
+      .sprintf(__('You must <a href="%1$s">enter your email settings</a> for it to work.','postie'), "options-general.php?page=postie/postie.php")."</p></div> ";
     }
     add_action('admin_notices', 'postie_enter_info');
   }
   if (!function_exists('imap_mime_header_decode') && $_GET['activate']==true) {
     function postie_imap_warning() {
-      echo "
-      <div id='postie-imap-warning' class='error'><p><strong>".__('Warning:
-      the IMAP php extension is not installed. Postie may not function
-      correctly without this extension (especially for non-English messages)
-      .')."</strong> ".sprintf(__('Please see the <a href="%1$s">FAQ
-      </a> for more information.'), "options-general.php?page=postie/postie.php")."</p></div>
-      ";
+      echo "<div id='postie-imap-warning' class='error'><p><strong>";
+      echo __('Warning: the IMAP php extension is not installed.', 'postie');
+      echo __('Postie may not function correctly without this extension (especially for non-English messages).', 'postie');
+      echo "</strong> ";
+      //echo __('Warning: the IMAP php extension is not installed. Postie may not function correctly without this extension (especially for non-English messages) .', 'postie')."</strong> ".
+      echo sprintf(__('Please see the <a href="%1$s">FAQ </a> for more information.'), "options-general.php?page=postie/postie.php", 'postie')."</p></div> ";
     }
     add_action('admin_notices', 'postie_imap_warning');
   }

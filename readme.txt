@@ -338,12 +338,14 @@ The IMAP extension is known to be installed on the following popular webhosts:
 
 == CHANGELOG ==
 
-= 1.3.2 (2009.xx.xx) =
+= 1.3.2 (2009.08.26) =
     * tags are now always an array, even if no default tags are set 
     * Subject is showing up again if you do not have the IMAP extension
       installed
     * More information on the IMAP extension and more user-friendly
       installation
+    * Fixed problems with smtp server settings in 1.3.1
+    * Added russian translation (thanks to fatcow.com)
 
 = 1.3.1 (2009.08.24) =
     * Changed GetContent filter to postie_post
