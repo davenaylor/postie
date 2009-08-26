@@ -82,19 +82,35 @@ if (is_admin()) {
     }
     add_action('init', 'postie_load_domain'); 
   }
+  postie_warnings(); 
 }
 register_activation_hook(__FILE__, 'UpdateArrayConfig');
 /* Version info
 $Id$
 */
-$config=GetConfig();
-//print_r($config);
-if ($config['MAIL_SERVER']=='') {
-  function postie_enter_info() {
-    echo "
-    <div id='postie-info' class='updated fade'><p><strong>".__('Akismet is almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your WordPress.com API key</a> for it to work.'), "plugins.php?page=akismet-key-config")."</p></div>
-    ";
+function postie_warnings() {
+  $config=GetConfig();
+  if ($config['MAIL_SERVER']=='' && !isset($_POST['submit'])) {
+    function postie_enter_info() {
+      echo "
+      <div id='postie-info-warning' class='updated fade'><p><strong>".__('Postie is
+      almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter
+      your email settings</a> for it to work.'), "options-general.php?page=postie/postie.php")."</p></div>
+      ";
+    }
+    add_action('admin_notices', 'postie_enter_info');
   }
-  add_action('admin_notices', 'postie_enter_info');
+  if (!function_exists('imap_mime_header_decode') && $_GET['activate']==true) {
+    function postie_imap_warning() {
+      echo "
+      <div id='postie-imap-warning' class='error'><p><strong>".__('Warning:
+      the IMAP php extension is not installed. Postie may not function
+      correctly without this extension (especially for non-English messages)
+      .')."</strong> ".sprintf(__('Please see the <a href="%1$s">FAQ
+      </a> for more information.'), "options-general.php?page=postie/postie.php")."</p></div>
+      ";
+    }
+    add_action('admin_notices', 'postie_imap_warning');
+  }
 }
 ?>

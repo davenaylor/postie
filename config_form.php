@@ -556,8 +556,10 @@ attribute_escape($config['AUDIOTEMPLATE']) ?>" />
   </div>
 	<div id="simpleTabs-content-8" class="simpleTabs-content">
   <?php include('faq.html'); ?>
-  </div>
-		<input type="submit" name="Submit" value="<?php _e('Update Options', 'postie') ?> &raquo;" class='button' />
+  </div> <p class='submit'>
+		<input type="submit" name="submit" value="<?php _e('Update Options',
+    'postie') ?> &raquo;" />
+    </p>
 </form> 
 <div id="w3c">
     <a href="http://validator.w3.org/check?uri=referer"><img src="<?php echo '../wp-content/plugins/postie/images/valid-xhtml10-blue.png'; ?>" alt="Valid XHTML 1.0 Transitional" height="31" width="88" /></a>

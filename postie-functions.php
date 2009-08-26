@@ -2059,10 +2059,11 @@ function UpdateArrayConfig() {
         if (unserialize($row->value)) {
           $config[$row->label] = unserialize($row->value);
         } else {
-          if (!is_array($config[$row->label])) {
+        echo "label='" . $row->label . "', value='" . $row->value . "'\n";
+          if (!is_array($config[$row->label])) 
             $config[$row->label] = array();
-          }
-          $config[$row->label][] = $row->value;
+          if ($row->value!='a:0:{}') 
+            $config[$row->label][] = $row->value;
         }
       } else {
         $config[$row->label] = $row->value;

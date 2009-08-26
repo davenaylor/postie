@@ -319,11 +319,31 @@ Two short examples are included in the filterPostie.php file
 Yes. You can create your own function, and use the postie_post filter
 Two short examples are included in the filterPostie.php file
 
+= Is the IMAP extension required for postie? =
+
+The IMAP extension is not required, but it is strongly recommended, especially
+is you are using non-English text. There is more information on php.net about
+installing the IMAP extension. If you have control over your server, it is
+often not hard to install. 
+
+On Ubuntu, try
+sudo apt-get install php5-imap
+
+On Fedora, try
+sudo yuminstall php-imap
+
+The IMAP extension is known to be installed on the following popular webhosts:
+* Dreamhost
+
 
 == CHANGELOG ==
 
 = 1.3.2 (2009.xx.xx) =
     * tags are now always an array, even if no default tags are set 
+    * Subject is showing up again if you do not have the IMAP extension
+      installed
+    * More information on the IMAP extension and more user-friendly
+      installation
 
 = 1.3.1 (2009.08.24) =
     * Changed GetContent filter to postie_post
