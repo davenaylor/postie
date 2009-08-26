@@ -2057,9 +2057,12 @@ function UpdateArrayConfig() {
     foreach($data as $row) {
       if (in_array($row->label,$key_arrays)) {
         if (unserialize($row->value)) {
-          $config[$row->label] = unserialize($row->value);
+          if ($row->value=='a:1:{i:0;s:6:"a:0:{}";}') {
+            $config[$row->label] = array(); 
+          } else {
+            $config[$row->label] = unserialize($row->value);
+          }
         } else {
-        echo "label='" . $row->label . "', value='" . $row->value . "'\n";
           if (!is_array($config[$row->label])) 
             $config[$row->label] = array();
           if ($row->value!='a:0:{}') 
