@@ -10,6 +10,7 @@
 <li id='question-9'><a href='#answer-9'>How can I add custom attachment icons?</a></li>
 <li id='question-10'><a href='#answer-10'>Can I add special text to the body of the post when using postie?</a></li>
 <li id='question-11'><a href='#answer-11'>Can I add special text to the title of the post when using postie?</a></li>
+<li id='question-12'><a href='#answer-12'>Is the IMAP extension required for postie?</a></li>
 <h3>Frequently Asked Questions</h3>
 	<h4 id='answer-0'>Mail is not showing up right when I send html (rich formatted) e-mail!</h4>
 
@@ -138,4 +139,20 @@ Two short examples are included in the filterPostie.php file</p>
 <h4 id='answer-11'>Can I add special text to the title of the post when using postie?</h4>
 
 <p>Yes. You can create your own function, and use the postie_post filter
-Two short examples are included in the filterPostie.php file</p>	
+Two short examples are included in the filterPostie.php file</p>
+
+<h4 id='answer-12'>Is the IMAP extension required for postie?</h4>
+
+<p>The IMAP extension is not required, but it is strongly recommended, especially
+is you are using non-English text. There is more information on php.net about
+installing the IMAP extension. If you have control over your server, it is
+often not hard to install. </p>
+
+<p>On Ubuntu, try
+sudo apt-get install php5-imap</p>
+
+<p>On Fedora, try
+sudo yuminstall php-imap</p>
+
+<p>The IMAP extension is known to be installed on the following popular webhosts:
+* Dreamhost</p>	

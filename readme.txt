@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.8
-Stable tag: 1.3.1
+Stable tag: 1.3.2
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -338,7 +338,7 @@ The IMAP extension is known to be installed on the following popular webhosts:
 
 == CHANGELOG ==
 
-= 1.3.2 (2009.08.26) =
+= 1.3.2 (2009.08.27) =
     * tags are now always an array, even if no default tags are set 
     * Subject is showing up again if you do not have the IMAP extension
       installed
