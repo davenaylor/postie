@@ -553,10 +553,8 @@ function BannedFileName($filename, $bannedFiles) {
 function GetContent ($part,&$attachments, $post_id, $config) {
   global $charset, $encoding;
   /*
-  if (function_exists(imap_mime_header_decode) && $charset=='') {
-    $element=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
-    $charset = $element->charset;
-  }
+  if (!function_exists(imap_mime_header_decode))
+    echo "you need to install the php-imap extension for full functionality, including mime header decoding\n";
   */
   $meta_return = NULL;	
   echo "primary= " . $part->ctype_primary . ", secondary = " .  $part->ctype_secondary . "\n";
@@ -2025,7 +2023,23 @@ function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
   */
 function SetupConfiguration() {
     if (! function_exists('maybe_create_table')) {
-        require_once(ABSPATH . DIRECTORY_SEPARATOR. 'wp-admin'.DIRECTORY_SEPARATOR.'upgrade-functions.php');
+      function maybe_create_table($table_name, $create_ddl) {
+        global $wpdb;
+        foreach ($wpdb->get_col("SHOW TABLES",0) as $table ) {
+          if ($table == $table_name) {
+            return true;
+          }
+        }
+        //didn't find it try to create it.
+        $wpdb->query($create_ddl);
+        // we cannot directly tell that whether this succeeded!
+        foreach ($wpdb->get_col("SHOW TABLES",0) as $table ) {
+          if ($table == $table_name) {
+            return true;
+          }
+        }
+        return false;
+      }
     }
     $create_table_sql = "CREATE TABLE ".POSTIE_TABLE ." (
          label text NOT NULL,
