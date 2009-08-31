@@ -2122,6 +2122,11 @@ function UpdatePostieConfig($data) {
   }
   WriteConfig($config);
   UpdatePostiePermissions($data["ROLE_ACCESS"]);
+  // If we are using cronless, we also update the cronless events
+  if ($config['CRONLESS']!='') {
+    postie_decron();
+    postie_cron();
+  }
   return(1);
 }
 /**
