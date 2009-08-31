@@ -1235,7 +1235,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   }
   //print_r($part->ctype_parameters);
   if ($part->ctype_parameters['name']=='') {
-    if ($part->ctype_parameters['name']!='') {
+    if ($part->ctype_parameters['filename']!='') {
       $name = $part->d_parameters['filename'];
     } else {
       $name = 'postie-media.'. $part->ctype_secondary;

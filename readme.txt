@@ -343,6 +343,7 @@ The IMAP extension is known to be installed on the following popular webhosts:
     * Fixed error in wp-mu
     * Cronless postie now correctly updates when changing the setting in the
       postie settings
+    * Small fix in handling of names of attachments (thanks to Teejot)
 
 = 1.3.2 (2009.08.27) =
     * tags are now always an array, even if no default tags are set 
