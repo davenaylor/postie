@@ -1825,6 +1825,7 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
       $encoding='7bit';
     }
     if (function_exists(imap_mime_header_decode)) {
+      $subject='';
       //$elements=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
       //$text = "=?utf-8?b?w6XDpMO2?= unicode";
       $text=$mimeDecodedEmail->headers['subject'];
