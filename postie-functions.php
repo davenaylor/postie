@@ -58,7 +58,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   //}
   FilterTextParts($mimeDecodedEmail, $config['PREFER_TEXT_TYPE']);
   $tmpPost=array('post_title'=> 'tmptitle',
-                 'post_status' => 'draft',
+                 'post_status' => 'publish',
                  'post_content'=>'tmoPost');
   /* in order to do attachments correctly, we need to associate the
   attachments with a post. So we add the post here, then update it 
@@ -83,7 +83,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
         $mimeDecodedEmail->headers["date"], $config['MESSAGE_ENCODING'], $config['MESSAGE_DEQUOTE']);
     //$message_date = $mimeDecodedEmail->headers['date'];
   }
-  list($post_date,$post_date_gmt) = DeterminePostDate($content,
+  list($post_date,$post_date_gmt, $delay) = DeterminePostDate($content,
       $message_date,$config['TIME_OFFSET']);
 
   ubb2HTML($content);	
@@ -139,8 +139,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
     $content = FilterNewLines($content, $config['CONVERTNEWLINE']);
 
 
-  $now = date('U');
-  if (strtotime($post_date)>$now) {
+  if ($delay!=0 && $config['POST_STATUS']=='publish') {
     $post_status='future';
   } else {
     $post_status=$config['POST_STATUS'];
@@ -1179,7 +1178,7 @@ function DeterminePostDate(&$content, $message_date = NULL, $offset=0) {
     echo "post_date=$post_date\n";
     echo "--------------------DELAY------------\n";
     */
-    return(array($post_date,$post_date_gmt));
+    return(array($post_date,$post_date_gmt, $delay));
 }
 /**
   * This function takes the content of the message - looks for a subject at the begining surrounded by # and then removes that from the content
