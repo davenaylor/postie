@@ -313,9 +313,6 @@ The IMAP extension is known to be installed on the following popular webhosts:
 
 == CHANGELOG ==
 
-= 1.3.4 (2009.xx.xx) =
-    * Cronless option value is now correctly deleted when deactivating the
-      cronless postie plugin
 = 1.3.3 (2009.09.11) =
     * Fixed problem with double titles
     * Fixed error in wp-mu
@@ -323,6 +320,8 @@ The IMAP extension is known to be installed on the following popular webhosts:
       postie settings
     * Small fix in handling of names of attachments (thanks to Teejot)
     * Fixed delay option (thanks to redbrandonk)
+    * Cronless option value is now correctly deleted when deactivating the
+      cronless postie plugin
 
 = 1.3.2 (2009.08.27) =
     * tags are now always an array, even if no default tags are set 
