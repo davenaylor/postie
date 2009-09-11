@@ -53,10 +53,9 @@ function postie_cron() {
 }
 function postie_decron() {
   wp_clear_scheduled_hook('check_postie_hook');
-  //TODO: make sure that clearing the cronless option works right
-//  $config=GetConfig();
- // $config['CRONLESS']='';
-  //WriteConfig($config);
+  $config=GetConfig();
+  $config['CRONLESS']='';
+  WriteConfig($config);
 }
 
 /* here we add some more options for how often to check for e-mail */
