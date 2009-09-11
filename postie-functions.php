@@ -58,8 +58,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   //}
   FilterTextParts($mimeDecodedEmail, $config['PREFER_TEXT_TYPE']);
   $tmpPost=array('post_title'=> 'tmptitle',
-                 'post_status' => 'publish',
-                 'post_content'=>'tmoPost');
+                 'post_content'=>'tmpPost');
   /* in order to do attachments correctly, we need to associate the
   attachments with a post. So we add the post here, then update it 
   */
@@ -151,11 +150,11 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
       'user_ID' => $postAuthorDetails['user_ID'],
       'email_author'  => $postAuthorDetails['email'],
       'post_date'   => $post_date,
-      'post_date_gmt'  => $post_date_gmt,
+   //   'post_date_gmt'  => $post_date_gmt,
       'post_content'  => apply_filters('content_save_pre',$content),
       'post_title'  =>  $subject,
-      'post_modified'  => $post_date,
-      'post_modified_gmt' => $post_date_gmt,
+   //   'post_modified'  => $post_date,
+   //   'post_modified_gmt' => $post_date_gmt,
       'ping_status' => get_option('default_ping_status'),
       'post_category' => $post_categories,
       'tags_input' => $post_tags,
@@ -499,7 +498,7 @@ function PostToDB($details,$isReply, $postToDb=true, $customImageField=false) {
     //generate sql for insertion	    
     //$_POST['publish'] = true; //Added to make subscribe2 work - it will only handle it if the global varilable _POST is set
     if (!$isReply) {
-      $post_ID = wp_update_post($details);
+      $post_ID = wp_insert_post($details);
     } else {
       $comment = array(
       'comment_author'=>$details['comment_author'],
@@ -1956,7 +1955,6 @@ function DisplayEmailPost($details) {
   // Report
   print '</pre><p><b>Post Author</b>: ' . $details["post_author"]. '<br />' . "\n";
   print '<b>Date</b>: ' . $details["post_date"] . '<br />' . "\n";
-  print '<b>Date GMT</b>: ' . $details["post_date_gmt"] . '<br />' . "\n";
   foreach($details["post_category"] as $category) {
       print '<b>Category</b>: ' . $category . '<br />' . "\n";
   }

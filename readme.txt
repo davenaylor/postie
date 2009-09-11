@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail
 Requires at least: 2.3
 Tested up to: 2.8
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -19,38 +19,13 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 
 = What's new? = 
 
-* 1.3.1 (2009.08.24)
-    * Changed GetContent filter to postie_content
-    * Added postie_subject filter
-    * Added database upgrade hook on activation
-    * Fixed bug where content would be empty if trying to remove signature,
-      and signature list was emtpy
- 
-* 1.3.0 (2009.08.14) 
-    * Features
-        * Added mpeg4 to default list of videotypes
-        * Added support for KOI8-R character set (cyrillic)
-        * Added support for iso-8859-2 character set (eastern european)
-        * Added option to include custom icons for attachments
-        * Added option to send confirmation message to sender
-        * Enhanced e-mails for unauthorized users
-        * Added option to send unauthorized e-mail back to sender
-        * Added option to only allow e-mails from a specified list of smtp
-          servers
-        * Added option to use shortcode for embedding videos (works with the
-          videos plugin http://www.daburna.de/download/videos-plugin.zip
-        * Better handling of comment authors (thanks to Petter for suggestion)
-        * Simplified message options (now includes an advanced options section)
-        * Added filter ability for post content
-    * Bug fixes
-        * No longer including wp-config.php
-        * If tmpdir is not writable, try a different tmpdir
-        * More subject encoding fixes
-        * Updated image templates, which were causing problems for cron
-        * Fixed in text captions
-        * Fixed SQL problems when updating options
-        * Fixed name clashes with other plugins
-        * Fixed custom image field
+* 1.3.3 (2009.09.11)
+    * Fixed problem with double titles
+    * Fixed error in wp-mu
+    * Cronless postie now correctly updates when changing the setting in the
+      postie settings
+    * Small fix in handling of names of attachments (thanks to Teejot)
+    * Fixed delay option (thanks to redbrandonk)
 
 == Installation ==
 * Either:
@@ -338,7 +313,7 @@ The IMAP extension is known to be installed on the following popular webhosts:
 
 == CHANGELOG ==
 
-= 1.3.3 (2009.09.xx) =
+= 1.3.3 (2009.09.11) =
     * Fixed problem with double titles
     * Fixed error in wp-mu
     * Cronless postie now correctly updates when changing the setting in the
