@@ -4,7 +4,7 @@ define('WP_POST_REVISIONS', false);
 $original_mem_limit = ini_get('memory_limit');
 ini_set('memory_limit', -1);
 
-include_once (dirname(dirname(dirname(dirname(__FILE__)))) .  DIRECTORY_SEPARATOR."wp-admin" . DIRECTORY_SEPARATOR . "upgrade-functions.php");
+//include_once (dirname(dirname(dirname(dirname(__FILE__)))) .  DIRECTORY_SEPARATOR."wp-admin" . DIRECTORY_SEPARATOR . "upgrade-functions.php");
 /*
 $Id$
 */
@@ -45,6 +45,7 @@ if (!function_exists('fnmatch')) {
   * This is the main handler for all of the processing
   */
 function PostEmail($poster,$mimeDecodedEmail,$config) {
+  $debug=true;
 
   $attachments = array(
           "html" => array(), //holds the html for each image
@@ -64,7 +65,13 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   attachments with a post. So we add the post here, then update it 
   */
   $post_id = wp_insert_post($tmpPost);
+  if ($debug) {
+    echo "the id is $post_id\n";
+  }
   $content = GetContent($mimeDecodedEmail,$attachments,$post_id, $config);
+  if ($debug) {
+    echo "the content is $content\n";
+  }
   $subject = GetSubject($mimeDecodedEmail,$content, $config);
   if ($debug) {
     echo "the subject is $subject, right after calling GetSubject\n";
@@ -628,6 +635,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
           break;
 
       case 'image':
+        echo "looking at an image\n";
         $file_id = postie_media_handle_upload($part, $post_id);
         $file = wp_get_attachment_url($file_id);
 
@@ -1232,6 +1240,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   } else {
     echo "could not write to temp file: '$tmpFile' ";
   }
+  echo "wrote to temp file\n";
   //print_r($part->ctype_parameters);
   if ($part->ctype_parameters['name']=='') {
     if ($part->ctype_parameters['filename']!='') {
@@ -1247,6 +1256,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
                     'size' => filesize($tmpFile),
                     'error' => ''
                     );
+  print_r($the_file);
   if (stristr('.zip', $name)) {
     $parts=explode('.', $name);
     $ext=$parts[count($parts)-1];
@@ -1263,6 +1273,8 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   }
 
   $file = postie_handle_upload($the_file, $overrides, $time);
+  echo "finished postie_handle_upload\n";
+  print_r($file);
   //unlink($tmpFile);
 
   if ( isset($file['error']) )
@@ -1275,12 +1287,14 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
   $content = '';
 
   // use image exif/iptc data for title and caption defaults if possible
+  include_once('../../../wp-admin/includes/image.php');
   if ( $image_meta = @wp_read_image_metadata($file) ) {
     if ( trim($image_meta['title']) )
       $title = $image_meta['title'];
     if ( trim($image_meta['caption']) )
       $content = $image_meta['caption'];
   }
+  echo "read image meta data";
 
   // Construct the attachment array
   $attachment = array_merge( array(
@@ -2020,7 +2034,6 @@ function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
   *Handles the creation of the table needed to store all the data
   */
 function SetupConfiguration() {
-/*
     if (! function_exists('maybe_create_table')) {
       function maybe_create_table($table_name, $create_ddl) {
         global $wpdb;
@@ -2040,7 +2053,6 @@ function SetupConfiguration() {
         return false;
       }
     }
-    */
     $create_table_sql = "CREATE TABLE ".POSTIE_TABLE ." (
          label text NOT NULL,
          value text not NULL

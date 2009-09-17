@@ -13,6 +13,7 @@ require_once (dirname(__FILE__). DIRECTORY_SEPARATOR . 'postie-functions.php');
 //Retreive emails 
 print("<pre>\n");
 print("This is the postie plugin\n");
+print("time:" . time() . "\n");
 include('Revision');
 $config = GetConfig();
 //print_r($config);
