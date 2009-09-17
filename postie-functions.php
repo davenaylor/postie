@@ -4,6 +4,7 @@ define('WP_POST_REVISIONS', false);
 $original_mem_limit = ini_get('memory_limit');
 ini_set('memory_limit', -1);
 
+include_once (dirname(dirname(dirname(dirname(__FILE__)))) .  DIRECTORY_SEPARATOR."wp-admin" . DIRECTORY_SEPARATOR . "upgrade-functions.php");
 /*
 $Id$
 */
@@ -2019,6 +2020,7 @@ function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
   *Handles the creation of the table needed to store all the data
   */
 function SetupConfiguration() {
+/*
     if (! function_exists('maybe_create_table')) {
       function maybe_create_table($table_name, $create_ddl) {
         global $wpdb;
@@ -2038,6 +2040,7 @@ function SetupConfiguration() {
         return false;
       }
     }
+    */
     $create_table_sql = "CREATE TABLE ".POSTIE_TABLE ." (
          label text NOT NULL,
          value text not NULL

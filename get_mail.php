@@ -1,7 +1,7 @@
 <?php
 
 //Load up some usefull libraries
-include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR."wp-config.php");
+include_once (dirname(dirname(dirname(dirname(__FILE__)))) .  DIRECTORY_SEPARATOR."wp-config.php");
 require_once (dirname(__FILE__). DIRECTORY_SEPARATOR . 'mimedecode.php');
 require_once (dirname(__FILE__). DIRECTORY_SEPARATOR . 'postie-functions.php');
 	
