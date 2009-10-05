@@ -4,7 +4,7 @@ Plugin Name: Cronless Postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Description: Checks e-mail periodically using wordpress's built-in scheduling mechanism
 Author: Robert Felty
-Version: 1.3.3
+Version: 1.3.4
 Author URI: http://blog.robfelty.com
 */ 
 
@@ -44,18 +44,28 @@ if (isset($_GET["cronless_postie_read_me"])) {
 
 
 function postie_cron() {
+  global $wpdb;
   $config=GetConfig();
   if (!$config['CRONLESS'] || $config['CRONLESS']=='') {
     $config['CRONLESS']='hourly';
-    WriteConfig($config);
+    $theQuery=$wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
+        (label,value) VALUES
+        ('CRONLESS','". $config['CRONLESS'] ."');");
+    $q = $wpdb->query($theQuery);
+    //WriteConfig($config);
   }
   wp_schedule_event(time(),$config['CRONLESS'],'check_postie_hook');
 }
 function postie_decron() {
+  global $wpdb;
   wp_clear_scheduled_hook('check_postie_hook');
   $config=GetConfig();
   $config['CRONLESS']='';
-  WriteConfig($config);
+  $theQuery=$wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
+      (label,value) VALUES
+      ('CRONLESS','". $config['CRONLESS'] ."');");
+  $q = $wpdb->query($theQuery);
+  //WriteConfig($config);
 }
 
 /* here we add some more options for how often to check for e-mail */

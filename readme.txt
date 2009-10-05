@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail, email
 Requires at least: 2.3
 Tested up to: 2.8
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -18,6 +18,10 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 [other notes](other_notes) page
 
 = What's new? = 
+
+* 1.3.4 (2009.10.05)
+    * Fixed problem with images not posting under cron
+    * Fixed issue with disappearing password
 
 * 1.3.3 (2009.09.11)
     * Fixed problem with double titles
@@ -312,32 +316,36 @@ The IMAP extension is known to be installed on the following popular webhosts:
 
 
 == CHANGELOG ==
+ 
+= 1.3.4 (2009.10.05) =
+* Fixed problem with images not posting under cron
+* Fixed issue with disappearing password
 
 = 1.3.3 (2009.09.11) =
-    * Fixed problem with double titles
-    * Fixed error in wp-mu
-    * Cronless postie now correctly updates when changing the setting in the
-      postie settings
-    * Small fix in handling of names of attachments (thanks to Teejot)
-    * Fixed delay option (thanks to redbrandonk)
-    * Cronless option value is now correctly deleted when deactivating the
-      cronless postie plugin
+* Fixed problem with double titles
+* Fixed error in wp-mu
+* Cronless postie now correctly updates when changing the setting in the
+  postie settings
+* Small fix in handling of names of attachments (thanks to Teejot)
+* Fixed delay option (thanks to redbrandonk)
+* Cronless option value is now correctly deleted when deactivating the
+  cronless postie plugin
 
 = 1.3.2 (2009.08.27) =
-    * tags are now always an array, even if no default tags are set 
-    * Subject is showing up again if you do not have the IMAP extension
-      installed
-    * More information on the IMAP extension and more user-friendly
-      installation
-    * Fixed problems with smtp server settings in 1.3.1
-    * Added russian translation (thanks to fatcow.com)
+* tags are now always an array, even if no default tags are set 
+* Subject is showing up again if you do not have the IMAP extension
+  installed
+* More information on the IMAP extension and more user-friendly
+  installation
+* Fixed problems with smtp server settings in 1.3.1
+* Added russian translation (thanks to fatcow.com)
 
 = 1.3.1 (2009.08.24) =
-    * Changed GetContent filter to postie_post
-    * Added database upgrade hook on activation
-    * Fixed bug where content would be empty if trying to remove signature,
-      and signature list was emtpy
-    * Updated FAQ and readme
+  * Changed GetContent filter to postie_post
+  * Added database upgrade hook on activation
+  * Fixed bug where content would be empty if trying to remove signature,
+    and signature list was emtpy
+  * Updated FAQ and readme
 
 = 1.3.0 (2009.08.14) =
   * Features
