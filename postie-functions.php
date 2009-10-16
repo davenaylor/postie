@@ -13,14 +13,12 @@ $Id$
  * html purify
  * USE built-in php message decoding to improve speed
  * Add custom fields
- * fix delay
  * support for flexible upload plugin
- * confirm post
- * return reject to sender
- * icons
- * iso 8859-2 support
  * add private post function
    http://forum.robfelty.com/topic/how-to-private-posts-from-postie?replies=2#post-1515
+ * category per e-mail address
+ * add vimeo embedding
+ * add option to send confirmation e-mail to admin
  */
 #global $config,$debug;
 #$debug=true;
@@ -45,7 +43,7 @@ if (!function_exists('fnmatch')) {
   * This is the main handler for all of the processing
   */
 function PostEmail($poster,$mimeDecodedEmail,$config) {
-  $debug=true;
+  //$debug=true;
 
   $attachments = array(
           "html" => array(), //holds the html for each image
@@ -1909,6 +1907,7 @@ function GetPostExcerpt(&$content, $filterNewLines, $convertNewLines) {
   * @return array
   */
 function GetPostCategories(&$subject, $defaultCategory) {
+    echo "default cat = $defaultCategory";
     global $wpdb;
     $post_categories = array();
     $matches = array();
