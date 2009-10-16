@@ -30,10 +30,10 @@ function init() {
   }
     $addresses = array(
                  0=> array(
-                     'server'=>'robfelty.com',
+                     'server'=>'yourserver.com',
                      'port' =>'993',
-                     'email' => 'robtest',
-                     'passwd' => 'neveroddoreven',
+                     'email' => 'youruser',
+                     'passwd' => 'yourpword',
                      'protocol' => 'imap-ssl',
                      'offset' => '-5',
                      'category' => 5
