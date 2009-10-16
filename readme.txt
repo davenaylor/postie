@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail, email
 Requires at least: 2.3
 Tested up to: 2.8
-Stable tag: 1.3.4
+Stable tag: 1.3.development
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -314,9 +314,18 @@ sudo yuminstall php-imap
 The IMAP extension is known to be installed on the following popular webhosts:
 * Dreamhost
 
+= How can I embed youtube or vimeo videos? =
+
+Simply put the url in the body of your e-mail. (Make sure that you have the
+option to convert url into links turned on)
 
 == CHANGELOG ==
  
+= 1.3.5 (2009.10.xx) =
+* Can use fetchmails.php to fetch mail from multiple mailboxes
+* Fixed problem with embedding youtube videos from html (richtext) e-mail
+* Added support for embedding vimeo vidoes
+
 = 1.3.4 (2009.10.05) =
 * Fixed problem with images not posting under cron
 * Fixed issue with disappearing password

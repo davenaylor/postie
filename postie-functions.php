@@ -184,20 +184,45 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
 
 function clickableLink($text, $shortcode=false) {
   # this functions deserves credit to the fine folks at phpbb.com
+  # It turns urls into links, and video urls into embedded players
 
   $text = preg_replace('#(script|about|applet|activex|chrome):#is', "\\1:",
   $text);
 
   // pad it with a space so we can match things at the start of the 1st line.
   $ret = ' ' . $text;
-  // try to embed youtube videos
-  $youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
-  if ($shortcode) {
-    $youtube_replace= "\\1[youtube \\3]\\4";
-  } else {
-    $youtube_replace= "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />\\4"; 
+  if (strpos($ret, 'youtube') !== false) {
+    // try to embed youtube videos
+    $youtube="#(^|[\n ]|>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|<)#is";
+    #$youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
+    if ($shortcode) {
+      $youtube_replace= "\\1[youtube \\3]\\4";
+    } else {
+      $youtube_replace= "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />\\4"; 
+    }
+    $ret = preg_replace($youtube,$youtube_replace, $ret);
   }
-  $ret = preg_replace($youtube,$youtube_replace, $ret);
+
+  if (strpos($ret, 'vimeo') !== false) {
+    // try to embed vimeo videos
+#    : http://vimeo.com/6348141
+    $vimeo="#(^|[\n ]|>)[\w]+?://(www\.)?vimeo\.com/([_a-zA-Z0-9]+).*?([ \n]|$|<)#is";
+    #$youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
+    if ($shortcode) {
+      $vimeo_replace= "\\1[vimeo \\3]\\4";
+    } else {
+      $vimeo_replace = "\\1<object width='400' height='300'><param name='allowfullscreen'
+    value='true' /><param name='allowscriptaccess' value='always' /><param
+    name='movie'
+    value='http://vimeo.com/moogaloop.swf?clip_id=\\3&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1'
+    /><embed
+    src='http://vimeo.com/moogaloop.swf?clip_id=\\3&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1'
+    type='application/x-shockwave-flash' allowfullscreen='true'
+    allowscriptaccess='always' width='400' height='300'></embed></object>\\4";
+      //$vimeo_replace= "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />\\4"; 
+    }
+    $ret = preg_replace($vimeo,$vimeo_replace, $ret);
+  }
 
   // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
   // xxxx can only be alpha characters.
@@ -1907,7 +1932,6 @@ function GetPostExcerpt(&$content, $filterNewLines, $convertNewLines) {
   * @return array
   */
 function GetPostCategories(&$subject, $defaultCategory) {
-    echo "default cat = $defaultCategory";
     global $wpdb;
     $post_categories = array();
     $matches = array();
