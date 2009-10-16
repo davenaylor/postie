@@ -10,10 +10,9 @@ Author URI: http://blog.robfelty.com
 
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR. "wp-config.php");
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR ."postie-functions.php");
-/*
 function check_postie() {
     $host = get_option('siteurl');
-    preg_match("/http:\/\/(.[^\/]*)(.*)/",$host,$matches);
+    preg_match("/https?:\/\/(.[^\/]*)(.*)/",$host,$matches);
     $host = $matches[1];
     $url = "";
     if (isset($matches[2])) {
@@ -32,9 +31,6 @@ function check_postie() {
     }
 #var_dump($page);
     fclose($fp);
-}
-*/
-function check_postie() {
 }
 if (isset($_GET["cronless_postie_read_me"])) {
     include_once(ABSPATH . "wp-admin/admin.php");
