@@ -2303,9 +2303,9 @@ function GetDBConfig() {
       $config["VIDEO1TEMPLATE"] = $simple_link;
     if (!isset($config["VIDEO1TYPES"])) 
       $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', 
-          '3gp2', 'mov');
+          '3gp2', 'mov', 'mpeg');
     if (!isset($config["AUDIOTYPES"])) 
-      $config['AUDIOTYPES'] = array('m4a', 'mp3', 'ogg', 'wav');
+      $config['AUDIOTYPES'] = array('m4a', 'mp3', 'ogg', 'wav', 'mpeg');
     if (!isset($config["SELECTED_VIDEO2TEMPLATE"])) 
       $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
     include('templates/video2_templates.php');
