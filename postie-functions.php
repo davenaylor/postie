@@ -385,7 +385,8 @@ function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
       }
   }
   if (!$emails)
-    die("\n" . __('There does not seem to be any new mail.', 'postie') . "\n");
+    //die("\n" . __('There does not seem to be any new mail.', 'postie') . "\n");
+    $emails=false;
   return($emails);
 }
 /**
