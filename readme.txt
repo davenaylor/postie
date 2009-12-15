@@ -4,8 +4,8 @@ Donate link: http://blog.robfelty.com/plugins/postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail, email
 Requires at least: 2.3
-Tested up to: 2.8
-Stable tag: 1.3.development
+Tested up to: 2.9
+Stable tag: 1.3.4
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -321,10 +321,12 @@ option to convert url into links turned on)
 
 == CHANGELOG ==
  
-= 1.3.5 (2009.10.xx) =
+= 1.3.5 (2009.12.xx) =
 * Can use fetchmails.php to fetch mail from multiple mailboxes
 * Fixed problem with embedding youtube videos from html (richtext) e-mail
 * Added support for embedding vimeo vidoes
+* Fixed problem with selecting "none" as icon set for attachments (thanks
+  tonyvitali)
 
 = 1.3.4 (2009.10.05) =
 * Fixed problem with images not posting under cron
