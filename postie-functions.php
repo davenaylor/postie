@@ -1265,9 +1265,9 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
     echo "could not write to temp file: '$tmpFile' ";
   }
   echo "wrote to temp file\n";
-  //print_r($part->ctype_parameters);
+  //print_r($part);
   if ($part->ctype_parameters['name']=='') {
-    if ($part->ctype_parameters['filename']!='') {
+    if ($part->d_parameters['filename']!='') {
       $name = $part->d_parameters['filename'];
     } else {
       $name = 'postie-media.'. $part->ctype_secondary;

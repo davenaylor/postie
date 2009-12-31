@@ -22,6 +22,7 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 * 1.3.4 (2009.10.05)
     * Fixed problem with images not posting under cron
     * Fixed issue with disappearing password
+    * Fixed problem with filenames in attachments from blackberrys
 
 * 1.3.3 (2009.09.11)
     * Fixed problem with double titles
