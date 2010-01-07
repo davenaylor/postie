@@ -322,12 +322,13 @@ option to convert url into links turned on)
 
 == CHANGELOG ==
  
-= 1.3.5 (2009.12.xx) =
+= 1.3.5 (2010.xx.xx) =
 * Can use fetchmails.php to fetch mail from multiple mailboxes
 * Fixed problem with embedding youtube videos from html (richtext) e-mail
 * Added support for embedding vimeo vidoes
 * Fixed problem with selecting "none" as icon set for attachments (thanks
   tonyvitali)
+* Fixed problems with cronless postie settings
 
 = 1.3.4 (2009.10.05) =
 * Fixed problem with images not posting under cron

@@ -48,23 +48,32 @@ function postie_cron() {
   $config=GetConfig();
   if (!$config['CRONLESS'] || $config['CRONLESS']=='') {
     $config['CRONLESS']='hourly';
-    $theQuery=$wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
-        (label,value) VALUES
-        ('CRONLESS','". $config['CRONLESS'] ."');");
+    $cronQuery=$wpdb->prepare("SELECT * FROM wp_postie_config  WHERE label='CRONLESS'");
+    $cron = $wpdb->get_results($cronQuery);
+    if ($cron) {
+      $theQuery=$wpdb->prepare("UPDATE ". POSTIE_TABLE .
+          " SET value='" . $config['CRONLESS'] .
+          "' WHERE label='CRONLESS'");
+    } else {
+      $theQuery=$wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
+          (label,value) VALUES
+          ('CRONLESS','". $config['CRONLESS'] ."');");
+    }
     $q = $wpdb->query($theQuery);
     //WriteConfig($config);
   }
   wp_schedule_event(time(),$config['CRONLESS'],'check_postie_hook');
 }
-function postie_decron() {
+function postie_decron($deactivate=true) {
   global $wpdb;
   wp_clear_scheduled_hook('check_postie_hook');
-  $config=GetConfig();
-  $config['CRONLESS']='';
-  $theQuery=$wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
-      (label,value) VALUES
-      ('CRONLESS','". $config['CRONLESS'] ."');");
-  $q = $wpdb->query($theQuery);
+  if ($deactivate) {
+    $config=GetConfig();
+    $config['CRONLESS']='';
+    $theQuery=$wpdb->prepare("UPDATE " .  POSTIE_TABLE . " SET value='' WHERE
+    label='CRONLESS'");
+    $q = $wpdb->query($theQuery);
+  }
   //WriteConfig($config);
 }
 
