@@ -64,14 +64,17 @@ function postie_cron() {
   }
   wp_schedule_event(time(),$config['CRONLESS'],'check_postie_hook');
 }
-function postie_decron($deactivate=true) {
+function postie_decron($keep=true) {
   global $wpdb;
   wp_clear_scheduled_hook('check_postie_hook');
-  if ($deactivate) {
-    $config=GetConfig();
-    $config['CRONLESS']='';
-    $theQuery=$wpdb->prepare("UPDATE " .  POSTIE_TABLE . " SET value='' WHERE
-    label='CRONLESS'");
+  if ($keep) {
+  } else {
+    //$config=GetConfig();
+    //$config['CRONLESS']='';
+    //$theQuery=$wpdb->prepare("UPDATE " .  POSTIE_TABLE . " SET value='' WHERE
+    //label='CRONLESS'");
+  $theQuery=$wpdb->prepare("DELETE FROM " .  POSTIE_TABLE . " WHERE
+   label='CRONLESS'");
     $q = $wpdb->query($theQuery);
   }
   //WriteConfig($config);
