@@ -150,6 +150,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   } else {
     $post_status=$config['POST_STATUS'];
   }
+  // DEBUG
   $details = array(
       'post_author'  => $poster,
       'comment_author'  => $postAuthorDetails['author'],
@@ -158,7 +159,8 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
       'email_author'  => $postAuthorDetails['email'],
       'post_date'   => $post_date,
    //   'post_date_gmt'  => $post_date_gmt,
-      'post_content'  => apply_filters('content_save_pre',$content),
+  //    'post_content'  => apply_filters('content_save_pre',$content),
+      'post_content'  => $content,
       'post_title'  =>  $subject,
    //   'post_modified'  => $post_date,
    //   'post_modified_gmt' => $post_date_gmt,
@@ -194,7 +196,7 @@ function clickableLink($text, $shortcode=false) {
   $ret = ' ' . $text;
   if (strpos($ret, 'youtube') !== false) {
     // try to embed youtube videos
-    $youtube="#(^|[\n ]|>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|<)#is";
+    $youtube="#(^|[\n ]|>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9-]+).*?([ \n]|$|<)#is";
     #$youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
     if ($shortcode) {
       $youtube_replace= "\\1[youtube \\3]\\4";
@@ -207,7 +209,7 @@ function clickableLink($text, $shortcode=false) {
   if (strpos($ret, 'vimeo') !== false) {
     // try to embed vimeo videos
 #    : http://vimeo.com/6348141
-    $vimeo="#(^|[\n ]|>)[\w]+?://(www\.)?vimeo\.com/([_a-zA-Z0-9]+).*?([ \n]|$|<)#is";
+    $vimeo="#(^|[\n ]|>)[\w]+?://(www\.)?vimeo\.com/([_a-zA-Z0-9-]+).*?([ \n]|$|<)#is";
     #$youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
     if ($shortcode) {
       $vimeo_replace= "\\1[vimeo \\3]\\4";
@@ -527,7 +529,6 @@ function POP3MessageFetch ($server=NULL, $port=NULL, $email=NULL,
   */
 function PostToDB($details,$isReply, $postToDb=true, $customImageField=false) {
   if ($postToDb) {
-    //generate sql for insertion	    
     //$_POST['publish'] = true; //Added to make subscribe2 work - it will only handle it if the global varilable _POST is set
     if (!$isReply) {
       $post_ID = wp_insert_post($details);
@@ -706,6 +707,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         }
         $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary, 
             $videoTemplate);
+        //echo "videoTemplate = $videoTemplate\n";
         break;
 
       default:
