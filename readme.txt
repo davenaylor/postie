@@ -329,6 +329,8 @@ option to convert url into links turned on)
 * Fixed problem with selecting "none" as icon set for attachments (thanks
   tonyvitali)
 * Fixed problems with cronless postie settings
+* Fixed bug with embedding youtube and vimeo videos whose ID contains a -
+  (thanks Jim Kehoe)
 
 = 1.3.4 (2009.10.05) =
 * Fixed problem with images not posting under cron
