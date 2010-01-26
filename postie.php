@@ -111,4 +111,9 @@ function postie_warnings() {
     add_action('admin_notices', 'postie_imap_warning');
   }
 }
+
+function disable_kses_content() {
+remove_filter('content_save_pre', 'wp_filter_post_kses');
+}
+add_action('init','disable_kses_content',20);
 ?>
