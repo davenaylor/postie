@@ -1797,7 +1797,6 @@ function ReplaceImageCIDs(&$content,&$attachments) {
   * @param array - array of HTML for images for post
   */
 function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
-  //echo "first content is: $content\n";
   ($config["START_IMAGE_COUNT_AT_ZERO"] ? $startIndex = 0 :$startIndex = 1);
   foreach ( $attachments as $i => $value ) {
     // looks for ' #img1# ' etc... and replaces with image
@@ -1810,11 +1809,12 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
          stristr($content, $eimg_placeholder_temp) ) {
       // look for caption
       $caption='';
-      if ( preg_match("/$img_placeholder_temp caption=['\"](.*)['\"]/", $content, $matches))  {
+      $content = preg_replace("/&#0?39;/", "'", $content);
+      $content = preg_replace("/&(#0?34|quot);/", "\"", $content);
+      if ( preg_match("/$img_placeholder_temp caption=['\"]?(.*)['\"]?#/", $content, $matches))  {
         $caption =$matches[1];
-        $img_placeholder_temp=$matches[0];
-        $eimg_placeholder_temp=$matches[0];
-      //  echo "caption=$caption\n";
+        $img_placeholder_temp = substr($matches[0], 0, -1);
+        $eimg_placeholder_temp = substr($matches[0], 0, -1);
       }
       $value = str_replace('{CAPTION}', $caption, $value);
       $img_placeholder_temp.='#';
