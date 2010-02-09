@@ -78,6 +78,6 @@ $large_widescreen = '<object '.
 $simple_link = '<a href="{FILELINK}">{FILENAME}</a>';
 
 $custom=$config['VIDEO1TEMPLATE'];
-$video1Templates=serialize(compact('simple_link','small', 'medium',
-    'medium_widescreen', 'large','large_widescreen', 'custom'));
+$video1Templates=compact('simple_link','small', 'medium',
+    'medium_widescreen', 'large','large_widescreen', 'custom');
 ?>

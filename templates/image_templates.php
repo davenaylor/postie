@@ -9,6 +9,6 @@ style="width: {MEDIUMWIDTH};"><a rel="attachment wp-att-{ID}" href="{PAGELINK}">
 $postie_legacy = '<div class="postie-image-div"><a href="{IMAGE}"><img src="{THUMBNAIL}" alt="{FILENAME}" title="{FILENAME}" style="border:none" class="postie-image" /></a></div>';
 
 $custom=$config['IMAGETEMPLATE'];
-$imageTemplates=serialize(compact('simple_link','no_wrappers',
-'wordpress_default','thumbnail_left','thumbnail_right','robert_felty','postie_legacy','custom'));
+$imageTemplates=compact('simple_link','no_wrappers',
+'wordpress_default','thumbnail_left','thumbnail_right','robert_felty','postie_legacy','custom');
 ?>

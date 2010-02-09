@@ -79,6 +79,6 @@ $flv_embed = '[flv:{FILELINK} 480 270]';
 $simple_link = '<a href="{FILELINK}">{FILENAME}</a>';
 
 $custom=$config['VIDEO2TEMPLATE'];
-$video2Templates=serialize(compact('simple_link','small', 'medium',
-    'medium_widescreen', 'large','large_widescreen', 'flv_embed', 'custom'));
+$video2Templates=compact('simple_link','small', 'medium',
+    'medium_widescreen', 'large','large_widescreen', 'flv_embed', 'custom');
 ?>
