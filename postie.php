@@ -3,7 +3,7 @@
 Plugin Name: Postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href='options-general.php?page=postie/postie.php'>Settings and options</a>) to configure your e-mail settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://forum.robfelty.com/forum/postie'>postie forum</a> for support.
-Version: 1.3.development
+Version: 1.4
 Author: Robert Felty
 Author URI: http://blog.robfelty.com/
 */
@@ -84,13 +84,114 @@ if (is_admin()) {
   }
   postie_warnings(); 
 }
-register_activation_hook(__FILE__, 'UpdateArrayConfig');
-/* Version info
-$Id$
-*/
+//register_activation_hook(__FILE__, 'UpdateArrayConfig');
+function activate_postie() {
+  register_setting('postie-settings');
+	static $init = false;
+	$options = get_option('postie-settings');
+	
+	if(!$init) {
+		if(!$options) {
+			$options = array();
+		}	
+    $default_options = array(
+      'admin_username' => 'admin', 
+      'prefer_text_type' => "plain",
+      'default_title' => "Live From The Field",
+      'input_protocol' => "pop3",
+      'image_placeholder' => "#img%#",
+      'images_append' => true,
+      'allow_subject_in_mail' => true,
+      'drop_signature' => true,
+      'message_start' => ":start",
+      'message_end' => ":end",
+      'forward_rejected_mail' => true,
+      'return_to_sender' => false,
+      'confirmation_email' => false,
+      'allow_html_in_subject' => true,
+      'allow_html_in_body' => true,
+      'start_image_count_at_zero' => false,
+      'message_encoding' => "UTF-8",
+      'message_dequote' => true, 
+      'turn_authorization_off' => false,
+      'custom_image_field' => false,
+      'convertnewline' => false,
+      'sig_pattern_list' => '--\n- --',
+      'banned_files_list' => '',
+      'supported_file_types' => "video\napplication",
+      'authorized_addresses' => '',
+      'mail_server' => NULL,
+      'mail_server_port' =>  NULL,
+      'mail_userid' =>  NULL,
+      'mail_password' =>  NULL,
+      'default_post_category' =>  NULL,
+      'default_post_tags' =>  NULL,
+      'time_offset' =>  get_option('gmt_offset'),
+      'wrap_pre' =>  'no',
+      'converturls' =>  true,
+      'shortcode' =>  false,
+      'add_meta' =>  'no',
+      'icon_set' => 'silver',
+      'icon_size' => 32,
+      'audiotemplate' =>$simple_link,
+      'selected_audiotemplate' => 'simple_link',
+      'selected_video1template' => 'simple_link',
+      'video1template' => $simple_link,
+      'video1types' => 'mp4,mpeg4,3gp,3gpp,3gpp2,3gp2,mov,mpeg',
+      'audiotypes' => 'm4a,mp3,ogg,wav,mpeg',
+      'selected_video2template' => 'simple_link',
+      'video2template' => $simple_link,
+      'video2types' => 'x-flv',
+      'post_status' => 'publish',
+      'image_new_window' => false,
+      'filternewlines' => true,
+      'selected_imagetemplate' => 'wordpress_default',
+      'imagetemplate' => $wordpress_default,
+      'smtp' => '',
+    );
+		
+		$updated = false;
+		$migration = false;
+	  $oldConfig=getConfig();	
+		foreach($default_options as $option => $value) {
+			if(!isset($options[$option])) {
+				// Migrate old options
+        $oldOption = strtoupper($option);
+				if ($oldConfig[$oldOption]) {
+          // we handle some old array options individually
+          $commas = array('audiotypes', 'video1types', 'video2types',
+          'default_post_tags');
+          $newlines = array('smtp', 'authorized_addresses', 'supported_file_types',
+          'banned_files_list', 'sig_patterns_list');
+          if (in_array($option, $commas)) {
+            $options[$option] = implode(', ', $oldConfig[$oldOption]);
+          } elseif (in_array($options, $newlines)) {
+            $options[$option] = $implode("\n", $oldConfig[$oldOption]);
+          } else {
+            $options[$option] = $oldConfig[$oldOption];
+          }
+					$migration = true;
+				} else {
+					$options[$option] = $default_options[$option];
+				}
+				$updated = true;
+			}
+		}
+		
+		if($updated) {
+			update_option('postie-settings', $options);
+		}
+		if ($migration) {
+		}
+		$init = true;
+	}
+	return $options;
+}
+register_activation_hook(__FILE__, 'activate_postie');
 function postie_warnings() {
-  $config=GetConfig();
-  if ($config['MAIL_SERVER']=='' && !isset($_POST['submit'])) {
+  if ($config=get_option('postie-settings'))
+    extract($config);
+  if ($mail_server=='' && !isset($_POST['submit'])) {
     function postie_enter_info() {
       echo "
       <div id='postie-info-warning' class='updated fade'><p><strong>".
@@ -116,4 +217,10 @@ function disable_kses_content() {
 remove_filter('content_save_pre', 'wp_filter_post_kses');
 }
 add_action('init','disable_kses_content',20);
+function postie_whitelist($options) {
+	$added = array( 'postie-settings' => array( 'postie-settings' ) );
+	$options = add_option_whitelist( $added, $options );
+	return $options;
+}
+add_filter('whitelist_options', 'postie_whitelist');
 ?>
