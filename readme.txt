@@ -4,7 +4,7 @@ Donate link: http://blog.robfelty.com/plugins/postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail, email
 Requires at least: 2.3
-Tested up to: 2.9
+Tested up to: 3.0.alpha
 Stable tag: 1.3.4
 
 The Postie plugin allows you to blog via e-mail, including many advanced

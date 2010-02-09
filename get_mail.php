@@ -15,12 +15,11 @@ print("<pre>\n");
 print("This is the postie plugin\n");
 print("time:" . time() . "\n");
 include('Revision');
-$config = GetConfig();
-//print_r($config);
-$emails = FetchMail($config['MAIL_SERVER'], $config['MAIL_SERVER_PORT'],
-$config['MAIL_USERID'], $config['MAIL_PASSWORD'], $config['INPUT_PROTOCOL'],
-$config['TIME_OFFSET'], $config['TEST_EMAIL'],
-$config['DELETE_MAIL_AFTER_PROCESSING']);
+$config = get_option('postie-settings');
+extract($config);
+$emails = FetchMail($mail_server, $mail_server_port, $mail_userid, 
+    $mail_password, $input_protocol, $time_offset, $test_email,
+    $delete_mail_after_processing);
 //loop through messages
 foreach ($emails as $email) {
   if (function_exists('memory_get_usage'))
@@ -46,7 +45,7 @@ foreach ($emails as $email) {
     //Check poster to see if a valid person
     $poster = ValidatePoster($mimeDecodedEmail, $config);
     if (!empty($poster)) {
-        if ($config['TEST_EMAIL']) 
+        if ($test_email) 
           DebugEmailOutput($email,$mimeDecodedEmail); 
         PostEmail($poster,$mimeDecodedEmail, $config);
     }
