@@ -150,12 +150,15 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 				<input name='postie-settings[mail_password]' type="text" id='postie-settings-mail_password' value="<?php echo $mail_password; ?>" size="40" />
 			</td>
 		</tr>
+            <?php echo BuildBooleanSelect("Delete email after
+            posting",'postie-settings[delete_mail_after_processing]',$delete_mail_after_processing,"Only set to yes for testing purposes");?>
 	</table>
   </div>
 	<div id="simpleTabs-content-2" class="simpleTabs-content">
             <table class='form-table'>
 
-            <?php echo BuildBooleanSelect("Allow Anyone To Post Via Email","TURN_AUTHORIZATION_OFF",$turn_authorization_off,"Changing this to yes is NOT RECOMMEDED - anything that gets sent in will automatically be posted. This could make it easier to compromise your server - YOU HAVE BEEN WARNED.");?>
+            <?php echo BuildBooleanSelect("Allow Anyone To Post Via
+            Email","postie-settings[turn_authorization_off]",$turn_authorization_off,"Changing this to yes is NOT RECOMMEDED - anything that gets sent in will automatically be posted. This could make it easier to compromise your server - YOU HAVE BEEN WARNED.");?>
         <tr>
         <th scope="row"><?php _e('Roles That Can Post:', 'postie') ?>
         <br />
@@ -168,13 +171,14 @@ $messages[2] = __("Error - unable to save configuration",'postie');
             $name=translate_with_context($name);
             $role = &$wp_roles->get_role($roleId);
             if ($role->has_cap("post_via_postie")) {
-                $checked = " CHECKED ";
+                $checked = " checked ";
             }
             else {
                 $checked = "";
             }
             if ($roleId != "administrator") {
-                print("<tr><td><input type='checkbox' value='1' name='ROLE_ACCESS[$roleId]' $checked >".$name."</td></tr>");
+                print("<tr><td><input type='checkbox' value='1'
+                name='postie-settings[role_access[$roleId]]' $checked >".$name."</td></tr>");
             }
         }
         ?>
@@ -195,7 +199,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
         "selected";} ?>>Private</option>
         </select>                </td> 
             </tr> 
-            <?php echo BuildTextArea("Authorized Addresses","AUTHORIZED_ADDRESSES",$authorized_addresses,"Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level.");?>
+            <?php echo BuildTextArea("Authorized Addresses","authorized_addresses",$authorized_addresses,"Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level.");?>
             <tr> 
                 <th width="33%" valign="top" scope="row">
                 <?php _e('Admin username:') ?> </th> 
@@ -212,7 +216,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                 <td>
                 <?php
                 $defaultCat=$default_post_category;
-                wp_dropdown_categories("name=DEFAULT_POST_CATEGORY&hierarchical=1&selected=$defaultCat&hide_empty=0"); ?>
+                wp_dropdown_categories("name=postie-settings[default_post_category]&hierarchical=1&selected=$defaultCat&hide_empty=0"); ?>
           </tr>
           <tr valign="top">
             <th scope="row">
@@ -241,10 +245,10 @@ $messages[2] = __("Error - unable to save configuration",'postie');
         </select><br />
                 </td> 
             </tr> 
-            <?php echo BuildBooleanSelect("Forward Rejected Mail","FORWARD_REJECTED_MAIL",$forward_rejected_mail);?>
-            <?php echo BuildBooleanSelect("Allow Subject In Mail","ALLOW_SUBJECT_IN_MAIL",$allow_subject_in_mail);?>
-            <?php echo BuildBooleanSelect("Allow HTML In Mail Subject","ALLOW_HTML_IN_SUBJECT",$allow_html_in_subject);?>
-            <?php echo BuildBooleanSelect("Allow HTML In Mail Body","ALLOW_HTML_IN_BODY",$allow_html_in_body);?>
+            <?php echo BuildBooleanSelect("Forward Rejected Mail","forward_rejected_mail",$forward_rejected_mail);?>
+            <?php echo BuildBooleanSelect("Allow Subject In Mail","allow_subject_in_mail",$allow_subject_in_mail);?>
+            <?php echo BuildBooleanSelect("Allow HTML In Mail Subject","allow_html_in_subject",$allow_html_in_subject);?>
+            <?php echo BuildBooleanSelect("Allow HTML In Mail Body","allow_html_in_body",$allow_html_in_body);?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Tag Of
                 Message Start:', 'postie') ?> <br />
@@ -265,17 +269,17 @@ $messages[2] = __("Error - unable to save configuration",'postie');
   <a style='cursor:pointer' onclick='showAdvanced("message-advanced", "message-advanced-arrow");'><span id="message-advanced-arrow">&#9654;</span> Advanced options</a>
   <div id="message-advanced" style='display:none;'>
   <table class='form-table'>
-            <?php echo BuildBooleanSelect("Wrap content in pre tags","WRAP_PRE",$wrap_pre);?>
+            <?php echo BuildBooleanSelect("Wrap content in pre tags","wrap_pre",$wrap_pre);?>
             <?php echo BuildBooleanSelect("Filter newlines",
-              "FILTERNEWLINES",$filternewlines,
+              "filternewlines",$filternewlines,
               "Set to no if using markdown or textitle syntax");?>
             <?php echo BuildBooleanSelect("Replace newline characters with
             html line breaks (&lt;br
-            /&gt;)","CONVERTNEWLINE",$convertnewline);?>
-            <?php echo BuildBooleanSelect("Return rejected mail to sender","RETURN_TO_SENDER",$return_to_sender);?>
-            <?php echo BuildBooleanSelect("Send post confirmation e-mail to sender","CONFIRMATION_EMAIL",$confirmation_email);?>
-            <?php echo BuildBooleanSelect("Automatically convert urls to links","CONVERTURLS",$converturls);?>
-            <?php echo BuildBooleanSelect("Use shortcode for embedding video (youtube and others)","SHORTCODE",$shortcode);?>
+            /&gt;)","convertnewline",$convertnewline);?>
+            <?php echo BuildBooleanSelect("Return rejected mail to sender","return_to_sender",$return_to_sender);?>
+            <?php echo BuildBooleanSelect("Send post confirmation e-mail to sender","confirmation_email",$confirmation_email);?>
+            <?php echo BuildBooleanSelect("Automatically convert urls to links","converturls",$converturls);?>
+            <?php echo BuildBooleanSelect("Use shortcode for embedding video (youtube and others)","shortcode",$shortcode);?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> </th> 
                 <td>
@@ -283,13 +287,13 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                 <span class='recommendation'>UTF-8 <?php _e("should handle ISO-8859-1 as well", 'postie');?></span>
                 </td> 
             </tr> 
-            <?php echo BuildBooleanSelect("Decode Quoted Printable Data","MESSAGE_DEQUOTE",$message_dequote);?>
-            <?php echo BuildTextArea("Supported File Types","SUPPORTED_FILE_TYPES",$supported_file_types,"Put each type on a single line.");?>
-            <?php echo BuildTextArea("Banned File Names","BANNED_FILES_LIST",$banned_files_list,"Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files");?>
-            <?php echo BuildBooleanSelect("Drop The Signature From Mail","DROP_SIGNATURE",$drop_signature);?>
-            <?php echo BuildTextArea("Signature Patterns","SIG_PATTERN_LIST",$sig_pattern_list,"Put each pattern on a separate line and make sure to escape any special characters.");?>
+            <?php echo BuildBooleanSelect("Decode Quoted Printable Data","message_dequote",$message_dequote);?>
+            <?php echo BuildTextArea("Supported File Types","supported_file_types",$supported_file_types,"Put each type on a single line.");?>
+            <?php echo BuildTextArea("Banned File Names","banned_files_list",$banned_files_list,"Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files");?>
+            <?php echo BuildBooleanSelect("Drop The Signature From Mail","drop_signature",$drop_signature);?>
+            <?php echo BuildTextArea("Signature Patterns","sig_pattern_list",$sig_pattern_list,"Put each pattern on a separate line and make sure to escape any special characters.");?>
             <?php echo BuildTextArea("Allowed SMTP
-            servers","SMTP",$smtp,"Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check stmp servers.");?>
+            servers","smtp",$smtp,"Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check stmp servers.");?>
             </table> 
             </div> <!-- advanced options -->
             </div>
@@ -298,8 +302,8 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 
 
             <?php echo BuildBooleanSelect("Post Images At
-            End","IMAGES_APPEND",$images_append,"No means they will be put before the text of the message.");?>     
-            <?php echo BuildBooleanSelect("Start Image Count At 0","START_IMAGE_COUNT_AT_ZERO",$start_image_count_at_zero);?>
+            End","images_append",$images_append,"No means they will be put before the text of the message.");?>     
+            <?php echo BuildBooleanSelect("Start Image Count At 0","start_image_count_at_zero",$start_image_count_at_zero);?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Image Place Holder Tag:', 'postie') ?> </th> 
                 <td>
@@ -347,7 +351,7 @@ attribute_escape($imagetemplate) ?>" />
    name='postie-settings[imagetemplate]'><?php echo attribute_escape($imagetemplate) ?></textarea>
 			 </td>
             </tr> 
-            <?php echo BuildBooleanSelect("Use custom image field","CUSTOM_IMAGE_FIELD",$custom_image_field,"When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'.");?>            
+            <?php echo BuildBooleanSelect("Use custom image field","custom_image_field",$custom_image_field,"When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'.");?>            
             </table> 
    </div> 
 

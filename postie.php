@@ -147,6 +147,7 @@ function activate_postie() {
       'filternewlines' => true,
       'selected_imagetemplate' => 'wordpress_default',
       'imagetemplate' => $wordpress_default,
+      'delete_mail_after_processing' => true,
       'smtp' => '',
     );
 		
