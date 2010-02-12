@@ -51,6 +51,12 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 
 = Automating checking e-mail =
 
+By default, postie checks for new e-mail every 30 minutes. You can select from
+a number of different checking intervals in the settings page, under the
+mailserver tab.
+
+If you would prefer to have more fine-grained control of how postie checks
+for mail, you can also set up a crontab. This is for advanced users only.
 If your site runs on a UNIX/linux server, and you have shell access, you can
 enable mail checking using cron; if you don't know anything about cron, skip
 to the cronless postie section.
@@ -65,21 +71,6 @@ This fetches the mail every five minutes with lynx
 */10 * * * * /usr/bin/wget -O /dev/null http://blog.robfelty.com/wp-content/plugins/postie/get\_mail.php >/dev/null 2>&1
 
 This fetches the mail every ten minutes with wget 
-
-= Cronless Postie =
-
-If you don't have access to cron, you can run postie without it.
-
-* Activate the cronless postie plugin (it is included with the postie plugin,
-  so if you have downloaded postie, you don't need to download anything else
-* By default, cronless postie checks for new e-mail once every hour. To select
-  a different rate, change the cronless postie setting in the postie settings
-  page. 
-* Note that timing with cronless postie is not very accurate. It depends
-  on people visiting your website. If you select to check every 10 minutes, but
-  you only get one visit every 30 minutes, then it might take 30 minutes for a
-  post to show up.
-
 
 == Usage ==
 * If you put in :start - the message processing won't start until it sees that string
@@ -321,8 +312,11 @@ Simply put the url in the body of your e-mail. (Make sure that you have the
 option to convert url into links turned on)
 
 == CHANGELOG ==
- 
-= 1.3.5 (2010.xx.xx) =
+
+= 1.4 (2010.02.xx) =  
+* Now using wordpress settings api
+* Cronless postie is now integrated with postie instead of a separate plugin
+* filterPostie.php moved to filterPostie.php.sample
 * Can use fetchmails.php to fetch mail from multiple mailboxes
 * Fixed problem with embedding youtube videos from html (richtext) e-mail
 * Added support for embedding vimeo vidoes

@@ -42,6 +42,9 @@ $title = __('Postie Options', 'postie');
 $parent_file = 'options-general.php';
 if ( $config = get_option('postie-settings') ) {
   extract($config);
+  if ($interval=='manual') {
+    wp_clear_scheduled_hook('check_postie_hook');
+  }
 }
 $messages[1] = __("Configuration successfully updated!",'postie');
 $messages[2] = __("Error - unable to save configuration",'postie');
@@ -80,21 +83,6 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 	</div>
 	<div id="simpleTabs-content-1" class="simpleTabs-content">
 	<table class='form-table'>
-    <tr><td colspan=2>
-  <?php if (isset($cronless) && $cronless!='') {
-  ?>
-  <p><?php _e('Cronless postie should check for mail', 'postie') ?>
-  <select name='postie-settings[cronless]' id='postie-settings-cronless'>
-    <option value="weekly" <?php if($cronless == "weekly") { echo "selected='selected'";} ?>><?php _e('Once weekly', 'postie') ?></option>
-    <option value="daily"<?php if($cronless == "daily") { echo "selected='selected'";} ?>><?php _e('daily', 'postie') ?></option>
-    <option value="hourly" <?php if($cronless == "hourly") { echo "selected='selected'";} ?>><?php _e('hourly', 'postie') ?></option>
-    <option value="twiceperhour" <?php if($cronless == "twiceperhour") { echo "selected='selected'";} ?>><?php _e('twice per hour', 'postie') ?></option>
-    <option value="tenminutes" <?php if($cronless == "tenminutes") { echo "selected='selected'";} ?>><?php _e('every ten minutes', 'postie') ?></option>
-  </select>
-  </p>
-  <?php 
-  }
-  ?>
 
 
 	<tr>
@@ -150,6 +138,21 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 				<input name='postie-settings[mail_password]' type="text" id='postie-settings-mail_password' value="<?php echo $mail_password; ?>" size="40" />
 			</td>
 		</tr>
+    <tr><th>
+  <?php _e('Check for mail every', 'postie') ?>
+  </th>
+  <td>
+  <select name='postie-settings[interval]' id='postie-settings-interval'>
+    <option value="weekly" <?php if($interval == "weekly") { echo "selected='selected'";} ?>><?php _e('Once weekly', 'postie') ?></option>
+    <option value="daily"<?php if($interval == "daily") { echo "selected='selected'";} ?>><?php _e('daily', 'postie') ?></option>
+    <option value="hourly" <?php if($interval == "hourly") { echo "selected='selected'";} ?>><?php _e('hourly', 'postie') ?></option>
+    <option value="twiceperhour" <?php if($interval == "twiceperhour") { echo "selected='selected'";} ?>><?php _e('twice per hour', 'postie') ?></option>
+    <option value="tenminutes" <?php if($interval == "tenminutes") { echo "selected='selected'";} ?>><?php _e('every ten minutes', 'postie') ?></option>
+    <option value="manual" <?php if($interval == "manual") { echo
+    "selected='selected'";} ?>><?php _e('check manually', 'postie') ?></option>
+  </select>
+  </td>
+  </tr>
             <?php echo BuildBooleanSelect("Delete email after
             posting",'postie-settings[delete_mail_after_processing]',$delete_mail_after_processing,"Only set to yes for testing purposes");?>
 	</table>

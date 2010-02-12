@@ -148,6 +148,7 @@ function activate_postie() {
       'selected_imagetemplate' => 'wordpress_default',
       'imagetemplate' => $wordpress_default,
       'delete_mail_after_processing' => true,
+      'interval' => 'twiceperhour',
       'smtp' => '',
     );
 		
@@ -224,4 +225,54 @@ function postie_whitelist($options) {
 	return $options;
 }
 add_filter('whitelist_options', 'postie_whitelist');
+
+function check_postie() {
+    $host = get_option('siteurl');
+    preg_match("/https?:\/\/(.[^\/]*)(.*)/",$host,$matches);
+    $host = $matches[1];
+    $url = "";
+    if (isset($matches[2])) {
+        $url .=  $matches[2];
+    }
+    $url .= "/wp-content/plugins/postie/get_mail.php";
+    $port = 80;
+	$fp=fsockopen($host,$port,$errno,$errstr);
+    fputs($fp,"GET $url HTTP/1.0\r\n");
+    fputs($fp,"User-Agent:  Cronless-Postie\r\n");
+    fputs($fp,"Host: $host\r\n");
+    fputs($fp,"\r\n");
+    $page = '';
+    while(!feof($fp)) {
+        $page.=fgets($fp,128);
+    }
+    fclose($fp);
+}
+
+function postie_cron() {
+  global $wpdb;
+  $config=get_option('postie-settings');
+  if (!$config['interval'] || $config['interval']=='')
+    $config['interval']='hourly';
+  if ($config['interval']=='manual') {
+    wp_clear_scheduled_hook('check_postie_hook');
+  } else {
+    wp_schedule_event(time(),$config['interval'],'check_postie_hook');
+  }
+}
+function postie_decron() {
+  wp_clear_scheduled_hook('check_postie_hook');
+}
+
+/* here we add some more options for how often to check for e-mail */
+function more_reccurences() {
+  return array(
+  'weekly' => array('interval' => 604800, 'display' => 'Once Weekly'),
+  'twiceperhour' => array('interval' => 1800, 'display' => 'Twice per hour '),
+  'tenminutes' =>array('interval' => 600, 'display' => 'Every 10 minutes')
+  );
+}
+add_filter('cron_schedules', 'more_reccurences');
+register_activation_hook(__FILE__,'postie_cron');
+register_deactivation_hook(__FILE__,'postie_decron');
+add_action('check_postie_hook', 'check_postie');
 ?>
