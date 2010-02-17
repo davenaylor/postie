@@ -41,6 +41,7 @@ global $wpdb,$wp_roles;
 $title = __('Postie Options', 'postie');
 $parent_file = 'options-general.php';
 if ( $config = get_option('postie-settings') ) {
+  print_r($config);
   extract($config);
   if ($interval=='manual') {
     wp_clear_scheduled_hook('check_postie_hook');
@@ -202,7 +203,8 @@ $messages[2] = __("Error - unable to save configuration",'postie');
         "selected";} ?>>Private</option>
         </select>                </td> 
             </tr> 
-            <?php echo BuildTextArea("Authorized Addresses","authorized_addresses",$authorized_addresses,"Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level.");?>
+            <?php echo BuildTextArea("Authorized
+            Addresses","postie-settings[authorized_addresses]",$authorized_addresses,"Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level.");?>
             <tr> 
                 <th width="33%" valign="top" scope="row">
                 <?php _e('Admin username:') ?> </th> 
@@ -248,10 +250,10 @@ $messages[2] = __("Error - unable to save configuration",'postie');
         </select><br />
                 </td> 
             </tr> 
-            <?php echo BuildBooleanSelect("Forward Rejected Mail","forward_rejected_mail",$forward_rejected_mail);?>
-            <?php echo BuildBooleanSelect("Allow Subject In Mail","allow_subject_in_mail",$allow_subject_in_mail);?>
-            <?php echo BuildBooleanSelect("Allow HTML In Mail Subject","allow_html_in_subject",$allow_html_in_subject);?>
-            <?php echo BuildBooleanSelect("Allow HTML In Mail Body","allow_html_in_body",$allow_html_in_body);?>
+            <?php echo BuildBooleanSelect("Forward Rejected Mail","postie-settings[forward_rejected_mail]",$forward_rejected_mail);?>
+            <?php echo BuildBooleanSelect("Allow Subject In Mail","postie-settings[allow_subject_in_mail]",$allow_subject_in_mail);?>
+            <?php echo BuildBooleanSelect("Allow HTML In Mail Subject","postie-settings[allow_html_in_subject]",$allow_html_in_subject);?>
+            <?php echo BuildBooleanSelect("Allow HTML In Mail Body","postie-settings[allow_html_in_body]",$allow_html_in_body);?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Tag Of
                 Message Start:', 'postie') ?> <br />
@@ -272,17 +274,14 @@ $messages[2] = __("Error - unable to save configuration",'postie');
   <a style='cursor:pointer' onclick='showAdvanced("message-advanced", "message-advanced-arrow");'><span id="message-advanced-arrow">&#9654;</span> Advanced options</a>
   <div id="message-advanced" style='display:none;'>
   <table class='form-table'>
-            <?php echo BuildBooleanSelect("Wrap content in pre tags","wrap_pre",$wrap_pre);?>
-            <?php echo BuildBooleanSelect("Filter newlines",
-              "filternewlines",$filternewlines,
+            <?php echo BuildBooleanSelect("Wrap content in pre tags","postie-settings[wrap_pre]",$wrap_pre);?>
+            <?php echo BuildBooleanSelect("Filter newlines", "postie-settings[filternewlines]",$filternewlines,
               "Set to no if using markdown or textitle syntax");?>
-            <?php echo BuildBooleanSelect("Replace newline characters with
-            html line breaks (&lt;br
-            /&gt;)","convertnewline",$convertnewline);?>
-            <?php echo BuildBooleanSelect("Return rejected mail to sender","return_to_sender",$return_to_sender);?>
-            <?php echo BuildBooleanSelect("Send post confirmation e-mail to sender","confirmation_email",$confirmation_email);?>
-            <?php echo BuildBooleanSelect("Automatically convert urls to links","converturls",$converturls);?>
-            <?php echo BuildBooleanSelect("Use shortcode for embedding video (youtube and others)","shortcode",$shortcode);?>
+            <?php echo BuildBooleanSelect("Replace newline characters with html line breaks (&lt;br /&gt;)","postie-settings[convertnewline]",$convertnewline);?>
+            <?php echo BuildBooleanSelect("Return rejected mail to sender","postie-settings[return_to_sender]",$return_to_sender);?>
+            <?php echo BuildBooleanSelect("Send post confirmation e-mail to sender","postie-settings[confirmation_email]",$confirmation_email);?>
+            <?php echo BuildBooleanSelect("Automatically convert urls to links","postie-settings[converturls]",$converturls);?>
+            <?php echo BuildBooleanSelect("Use shortcode for embedding video (youtube and others)","postie-settings[shortcode]",$shortcode);?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> </th> 
                 <td>
@@ -290,13 +289,17 @@ $messages[2] = __("Error - unable to save configuration",'postie');
                 <span class='recommendation'>UTF-8 <?php _e("should handle ISO-8859-1 as well", 'postie');?></span>
                 </td> 
             </tr> 
-            <?php echo BuildBooleanSelect("Decode Quoted Printable Data","message_dequote",$message_dequote);?>
-            <?php echo BuildTextArea("Supported File Types","supported_file_types",$supported_file_types,"Put each type on a single line.");?>
-            <?php echo BuildTextArea("Banned File Names","banned_files_list",$banned_files_list,"Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files");?>
-            <?php echo BuildBooleanSelect("Drop The Signature From Mail","drop_signature",$drop_signature);?>
-            <?php echo BuildTextArea("Signature Patterns","sig_pattern_list",$sig_pattern_list,"Put each pattern on a separate line and make sure to escape any special characters.");?>
+            <?php echo BuildBooleanSelect("Decode Quoted Printable
+            Data","postie-settings[message_dequote]",$message_dequote);?>
+            <?php echo BuildTextArea("Supported File
+            Types","postie-settings[supported_file_types]",$supported_file_types,"Put each type on a single line.");?>
+            <?php echo BuildTextArea("Banned File
+            Names","postie-settings[banned_files_list]",$banned_files_list,"Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files");?>
+            <?php echo BuildBooleanSelect("Drop The Signature From Mail","postie-settings[drop_signature]",$drop_signature);?>
+            <?php echo BuildTextArea("Signature
+            Patterns","postie-settings[sig_pattern_list]",$sig_pattern_list,"Put each pattern on a separate line and make sure to escape any special characters.");?>
             <?php echo BuildTextArea("Allowed SMTP
-            servers","smtp",$smtp,"Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check stmp servers.");?>
+            servers","postie-settings[smtp]",$smtp,"Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check stmp servers.");?>
             </table> 
             </div> <!-- advanced options -->
             </div>
@@ -304,9 +307,9 @@ $messages[2] = __("Error - unable to save configuration",'postie');
   <table class='form-table'>
 
 
-            <?php echo BuildBooleanSelect("Post Images At
-            End","images_append",$images_append,"No means they will be put before the text of the message.");?>     
-            <?php echo BuildBooleanSelect("Start Image Count At 0","start_image_count_at_zero",$start_image_count_at_zero);?>
+            <?php echo BuildBooleanSelect("Post Images At End","postie-settings[images_append]",$images_append,"No means they will be put before the text of the message.");?>     
+            <?php echo BuildBooleanSelect("Start Image Count At
+            0","postie-settings[start_image_count_at_zero]",$start_image_count_at_zero);?>
             <tr> 
                 <th width="33%" valign="top" scope="row"><?php _e('Image Place Holder Tag:', 'postie') ?> </th> 
                 <td>
@@ -324,8 +327,6 @@ $messages[2] = __("Error - unable to save configuration",'postie');
             <td>
   <input type='hidden' id='postie-settings-selected_imagetemplate' name='postie-settings[selected_imagetemplate]'
   value="<?php echo attribute_escape($selected_imagetemplate) ?>" />
-  <input type='hidden' id='postie-settings-current_imagetemplate' value="<?php echo
-attribute_escape($imagetemplate) ?>" />
 			 <select name='imagetemplateselect' id='imagetemplateselect' 
        onchange="changeStyle('imageTemplatePreview','postie-settings-imagetemplate',
        'imagetemplateselect', 'postie-settings-selected_imagetemplate','smiling.jpg');" />
@@ -340,6 +341,8 @@ attribute_escape($imagetemplate) ?>" />
 					 } else {
 						 $select=' ';
 					 }
+           if ($key=='custom')
+             $value = $imagetemplate;
 					 echo '<option' .  $select . 'value="'.
 					     attribute_escape($value) . '" >'.$key . '</option>';
          }
@@ -354,7 +357,8 @@ attribute_escape($imagetemplate) ?>" />
    name='postie-settings[imagetemplate]'><?php echo attribute_escape($imagetemplate) ?></textarea>
 			 </td>
             </tr> 
-            <?php echo BuildBooleanSelect("Use custom image field","custom_image_field",$custom_image_field,"When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'.");?>            
+            <?php echo BuildBooleanSelect("Use custom image
+            field","postie-settings[custom_image_field]",$custom_image_field,"When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'.");?>            
             </table> 
    </div> 
 
@@ -371,8 +375,6 @@ attribute_escape($imagetemplate) ?>" />
             <td>
   <input type='hidden' id='postie-settings-selected_video1template' name='postie-settings[selected_video1template]'
   value="<?php echo attribute_escape($selected_video1template) ?>" />
-  <input type='hidden' id='postie-settings-current_video1template' value="<?php echo
-attribute_escape($video1template) ?>" />
 			 <select name='video1templateselect' id='video1templateselect' 
        onchange="changeStyle('video1TemplatePreview','postie-settings-video1template',
        'video1templateselect', 'postie-settings-selected_video1template','hi.mp4');" />
@@ -387,6 +389,8 @@ attribute_escape($video1template) ?>" />
 					 } else {
 						 $select=' ';
 					 }
+           if ($key=='custom')
+             $value = $video1template;
 					 echo '<option' .  $select . 'value="'.
 					     attribute_escape($value) . '" >'.$key . '</option>';
          }
@@ -415,8 +419,6 @@ attribute_escape($video1template) ?>" />
             <td>
   <input type='hidden' id='postie-settings-selected_video2template' name='postie-settings[selected_video2template]'
   value="<?php echo attribute_escape($selected_video2template) ?>" />
-  <input type='hidden' id='postie-settings-current_video2template' value="<?php echo
-attribute_escape($video2template) ?>" />
 			 <select name='video2templateselect' id='video2templateselect' 
        onchange="changeStyle('video2TemplatePreview','postie-settings-video2template',
        'video2templateselect', 'postie-settings-selected_video2template','hi.flv');" />
@@ -431,6 +433,8 @@ attribute_escape($video2template) ?>" />
 					 } else {
 						 $select=' ';
 					 }
+           if ($key=='custom')
+             $value = $video2template;
 					 echo '<option' .  $select . 'value="'.
 					     attribute_escape($value) . '" >'.$key . '</option>';
          }
@@ -459,8 +463,6 @@ attribute_escape($video2template) ?>" />
         <td>
   <input type='hidden' id='postie-settings-selected_audiotemplate' name='postie-settings[selected_audiotemplate]'
   value="<?php echo attribute_escape($selected_audiotemplate) ?>" />
-  <input type='hidden' id='postie-settings-current_audiotemplate' value="<?php echo
-attribute_escape($audiotemplate) ?>" />
 			 <select name='audiotemplateselect' id='audiotemplateselect' 
        onchange="changeStyle('audioTemplatePreview','postie-settings-audiotemplate',
        'audiotemplateselect', 'postie-settings-selected_audiotemplate','funky.mp3', false);" />
@@ -475,6 +477,8 @@ attribute_escape($audiotemplate) ?>" />
 					 } else {
 						 $select=' ';
 					 }
+           if ($key=='custom')
+             $value = $audiotemplate;
 					 echo '<option' .  $select . 'value="'.
 					     attribute_escape($value) . '" >'.$key . '</option>';
          }
@@ -589,6 +593,14 @@ value="postie-settings" />
 </p>
 </form> 
 </div>
+	<p>
+<a href="http://validator.w3.org/check?uri=referer"><img
+src="/images/valid-xhtml10.png" alt="Valid XHTML 1.0!" style="height:20px;
+width:65px; border:0;" /></a> <a
+href="http://jigsaw.w3.org/css-validator/check/referer"><img
+style="border:0;width:65px;height:20px;" src="/images/vcss.gif" alt="Valid
+CSS!" /></a><br />
+	</p>
 
 <?php $iconDir = get_option('siteurl') . '/' . PLUGINDIR .  '/postie/icons'; ?>
 <script type="text/javascript">
@@ -664,11 +676,6 @@ function changeStyle(preview,template,select,selected,sample,custom) {
   preview.innerHTML=previewHTML;
   pageStyle.value=selectedStyle.value;
 }
-function restoreStyle(current,template) {
-  var defaultStyle = document.getElementById(current).value;
-  var pageStyle = document.getElementById(template);
-  pageStyle.value=defaultStyle;
-}
 
 function showAdvanced(advancedId, arrowId) {
   var advanced = document.getElementById(advancedId);
@@ -681,7 +688,6 @@ function showAdvanced(advancedId, arrowId) {
     arrow.innerHTML='&#9654;';
   }
 }
-
 changeStyle('imageTemplatePreview','postie-settings-imagetemplate', 'imagetemplateselect',
 'postie-settings-selected_imagetemplate','smiling.jpg', false);
 changeStyle('audioTemplatePreview','postie-settings-audiotemplate',

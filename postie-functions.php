@@ -2047,6 +2047,7 @@ function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
   $string.="</th>";
 
   $string .="<td><textarea cols=40 rows=3 name=\"$id\" id=\"$id\">";
+  $current_value = preg_split("/[,\r\n]+/", trim($current_value));
   if (is_array($current_value)) {
     foreach($current_value as $item) {
       $string .= "$item\n";
