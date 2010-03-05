@@ -41,7 +41,6 @@ global $wpdb,$wp_roles;
 $title = __('Postie Options', 'postie');
 $parent_file = 'options-general.php';
 if ( $config = get_option('postie-settings') ) {
-  print_r($config);
   extract($config);
   if ($interval=='manual') {
     wp_clear_scheduled_hook('check_postie_hook');
