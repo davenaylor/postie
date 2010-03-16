@@ -1,7 +1,11 @@
 <div class="wrap"> 
-<h2><a style='text-decoration:none' href='options-general.php?page=postie/postie.php'><img src="<?php echo
-'../wp-content/plugins/postie/images/mail.png'; ?>" alt="postie" /><?php
-_e('Postie Options', 'postie') ?></a></h2>
+<h2>
+	<a style='text-decoration:none' href='options-general.php?page=postie/postie.php'>
+	<img src="<?php
+		echo '	../wp-content/plugins/postie/images/mail.png'; ?>" alt="postie" /><?php
+	_e('Postie Options', 'postie');
+		?></a>
+</h2>
 <?php
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
 if (isset($_POST["action"])) {
@@ -23,14 +27,6 @@ if (isset($_POST["action"])) {
       include('get_mail.php');
       exit;
       break;
-    case "config":
-      if( UpdatePostieConfig($_POST)) {
-        $message = 1;
-      }
-      else {
-        $message = 2;
-      }
-      break;
     default:
       $message = 2;
       break;
@@ -40,12 +36,22 @@ global $wpdb,$wp_roles;
 
 $title = __('Postie Options', 'postie');
 $parent_file = 'options-general.php';
-if ( $config = get_option('postie-settings') ) {
-  extract($config);
-  if ($interval=='manual') {
-    wp_clear_scheduled_hook('check_postie_hook');
-  }
+$config = get_option( 'postie-settings');
+if ( empty ($config) ) $config = ResetPostieConfig();
+if ( defined ( 'POSTIE_DEBUG' ) ) var_dump( $config );
+$arrays = get_arrayed_settings();
+// some fields are stored as arrays, because that makes back-end processing much easier
+// and we need to convert those fields to strings here, for the options form
+foreach ( $arrays as $sep => $fields ) {
+	foreach ( $fields as $field ) {
+			$config[$field] = implode( $sep, $config[$field] );
+	}
 }
+extract($config);
+if ($interval=='manual') {
+	wp_clear_scheduled_hook('check_postie_hook');
+}
+
 $messages[1] = __("Configuration successfully updated!",'postie');
 $messages[2] = __("Error - unable to save configuration",'postie');
 
@@ -55,19 +61,21 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 <?php endif; ?>
 <form name="postie-options" method="post"> 
 	<input type="hidden" name="action" value="reset" />
-            <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie')?> &raquo" type="submit" class='button'>
+	<input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie')?> &raquo" type="submit" class='button'>
 </form>
 <form name="postie-options" method='post'> 
 	<input type="hidden" name="action" value="runpostie" />
-            <input name="Submit" value="<?php _e("Run Postie", 'postie');?> &raquo;" type="submit" class='button'>
-    <?php _e("(To run the check mail script manually)", 'postie');?>
+	<input name="Submit" value="<?php _e("Run Postie", 'postie');?> &raquo;" type="submit" class='button'>
+	<?php _e("(To run the check mail script manually)", 'postie');?>
 </form>
 <form name="postie-options" method="post">
 	<input type="hidden" name="action" value="test" />
-            <input name="Submit" value="<?php _e("Test Config", 'postie');?>&raquo;" type="submit" class='button'>
-    <?php _e("this will run a special script to test your configuration options", 'postie');?>
+	<input name="Submit" value="<?php _e("Test Config", 'postie');?>&raquo;" type="submit" class='button'>
+	<?php _e("this will run a special script to test your configuration options", 'postie');?>
 </form>
-<form name="postie-options" method="post" action='options.php'>	<input type="hidden" name="action" value="config" />
+<form name="postie-options" method="post" action='options.php'>
+	<?php settings_fields( 'postie-settings' ); ?>
+	<input type="hidden" name="action" value="config" />
 <div id="simpleTabs">
 	<div class="simpleTabs-nav">
 	<ul>
@@ -84,20 +92,22 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 	<div id="simpleTabs-content-1" class="simpleTabs-content">
 	<table class='form-table'>
 
-
 	<tr>
     <th scope="row"><?php _e('Mail Protocol:', 'postie') ?>        </th>
     <td>
     <select name='postie-settings[input_protocol]' id='postie-settings-input_protocol'>
-    <option value="pop3">POP3</option>
+    <option value="pop3"  <?php if( $input_protocol == "pop3" ) { echo " selected='selected' ";} ?>>POP3</option>
     <?php if (HasIMAPSupport(false)):?>
         <option value="imap" <?php if($input_protocol == "imap") { echo "selected";} ?>>IMAP</option>
         <option value="pop3-ssl" <?php if($input_protocol == "pop3-ssl") { echo "selected";} ?>>POP3-SSL</option>
         <option value="imap-ssl" <?php if($input_protocol == "imap-ssl") { echo "selected";} ?>>IMAP-SSL</option>
+    </select>
     <?php else:?>
-        <option value="pop3" ><?php _e("IMAP/IMAP-SSL/POP3-SSL unavailable", 'postie');?></option>
+    </select>
+        <span class="recommendation">IMAP/IMAP-SSL/POP3-SSL unavailable</span>
     <?php endif;?>
     </select>
+		
     </td>
   </tr>
   <tr>
@@ -173,16 +183,15 @@ $messages[2] = __("Error - unable to save configuration",'postie');
         foreach($wp_roles->role_names as $roleId => $name) {
             $name=translate_with_context($name);
             $role = &$wp_roles->get_role($roleId);
-            if ($role->has_cap("post_via_postie")) {
-                $checked = " checked ";
-            }
-            else {
-                $checked = "";
-            }
-            if ($roleId != "administrator") {
-                print("<tr><td><input type='checkbox' value='1'
-                name='postie-settings[role_access[$roleId]]' $checked >".$name."</td></tr>");
-            }
+            if ($roleId != "administrator") { ?>
+						<tr><td>
+							<input type='checkbox' value='1' name='postie-settings[role_access][<?php
+								echo $roleId;
+								?>]' <?php echo checked($role->has_cap("post_via_postie")); ?>  >
+								<?php echo $name; ?>
+						</td></tr>
+						<?php
+					}
         }
         ?>
         </table>
@@ -298,7 +307,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
             <?php echo BuildTextArea("Signature
             Patterns","postie-settings[sig_pattern_list]",$sig_pattern_list,"Put each pattern on a separate line and make sure to escape any special characters.");?>
             <?php echo BuildTextArea("Allowed SMTP
-            servers","postie-settings[smtp]",$smtp,"Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check stmp servers.");?>
+            servers","postie-settings[smtp]",$smtp,"Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check smtp servers.");?>
             </table> 
             </div> <!-- advanced options -->
             </div>
@@ -579,7 +588,6 @@ $messages[2] = __("Error - unable to save configuration",'postie');
 	<div id="simpleTabs-content-8" class="simpleTabs-content">
   <?php include('faq.html'); ?>
   </div>
-  <?php settings_fields('postie-settings');  ?>
 
 <p class="submit">
 <input type="hidden" name="action" value="update" />
@@ -633,7 +641,7 @@ function changeIconSet(selectBox, size) {
     preview.innerHTML+="<img src='" + iconDir + iconSet.value + '/' +
         fileTypes[j] + '-' + iconSize.value + ".png' />";
   }
-    preview.innerHTML+='<br />Here is some sample text with a link to a' +
+    preview.innerHTML+='<br />Here is some sample text with a link to a ' +
        'word document that I think you might find interesting<br />' +
        "<a href='#'><img style='text-decoration:none' src='" +
        iconDir + iconSet.value + '/doc' +   

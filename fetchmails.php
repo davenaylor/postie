@@ -85,7 +85,7 @@ function fetch_mails() {
   $fetch_query = 'SELECT * FROM ' .  $wpdb->prefix . 'postie_addresses';
   $mailboxes=$wpdb->get_results($fetch_query);
   print_r($mailboxes);
-  $config=GetConfig();
+  $config=get_config();
   foreach ($mailboxes as $mailbox) {
     $emails = FetchMail($mailbox->server, $mailbox->port,
         $mailbox->email, $mailbox->passwd, $mailbox->protocol);

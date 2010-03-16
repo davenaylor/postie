@@ -4,7 +4,7 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR ."postie-functions.php");
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR. "wp-config.php");
 //require_once('admin.php');
 require_once("postie-functions.php");
-$config = GetConfig();
+$config = get_config();
 $title = __("Postie Diagnosis");
 $parent_file = 'options-general.php?page=postie/postie.php';
 get_currentuserinfo();
@@ -69,7 +69,7 @@ get_currentuserinfo();
         <th>Connect to Mail Host</th>
         <td>
            <?php
-                switch( strtolower($config["INPUT_PROTOCOL"]) ) {
+                switch( strtolower($config["input_protocol"]) ) {
                     case 'imap':
                     case 'imap-ssl':
                     case 'pop3-ssl':
@@ -78,8 +78,8 @@ get_currentuserinfo();
                         }
                         else {
                             require_once("postieIMAP.php");
-                            $mail_server = &PostieIMAP::Factory($config["INPUT_PROTOCOL"]);
-                            if (!$mail_server->connect($config["MAIL_SERVER"], $config["MAIL_SERVER_PORT"],$config["MAIL_USERID"],$config["MAIL_PASSWORD"])) {
+                            $mail_server = &PostieIMAP::Factory($config["input_protocol"]);
+                            if (!$mail_server->connect($config["mail_server"], $config["mail_server_port"],$config["mail_userid"],$config["mail_password"])) {
                                 print("Unable to connect. The server said - ".$mail_server->error());
                                 print("<br/>Try putting in your full email address as a userid and try again.");
                             }
@@ -92,7 +92,7 @@ get_currentuserinfo();
                     default: 
                         require_once(ABSPATH.WPINC.DIRECTORY_SEPARATOR.'class-pop3.php');
                         $pop3 = &new POP3();
-                        if (!$pop3->connect($config["MAIL_SERVER"], $config["MAIL_SERVER_PORT"])) {
+                        if (!$pop3->connect($config["mail_server"], $config["mail_server_port"])) {
                                 print("Unable to connect. The server said - ".$pop3->ERROR);
                                 print("<br/>Try putting in your full email address as a userid and try again.");
                         }

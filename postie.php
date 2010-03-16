@@ -37,7 +37,7 @@ $Id$
 */
 
 //Older Version History is in the HISTORY file
-//error_reporting(E_ALL);
+//error_reporting(E_ALL  & ~E_NOTICE);
 //ini_set("display_errors", 1);
 
 define("POSTIE_ROOT",dirname(__FILE__));
@@ -73,6 +73,7 @@ if (isset($_GET["postie_read_me"])) {
 if (is_admin()) {
   require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR ."postie-functions.php");
   //add_action("admin_menu","PostieMenu");
+	add_action( 'admin_init', 'postie_admin_settings' );
   add_action('admin_menu', 'postie_loadjs_add_page');
   if(function_exists('load_plugin_textdomain')){
     $plugin_dir = WP_PLUGIN_DIR . '/' . basename(dirname(__FILE__));
@@ -84,116 +85,53 @@ if (is_admin()) {
   }
   postie_warnings(); 
 }
-//register_activation_hook(__FILE__, 'UpdateArrayConfig');
+
 function activate_postie() {
-  register_setting('postie-settings');
 	static $init = false;
-	$options = get_option('postie-settings');
+	$options = get_option( 'postie-settings' );
 	
-	if(!$init) {
-		if(!$options) {
-			$options = array();
-		}	
-    $default_options = array(
-      'admin_username' => 'admin', 
-      'prefer_text_type' => "plain",
-      'default_title' => "Live From The Field",
-      'input_protocol' => "pop3",
-      'image_placeholder' => "#img%#",
-      'images_append' => true,
-      'allow_subject_in_mail' => true,
-      'drop_signature' => true,
-      'message_start' => ":start",
-      'message_end' => ":end",
-      'forward_rejected_mail' => true,
-      'return_to_sender' => false,
-      'confirmation_email' => false,
-      'allow_html_in_subject' => true,
-      'allow_html_in_body' => true,
-      'start_image_count_at_zero' => false,
-      'message_encoding' => "UTF-8",
-      'message_dequote' => true, 
-      'turn_authorization_off' => false,
-      'custom_image_field' => false,
-      'convertnewline' => false,
-      'sig_pattern_list' => '--\n- --',
-      'banned_files_list' => '',
-      'supported_file_types' => "video\napplication",
-      'authorized_addresses' => '',
-      'mail_server' => NULL,
-      'mail_server_port' =>  NULL,
-      'mail_userid' =>  NULL,
-      'mail_password' =>  NULL,
-      'default_post_category' =>  NULL,
-      'default_post_tags' =>  NULL,
-      'time_offset' =>  get_option('gmt_offset'),
-      'wrap_pre' =>  'no',
-      'converturls' =>  true,
-      'shortcode' =>  false,
-      'add_meta' =>  'no',
-      'icon_set' => 'silver',
-      'icon_size' => 32,
-      'audiotemplate' =>$simple_link,
-      'selected_audiotemplate' => 'simple_link',
-      'selected_video1template' => 'simple_link',
-      'video1template' => $simple_link,
-      'video1types' => 'mp4,mpeg4,3gp,3gpp,3gpp2,3gp2,mov,mpeg',
-      'audiotypes' => 'm4a,mp3,ogg,wav,mpeg',
-      'selected_video2template' => 'simple_link',
-      'video2template' => $simple_link,
-      'video2types' => 'x-flv',
-      'post_status' => 'publish',
-      'image_new_window' => false,
-      'filternewlines' => true,
-      'selected_imagetemplate' => 'wordpress_default',
-      'imagetemplate' => $wordpress_default,
-      'delete_mail_after_processing' => true,
-      'interval' => 'twiceperhour',
-      'smtp' => '',
-    );
-		
-		$updated = false;
-		$migration = false;
-	  $oldConfig=getConfig();	
-		foreach($default_options as $option => $value) {
-			if(!isset($options[$option])) {
-				// Migrate old options
-        $oldOption = strtoupper($option);
-				if ($oldConfig[$oldOption]) {
-          // we handle some old array options individually
-          $commas = array('audiotypes', 'video1types', 'video2types',
-          'default_post_tags');
-          $newlines = array('smtp', 'authorized_addresses', 'supported_file_types',
-          'banned_files_list', 'sig_patterns_list');
-          if (in_array($option, $commas)) {
-            $options[$option] = implode(', ', $oldConfig[$oldOption]);
-          } elseif (in_array($options, $newlines)) {
-            $options[$option] = $implode("\n", $oldConfig[$oldOption]);
-          } else {
-            $options[$option] = $oldConfig[$oldOption];
-          }
-					$migration = true;
-				} else {
-					$options[$option] = $default_options[$option];
-				}
-				$updated = true;
-			}
+	if ( $init ) return;
+
+	if(!$options) {
+		$options = array();
+	}	
+	$default_options = get_config_defaults();
+	$old_config = array();
+	$updated = false;
+	$migration = false;
+	
+	/*
+	global $wpdb;
+	$GLOBALS["table_prefix"]. "postie_config";
+	$result = $wpdb->get_results("SELECT label,value FROM $postietable ;");
+	*/
+	$result = GetConfig(); 
+	if (is_array($result)) {		
+		foreach ( $result as $key => $val ) {
+			$old_config[strtolower( $key )] = $val;
 		}
-		
-		if($updated) {
-			update_option('postie-settings', $options);
-		}
-		if ($migration) {
-		}
-		$init = true;
 	}
+	
+	// overlay the options on top of each other:
+	// the current value of $options takes priority over the $old_config, which takes priority over the $default_options
+	$options = array_merge( $default_options, $old_config, $options );
+	$options = postie_validate_settings( $options );
+	update_option( 'postie-settings', $options );
+	$init = true;
+	// $wpdb->query("DROP TABLE IF EXISTS $postietable"); // safely updated options, so we can remove the old table
 	return $options;
 }
 register_activation_hook(__FILE__, 'activate_postie');
-function postie_warnings() {
-  if ($config=get_option('postie-settings'))
-    extract($config);
-  if ($mail_server=='' && !isset($_POST['submit'])) {
+
+/**
+  * set up actions to show relevant warnings, 
+  * if mail server is not set, or if IMAP extension is not available
+  */
+function postie_warnings() {	
+	
+  $config = get_option( 'postie-settings' );
+	
+  if ( empty( $config['mail_server'] ) && !isset($_POST['submit'] ) ) {
     function postie_enter_info() {
       echo "
       <div id='postie-info-warning' class='updated fade'><p><strong>".
@@ -202,6 +140,7 @@ function postie_warnings() {
     }
     add_action('admin_notices', 'postie_enter_info');
   }
+	
   if (!function_exists('imap_mime_header_decode') && $_GET['activate']==true) {
     function postie_imap_warning() {
       echo "<div id='postie-imap-warning' class='error'><p><strong>";
@@ -213,6 +152,7 @@ function postie_warnings() {
     }
     add_action('admin_notices', 'postie_imap_warning');
   }
+	
 }
 
 function disable_kses_content() {
@@ -248,15 +188,18 @@ function check_postie() {
     fclose($fp);
 }
 
-function postie_cron() {
-  global $wpdb;
-  $config=get_option('postie-settings');
-  if (!$config['interval'] || $config['interval']=='')
-    $config['interval']='hourly';
-  if ($config['interval']=='manual') {
+function postie_cron($interval=false) {
+  echo "interval = '" . $config['interval'] . "'";
+  if (!$interval) {
+    $config=get_option('postie-settings');
+    $interval = $config['interval'];
+  }
+  if (!$interval || $interval=='')
+    $interval='hourly';
+  if ($interval=='manual') {
     wp_clear_scheduled_hook('check_postie_hook');
   } else {
-    wp_schedule_event(time(),$config['interval'],'check_postie_hook');
+    wp_schedule_event(time(),$interval,'check_postie_hook');
   }
 }
 function postie_decron() {

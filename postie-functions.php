@@ -1,8 +1,9 @@
 <?php
 $revisions= WP_POST_REVISIONS;
 define('WP_POST_REVISIONS', false);
+//define('POSTIE_DEBUG', true);
 $original_mem_limit = ini_get('memory_limit');
-ini_set('memory_limit', -1);
+//ini_set('memory_limit', -1);
 
 //include_once (dirname(dirname(dirname(dirname(__FILE__)))) .  DIRECTORY_SEPARATOR."wp-admin" . DIRECTORY_SEPARATOR . "upgrade-functions.php");
 /*
@@ -21,12 +22,8 @@ $Id$
  * add vimeo embedding
  * add option to send confirmation e-mail to admin
  */
-#global $config,$debug;
-#$debug=true;
-#$config=GetConfig();
 
 //include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
-define("POSTIE_TABLE",$GLOBALS["table_prefix"]. "postie_config");
 
 /* this function is necessary for wildcard matching on non-posix systems */
 if (!function_exists('fnmatch')) {
@@ -45,7 +42,6 @@ if (!function_exists('fnmatch')) {
   */
 function PostEmail($poster,$mimeDecodedEmail,$config) {
   extract($config);
-  //$debug=true;
   $post_to_db=true;
 
   $attachments = array(
@@ -55,10 +51,13 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
           );
   print("<p>Message Id is :" .
       htmlentities($mimeDecodedEmail->headers["message-id"]) . "</p><br/>\n");
-  print("<p>Email has following attachments:</p>");
-  //foreach($mimeDecodedEmail->parts as $parts) {
-   // print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."</p>\n";
-  //}
+	if ( defined ( 'POSTIE_DEBUG' ) ){
+		foreach($mimeDecodedEmail->parts as $parts) {
+    	print("<p>".$parts->ctype_primary ." ".$parts->ctype_secondary) ."</p>\n";
+		}
+		echo "<p>Email is:</p>";
+		var_dump($mimeDecodedEmail);
+	}
   FilterTextParts($mimeDecodedEmail, $prefer_text_type);
   $tmpPost=array('post_title'=> 'tmptitle',
                  'post_content'=>'tmpPost');
@@ -66,15 +65,15 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   attachments with a post. So we add the post here, then update it 
   */
   $post_id = wp_insert_post($tmpPost);
-  if ($debug) {
+  if( defined( 'POSTIE_DEBUG' ) ) {
     echo "the id is $post_id\n";
   }
   $content = GetContent($mimeDecodedEmail,$attachments,$post_id, $config);
-  if ($debug) {
+  if( defined( 'POSTIE_DEBUG' ) ) {
     echo "the content is $content\n";
   }
   $subject = GetSubject($mimeDecodedEmail,$content, $config);
-  if ($debug) {
+  if( defined( 'POSTIE_DEBUG' ) ) {
     echo "the subject is $subject, right after calling GetSubject\n";
   }
   $customImages = SpecialMessageParsing($content,$attachments, $config);
@@ -93,7 +92,6 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   }
   list($post_date,$post_date_gmt, $delay) = DeterminePostDate($content,
       $message_date,$time_offset);
-
   ubb2HTML($content);	
 
   if ($converturls) 
@@ -421,7 +419,8 @@ function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
   */
 function TestIMAPMessageFetch ( ) {			
   print("**************RUNING IN TESTING MODE************\n");
-  $config = GetConfig();
+  $config = get_config();
+	extract( $config );
   $email = $test_email_account;
   $password = $test_email_password;
   return(IMAPMessageFetch($mail_server, $mail_server_port,
@@ -466,7 +465,8 @@ function IMAPMessageFetch ($server=NULL, $port=NULL, $email=NULL,
 }
 function TestPOP3MessageFetch ( ) {			
   print("**************RUNING IN TESTING MODE************\n");
-  $config = GetConfig();
+  $config = get_config();
+	extract( $config );
   $email = $test_email_account;
   $password = $test_email_password;
   return(POP3MessageFetch($mail_server, $mail_server_port,
@@ -573,8 +573,7 @@ function PostToDB($details,$isReply, $postToDb=true, $customImageField=false) {
   * @return boolean
   */
 function BannedFileName($filename, $bannedFiles) {
-  if ($bannedFiles!='') 
-    $bannedFiles = explode("\n", $bannedFiles);
+	if ( empty( $filename ) || empty( $bannedFiles ) ) return false;
   foreach ($bannedFiles as $bannedFile) {
     if (fnmatch($bannedFile, $filename)) {
       print("<p>Ignoring $filename - it is on the banned files list.");
@@ -682,7 +681,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         $file_id = postie_media_handle_upload($part, $post_id);
         $file = wp_get_attachment_url($file_id);
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
-        if (stristr($audiotypes, $part->ctype_secondary)!== FALSE) {
+        if ( in_array( $part->ctype_secondary, $audiotypes ) ) {
           $audioTemplate=$audiotemplate;
         } else {
           $icon=chooseAttachmentIcon($file, $part->ctype_primary,
@@ -697,9 +696,9 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         $file_id = postie_media_handle_upload($part, $post_id);
         $file = wp_get_attachment_url($file_id);
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
-        if (stristr($video1types, $part->ctype_secondary)!== FALSE) {
+        if ( in_array( strtolower( $part->ctype_secondary ), $video1types ) ) {
           $videoTemplate=$video1template;
-        } elseif (stristr($video2types, $part->ctype_secondary)!== FALSE) {
+        } elseif ( in_array( strtolower( $part->ctype_secondary ), $video2types ) )  {
           $videoTemplate=$video2template;
         } else {
           $icon=chooseAttachmentIcon($file, $part->ctype_primary,
@@ -713,7 +712,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         break;
 
       default:
-        if (stristr($supported_file_types, $part->ctype_primary)!== FALSE) {
+        if ( in_array( strtolower( $part->ctype_primary ), $supported_file_types ) ) {
           //pgp signature - then forget it
           if ( $part->ctype_secondary == 'pgp-signature' )
             break;
@@ -904,15 +903,13 @@ if ( empty($from) ) {
 }
 
 function checkSMTP($mimeDecodedEmail, $smtpservers) {
-  if (empty($smtpservers))
-    return(true);
-  foreach ($mimeDecodedEmail->headers['received'] as $received) {
-    foreach ($smtpservers as $smtp) {
-      if (stristr($received, $smtp))
-        return(true);
-    }
-  }
-  return(false);
+
+if ( empty( $smtpservers ) ) return true;
+	
+  foreach ( (array) $mimeDecodedEmail->headers['received'] as $received ) {
+		if ( in_array( strtolower($received), $smtpservers ) ) return true;
+	}
+  return false;
 }
 
 /**
@@ -935,25 +932,23 @@ function StartFilter(&$content,$start) {
 * @param string
 * @param array - a list of patterns to determine if it is a sig block
 */
-function RemoveSignature( &$content,$filterList = array('--','- --' )) {
+function remove_signature( $content, $filterList ) {
   if (empty($filterList))
-    return;
-$arrcontent = explode("\n", $content);
-$i = 0;
-$pattern='/^(';
-$pattern.=implode('|',$filterList);
-$pattern.=')/';
-for ($i = 0; $i<=count($arrcontent); $i++) {
-  $line = trim($arrcontent[$i]);
-  $nextline = $arrcontent[$i+1];
-  if (preg_match($pattern,trim($line))) {
-  //if (!strpos(trim($line), $pattern)==0) {
-    //print("<p>Found in $line");
-    break;
-  }
-  $strcontent .= $line ."\n";
-}
-  $content = $strcontent;
+    return $content;
+	$arrcontent = explode("\n", $content);
+	$strcontent = '';
+	$pattern='/^('  . implode( '|', $filterList ) . ')/';
+	for ($i = 0; $i<=count($arrcontent); $i++) {
+		$line = trim($arrcontent[$i]);
+		$nextline = $arrcontent[$i+1];
+		if (preg_match($pattern,trim($line))) {
+		//if (!strpos(trim($line), $pattern)==0) {
+			//print("<p>Found in $line");
+			break;
+		}
+		$strcontent .= $line ."\n";
+	}
+  return $strcontent;
 }
 /**
 * Looks at the content for the given tag and removes all text
@@ -1001,12 +996,12 @@ function FilterNewLines ( $content, $convertNewLines=false ) {
   //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
   if ($convertNewLines) {
     $newContent= preg_replace('/LINEBREAK/',"<br />\n",$newContent);
-    if ($debug) {
+    if( defined( 'POSTIE_DEBUG' ) ) {
       echo "converting newlines\n";
     }
   } else {
     $newContent= preg_replace('/LINEBREAK/'," ",$newContent);
-    if ($debug) {
+    if( defined( 'POSTIE_DEBUG' ) ) {
       echo "not converting newlines\n";
     }
   }
@@ -1180,7 +1175,7 @@ function AllowCommentsOnPost(&$content) {
   */
 function DeterminePostDate(&$content, $message_date = NULL, $offset=0) {
     $delay = 0;
-    if ($debug) {
+    if( defined( 'POSTIE_DEBUG' ) ) {
       echo "inside Determine Post Date, message_date = $message_date\n";
     }
     if (eregi("delay:(-?[0-9dhm]+)",$content,$matches)
@@ -1585,7 +1580,9 @@ function DecodeMIMEMail($email, $decodeHeaders=false) {
     $params['decode_headers'] = $decodeHeaders;
     $params['input'] = $email;
     //$decoded = imap_mime_header_decode($email);
-    return(Mail_mimeDecode::decode($params));
+		$decoded = Mail_mimeDecode::decode($params);
+		if ( empty($decoded->parts) ) $decoded->parts = array(); // have an empty array at minimum, so that it is safe for "foreach"
+    return $decoded;
 }
     
 /**
@@ -1603,9 +1600,7 @@ function DisplayMIMEPartTypes($mimeDecodedEmail) {
   * @return boolean
   */
 function CheckEmailAddress($address, $authorized) {
-  $address = strtolower($address);
-  if (strstr($address,$authorized)!==FALSE)
-    return(true);
+	return in_array( strtolower($address), $authorized );
 }
 /**
   *This method works around a problemw with email address with extra <> in the email address
@@ -1903,15 +1898,14 @@ function GetSubject(&$mimeDecodedEmail,&$content, $config) {
   *
   */
 function postie_get_tags(&$content, $defaultTags) {
-  global $wpdb;
   $post_tags = array();
   //try and determine tags
   if ( preg_match('/tags: ?(.*)\n/i', $content, $matches))  {
     $content = str_replace($matches[0], "", $content);
     $post_tags = preg_split("/,\s*/", $matches[1]);
   }
-  if (!count($post_tags) && $defaultTags!='') {
-      $post_tags =  preg_split("/,\s*/", $defaultTags);
+  if ( !count( $post_tags ) && !empty( $defaultTags ) ) {
+      $post_tags =  $defaultTags;
   }
   return($post_tags);
 }
@@ -1988,7 +1982,7 @@ function GetPostCategories(&$subject, $defaultCategory) {
   *This function just outputs a simple html report about what is being posted in
   */
 function DisplayEmailPost($details) {
-  if ($debug) {
+  if( defined( 'POSTIE_DEBUG' ) ) {
     print_r($config);
     print_r($details);
   }
@@ -2058,144 +2052,124 @@ function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
   return($string);
 }
 /**
-  *Handles the creation of the table needed to store all the data
-  */
-function SetupConfiguration() {
-    if (! function_exists('maybe_create_table')) {
-      function maybe_create_table($table_name, $create_ddl) {
-        global $wpdb;
-        foreach ($wpdb->get_col("SHOW TABLES",0) as $table ) {
-          if ($table == $table_name) {
-            return true;
-          }
-        }
-        //didn't find it try to create it.
-        $wpdb->query($create_ddl);
-        // we cannot directly tell that whether this succeeded!
-        foreach ($wpdb->get_col("SHOW TABLES",0) as $table ) {
-          if ($table == $table_name) {
-            return true;
-          }
-        }
-        return false;
-      }
-    }
-    $create_table_sql = "CREATE TABLE ".POSTIE_TABLE ." (
-         label text NOT NULL,
-         value text not NULL
-             );";
-
-    maybe_create_table(POSTIE_TABLE,$create_table_sql);
-}
-/**
   *This function resets all the configuration options to the default
   */
 function ResetPostieConfig() {
-	global $wpdb;
-  //Get rid of old values
-  $query ="delete from  ". POSTIE_TABLE . "  WHERE label NOT IN ('MAIL_PASSWORD', 'MAIL_SERVER', 'MAIL_SERVER_PORT', 'MAIL_USERID', 'INPUT_PROTOCOL');";
-  $results=$wpdb->query($wpdb->prepare($query));
-  $config = GetConfig();
-  $key_arrays = GetListOfArrayConfig();
-  foreach($key_arrays as $key) {
-    $config[$key] = join("\n",$config[$key]);
-  }
-  UpdatePostieConfig($config);
+  $newconfig = get_config_defaults();
+	$config = get_option( 'postie-settings' ) ;
+	$save_keys=array( 'mail_password', 'mail_server', 'mail_server_port', 'mail_userid', 'iinput_protocol' );
+  foreach ( $save_keys as $key )
+		$newconfig[$key] = $config[$key];
+  update_option( 'postie-settings', $newconfig );
+	UpdatePostieConfig( $newconfig );
+	return $newconfig;
 }
 
-function UpdateArrayConfig() {
-  global $wpdb;
-  $key_arrays = GetListOfArrayConfig();
-  $data = $wpdb->get_results("SELECT label,value FROM ". POSTIE_TABLE .";");
-  if (is_array($data)) {
-    foreach($data as $row) {
-      if (in_array($row->label,$key_arrays)) {
-        if (unserialize($row->value)) {
-          if ($row->value=='a:1:{i:0;s:6:"a:0:{}";}') {
-            $config[$row->label] = array(); 
-          } else {
-            $config[$row->label] = unserialize($row->value);
-          }
-        } else {
-          if (!is_array($config[$row->label])) 
-            $config[$row->label] = array();
-          if ($row->value!='a:0:{}') 
-            $config[$row->label][] = $row->value;
-        }
-      } else {
-        $config[$row->label] = $row->value;
-      }
-    }
-  }
-  WriteConfig($config);
-  echo "updating database";
-}
 /**
-  * This function handles updating the configuration 
+  * This function used to handle updating the configuration.
   *@return boolean
   */
 function UpdatePostieConfig($data) {
-  SetupConfiguration();
-  $key_arrays = GetListOfArrayConfig();
-  $config = GetDBConfig();
-  foreach($config as $key => $value) {
-    if (isset($data[$key])) {
-      if (in_array($key,$key_arrays)) { //This is stored as an array
-        $data[$key]=trim($data[$key]);
-        if (strstr($data[$key], "\n")) {
-          $delim = "\n";
-        } else {
-          $delim = ',';
-        }
-        $config[$key] = array();
-        $values = explode($delim,$data[$key]);
-        foreach($values as $item) {
-          if (trim($item)) {
-            $config[$key][] = trim($item);
-          }
-        }
-      } else {
-        $config[$key] = FilterNewLines($data[$key]);
-      }
-    }
-  }
-  WriteConfig($config);
-  UpdatePostiePermissions($data["ROLE_ACCESS"]);
-  // If we are using cronless, we also update the cronless events
-  if ($cronless!='') {
+	UpdatePostiePermissions( $data["role_access"] );  
+  // We also update the cron settings
+  if ($data['interval']!='') {
+    echo "removing postie cron hook";
     postie_decron();
-    postie_cron();
+    if ($data['interval']!='manual') {
+      echo "adding new postie cron hook";
+      postie_cron($interval=$data['interval']);
+    }
   }
   return(1);
 }
 /**
-  * This handles actually writing out the changes
-  *@param array
-  */
-function WriteConfig($config) {
-  global $wpdb;
-  foreach($config as $key=>$value) {
-    $label = $key;
-    $q = $wpdb->query($wpdb->prepare("DELETE FROM ". POSTIE_TABLE . "
-        WHERE label = '$label';"));
-    if (is_array($value))  {
-      $value=serialize($value);
-    }
-    $theQuery=$wpdb->prepare("INSERT INTO ". POSTIE_TABLE . "
-        (label,value) VALUES
-        ('$label','". $value ."');");
-    $q = $wpdb->query($theQuery);
-  }
+	* return an array of the config defaults
+	*/
+function get_config_defaults() {
+	include('templates/audio_templates.php');
+  include('templates/image_templates.php');	
+  include('templates/video1_templates.php');
+  include('templates/video2_templates.php');
+	return array(
+      'add_meta' =>  'no',
+      'admin_username' => 'admin', 
+      'allow_html_in_body' => true,
+      'allow_html_in_subject' => true,
+      'allow_subject_in_mail' => true,
+      'audiotemplate' =>$simple_link,
+      'audiotypes' => array( 'm4a', 'mp3','ogg', 'wav', 'mpeg' ),
+      'authorized_addresses' => array(),
+      'banned_files_list' => array(),
+      'confirmation_email' => false,
+      'convertnewline' => false,
+      'converturls' =>  true,
+      'custom_image_field' => false,
+      'default_post_category' =>  NULL,
+      'default_post_tags' =>  array(),
+      'default_title' => "Live From The Field",
+      'delete_mail_after_processing' => true,
+      'drop_signature' => true,
+      'filternewlines' => true,
+      'forward_rejected_mail' => true,
+      'icon_set' => 'silver',
+      'icon_size' => 32,
+      'image_new_window' => false,
+      'image_placeholder' => "#img%#",
+      'images_append' => true,
+      'imagetemplate' => $wordpress_default,
+			'imagetemplates' => $imageTemplates,
+      'input_protocol' => "pop3",
+      'interval' => 'twiceperhour',
+      'mail_server' => NULL,
+      'mail_server_port' =>  NULL,
+      'mail_userid' =>  NULL,
+      'mail_password' =>  NULL,
+      'message_start' => ":start",
+      'message_end' => ":end",
+      'message_encoding' => "UTF-8",
+      'message_dequote' => true, 
+      'post_status' => 'publish',
+      'prefer_text_type' => "plain",
+      'return_to_sender' => false,
+			'role_access' => array(),
+			'selected_audiotemplate' => 'simple_link',
+      'selected_imagetemplate' => 'wordpress_default',
+      'selected_video1template' => 'simple_link',
+      'selected_video2template' => 'simple_link',
+      'shortcode' =>  false,
+      'sig_pattern_list' => array( '--', '- --' ),
+      'smtp' => array(),
+      'start_image_count_at_zero' => false,
+      'supported_file_types' => array( 'video', 'application' ),
+      'turn_authorization_off' => false,
+      'time_offset' =>  get_option('gmt_offset'),
+      'video1template' => $simple_link,
+      'video1types' => array( 'mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', '3gp2', 'mov', 'mpeg' ),
+      'video2template' => $simple_link,
+      'video2types' => array( 'x-flv' ),
+			'video1templates' => $video1Templates,
+			'video2templates' => $video2Templates,
+      'wrap_pre' =>  'no'
+    );
 }
 /**
-  *This handles actually reading the config from the database
+  *=======================================================
+  * the following functions are only used to retrieve the old (pre 1.4) config, to convert it
+  * to the new format
+  */
+function GetListOfArrayConfig() {
+  return(array('SUPPORTED_FILE_TYPES','AUTHORIZED_ADDRESSES',
+      'SIG_PATTERN_LIST','BANNED_FILES_LIST', 'VIDEO1TYPES', 
+      'VIDEO2TYPES', 'AUDIOTYPES', 'SMTP'));
+}
+/**
+  *This function retrieves the old-format config (pre 1.4) from the database
   * @return array
   */
 function ReadDBConfig() {
-  SetupConfiguration();
   $config = array();
   global $wpdb;
-  $data = $wpdb->get_results("SELECT label,value FROM ". POSTIE_TABLE .";");
+  $data = $wpdb->get_results("SELECT label,value FROM ". $GLOBALS["table_prefix"] . "postie_config;");
   if (is_array($data)) {
     foreach($data as $row) {
       if (in_array($row->label,GetListOfArrayConfig())) {
@@ -2208,8 +2182,7 @@ function ReadDBConfig() {
   return($config);
 }
 /**
-  * This handles the configs that are stored in the data base
-  * You should never call this outside of the library
+  * This function processes the old-format config (pre 1.4) for conversion to the 1.4 format
   * @return array
   * @access private
   */
@@ -2335,7 +2308,7 @@ function GetDBConfig() {
     return($config);
 }
 /**
-  * This function handles building up the configuration array for the program
+  * This function returns the old-format config (pre 1.4)
   * @return array
   */
 function GetConfig() {
@@ -2359,13 +2332,32 @@ function GetConfig() {
   return $config;
 }
 /**
+  * end of functions used to retrieve the old (pre 1.4) config
+  *=======================================================
+  */
+/**
+  * This function returns the current config
+  * @return array
+  */
+function get_config() {
+  $config = get_option( 'postie-settings' );
+  if (file_exists(POSTIE_ROOT . '/postie_test_variables.php')) { 
+    include(POSTIE_ROOT . '/postie_test_variables.php');
+  }
+  // These are computed
+  $config["time_offset"] = get_option('gmt_offset');
+  $config["postie_root"] = POSTIE_ROOT;
+  return $config;
+}
+/**
   * Returns a list of config keys that should be arrays
   *@return array
   */
-function GetListOfArrayConfig() {
-  return(array('SUPPORTED_FILE_TYPES','AUTHORIZED_ADDRESSES',
-      'SIG_PATTERN_LIST','BANNED_FILES_LIST', 'VIDEO1TYPES', 
-      'VIDEO2TYPES', 'AUDIOTYPES', 'SMTP'));
+function get_arrayed_settings() {
+	return array(
+		',' => array('audiotypes', 'video1types', 'video2types', 'default_post_tags'),
+		"\n" => array('smtp', 'authorized_addresses', 'supported_file_types', 
+					'banned_files_list', 'sig_pattern_list') );
 }
 /**
   * Detects if they can do IMAP
@@ -2421,17 +2413,54 @@ function TestForMarkdown() {
 
 }
 /**
+  * validates the config form output, fills in any gaps by using the defaults,
+  * and ensures that arrayed items are stored as such
+  */
+function postie_validate_settings( $in ) {
+	if ( defined ( 'POSTIE_DEBUG' ) ) var_dump( $in );
+	$out = array();
+	
+	// use the default as a template: 
+	// if a field is present in the defaults, we want to store it; otherwise we discard it
+	$allowed_keys = get_config_defaults();
+	foreach ( $allowed_keys as $key => $default )
+		$out[$key] = array_key_exists( $key, $in ) ? $in[$key] : $default;
+
+	// some fields are always forced to lower case:
+	$lowercase = array( 'authorized_addresses', 'smtp', 'supported_file_types', 'video1types', 'video2types', 'audiotypes' );
+	foreach ($lowercase as $field) {
+		$out[$field] = ( is_array( $out[$field] ) ) ? array_map( strtolower, $out[$field] ) : strtolower( $out[$field] );
+	}
+	$arrays = get_arrayed_settings();
+	
+	foreach ( $arrays as $sep => $fields ) {
+		foreach ( $fields as $field ) {
+				if ( !is_array( $out[$field] ) )
+					$out[$field] = explode( $sep, trim( $out[$field] ) );
+				foreach ( $out[$field] as $key => $val ) {
+					$tst = trim($val);
+					if ( empty( $tst ) ) unset( $out[$field][$key] );
+				}
+		 }
+	}
+
+	UpdatePostieConfig( $out );
+	return $out;
+}
+/**
+  * registers the settings and the admin optionspage
+  */
+function postie_admin_settings() {
+  register_setting( 'postie-settings', 'postie-settings', 'postie_validate_settings' );
+}
+/**
   * This function handles setting up the basic permissions
   */
-function PostieAdminPermissions() {
+function UpdatePostiePermissions( $role_access ) {
   global $wp_roles;
   $admin = $wp_roles->get_role("administrator");
   $admin->add_cap("config_postie");
   $admin->add_cap("post_via_postie");
-}
-function UpdatePostiePermissions($role_access, $unfiltered=true) {
-  global $wp_roles;
-  PostieAdminPermissions();
   if (!is_array($role_access)) {
     $role_access = array();
   }
@@ -2471,7 +2500,7 @@ function SpecialMessageParsing(&$content, &$attachments, $config){
     EndFilter($content,$message_end);
   }
   if ( $drop_signature ) { 
-    RemoveSignature($content,$sig_pattern_list);
+    $content = remove_signature( $content, $sig_pattern_list );
   }
   if  ($prefer_text_type == "html"
           && count($attachments["cids"])) {
