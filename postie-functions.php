@@ -66,7 +66,7 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
   if( defined( 'POSTIE_DEBUG' ) ) {
     echo "the id is $post_id\n";
   }
-  $content = GetContent($mimeDecodedEmail,$attachments,$post_id, $config);
+  $content = GetContent($mimeDecodedEmail,$attachments,$post_id, $poster, $config);
   if( defined( 'POSTIE_DEBUG' ) ) {
     echo "the content is $content\n";
   }
@@ -582,7 +582,7 @@ function BannedFileName($filename, $bannedFiles) {
 }
 
 //tear apart the meta part for useful information
-function GetContent ($part,&$attachments, $post_id, $config) {
+function GetContent ($part,&$attachments, $post_id, $poster, $config) {
   extract($config);
   global $charset, $encoding;
   /*
@@ -610,7 +610,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
       $mimeDecodedEmail = DecodeMIMEMail($part->body);
       FilterTextParts($mimeDecodedEmail, $prefer_text_type);
       foreach($mimeDecodedEmail->parts as $section) {
-        $meta_return .= GetContent($section,$attachments,$post_id, $config);
+        $meta_return .= GetContent($section,$attachments,$post_id, $poster, $config);
       }
     }
   }
@@ -620,14 +620,14 @@ function GetContent ($part,&$attachments, $post_id, $config) {
     FilterTextParts($mimeDecodedEmail, $prefer_text_type);
     FilterAppleFile($mimeDecodedEmail);
     foreach($mimeDecodedEmail->parts as $section) {
-      $meta_return .= GetContent($section,$attachments,$post_id, $config);
+      $meta_return .= GetContent($section,$attachments,$post_id, $poster, $config);
     }
   } else { 
     switch ( strtolower($part->ctype_primary) ) {
       case 'multipart':
         FilterTextParts($part, $prefer_text_type);
         foreach ($part->parts as $section) {
-          $meta_return .= GetContent($section,$attachments,$post_id, $config);
+          $meta_return .= GetContent($section,$attachments,$post_id, $poster, $config);
         }
         break;
       case 'text':
@@ -663,7 +663,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
 
       case 'image':
         echo "looking at an image\n";
-        $file_id = postie_media_handle_upload($part, $post_id);
+        $file_id = postie_media_handle_upload($part, $post_id, $poster);
         $file = wp_get_attachment_url($file_id);
 
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
@@ -676,7 +676,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
         }
         break;
       case 'audio':
-        $file_id = postie_media_handle_upload($part, $post_id);
+        $file_id = postie_media_handle_upload($part, $post_id, $poster);
         $file = wp_get_attachment_url($file_id);
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
         if ( in_array( $part->ctype_secondary, $audiotypes ) ) {
@@ -691,7 +691,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
             $audioTemplate);
         break;
       case 'video':
-        $file_id = postie_media_handle_upload($part, $post_id);
+        $file_id = postie_media_handle_upload($part, $post_id, $poster);
         $file = wp_get_attachment_url($file_id);
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
         if ( in_array( strtolower( $part->ctype_secondary ), $video1types ) ) {
@@ -714,7 +714,7 @@ function GetContent ($part,&$attachments, $post_id, $config) {
           //pgp signature - then forget it
           if ( $part->ctype_secondary == 'pgp-signature' )
             break;
-          $file_id = postie_media_handle_upload($part, $post_id);
+          $file_id = postie_media_handle_upload($part, $post_id, $poster);
           $file = wp_get_attachment_url($file_id);
           echo "file=$file\n";
           $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
@@ -1243,7 +1243,7 @@ function FilterAppleFile(&$mimeDecodedEmail) {
         $mimeDecodedEmail->parts = $newParts; //This is now the filtered list of just the preferred type.
     }
 }
-function postie_media_handle_upload($part, $post_id, $post_data = array()) {
+function postie_media_handle_upload($part, $post_id, $poster, $post_data = array()) {
   $overrides = array('test_form'=>false);
         //$overrides = array('test_form'=>false, 'test_size'=>false,
          //                  'test_type'=>false);
@@ -1323,6 +1323,7 @@ function postie_media_handle_upload($part, $post_id, $post_data = array()) {
     'post_title' => $title,
     'post_excerpt' => $content,
     'post_content' => $content,
+    'post_author' => $poster
   ), $post_data );
 
   // Save the data

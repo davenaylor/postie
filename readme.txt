@@ -314,7 +314,7 @@ option to convert url into links turned on)
 == CHANGELOG ==
 
 = 1.4 (2010.02.xx) =  
-* Now using wordpress settings api
+* Now using wordpress settings api (thanks for much help from Andrew S)
 * Cronless postie is now integrated with postie instead of a separate plugin
 * filterPostie.php moved to filterPostie.php.sample
 * Can use fetchmails.php to fetch mail from multiple mailboxes
@@ -325,6 +325,7 @@ option to convert url into links turned on)
 * Fixed problems with cronless postie settings
 * Fixed bug with embedding youtube and vimeo videos whose ID contains a -
   (thanks Jim Kehoe)
+* Post_author is now included with attachments
 
 = 1.3.4 (2009.10.05) =
 * Fixed problem with images not posting under cron
