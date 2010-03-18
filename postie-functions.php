@@ -19,8 +19,6 @@ $Id$
  * add private post function
    http://forum.robfelty.com/topic/how-to-private-posts-from-postie?replies=2#post-1515
  * category per e-mail address
- * add vimeo embedding
- * add option to send confirmation e-mail to admin
  */
 
 //include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
@@ -2073,10 +2071,8 @@ function UpdatePostieConfig($data) {
 	UpdatePostiePermissions( $data["role_access"] );  
   // We also update the cron settings
   if ($data['interval']!='') {
-    echo "removing postie cron hook";
     postie_decron();
     if ($data['interval']!='manual') {
-      echo "adding new postie cron hook";
       postie_cron($interval=$data['interval']);
     }
   }
