@@ -189,7 +189,6 @@ function check_postie() {
 }
 
 function postie_cron($interval=false) {
-  echo "interval = '" . $config['interval'] . "'";
   if (!$interval) {
     $config=get_option('postie-settings');
     $interval = $config['interval'];
