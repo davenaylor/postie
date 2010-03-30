@@ -173,12 +173,21 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
       'post_status' => $post_status
   );
   $details = apply_filters('postie_post', $details);
-  DisplayEmailPost($details);
-  PostToDB($details,$isReply, $post_to_db,
-      $custom_image_field); 
-  if ($confirmation_email)
-    MailToRecipients($mimeDecodedEmail, false,
-        array($postAuthorDetails['email']), false, false); 
+  if ( empty( $details ) ) {
+    // It is possible that the filter has removed the post, in which case, it should not be posted.
+    // And if we created a placeholder post (because this was not a reply to an existing post),
+    // then it should be removed
+    if ( !$is_reply ) {
+      wp_delete_post($post_id);
+    }
+  } else {
+    DisplayEmailPost($details);
+    PostToDB($details,$isReply, $post_to_db,
+        $custom_image_field); 
+    if ($confirmation_email)
+      MailToRecipients($mimeDecodedEmail, false,
+          array($postAuthorDetails['email']), false, false); 
+  }
 }
 /** FUNCTIONS **/
 
@@ -901,11 +910,11 @@ if ( empty($from) ) {
 }
 
 function checkSMTP($mimeDecodedEmail, $smtpservers) {
-
-if ( empty( $smtpservers ) ) return true;
-	
+  if ( empty( $smtpservers ) ) return true;
   foreach ( (array) $mimeDecodedEmail->headers['received'] as $received ) {
-		if ( in_array( strtolower($received), $smtpservers ) ) return true;
+    foreach ($smtpservers as $smtp) {
+      if ( stristr( $received, $smtp ) !== false ) return true;
+    }
 	}
   return false;
 }
@@ -954,19 +963,11 @@ function remove_signature( $content, $filterList ) {
 * @param string
 * @param filter
 */
-function EndFilter( &$content,$filter) {
-$arrcontent = explode("\n", $content);
-$i = 0;
-for ($i = 0; $i<=count($arrcontent); $i++) {
-  $line = $arrcontent[$i];
-  $nextline = $arrcontent[$i+1];
-      if (preg_match("/^$filter/",trim($line))) {
-          //print("<p>Found in $line");
-          break;
-      }
-  $strcontent .= $line ."\n";
-}
-  $content = $strcontent;
+function EndFilter( &$content, $end ) {
+ $pos = strpos( $content, $end );
+  if ( $pos === false )
+      return $content;
+ return $content = substr($content, 0, $pos);
 }
 
 //filter content for new lines
