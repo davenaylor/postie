@@ -287,7 +287,25 @@ $messages[2] = __("Error - unable to save configuration",'postie');
               "Set to no if using markdown or textitle syntax");?>
             <?php echo BuildBooleanSelect("Replace newline characters with html line breaks (&lt;br /&gt;)","postie-settings[convertnewline]",$convertnewline);?>
             <?php echo BuildBooleanSelect("Return rejected mail to sender","postie-settings[return_to_sender]",$return_to_sender);?>
-            <?php echo BuildBooleanSelect("Send post confirmation e-mail to sender","postie-settings[confirmation_email]",$confirmation_email);?>
+            <tr>
+            <th>
+            <?php _e("Send post confirmation e-mail to" , 'postie') ?>
+            </th>
+            <td>
+    <select name='postie-settings[confirmation_email]'
+    id='postie-settings-confirmation_email'>
+        <option value="sender" <?php if($confirmation_email == "sender") {
+        echo "selected";} ?>><?php _e('sender', 'postie') ?></option>
+        <option value="admin" <?php if($confirmation_email == "admin") { echo
+        "selected";} ?>><?php _e('administrator', 'postie') ?></option>
+        <option value="both" <?php if($confirmation_email == "both") { echo
+        "selected";} ?>><?php _e('sender and administrator', 'postie') ?></option>
+        <option value="" <?php if($confirmation_email == "") { echo
+        "selected";} ?>><?php _e('none', 'postie') ?></option>
+            </select>
+            </td>
+            </tr>
+            
             <?php echo BuildBooleanSelect("Automatically convert urls to links","postie-settings[converturls]",$converturls);?>
             <?php echo BuildBooleanSelect("Use shortcode for embedding video (youtube and others)","postie-settings[shortcode]",$shortcode);?>
             <tr> 

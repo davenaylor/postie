@@ -184,9 +184,18 @@ function PostEmail($poster,$mimeDecodedEmail,$config) {
     DisplayEmailPost($details);
     PostToDB($details,$isReply, $post_to_db,
         $custom_image_field); 
-    if ($confirmation_email)
+    if ($confirmation_email!='') {
+      if ($confirmation_email=='sender') {
+        $recipients = array($postAuthorDetails['email']);
+      } elseif ($confirmation_email=='admin') {
+        $recipients = array(get_option("admin_email"));
+      } elseif ($confirmation_email=='both') {
+        $recipients = array($postAuthorDetails['email'],
+            get_option("admin_email"));
+      }
       MailToRecipients($mimeDecodedEmail, false,
-          array($postAuthorDetails['email']), false, false); 
+          $recipients, false, false); 
+    }
   }
 }
 /** FUNCTIONS **/
@@ -897,8 +906,9 @@ if ( empty($from) ) {
   if (!$poster || !$validSMTP) {
     echo 'Invalid sender: ' . htmlentities($from) . "! Not adding email!\n";
     if ($forward_rejected_mail) {
+      $admin_email = get_option("admin_email");
       if (MailToRecipients($mimeDecodedEmail, $test_email, 
-          array(), $return_to_sender)) { 
+          array($admin_email), $return_to_sender)) { 
         echo "A copy of the message has been forwarded to the administrator.\n"; 
       } else {
         echo "The message was unable to be forwarded to the adminstrator.\n";
@@ -1483,12 +1493,14 @@ function MailToRecipients( &$mail_content,$testEmail=false,
   if ($testEmail) {
       return;
   }
+  echo "mailing to ";
 	$user = get_userdata('1');
 	$myname = $user->user_nicename;
 	$myemailadd = get_option("admin_email");
 	$blogname = get_option("blogname");
 	$blogurl = get_option("siteurl");
-	array_push($recipients, $myemailadd);
+	//array_push($recipients, $myemailadd);
+  print_r($recipients);
 	if (count($recipients) == 0) {
 		return false;
 	}
@@ -1500,6 +1512,12 @@ function MailToRecipients( &$mail_content,$testEmail=false,
   }
     
   $headers = "From: Wordpress <" .$myemailadd .">\r\n";
+  foreach ($recipients as $recipient) {
+    $recipient = trim($recipient);
+    if (! empty($recipient)) {
+      $headers .= "Cc: " . $recipient . "\r\n";
+    }
+  }
 	// Set email subject
   if ($reject) {
     $alert_subject = $blogname . ": Unauthorized Post Attempt from $from";
@@ -1520,12 +1538,6 @@ function MailToRecipients( &$mail_content,$testEmail=false,
 
       $headers.="Content-Type:multipart/alternative; boundary=\"$boundary\"\r\n";
     // SDM 20041123
-    foreach ($recipients as $recipient) {
-      $recipient = trim($recipient);
-      if (! empty($recipient)) {
-        $headers .= "Cc: " . $recipient . "\r\n";
-      }
-    }
     	// construct mail message
     $message = "An unauthorized message has been sent to $blogname.\n";
     $message .= "Sender: $from\n";
@@ -2098,7 +2110,7 @@ function get_config_defaults() {
       'audiotypes' => array( 'm4a', 'mp3','ogg', 'wav', 'mpeg' ),
       'authorized_addresses' => array(),
       'banned_files_list' => array(),
-      'confirmation_email' => false,
+      'confirmation_email' => '',
       'convertnewline' => false,
       'converturls' =>  true,
       'custom_image_field' => false,
@@ -2211,7 +2223,7 @@ function GetDBConfig() {
     if (!isset($config["RETURN_TO_SENDER"])) 
       $config["RETURN_TO_SENDER"] = false;
     if (!isset($config["CONFIRMATION_EMAIL"])) 
-      $config["CONFIRMATION_EMAIL"] = false;
+      $config["CONFIRMATION_EMAIL"] = '';
     if (!isset($config["ALLOW_HTML_IN_SUBJECT"])) 
       $config["ALLOW_HTML_IN_SUBJECT"] = true;
     if (!isset($config["ALLOW_HTML_IN_BODY"])) 

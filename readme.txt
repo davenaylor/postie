@@ -326,6 +326,8 @@ option to convert url into links turned on)
 * Fixed bug with embedding youtube and vimeo videos whose ID contains a -
   (thanks Jim Kehoe)
 * Post_author is now included with attachments
+* fixed confirmation_email settings so that now you can select between sender,
+  admin, both, or none (thanks to redsalmon for pointing out bug)
 
 = 1.3.4 (2009.10.05) =
 * Fixed problem with images not posting under cron
