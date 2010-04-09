@@ -687,10 +687,13 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
         $the_post=get_post($file_id);
         /* TODO make these options */
-        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
-            $imagetemplate);
-        if ($cid) {
-          $attachments["cids"][$cid] = array($file,count($attachments["html"]) - 1);
+        if (!$auto_gallery) {
+          $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
+              $imagetemplate);
+          if ($cid) {
+            $attachments["cids"][$cid] = array($file,
+                count($attachments["html"]) - 1);
+          }
         }
         break;
       case 'audio':
@@ -1804,6 +1807,15 @@ function ReplaceImageCIDs(&$content,&$attachments) {
 function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
   extract($config);
   ($start_image_count_at_zero ? $startIndex = 0 :$startIndex = 1);
+  if ($auto_gallery) {
+    $value = '[gallery]';
+    if ($images_append) {
+      $content .= $value;
+    } else {
+      $content = "$value\n". $content;
+    }
+    return;
+  }
   foreach ( $attachments as $i => $value ) {
     // looks for ' #img1# ' etc... and replaces with image
     $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $image_placeholder);
@@ -1832,7 +1844,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
     } else {
       $value = str_replace('{CAPTION}', '', $value);
       /* if using the gallery shortcode, don't add pictures at all */
-      if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches))  {
+      if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
         if ($images_append) {
           $content .= $value;
         } else {
@@ -2123,6 +2135,7 @@ function get_config_defaults() {
       'forward_rejected_mail' => true,
       'icon_set' => 'silver',
       'icon_size' => 32,
+      'auto_gallery' => false,
       'image_new_window' => false,
       'image_placeholder' => "#img%#",
       'images_append' => true,

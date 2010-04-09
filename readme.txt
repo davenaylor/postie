@@ -313,7 +313,7 @@ option to convert url into links turned on)
 
 == CHANGELOG ==
 
-= 1.4 (2010.02.xx) =  
+= 1.4 (2010.xx.xx) =  
 * Now using wordpress settings api (thanks for much help from Andrew S)
 * Cronless postie is now integrated with postie instead of a separate plugin
 * filterPostie.php moved to filterPostie.php.sample
@@ -328,6 +328,7 @@ option to convert url into links turned on)
 * Post_author is now included with attachments
 * fixed confirmation_email settings so that now you can select between sender,
   admin, both, or none (thanks to redsalmon for pointing out bug)
+* Added option to automatically insert galleries
 
 = 1.3.4 (2009.10.05) =
 * Fixed problem with images not posting under cron
