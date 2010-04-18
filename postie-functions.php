@@ -1807,7 +1807,7 @@ function ReplaceImageCIDs(&$content,&$attachments) {
 function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
   extract($config);
   ($start_image_count_at_zero ? $startIndex = 0 :$startIndex = 1);
-  if ($auto_gallery) {
+  if (!empty($attachments) && $auto_gallery) {
     $value = '[gallery]';
     if ($images_append) {
       $content .= $value;
