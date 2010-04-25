@@ -185,9 +185,8 @@ $messages[2] = __("Error - unable to save configuration",'postie');
             $role = &$wp_roles->get_role($roleId);
             if ($roleId != "administrator") { ?>
 						<tr><td>
-							<input type='checkbox' value='1' name='postie-settings[role_access][<?php
-								echo $roleId;
-								?>]' <?php echo checked($role->has_cap("post_via_postie")); ?>  >
+							<input type='checkbox' value='1' name='postie-settings[role_access][<?php echo $roleId; ?>]' <?php if ($role->has_cap("post_via_postie")) echo
+                'checked="checked"'; ?>  >
 								<?php echo $name; ?>
 						</td></tr>
 						<?php
