@@ -319,6 +319,9 @@ option to convert url into links turned on)
 
 == CHANGELOG ==
 
+= 1.4.1 (2010.xx.xx) =
+* Images appear in correct order when using images append = false
+
 = 1.4 (2010.04.25) =  
 * Now using wordpress settings api (thanks for much help from Andrew S)
 * Cronless postie is now integrated with postie instead of a separate plugin

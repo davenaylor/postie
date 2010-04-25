@@ -1767,6 +1767,9 @@ size. If not found, we default to medium */
   $template=str_replace('{URL}', $fileLink, $template);
   $template=str_replace('{RELFILENAME}', $relFileName, $template);
   $template=str_replace('{POSTTITLE}', $the_parent->post_title, $template);
+  echo "excerpt = " . $attachment->post_excerpt . "<br />\n"; 
+  echo "title = " . $attachment->post_title . "<br />\n";
+  echo "content = " . $attachment->post_content . "<br />\n";
   if ($attachment->post_excerpt!='') {
     $template=str_replace('{CAPTION}', $attachment->post_excerpt, $template);
   } else {
