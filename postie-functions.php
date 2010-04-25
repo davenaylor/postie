@@ -680,7 +680,6 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
           break;
 
       case 'image':
-        echo "looking at an image\n";
         $file_id = postie_media_handle_upload($part, $post_id, $poster);
         $file = wp_get_attachment_url($file_id);
 
@@ -1273,7 +1272,6 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
   } else {
     echo "could not write to temp file: '$tmpFile' ";
   }
-  echo "wrote to temp file\n";
   if ($part->ctype_parameters['name']=='') {
     if ($part->d_parameters['filename']!='') {
       $name = $part->d_parameters['filename'];
@@ -1323,7 +1321,6 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     if ( trim($image_meta['caption']) )
       $content = $image_meta['caption'];
   }
-  echo "read image meta data";
 
   // Construct the attachment array
   $attachment = array_merge( array(
