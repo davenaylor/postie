@@ -321,6 +321,8 @@ option to convert url into links turned on)
 
 = 1.4.1 (2010.xx.xx) =
 * Images appear in correct order when using images append = false
+* Fixed formatting problem with wordpress_default image template
+* Captions now correctly work with wordpress >3.0 and <3.0
 
 = 1.4 (2010.04.25) =  
 * Now using wordpress settings api (thanks for much help from Andrew S)

@@ -1274,7 +1274,6 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     echo "could not write to temp file: '$tmpFile' ";
   }
   echo "wrote to temp file\n";
-  //print_r($part);
   if ($part->ctype_parameters['name']=='') {
     if ($part->d_parameters['filename']!='') {
       $name = $part->d_parameters['filename'];
@@ -1289,7 +1288,6 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
                     'size' => filesize($tmpFile),
                     'error' => ''
                     );
-  print_r($the_file);
   if (stristr('.zip', $name)) {
     $parts=explode('.', $name);
     $ext=$parts[count($parts)-1];
@@ -1306,8 +1304,6 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
   }
 
   $file = postie_handle_upload($the_file, $overrides, $time);
-  echo "finished postie_handle_upload\n";
-  print_r($file);
   //unlink($tmpFile);
 
   if ( isset($file['error']) )
@@ -1503,7 +1499,6 @@ function MailToRecipients( &$mail_content,$testEmail=false,
 	$blogname = get_option("blogname");
 	$blogurl = get_option("siteurl");
 	//array_push($recipients, $myemailadd);
-  print_r($recipients);
 	if (count($recipients) == 0) {
 		return false;
 	}
@@ -1767,11 +1762,10 @@ size. If not found, we default to medium */
   $template=str_replace('{URL}', $fileLink, $template);
   $template=str_replace('{RELFILENAME}', $relFileName, $template);
   $template=str_replace('{POSTTITLE}', $the_parent->post_title, $template);
-  echo "excerpt = " . $attachment->post_excerpt . "<br />\n"; 
-  echo "title = " . $attachment->post_title . "<br />\n";
-  echo "content = " . $attachment->post_content . "<br />\n";
   if ($attachment->post_excerpt!='') {
     $template=str_replace('{CAPTION}', $attachment->post_excerpt, $template);
+  } elseif ($attachment->post_title!=$fileName) {
+    $template=str_replace('{CAPTION}', $attachment->post_title, $template);
   } else {
     //$template=str_replace('{CAPTION}', '', $template);
   }
@@ -1819,6 +1813,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
     }
     return;
   }
+  $pictures='';
   foreach ( $attachments as $i => $value ) {
     // looks for ' #img1# ' etc... and replaces with image
     $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $image_placeholder);
@@ -1848,13 +1843,14 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
       $value = str_replace('{CAPTION}', '', $value);
       /* if using the gallery shortcode, don't add pictures at all */
       if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
-        if ($images_append) {
-          $content .= $value;
-        } else {
-          $content = $value . $content;
-        }
+        $pictures .= $value;
       }
     }
+  }
+  if ($images_append) {
+    $content .= $pictures;
+  } else {
+    $content = $pictures . $content;
   }
 }
 /**
@@ -2027,8 +2023,8 @@ function DisplayEmailPost($details) {
   print '<b>Post Id</b>: ' . $details["ID"] . '<br />' . "\n";
   print '<b>Posted content:</b></p><hr />' .
   $details["post_content"] . '<hr /><pre>';
-  if (function_exists('memory_get_peak_usage'))
-    echo  "Memory used: ". memory_get_peak_usage(). "\n";
+  //if (function_exists('memory_get_peak_usage'))
+    // echo  "Memory used: ". memory_get_peak_usage(). "\n";
 }
 /**
   * Takes a value and builds a simple simple yes/no select box
