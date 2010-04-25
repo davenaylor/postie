@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail, email
 Requires at least: 2.3
 Tested up to: 3.0.alpha
-Stable tag: 1.3.4
+Stable tag: 1.4
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -19,18 +19,23 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 
 = What's new? = 
 
-* 1.3.4 (2009.10.05)
-    * Fixed problem with images not posting under cron
-    * Fixed issue with disappearing password
-    * Fixed problem with filenames in attachments from blackberrys
-
-* 1.3.3 (2009.09.11)
-    * Fixed problem with double titles
-    * Fixed error in wp-mu
-    * Cronless postie now correctly updates when changing the setting in the
-      postie settings
-    * Small fix in handling of names of attachments (thanks to Teejot)
-    * Fixed delay option (thanks to redbrandonk)
+* 1.4 (2010.04.25)
+    * Now using wordpress settings api (thanks for much help from Andrew S)
+    * Cronless postie is now integrated with postie instead of a plugin
+    * filterPostie.php moved to filterPostie.php.sample
+    * Can use fetchmails.php to fetch mail from multiple mailboxes
+    * Fixed problem with embedding youtube videos from html (richtext) e-mail
+    * Added support for embedding vimeo vidoes
+    * Fixed problem with selecting "none" as icon set for attachments (thanks
+      tonyvitali)
+    * Fixed problems with cronless postie settings
+    * Fixed bug with embedding youtube and vimeo videos whose ID contains a -
+      (thanks Jim Kehoe)
+    * Post_author is now included with attachments
+    * fixed confirmation_email settings so that now you can select between
+      sender, admin, both, or none (thanks to redsalmon for pointing out bug)
+    * Added option to automatically insert galleries
+    * Updated FAQ and readme
 
 == Installation ==
 * Either:
@@ -131,8 +136,8 @@ This fetches the mail every ten minutes with wget
   #img2# - each one will be replaced with the HTML for the image
   you attached
 * Captions - you can also add a caption like so:
-  #img1 caption='foo'#
-  #img2 caption='bar'#
+    * #img1 caption='foo'#
+    * #img2 caption='bar'#
   
   Or, if you use IPTC captions, this caption will be used  (adding a caption
   in many photo editing programs (for example Picasa), will add an IPTC caption)
@@ -313,7 +318,7 @@ option to convert url into links turned on)
 
 == CHANGELOG ==
 
-= 1.4 (2010.xx.xx) =  
+= 1.4 (2010.04.25) =  
 * Now using wordpress settings api (thanks for much help from Andrew S)
 * Cronless postie is now integrated with postie instead of a separate plugin
 * filterPostie.php moved to filterPostie.php.sample
@@ -329,6 +334,7 @@ option to convert url into links turned on)
 * fixed confirmation_email settings so that now you can select between sender,
   admin, both, or none (thanks to redsalmon for pointing out bug)
 * Added option to automatically insert galleries
+* Updated FAQ and readme
 
 = 1.3.4 (2009.10.05) =
 * Fixed problem with images not posting under cron
