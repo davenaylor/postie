@@ -136,6 +136,7 @@ This fetches the mail every ten minutes with wget
   #img2# - each one will be replaced with the HTML for the image
   you attached
 * Captions - you can also add a caption like so:
+
     * #img1 caption='foo'#
     * #img2 caption='bar'#
   

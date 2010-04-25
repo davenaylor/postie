@@ -28,7 +28,13 @@ of connection and the port number. Common port configurations:
 
 <h4>Automating checking e-mail</h4>
 
-<p>If your site runs on a UNIX/linux server, and you have shell access, you can
+<p>By default, postie checks for new e-mail every 30 minutes. You can select from
+a number of different checking intervals in the settings page, under the
+mailserver tab.</p>
+
+<p>If you would prefer to have more fine-grained control of how postie checks
+for mail, you can also set up a crontab. This is for advanced users only.
+If your site runs on a UNIX/linux server, and you have shell access, you can
 enable mail checking using cron; if you don't know anything about cron, skip
 to the cronless postie section.</p>
 
@@ -41,23 +47,7 @@ Examples:</p>
 
 <p>*/10 * * * * /usr/bin/wget -O /dev/null <a href="http://blog.robfelty.com/wp-content/plugins/postie/get&#95;mail.php" rel="nofollow">http://blog.robfelty.com/wp-content/plugins/postie/get&#95;mail.php</a> &gt;/dev/null 2&gt;&amp;1</p>
 
-<p>This fetches the mail every ten minutes with wget</p>
-
-<h4>Cronless Postie</h4>
-
-<p>If you don't have access to cron, you can run postie without it.</p>
-
-<ul>
-<li>Activate the cronless postie plugin (it is included with the postie plugin,
-so if you have downloaded postie, you don't need to download anything else</li>
-<li>By default, cronless postie checks for new e-mail once every hour. To select
-a different rate, change the cronless postie setting in the postie settings
-page. </li>
-<li>Note that timing with cronless postie is not very accurate. It depends
-on people visiting your website. If you select to check every 10 minutes, but
-you only get one visit every 30 minutes, then it might take 30 minutes for a
-post to show up.</li>
-</ul>	<hr />
+<p>This fetches the mail every ten minutes with wget</p>	<hr />
 		
 		<h3>Usage</h3>
 <ul>
@@ -136,9 +126,10 @@ them to your blog</li>
 you attached</li>
 <li><p>Captions - you can also add a caption like so:</p>
 
-img1 caption='foo'
-
-img2 caption='bar'
+<ul>
+<li>#img1 caption='foo'#</li>
+<li>#img2 caption='bar'#</li>
+</ul>
 
 <p>Or, if you use IPTC captions, this caption will be used  (adding a caption
 in many photo editing programs (for example Picasa), will add an IPTC caption)</p></li>
