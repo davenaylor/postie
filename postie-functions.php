@@ -1763,7 +1763,7 @@ size. If not found, we default to medium */
   $template=str_replace('{POSTTITLE}', $the_parent->post_title, $template);
   if ($attachment->post_excerpt!='') {
     $template=str_replace('{CAPTION}', $attachment->post_excerpt, $template);
-  } elseif ($attachment->post_title!=$fileName) {
+  } elseif (!preg_match("/$attachment->post_title/i", $fileName)) {
     $template=str_replace('{CAPTION}', $attachment->post_title, $template);
   } else {
     //$template=str_replace('{CAPTION}', '', $template);
@@ -1826,7 +1826,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
       $caption='';
       $content = preg_replace("/&#0?39;/", "'", $content);
       $content = preg_replace("/&(#0?34|quot);/", "\"", $content);
-      if ( preg_match("/$img_placeholder_temp caption=['\"]?(.*)['\"]?#/", $content, $matches))  {
+      if ( preg_match("/$img_placeholder_temp caption=['\"]?(.*?)['\"]?#/", $content, $matches))  {
         $caption =$matches[1];
         $img_placeholder_temp = substr($matches[0], 0, -1);
         $eimg_placeholder_temp = substr($matches[0], 0, -1);

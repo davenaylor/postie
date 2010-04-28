@@ -337,6 +337,9 @@ option to convert url into links turned on)
 * Default port is now 110
 * Added more configuration tests
 * Added background color to settings page to make input boxes more visible
+* Removed extra quote character in captions from #img# placeholders (thanks
+  SteelD for pointing out the error)
+* Added support for big5 and gb-1232 encodings (thanks Chow)
 
 = 1.4 (2010.04.25) =  
 * Now using wordpress settings api (thanks for much help from Andrew S)
