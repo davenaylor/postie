@@ -288,13 +288,18 @@ Currently the following filetypes are supported:
 
 = Can I add special text to the body of the post when using postie? =
 
-Yes. You can create your own function, and use the postie_post filter
-Two short examples are included in the filterPostie.php file
+Yes. You can create your own function, and use the postie_post filter.
+Two short examples are included in the filterPostie.php.sample file
 
 = Can I add special text to the title of the post when using postie? =
 
-Yes. You can create your own function, and use the postie_post filter
-Two short examples are included in the filterPostie.php file
+Yes. You can create your own function, and use the postie_post filter.
+Two short examples are included in the filterPostie.php.sample file
+
+= Can I select tags or categories based on the content of the e-mail? =
+
+Yes. You can create your own function, and use the postie_post filter.
+See the filterPostie.php.sample file for examples.
 
 = Is the IMAP extension required for postie? =
 

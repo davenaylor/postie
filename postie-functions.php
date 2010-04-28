@@ -685,14 +685,11 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
 
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
         $the_post=get_post($file_id);
-        /* TODO make these options */
-        if (!$auto_gallery) {
-          $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
-              $imagetemplate);
-          if ($cid) {
-            $attachments["cids"][$cid] = array($file,
-                count($attachments["html"]) - 1);
-          }
+        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
+            $imagetemplate);
+        if ($cid) {
+          $attachments["cids"][$cid] = array($file,
+              count($attachments["html"]) - 1);
         }
         break;
       case 'audio':
