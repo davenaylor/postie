@@ -11,6 +11,9 @@ margin-right: 10px;
 margin-top: 50px;
 }
 
+table.form-table  {
+  background: #E5F3FF;
+}
 table.form-table td {line-height:1em;
                      margin:0;
                      padding:0;

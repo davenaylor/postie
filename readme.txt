@@ -329,6 +329,9 @@ option to convert url into links turned on)
 * Fixed formatting problem with wordpress_default image template
 * Captions now correctly work with wordpress >3.0 and <3.0
 * Fixed auto_gallery feature
+* Default port is now 110
+* Added more configuration tests
+* Added background color to settings page to make input boxes more visible
 
 = 1.4 (2010.04.25) =  
 * Now using wordpress settings api (thanks for much help from Andrew S)

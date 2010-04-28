@@ -2143,7 +2143,7 @@ function get_config_defaults() {
       'input_protocol' => "pop3",
       'interval' => 'twiceperhour',
       'mail_server' => NULL,
-      'mail_server_port' =>  NULL,
+      'mail_server_port' =>  110,
       'mail_userid' =>  NULL,
       'mail_password' =>  NULL,
       'message_start' => ":start",

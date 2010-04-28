@@ -131,7 +131,11 @@ function postie_warnings() {
 	
   $config = get_option( 'postie-settings' );
 	
-  if ( empty( $config['mail_server'] ) && !isset($_POST['submit'] ) ) {
+  if ( (empty( $config['mail_server'] ) || 
+        empty( $config['mail_server_port'] ) || 
+        empty( $config['mail_userid'] ) || 
+        empty( $config['mail_password'] )
+       ) && !isset($_POST['submit'] ) ) {
     function postie_enter_info() {
       echo "
       <div id='postie-info-warning' class='updated fade'><p><strong>".

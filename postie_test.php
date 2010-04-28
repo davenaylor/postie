@@ -5,6 +5,7 @@ include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR
 //require_once('admin.php');
 require_once("postie-functions.php");
 $config = get_config();
+extract($config);
 $title = __("Postie Diagnosis");
 $parent_file = 'options-general.php?page=postie/postie.php';
 get_currentuserinfo();
@@ -69,6 +70,9 @@ get_currentuserinfo();
         <th>Connect to Mail Host</th>
         <td>
            <?php
+            if (!$mail_server || !$mail_server_port || !$mail_userid) {
+              print("NO - check server settings");
+            }
                 switch( strtolower($config["input_protocol"]) ) {
                     case 'imap':
                     case 'imap-ssl':

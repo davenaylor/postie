@@ -164,7 +164,7 @@ $messages[2] = __("Error - unable to save configuration",'postie');
   </td>
   </tr>
             <?php echo BuildBooleanSelect("Delete email after
-            posting",'postie-settings[delete_mail_after_processing]',$delete_mail_after_processing,"Only set to yes for testing purposes");?>
+            posting",'postie-settings[delete_mail_after_processing]',$delete_mail_after_processing,"Only set to no for testing purposes");?>
 	</table>
   </div>
 	<div id="simpleTabs-content-2" class="simpleTabs-content">
