@@ -328,6 +328,7 @@ option to convert url into links turned on)
 * Images appear in correct order when using images append = false
 * Fixed formatting problem with wordpress_default image template
 * Captions now correctly work with wordpress >3.0 and <3.0
+* Fixed auto_gallery feature
 
 = 1.4 (2010.04.25) =  
 * Now using wordpress settings api (thanks for much help from Andrew S)

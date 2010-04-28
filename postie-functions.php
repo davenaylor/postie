@@ -1104,6 +1104,12 @@ function ConvertToUTF_8($encoding,$charset,$body) {
     case 'iso-8859-2':
       $body = iconv("iso-8859-2//TRANSLIT","UTF-8",$body);
       break;
+    case "big5":
+      $body = iconv("BIG5","UTF-8",$body);
+      break;
+    case "gb2312":
+      $body = iconv("GB2312","UTF-8",$body);
+      break;
   }
   return($body);
 }
