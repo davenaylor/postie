@@ -180,6 +180,11 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 
 == Frequently Asked Questions ==
 
+= How can I get postie to display inline images? =
+
+Make sure that you send e-mail formatted as html (richtext), and set postie to
+prefer html messages (in the message tab of the postie settings)
+
 = Mail is not showing up right when I send html (rich formatted) e-mail! =
 
 Make sure you set the preferred text type to html

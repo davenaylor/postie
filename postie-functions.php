@@ -733,7 +733,6 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
             break;
           $file_id = postie_media_handle_upload($part, $post_id, $poster);
           $file = wp_get_attachment_url($file_id);
-          echo "file=$file\n";
           $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
           $icon=chooseAttachmentIcon($file, $part->ctype_primary,
               $part->ctype_secondary, $icon_set,
