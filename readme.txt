@@ -340,6 +340,8 @@ option to convert url into links turned on)
 * Removed extra quote character in captions from #img# placeholders (thanks
   SteelD for pointing out the error)
 * Added support for big5 and gb-1232 encodings (thanks Chow)
+* Fixed issue with configurations items stored as arrays, which caused
+  problems with validating authorized addresses
 
 = 1.4 (2010.04.25) =  
 * Now using wordpress settings api (thanks for much help from Andrew S)

@@ -885,20 +885,20 @@ if ( empty($from) ) {
   print("Confirming Access For $from \n");
   $sql = 'SELECT id FROM '. $wpdb->users.' WHERE user_email=\'' . addslashes($from) . "' LIMIT 1;";
   $user_ID= $wpdb->get_var($sql);
-  $user = new WP_User($user_ID);
   if (!empty($user_ID)) {
-    $poster = $user_ID;
+    $user = new WP_User($user_ID);
+    if ($user->has_cap("post_via_postie")) {
+      $poster = $user_ID;
+      echo "posting as user $poster";
+    } else {
+      $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
+            user_login  = '$admin_username'");
+    }
   } elseif ($turn_authorization_off || 
       CheckEmailAddress($from, $authorized_addresses) ||
       CheckEmailAddress($resentFrom, $authorized_addresses)) {
-      print("$from is authorized to post as the administrator\n");
-      $from = get_option("admin_email");
-      $adminUser=$admin_username;
-      echo "adminUser='$adminUser'";
-      $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
-          user_login  = '$adminUser'");
-  } else if ($user->has_cap("post_via_postie")) {
-    $poster = $user_ID;
+    $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
+          user_login  = '$admin_username'");
   }
   $validSMTP=checkSMTP($mimeDecodedEmail, $smtp);
   if (!$poster || !$validSMTP) {
@@ -914,6 +914,14 @@ if ( empty($from) ) {
     }
     return;
   } 
+  return $poster;
+}
+
+function post_as_admin($admin_username) {
+  print("$from is authorized to post as the administrator\n");
+  //$from = get_option("admin_email");
+  //$adminUser=$admin_username;
+  //echo "adminUser='$adminUser'";
   return $poster;
 }
 
@@ -1491,7 +1499,6 @@ function MailToRecipients( &$mail_content,$testEmail=false,
   if ($testEmail) {
       return;
   }
-  echo "mailing to ";
 	$user = get_userdata('1');
 	$myname = $user->user_nicename;
 	$myemailadd = get_option("admin_email");
@@ -1609,7 +1616,8 @@ function DisplayMIMEPartTypes($mimeDecodedEmail) {
   * @return boolean
   */
 function CheckEmailAddress($address, $authorized) {
-	return in_array( strtolower($address), $authorized );
+	$isAuthorized = in_array( strtolower($address), $authorized );
+	return $isAuthorized;
 }
 /**
   *This method works around a problemw with email address with extra <> in the email address
@@ -2460,7 +2468,11 @@ function postie_validate_settings( $in ) {
 					$out[$field] = explode( $sep, trim( $out[$field] ) );
 				foreach ( $out[$field] as $key => $val ) {
 					$tst = trim($val);
-					if ( empty( $tst ) ) unset( $out[$field][$key] );
+					if ( empty( $tst ) ) {
+            unset( $out[$field][$key] );
+          } else {
+            $out[$field][$key]  = $tst;
+          }
 				}
 		 }
 	}
