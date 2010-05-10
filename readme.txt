@@ -342,6 +342,7 @@ option to convert url into links turned on)
 * Added support for big5 and gb-1232 encodings (thanks Chow)
 * Fixed issue with configurations items stored as arrays, which caused
   problems with validating authorized addresses
+* Fixed bug with replaceImageCIDs function
 
 = 1.4 (2010.04.25) =  
 * Now using wordpress settings api (thanks for much help from Andrew S)

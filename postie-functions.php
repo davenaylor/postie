@@ -1788,6 +1788,7 @@ size. If not found, we default to medium */
 function ReplaceImageCIDs(&$content,&$attachments) {
     $used = array();
     foreach ($attachments["cids"] as $key => $info) {
+        $key = str_replace('/', '\/', $key);
         $pattern = "/cid:$key/";
         if(preg_match($pattern,$content)) {
             $content = preg_replace($pattern,$info[0],$content);
