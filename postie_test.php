@@ -44,9 +44,20 @@ get_currentuserinfo();
          ?>
 
     <br/>
-    <h2>Iconv Library Test<h2>
-    <p><i>Only required if you want to support ISO-2022-JP</i>
-    <?php echo HasIconvInstalled();?>
+    <h2>International support<h2>
+    <p><i><?php _e('Only required for international character set support',
+    'postie') ?></i>
+   <table>
+   <tr>
+   <th>iconv</th>
+    <td> <?php if (HasIconvInstalled())  _e('yes', 'postie');  ?></td>
+    </tr>
+    <tr>
+   <th>imap <small>(required for subjects)</small></th>
+    <td> <?php if (function_exists('imap_mime_header_decode')) _e('yes', 'postie') ; ?></td>
+    </tr>
+    </table>
+
     </p>
     <br/>
     <h2>Clock Tests<h2>
