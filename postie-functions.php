@@ -1859,7 +1859,10 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
         $filename = basename($path);
         $filename = preg_replace("/-[0-9]+x[0-9]+\.(jpg|png|gif)/", '',
             $filename);
-        $filename = str_replace('IMG_', '', $filename);
+        if (preg_match("/[[:alpha:]_-]+([0-9]+)$/", $filename, $matches)) {
+          $filename = $matches[1];
+        }
+        echo "filename = $filename\n";
         if ($filename!=1) {
           $pictures[$filename] = $value;
         } else {
@@ -1868,7 +1871,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
       }
     }
   }
-  ksort($pictures, SORT_NUMERIC);
+  ksort($pictures);
   $pics = '';
   foreach ($pictures as $picture) {
     $pics .= $picture;
