@@ -1859,6 +1859,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
         $filename = basename($path);
         $filename = preg_replace("/-[0-9]+x[0-9]+\.(jpg|png|gif)/", '',
             $filename);
+        $filename = str_replace('IMG_', '', $filename);
         if ($filename!=1) {
           $pictures[$filename] = $value;
         } else {
