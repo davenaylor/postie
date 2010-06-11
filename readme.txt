@@ -343,6 +343,10 @@ option to convert url into links turned on)
 * Fixed issue with configurations items stored as arrays, which caused
   problems with validating authorized addresses
 * Fixed bug with replaceImageCIDs function
+* On hosts which allow it, we set max execution time to 300 seconds and
+  memory_limit to infinity to allow processing of large e-mails (especially
+  with large attachments)
+* Images are sorted in order of filename before inserting into post
 
 = 1.4 (2010.04.25) =  
 * Now using wordpress settings api (thanks for much help from Andrew S)

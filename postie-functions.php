@@ -2,8 +2,11 @@
 $revisions= WP_POST_REVISIONS;
 define('WP_POST_REVISIONS', false);
 //define('POSTIE_DEBUG', true);
-$original_mem_limit = ini_get('memory_limit');
-//ini_set('memory_limit', -1);
+if (!ini_get('safe_mode')) {
+  $original_mem_limit = ini_get('memory_limit');
+  ini_set('memory_limit', -1);
+  ini_set('max_execution_time', 300); 
+}
 
 //include_once (dirname(dirname(dirname(dirname(__FILE__)))) .  DIRECTORY_SEPARATOR."wp-admin" . DIRECTORY_SEPARATOR . "upgrade-functions.php");
 /*
@@ -1821,7 +1824,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
     }
     return;
   }
-  $pictures='';
+  $pictures= array();
   foreach ( $attachments as $i => $value ) {
     // looks for ' #img1# ' etc... and replaces with image
     $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $image_placeholder);
@@ -1851,14 +1854,28 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
       $value = str_replace('{CAPTION}', '', $value);
       /* if using the gallery shortcode, don't add pictures at all */
       if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
-        $pictures .= $value;
+        preg_match("/src=\"(.*?)\"/", $value, $matches);
+        $path = $matches[1];
+        $filename = basename($path);
+        $filename = preg_replace("/-[0-9]+x[0-9]+\.(jpg|png|gif)/", '',
+            $filename);
+        if ($filename!=1) {
+          $pictures[$filename] = $value;
+        } else {
+          $pictures[] = $value;
+        }
       }
     }
   }
+  ksort($pictures, SORT_NUMERIC);
+  $pics = '';
+  foreach ($pictures as $picture) {
+    $pics .= $picture;
+  }
   if ($images_append) {
-    $content .= $pictures;
+    $content .= $pics;
   } else {
-    $content = $pictures . $content;
+    $content = $pics . $content;
   }
 }
 /**
@@ -2614,5 +2631,7 @@ if (!function_exists('get_user_by')) {
 }
 
 define('WP_POST_REVISIONS', $revisions);
-ini_set('memory_limit', $original_mem_limit);
+if (!ini_get('safe_mode')) {
+  ini_set('memory_limit', $original_mem_limit);
+}
 ?>
