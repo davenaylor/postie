@@ -4,8 +4,8 @@ Donate link: http://blog.robfelty.com/plugins/postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail, email
 Requires at least: 2.3
-Tested up to: 3.0.alpha
-Stable tag: 1.4
+Tested up to: 3.0
+Stable tag: 1.4.1
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -18,6 +18,25 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 [other notes](other_notes) page
 
 = What's new? = 
+
+* 1.4.1 (2010.06.18)
+    * Images appear in correct order when using images append = false
+    * Images are sorted in order of filename before inserting into post
+    * Fixed formatting problem with wordpress_default image template
+    * Captions now correctly work with wordpress >3.0 and <3.0
+    * Fixed auto_gallery feature
+    * Default port is now 110
+    * Added more configuration tests
+    * Added background color to settings page to make input boxes more visible
+    * Removed extra quote character in captions from #img# placeholders (thanks
+      SteelD for pointing out the error)
+    * Added support for big5 and gb-1232 encodings (thanks Chow)
+    * Fixed issue with configurations items stored as arrays, which caused
+      problems with validating authorized addresses
+    * Fixed bug with replaceImageCIDs function
+    * On hosts which allow it, we set max execution time to 300 seconds and
+      memory_limit to infinity to allow processing of large e-mails (especially
+      with large attachments)
 
 * 1.4 (2010.04.25)
     * Now using wordpress settings api (thanks for much help from Andrew S)
@@ -329,7 +348,7 @@ option to convert url into links turned on)
 
 == CHANGELOG ==
 
-= 1.4.1 (2010.xx.xx) =
+= 1.4.1 (2010.06.18) =
 * Images appear in correct order when using images append = false
 * Fixed formatting problem with wordpress_default image template
 * Captions now correctly work with wordpress >3.0 and <3.0
