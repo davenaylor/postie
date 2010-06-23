@@ -739,9 +739,11 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
           $icon=chooseAttachmentIcon($file, $part->ctype_primary,
               $part->ctype_secondary, $icon_set,
               $icon_size);
+          // fix filename (remove non-standard characters)
+           $filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "",
+               $part->ctype_parameters['name']);
           $attachments["html"][] = '<a href="' . $file . 
-              '" style="text-decoration:none">' . $icon . 
-              $part->ctype_parameters['name'] . '</a>' . "\n";
+              $icon . $filename . '</a>' . "\n";
           if ($cid) {
             $attachments["cids"][$cid] = array($file,
                 count($attachments["html"]) - 1);
@@ -1428,7 +1430,10 @@ function postie_handle_upload( &$file, $overrides = false, $time = null ) {
 	// A writable uploads dir will pass this test. Again, there's no point overriding this one.
 	if ( ! ( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] ) )
 		return $upload_error_handler( $file, $uploads['error'] );
-
+ 
+ // fix filename (remove non-standard characters)
+  $file['name'] = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "",
+      $file['name']);
 	$filename = wp_unique_filename( $uploads['path'], $file['name'], $unique_filename_callback );
 
 	// Move the file to the uploads dir

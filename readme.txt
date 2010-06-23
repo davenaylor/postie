@@ -351,6 +351,8 @@ option to convert url into links turned on)
 = 1.4.2 =
 * TODO - fix corruption of rtf attachments
 * Fixed mailto link bug (thanks to Jason McNeil) 
+* Fixed bug with attachments with non-ascii characters in filename (thanks to
+  mtakada)
 
 = 1.4.1 (2010.06.18) =
 * Images appear in correct order when using images append = false
