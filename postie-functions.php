@@ -261,10 +261,9 @@ function clickableLink($text, $shortcode=false) {
 
   // matches an email@domain type address at the start of a line, or after a space.
   // Note: Only the followed chars are valid; alphanums, "-", "_" and or ".".
-  $ret = preg_replace("#(^|[\n
-  ])([a-z0-9&\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)*[\w]+)#i", "\\1<a
-  href=\"mailto:\\2@\\3\">\\2@\\3</a>", $ret);
-
+  $ret = preg_replace(
+      "#(^|[\n ])([a-z0-9&\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)*[\w]+)#i", 
+      "\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>", $ret);
   // Remove our padding..
   $ret = substr($ret, 1);
   return $ret;

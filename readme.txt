@@ -348,6 +348,10 @@ option to convert url into links turned on)
 
 == CHANGELOG ==
 
+= 1.4.2 =
+* TODO - fix corruption of rtf attachments
+* Fixed mailto link bug (thanks to Jason McNeil) 
+
 = 1.4.1 (2010.06.18) =
 * Images appear in correct order when using images append = false
 * Fixed formatting problem with wordpress_default image template
