@@ -356,6 +356,8 @@ option to convert url into links turned on)
 * checking for socket errors when checking mail (thanks elysian)
 * fixed issue with multiple files not being inserted correctly
 * TODO - add port checking in tests
+* TODO - non-image uploads get ignored in content when using autogallery - see
+  replaceimageplaceholders
 
 = 1.4.1 (2010.06.18) =
 * Images appear in correct order when using images append = false
