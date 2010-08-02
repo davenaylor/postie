@@ -643,6 +643,9 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
       $meta_return .= GetContent($section,$attachments,$post_id, $poster, $config);
     }
   } else { 
+    // fix filename (remove non-standard characters)
+    $filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "",
+        $part->ctype_parameters['name']);
     switch ( strtolower($part->ctype_primary) ) {
       case 'multipart':
         FilterTextParts($part, $prefer_text_type);
@@ -687,7 +690,7 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
 
         $cid = trim($part->headers["content-id"],"<>");; //cids are in <cid>
         $the_post=get_post($file_id);
-        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
+        $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary,
             $imagetemplate);
         if ($cid) {
           $attachments["cids"][$cid] = array($file,
@@ -706,7 +709,7 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
               $icon_size);
           $audioTemplate='<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
         }
-        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary,
+        $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary,
             $audioTemplate);
         break;
       case 'video':
@@ -723,7 +726,7 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
               $icon_size);
           $videoTemplate='<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
         }
-        $attachments["html"][] = parseTemplate($file_id, $part->ctype_primary, 
+        $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, 
             $videoTemplate);
         //echo "videoTemplate = $videoTemplate\n";
         break;
@@ -739,10 +742,7 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
           $icon=chooseAttachmentIcon($file, $part->ctype_primary,
               $part->ctype_secondary, $icon_set,
               $icon_size);
-          // fix filename (remove non-standard characters)
-           $filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "",
-               $part->ctype_parameters['name']);
-          $attachments["html"][] = '<a href="' . $file . 
+          $attachments["html"][$filename] = "<a href='$file'" . 
               $icon . $filename . '</a>' . "\n";
           if ($cid) {
             $attachments["cids"][$cid] = array($file,
@@ -1670,7 +1670,6 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet='silver',
   $fileName=basename($file); 
   $parts=explode('.', $fileName);
   $ext=$parts[count($parts)-1];
-  //echo "file='$fileName', ext=$ext, primary=$primary, secondary=$secondary\n";
   $docExts=array('doc', 'docx');
   $docMimes=array('msword', 'vnd.ms-word',
       'vnd.openxmlformats-officedocument.wordprocessingml.document');
@@ -1722,9 +1721,7 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet='silver',
   } else {
     $fileType='default';
   }
-  //echo "fileType=$fileType\n";
   $fileName="/icons/$iconSet/$fileType-$size.png";
-  //echo "fileName=$fileName\n";
   if (!file_exists(POSTIE_ROOT . $fileName))
     $fileName="/icons/$iconSet/default-$size.png";
   $iconHtml="<img src='" . POSTIE_URL . $fileName . "' alt='$fileType icon' />";
@@ -1829,6 +1826,7 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
     return;
   }
   $pictures= array();
+  ksort($attachments);
   foreach ( $attachments as $i => $value ) {
     // looks for ' #img1# ' etc... and replaces with image
     $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $image_placeholder);
@@ -1858,27 +1856,9 @@ function ReplaceImagePlaceHolders(&$content,$attachments, $config) {
       $value = str_replace('{CAPTION}', '', $value);
       /* if using the gallery shortcode, don't add pictures at all */
       if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
-        preg_match("/src=\"(.*?)\"/", $value, $matches);
-        $path = $matches[1];
-        $filename = basename($path);
-        $filename = preg_replace("/-[0-9]+x[0-9]+\.(jpg|png|gif)/", '',
-            $filename);
-        if (preg_match("/[[:alpha:]_-]+([0-9]+)$/", $filename, $matches)) {
-          $filename = $matches[1];
-        }
-        echo "filename = $filename\n";
-        if ($filename!=1) {
-          $pictures[$filename] = $value;
-        } else {
-          $pictures[] = $value;
-        }
+        $pics .= $value;
       }
     }
-  }
-  ksort($pictures);
-  $pics = '';
-  foreach ($pictures as $picture) {
-    $pics .= $picture;
   }
   if ($images_append) {
     $content .= $pics;

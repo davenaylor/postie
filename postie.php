@@ -160,9 +160,10 @@ function postie_warnings() {
 }
 
 function disable_kses_content() {
-remove_filter('content_save_pre', 'wp_filter_post_kses');
+  remove_filter('content_save_pre', 'wp_filter_post_kses');
 }
 add_action('init','disable_kses_content',20);
+
 function postie_whitelist($options) {
 	$added = array( 'postie-settings' => array( 'postie-settings' ) );
 	$options = add_option_whitelist( $added, $options );
@@ -171,16 +172,17 @@ function postie_whitelist($options) {
 add_filter('whitelist_options', 'postie_whitelist');
 
 function check_postie() {
-    $host = get_option('siteurl');
-    preg_match("/https?:\/\/(.[^\/]*)(.*)/",$host,$matches);
-    $host = $matches[1];
-    $url = "";
-    if (isset($matches[2])) {
-        $url .=  $matches[2];
-    }
-    $url .= "/wp-content/plugins/postie/get_mail.php";
-    $port = 80;
-	$fp=fsockopen($host,$port,$errno,$errstr);
+  $host = get_option('siteurl');
+  preg_match("/https?:\/\/(.[^\/]*)(.*)/",$host,$matches);
+  $host = $matches[1];
+  $url = "";
+  if (isset($matches[2])) {
+      $url .=  $matches[2];
+  }
+  $url .= "/wp-content/plugins/postie/get_mail.php";
+  $port = 80;
+  $fp=fsockopen($host,$port,$errno,$errstr);
+  if ($fp) {
     fputs($fp,"GET $url HTTP/1.0\r\n");
     fputs($fp,"User-Agent:  Cronless-Postie\r\n");
     fputs($fp,"Host: $host\r\n");
@@ -190,6 +192,12 @@ function check_postie() {
         $page.=fgets($fp,128);
     }
     fclose($fp);
+  } else {
+    echo "Cannot connect to server on port $port. Please check to make sure
+    that this port is open on your webhost.
+    Additional information:
+    $errno: $errstr";
+  }
 }
 
 function postie_cron($interval=false) {

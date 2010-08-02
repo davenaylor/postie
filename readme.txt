@@ -353,6 +353,9 @@ option to convert url into links turned on)
 * Fixed mailto link bug (thanks to Jason McNeil) 
 * Fixed bug with attachments with non-ascii characters in filename (thanks to
   mtakada)
+* checking for socket errors when checking mail (thanks elysian)
+* fixed issue with multiple files not being inserted correctly
+* TODO - add port checking in tests
 
 = 1.4.1 (2010.06.18) =
 * Images appear in correct order when using images append = false
