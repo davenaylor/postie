@@ -742,7 +742,7 @@ function GetContent ($part,&$attachments, $post_id, $poster, $config) {
           $icon=chooseAttachmentIcon($file, $part->ctype_primary,
               $part->ctype_secondary, $icon_set,
               $icon_size);
-          $attachments["html"][$filename] = "<a href='$file'" . 
+          $attachments["html"][$filename] = "<a href='$file'>" . 
               $icon . $filename . '</a>' . "\n";
           if ($cid) {
             $attachments["cids"][$cid] = array($file,
@@ -1099,7 +1099,7 @@ function ConvertToUTF_8($encoding,$charset,$body) {
       $body = utf8_encode($body);
       break;
     case "iso-2022-jp":
-      $body = iconv("ISO-2022-JP//TRANSLIT","UTF-8",$body);
+      $body = iconv("ISO-2022-JP","UTF-8//TRANSLIT",$body);
       break;
     case ($charset=="windows-1252" || $charset=="cp-1252"  || 
         $charset=="cp 1252"):
@@ -1107,19 +1107,22 @@ function ConvertToUTF_8($encoding,$charset,$body) {
       break;
     case ($charset=="windows-1256" || $charset=="cp-1256"  || 
         $charset=="cp 1256"):
-      $body = iconv("Windows-1256//TRANSLIT","UTF-8",$body);
+      $body = iconv("Windows-1256","UTF-8//TRANSLIT",$body);
       break;
     case 'koi8-r':
-      $body = iconv("koi8-r//TRANSLIT","UTF-8",$body);
+      $body = iconv("koi8-r","UTF-8//TRANSLIT",$body);
       break;
     case 'iso-8859-2':
-      $body = iconv("iso-8859-2//TRANSLIT","UTF-8",$body);
+      $body = iconv("iso-8859-2","UTF-8//TRANSLIT",$body);
       break;
     case "big5":
-      $body = iconv("BIG5","UTF-8",$body);
+      $body = iconv("BIG5","UTF-8//TRANSLIT",$body);
       break;
     case "gb2312":
-      $body = iconv("GB2312","UTF-8",$body);
+      $body = iconv("GB2312","UTF-8//TRANSLIT",$body);
+      break;
+    case "iso-8859-15":
+      $body = iconv("iso-8859-15","UTF-8//TRANSLIT",$body);
       break;
   }
   return($body);

@@ -358,6 +358,7 @@ option to convert url into links turned on)
 * TODO - add port checking in tests
 * TODO - non-image uploads get ignored in content when using autogallery - see
   replaceimageplaceholders
+* Added support for ISO 8859-15 (thanks paolog)
 
 = 1.4.1 (2010.06.18) =
 * Images appear in correct order when using images append = false
