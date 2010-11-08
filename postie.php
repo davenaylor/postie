@@ -54,10 +54,10 @@ function postie_loadjs_options_page() {
 }
 
 function postie_loadjs_admin_head() {
-	$plugindir = get_settings('home').'/wp-content/plugins/'.dirname(plugin_basename(__FILE__));
+	$plugindir = get_settings('siteurl').'/wp-content/plugins/'.dirname(plugin_basename(__FILE__));
 	wp_enqueue_script('loadjs', $plugindir . '/js/simpleTabs.jquery.js');
-	echo '<link type="text/css" rel="stylesheet" href="' .get_bloginfo('url') .'/wp-content/plugins/postie/css/style.css" />'."\n";
-	echo '<link type="text/css" rel="stylesheet" href="' .get_bloginfo('url') .'/wp-content/plugins/postie/css/simpleTabs.css" />'."\n";
+	echo '<link type="text/css" rel="stylesheet" href="' .get_bloginfo('wpurl') .'/wp-content/plugins/postie/css/style.css" />'."\n";
+	echo '<link type="text/css" rel="stylesheet" href="' .get_bloginfo('wpurl') .'/wp-content/plugins/postie/css/simpleTabs.css" />'."\n";
 }
 
 
