@@ -95,7 +95,7 @@ function activate_postie() {
 	if(!$options) {
 		$options = array();
 	}	
-	$default_options = get_config_defaults();
+	$default_options = get_postie_config_defaults();
 	$old_config = array();
 	$updated = false;
 	$migration = false;

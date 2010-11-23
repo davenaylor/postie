@@ -437,7 +437,7 @@ function FetchMail($server=NULL, $port=NULL, $email=NULL, $password=NULL,
   */
 function TestIMAPMessageFetch ( ) {			
   print("**************RUNING IN TESTING MODE************\n");
-  $config = get_config();
+  $config = get_postie_config();
 	extract( $config );
   $email = $test_email_account;
   $password = $test_email_password;
@@ -483,7 +483,7 @@ function IMAPMessageFetch ($server=NULL, $port=NULL, $email=NULL,
 }
 function TestPOP3MessageFetch ( ) {			
   print("**************RUNING IN TESTING MODE************\n");
-  $config = get_config();
+  $config = get_postie_config();
 	extract( $config );
   $email = $test_email_account;
   $password = $test_email_password;
@@ -2094,7 +2094,7 @@ function BuildTextArea($label,$id,$current_value,$recommendation = NULL) {
   *This function resets all the configuration options to the default
   */
 function ResetPostieConfig() {
-  $newconfig = get_config_defaults();
+  $newconfig = get_postie_config_defaults();
 	$config = get_option( 'postie-settings' ) ;
 	$save_keys=array( 'mail_password', 'mail_server', 'mail_server_port', 'mail_userid', 'iinput_protocol' );
   foreach ( $save_keys as $key )
@@ -2122,7 +2122,7 @@ function UpdatePostieConfig($data) {
 /**
 	* return an array of the config defaults
 	*/
-function get_config_defaults() {
+function get_postie_config_defaults() {
 	include('templates/audio_templates.php');
   include('templates/image_templates.php');	
   include('templates/video1_templates.php');
@@ -2377,7 +2377,7 @@ function GetConfig() {
   * This function returns the current config
   * @return array
   */
-function get_config() {
+function get_postie_config() {
   $config = get_option( 'postie-settings' );
   if (file_exists(POSTIE_ROOT . '/postie_test_variables.php')) { 
     include(POSTIE_ROOT . '/postie_test_variables.php');
@@ -2460,7 +2460,7 @@ function postie_validate_settings( $in ) {
 	
 	// use the default as a template: 
 	// if a field is present in the defaults, we want to store it; otherwise we discard it
-	$allowed_keys = get_config_defaults();
+	$allowed_keys = get_postie_config_defaults();
 	foreach ( $allowed_keys as $key => $default )
 		$out[$key] = array_key_exists( $key, $in ) ? $in[$key] : $default;
 

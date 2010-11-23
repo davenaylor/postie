@@ -199,6 +199,17 @@ class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
 
 == Frequently Asked Questions ==
 
+= Postie won't connect to my mailserver. Why Not? =
+
+Make sure the port you are using is open. For example, bluehost seems to block
+ports 993 and 995 (for pop3-ssl and imap-ssl) by default. I have heard that
+you can request that they open them for you ( you might have to pay extra). 
+
+You can check for open ports with the following command on your server:
+netstat -ln|grep -E ':::(993|995|143)'
+
+If nothing shows up, then the ports are not open.
+
 = How can I get postie to display inline images? =
 
 Make sure that you send e-mail formatted as html (richtext), and set postie to
@@ -359,6 +370,7 @@ option to convert url into links turned on)
 * TODO - non-image uploads get ignored in content when using autogallery - see
   replaceimageplaceholders
 * Added support for ISO 8859-15 (thanks paolog)
+* Fixed namespace clashing for get_config function
 
 = 1.4.1 (2010.06.18) =
 * Images appear in correct order when using images append = false
