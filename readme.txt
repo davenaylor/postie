@@ -5,7 +5,7 @@ Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail, email
 Requires at least: 2.3
 Tested up to: 3.0
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -18,6 +18,15 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 [other notes](other_notes) page
 
 = What's new? = 
+
+* 1.4.2 (2011.01.29)
+    * Fixed mailto link bug (thanks to Jason McNeil) 
+    * Fixed bug with attachments with non-ascii characters in filename (thanks to
+      mtakada)
+    * checking for socket errors when checking mail (thanks elysian)
+    * fixed issue with multiple files not being inserted correctly
+    * Added support for ISO 8859-15 (thanks paolog)
+    * fixed sql injection problem (thanks Jose P. Espinal for pointing it out)
 
 * 1.4.1 (2010.06.18)
     * Images appear in correct order when using images append = false
@@ -37,24 +46,6 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
     * On hosts which allow it, we set max execution time to 300 seconds and
       memory_limit to infinity to allow processing of large e-mails (especially
       with large attachments)
-
-* 1.4 (2010.04.25)
-    * Now using wordpress settings api (thanks for much help from Andrew S)
-    * Cronless postie is now integrated with postie instead of a plugin
-    * filterPostie.php moved to filterPostie.php.sample
-    * Can use fetchmails.php to fetch mail from multiple mailboxes
-    * Fixed problem with embedding youtube videos from html (richtext) e-mail
-    * Added support for embedding vimeo vidoes
-    * Fixed problem with selecting "none" as icon set for attachments (thanks
-      tonyvitali)
-    * Fixed problems with cronless postie settings
-    * Fixed bug with embedding youtube and vimeo videos whose ID contains a -
-      (thanks Jim Kehoe)
-    * Post_author is now included with attachments
-    * fixed confirmation_email settings so that now you can select between
-      sender, admin, both, or none (thanks to redsalmon for pointing out bug)
-    * Added option to automatically insert galleries
-    * Updated FAQ and readme
 
 == Installation ==
 * Either:
@@ -359,17 +350,20 @@ option to convert url into links turned on)
 
 == CHANGELOG ==
 
-= 1.4.2 =
+= 1.4.3 =
 * TODO - fix corruption of rtf attachments
+* TODO - add port checking in tests
+* TODO - non-image uploads get ignored in content when using autogallery - see
+  replaceimageplaceholders
+
+= 1.4.2 (2011.01.29) =
 * Fixed mailto link bug (thanks to Jason McNeil) 
 * Fixed bug with attachments with non-ascii characters in filename (thanks to
   mtakada)
 * checking for socket errors when checking mail (thanks elysian)
 * fixed issue with multiple files not being inserted correctly
-* TODO - add port checking in tests
-* TODO - non-image uploads get ignored in content when using autogallery - see
-  replaceimageplaceholders
 * Added support for ISO 8859-15 (thanks paolog)
+* fixed sql injection problem (thanks Jose P. Espinal for pointing it out)
 * Fixed namespace clashing for get_config function
 
 = 1.4.1 (2010.06.18) =

@@ -353,7 +353,7 @@ function checkReply(&$subject) {
     }
     $checkExistingPostQuery= "SELECT ID FROM $wpdb->posts WHERE 
         '$tmpSubject' = post_title";
-    if ($id=$wpdb->get_var($checkExistingPostQuery)) {
+    if ($id=$wpdb->get_var($wpdb->prepare($checkExistingPostQuery))) {
       if (is_array($id)) {
         $id=$id[count($id)-1];
       }
