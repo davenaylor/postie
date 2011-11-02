@@ -2582,44 +2582,6 @@ function VodafoneHandler(&$content, &$attachments){
     }
 
 }
-/* this is included in WP 2.8+. We are using our own (unmodified) version for
-   backwards compatibility */
-if (!function_exists('get_user_by')) {
-  function get_user_by($field, $value) {
-    global $wpdb;
-
-    switch ($field) {
-      case 'id':
-        return get_userdata($value);
-        break;
-      case 'slug':
-        $user_id = wp_cache_get($value, 'userslugs');
-        $field = 'user_nicename';
-        break;
-      case 'email':
-        $user_id = wp_cache_get($value, 'useremail');
-        $field = 'user_email';
-        break;
-      case 'login':
-        $value = sanitize_user( $value );
-        $user_id = wp_cache_get($value, 'userlogins');
-        $field = 'user_login';
-        break;
-      default:
-        return false;
-    }
-
-     if ( false !== $user_id )
-      return get_userdata($user_id);
-
-    if ( !$user = $wpdb->get_row( $wpdb->prepare("SELECT * FROM $wpdb->users WHERE $field = %s", $value) ) )
-      return false;
-
-    _fill_user($user);
-
-    return $user;
-  }
-}
 
 define('WP_POST_REVISIONS', $revisions);
 if (!ini_get('safe_mode')) {

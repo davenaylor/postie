@@ -3,8 +3,8 @@ Contributors: robfelty,
 Donate link: http://blog.robfelty.com/plugins/postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail, email
-Requires at least: 2.3
-Tested up to: 3.0
+Requires at least: 2.8
+Tested up to: 3.3
 Stable tag: 1.4.2
 
 The Postie plugin allows you to blog via e-mail, including many advanced
@@ -351,6 +351,8 @@ option to convert url into links turned on)
 == CHANGELOG ==
 
 = 1.4.3 =
+* Removed get_user_by function to make compatible with wp 3.3 - now requires
+ 2.8+
 * TODO - fix corruption of rtf attachments
 * TODO - add port checking in tests
 * TODO - non-image uploads get ignored in content when using autogallery - see
