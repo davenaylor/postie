@@ -1,11 +1,14 @@
 === Postie ===
 Contributors: robfelty, WayneAllen
-Donate link: http://blog.robfelty.com/plugins/postie
-Plugin URI: http://blog.robfelty.com/plugins/postie
+Donate link: 
+Author URI:
+Plugin URI: 
 Tags: e-mail, email
 Requires at least: 2.8
 Tested up to: 3.4.1
 Stable tag: 1.4.4
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 The Postie plugin allows you to blog via e-mail, including many advanced
 features not found in wordpress's default post by e-mail feature.
@@ -167,10 +170,10 @@ different one if you wish.
   You can also specify a custom image template. I use the following custom
 template:
 
-  &lt;div class='imageframe alignleft'&gt;&lt;a href='{IMAGE}'&gt;&lt;img src="{THUMBNAIL}"
+  <div class='imageframe alignleft'><a href='{IMAGE}'><img src="{THUMBNAIL}"
   alt="{CAPTION}" title="{CAPTION}" 
-  class="attachment" /&gt;&lt;/a&gt;&lt;div
-class='imagecaption'&gt;{CAPTION}&lt;/div&gt;&lt;/div&gt;
+  class="attachment" /></a><div
+class='imagecaption'>{CAPTION}</div></div>
      
     * {THUMBNAIL} gets replaced with the url to the thumbnail image
     * {MEDIUM} gets replaced with the url to the medium-sized image
@@ -569,7 +572,7 @@ option to convert url into links turned on)
   * Can now set administrator name. Authorized e-mail addresses which don't
     have a user get posted under this name
   * Will use IPTC captions if available
-  * Added option to replace newline characters with &lt;br /&gt;
+  * Added option to replace newline characters with <br />
 
 =  1.1.4 (2009.03.06) =
   * Added more image options (open in new window, custom image template)
@@ -587,7 +590,7 @@ option to convert url into links turned on)
   * replying to an e*mail adds a comment to a post
   * fixed category handling to work with taxonomy
   * fixed one syntax error
-  * added option to wrap posts and comments in &lt;pre%gt; tags
+  * added option to wrap posts and comments in <pre%gt; tags
 
 
 =  1.1.1 =
@@ -651,7 +654,7 @@ So I decided to make an offical fork. I put up an article on my blog asking for 
 * BUGFIX: Posting updates the category counts.
 
 =  0.9.8.6 =
-* BUGFIX: Fixed problems with config page &lt;%php became &lt;?php
+* BUGFIX: Fixed problems with config page <%php became <?php
 * 
 =  0.9.8.5 =
 * BUGFIX: onClick changed to onclick
@@ -881,3 +884,8 @@ So I decided to make an offical fork. I put up an article on my blog asking for 
 * 
 =  0.1 - 2004-06 =
 * First release
+
+== Upgrade Notice ==
+
+= 1.4.4 =
+Fixed possible XSS attack vulnerability
