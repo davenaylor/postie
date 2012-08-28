@@ -1,5 +1,5 @@
 === Postie ===
-Contributors: robfelty, 
+Contributors: robfelty, WayneAllen
 Donate link: http://blog.robfelty.com/plugins/postie
 Plugin URI: http://blog.robfelty.com/plugins/postie
 Tags: e-mail, email
