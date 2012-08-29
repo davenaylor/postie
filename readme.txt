@@ -11,7 +11,7 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 The Postie plugin allows you to blog via e-mail, including many advanced
-features not found in wordpress's default post by e-mail feature.
+features not found in WordPress's default post by e-mail feature.
 
 == Description ==
 Postie offers many advanced features for posting to your blog via e-mail,
