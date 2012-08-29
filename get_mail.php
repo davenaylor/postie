@@ -34,7 +34,7 @@ foreach ($emails as $email) {
       continue;
     }
  // check for XSS attacks - we disallow any javascript, meta, onload, or base64
-    if (preg_match("/.*(script|onload|meta|base64).*/is", $email)) {
+    if (preg_match("/.*(script|onload|meta).*/is", $email)) {
       echo "possible XSS attack - ignoring email\n";
       continue;
     }

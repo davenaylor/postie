@@ -1,12 +1,12 @@
 === Postie ===
 Contributors: robfelty, WayneAllen
-Donate link: 
-Author URI:
-Plugin URI: 
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HPK99BJ88V4C2
+Author URI: http://allens-home.com/
+Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 2.8
 Tested up to: 3.4.1
-Stable tag: 1.4.4
+Stable tag: 1.4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,6 +21,10 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 [other notes](other_notes) page
 
 = What's new? = 
+
+* 1.4.5 (2012.08.10)
+    * Fixed bug in XSS attack vulnerability code
+    * New maintainer
 
 * 1.4.4 (2012.08.10)
     * Fixed possible XSS attack vulnerability 
@@ -595,11 +599,19 @@ option to convert url into links turned on)
 
 =  1.1.1 =
 
-Below is all the of the version information. As far as I can tell there once was a guy named John Blade. He took some of the orignal wp-mail.php code and started hacking away on it. He actually got pretty far. About the time I discovered WordPress and his little hack - called WP-Mail at the time - he went on a vacation or something. There were some problems with the script, and it was missing some features I wanted. I hacked away at it and got it into a place where it did what I wanted. I started posting about it since I figured other people might want the features. 
+Below is all the of the version information. As far as I can tell there once was a guy named John Blade. He took some of the original wp-mail.php code 
+and started hacking away on it. He actually got pretty far. About the time I discovered WordPress and his little hack - called WP-Mail at the time - he 
+went on a vacation or something. There were some problems with the script, and it was missing some features I wanted. I hacked away at it and got it 
+into a place where it did what I wanted. I started posting about it since I figured other people might want the features. 
 
-John didn't release any more versions at least up til July 2005. So I started accepting submissions and feature requests from people to help make the code better. In June/July 2005 I discovered a little plugin by Chris J Davis (http://www.chrisjdavis.org/cjd-notepad/) called notepad. I added a small feature to it (basically a bookmarklet).  In the process I started looking at his code and realized how much you could do with the plugin system available in Word Press.
+John didn't release any more versions at least up til July 2005. So I started accepting submissions and feature requests from people to help make the 
+code better. In June/July 2005 I discovered a little plugin by Chris J Davis (http://www.chrisjdavis.org/cjd-notepad/) called notepad. I added a small 
+feature to it (basically a bookmarklet).  In the process I started looking at his code and realized how much you could do with the plugin system 
+available in Word Press.
 
-So I decided to make an offical fork. I put up an article on my blog asking for new names. I picked Postie.  I then modified the code to be a proper plugin.  And the rest is history :)
+So I decided to make an offical fork. I put up an article on my blog asking for new names. I picked Postie.  I then modified the code to be a proper 
+plugin.  And the rest is history :)
+
 * BUGFIX -problem with subject
 * BUGFIX -cronless postie typo
 
