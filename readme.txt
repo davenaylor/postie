@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 2.8
 Tested up to: 3.4.1
-Stable tag: 1.4.5
+Stable tag: 1.4.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,7 +22,7 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 
 = What's new? = 
 
-* 1.4.5 (2012.08.10)
+* 1.4.5 (upcoming)
     * Fixed bug in XSS attack vulnerability code
     * New maintainer
 
