@@ -25,6 +25,7 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 * 1.4.5 (upcoming)
     * Fixed bug in XSS attack vulnerability code. Thanks to R Reid http://blog.strictly-software.com/2012/03/fixing-postie-plugin-for-wordpress-to.html
     * Fixed bug where emails with multiple categories has the incorrect title
+    * Fixed bugs where PHP setting were not being changed correctly - thanks to Peter Chester http://tri.be/author/peter/
     * New maintainer
 
 * 1.4.4 (2012.08.10)

@@ -1,12 +1,40 @@
 <?php
 
-$revisions = WP_POST_REVISIONS;
-define('WP_POST_REVISIONS', false);
-//define('POSTIE_DEBUG', true);
-if (!ini_get('safe_mode')) {
-    $original_mem_limit = ini_get('memory_limit');
-    ini_set('memory_limit', -1);
-    ini_set('max_execution_time', 300);
+function postie_disable_revisions($restore = false) {
+    global $_wp_post_type_features, $_postie_revisions;
+
+    if (!$restore) {
+        $_postie_revisions = false;
+        if (isset($_wp_post_type_features['post']) && isset($_wp_post_type_features['post']['revisions'])) {
+            $_postie_revisions = $_wp_post_type_features['post']['revisions'];
+            unset($_wp_post_type_features['post']['revisions']);
+        }
+    } else {
+        if ($_postie_revisions) {
+            $_wp_post_type_features['post']['revisions'] = $_postie_revisions;
+        }
+    }
+}
+
+function postie_increase_memory($restore = false) {
+    global $_postie_original_memory_limit, $_postie_original_max_execution_time;
+
+    if (!ini_get('safe_mode')) {
+        if (!$restore) {
+
+            $_postie_original_memory_limit = ini_get('memory_limit');
+            $_postie_original_max_execution_time = ini_get('max_execution_time');
+            ini_set('memory_limit', -1);
+            ini_set('max_execution_time', 300);
+        } else {
+            if (isset($_postie_original_memory_limit)) {
+                ini_set('memory_limit', $_postie_original_memory_limit);
+            }
+            if (isset($_postie_original_max_execution_time)) {
+                ini_set('max_execution_time', $_postie_original_max_execution_time);
+            }
+        }
+    }
 }
 
 //include_once (dirname(dirname(dirname(dirname(__FILE__)))) .  DIRECTORY_SEPARATOR."wp-admin" . DIRECTORY_SEPARATOR . "upgrade-functions.php");
@@ -44,6 +72,8 @@ if (!function_exists('fnmatch')) {
  * This is the main handler for all of the processing
  */
 function PostEmail($poster, $mimeDecodedEmail, $config) {
+    postie_disable_revisions();
+    postie_increase_memory();
     extract($config);
     $post_to_db = true;
 
@@ -194,6 +224,8 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
             MailToRecipients($mimeDecodedEmail, false, $recipients, false, false);
         }
     }
+    postie_disable_revisions(true);
+    postie_increase_memory(true);
 }
 
 /** FUNCTIONS * */
@@ -1436,7 +1468,6 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
  * @param secondary mime
  * @return boolean
  */
-
 function SearchForMIMEType($part, $primary, $secondary) {
     if ($part->ctype_primary == $primary && $part->ctype_secondary == $secondary) {
         return true;
@@ -2573,8 +2604,4 @@ function VodafoneHandler(&$content, &$attachments) {
     }
 }
 
-define('WP_POST_REVISIONS', $revisions);
-if (!ini_get('safe_mode')) {
-    ini_set('memory_limit', $original_mem_limit);
-}
 ?>
