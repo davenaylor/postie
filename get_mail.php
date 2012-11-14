@@ -1,15 +1,9 @@
 <?php
 
-//Load up some usefull libraries
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mimedecode.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
 
-
-/* END OF USER VARIABLES */
-//some variables
-//error_reporting(2037);
-//Retreive emails 
 print("<pre>\n");
 print("This is the postie plugin\n");
 print("time:" . time() . "\n");
@@ -17,6 +11,7 @@ include('Revision');
 $config = get_option('postie-settings');
 extract($config);
 $emails = FetchMail($mail_server, $mail_server_port, $mail_userid, $mail_password, $input_protocol, $time_offset, $test_email, $delete_mail_after_processing);
+$message = 'Done.';
 //loop through messages
 foreach ($emails as $email) {
     if (function_exists('memory_get_usage'))
@@ -36,14 +31,7 @@ foreach ($emails as $email) {
         continue;
     }
 
-    $message = '';
     $mimeDecodedEmail = DecodeMIMEMail($email, true);
-    $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
-    /*
-      if ($from != "") {
-      continue;
-      }
-     */
 
     //Check poster to see if a valid person
     $poster = ValidatePoster($mimeDecodedEmail, $config);
@@ -61,7 +49,4 @@ foreach ($emails as $email) {
 print $message;
 print("</pre>\n");
 
-/* END PROGRAM */
-
-// end of script
 ?>
