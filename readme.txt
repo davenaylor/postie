@@ -1,12 +1,12 @@
 === Postie ===
-Contributors: robfelty, WayneAllen
+Contributors: WayneAllen
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HPK99BJ88V4C2
 Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 2.8
-Tested up to: 3.4.1
-Stable tag: 1.4.4
+Tested up to: 3.4.2
+Stable tag: 1.4.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,7 +22,7 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 
 = What's new? = 
 
-* 1.4.5 (upcoming)
+* 1.4.5 (2012.11.14)
     * Fixed bug in XSS attack vulnerability code. Thanks to R Reid http://blog.strictly-software.com/2012/03/fixing-postie-plugin-for-wordpress-to.html
     * Fixed bug where emails with multiple categories has the incorrect title
     * Fixed bugs where PHP setting were not being changed correctly - thanks to Peter Chester http://tri.be/author/peter/
@@ -533,7 +533,7 @@ option to convert url into links turned on)
   * Got rid of stupid version checking
   * Improved cronless postie instructions and configuration
   * Internationalization is working now
-  * Dutch localization (thanks to gvmelle http://gvmelle.com)
+  * Dutch localization (thanks to gvmelle http://gvmelle.com )
   * Fixed caption bug when using image magick
   * Added option to not filter new lines (when using markdown syntax)
   * Fixed autoplay option
