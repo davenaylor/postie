@@ -71,7 +71,7 @@ function postie_loadjs_options_page() {
 }
 
 function postie_loadjs_admin_head() {
-    $plugindir = get_settings('siteurl') . '/wp-content/plugins/' . dirname(plugin_basename(__FILE__));
+    $plugindir = get_option('siteurl') . '/wp-content/plugins/' . dirname(plugin_basename(__FILE__));
     wp_enqueue_script('loadjs', $plugindir . '/js/simpleTabs.jquery.js');
     echo '<link type="text/css" rel="stylesheet" href="' . get_bloginfo('wpurl') . '/wp-content/plugins/postie/css/style.css" />' . "\n";
     echo '<link type="text/css" rel="stylesheet" href="' . get_bloginfo('wpurl') . '/wp-content/plugins/postie/css/simpleTabs.css" />' . "\n";
@@ -103,21 +103,22 @@ if (is_admin()) {
 }
 
 function activate_postie() {
+    DebugEcho("activate started");
+
     static $init = false;
     $options = get_option('postie-settings');
-
-    error_log("activate");
-    DebugDump($options);
-    if ($init)
+    //DebugDump($options);
+    
+    if ($init){
+        DebugEcho("activate already happened");
         return;
+    }
 
     if (!$options) {
         $options = array();
     }
     $default_options = get_postie_config_defaults();
     $old_config = array();
-    $updated = false;
-    $migration = false;
 
     $result = GetConfig();
     if (is_array($result)) {
@@ -132,6 +133,7 @@ function activate_postie() {
     $options = postie_validate_settings($options);
     update_option('postie-settings', $options);
     $init = true;
+    DebugEcho("activate completed");
     return $options;
 }
 

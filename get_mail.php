@@ -8,10 +8,13 @@ print("<pre>\n");
 print("This is the postie plugin\n");
 print("time:" . time() . "\n");
 include('Revision');
+
+$test_email = null;
 $config = get_option('postie-settings');
 extract($config);
 $emails = FetchMail($mail_server, $mail_server_port, $mail_userid, $mail_password, $input_protocol, $time_offset, $test_email, $delete_mail_after_processing);
 $message = 'Done.';
+
 //loop through messages
 foreach ($emails as $email) {
     if (function_exists('memory_get_usage'))
@@ -48,5 +51,4 @@ foreach ($emails as $email) {
 } // end looping over messages
 print $message;
 print("</pre>\n");
-
 ?>

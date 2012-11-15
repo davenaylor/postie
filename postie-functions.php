@@ -1,6 +1,27 @@
 <?php
 
+/*
+  $Id$
+ */
+
+/* TODO 
+ * html purify
+ * USE built-in php message decoding to improve speed
+ * Add custom fields
+ * support for flexible upload plugin
+ * iso 8859-2 support
+ * add private post function
+  http://forum.robfelty.com/topic/how-to-private-posts-from-postie?replies=2#post-1515
+ * category per e-mail address
+ */
+
 $g_POSTIE_DEBUG = true;
+
+if (!ini_get('safe_mode')) {
+    $original_mem_limit = ini_get('memory_limit');
+    ini_set('memory_limit', -1);
+    ini_set('max_execution_time', 300);
+}
 
 function postie_disable_revisions($restore = false) {
     global $_wp_post_type_features, $_postie_revisions;
@@ -39,24 +60,6 @@ function postie_increase_memory($restore = false) {
     }
 }
 
-//include_once (dirname(dirname(dirname(dirname(__FILE__)))) .  DIRECTORY_SEPARATOR."wp-admin" . DIRECTORY_SEPARATOR . "upgrade-functions.php");
-/*
-  $Id$
- */
-
-/* TODO 
- * html purify
- * USE built-in php message decoding to improve speed
- * Add custom fields
- * support for flexible upload plugin
- * iso 8859-2 support
- * add private post function
-  http://forum.robfelty.com/topic/how-to-private-posts-from-postie?replies=2#post-1515
- * category per e-mail address
- */
-
-//include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
-
 /* this function is necessary for wildcard matching on non-posix systems */
 if (!function_exists('fnmatch')) {
 
@@ -72,19 +75,19 @@ if (!function_exists('fnmatch')) {
 
 function DebugDump($v) {
     global $g_POSTIE_DEBUG;
-    if ($g_POSTIE_DEBUG) {
-        $o = print_r($v, true);
-        //echo $o;
-        error_log($o);
-    }
+    //if ($g_POSTIE_DEBUG)  {
+    $o = print_r($v, true);
+    //echo $o;
+    error_log("Postie: $o");
+    //}
 }
 
 function DebugEcho($v) {
     global $g_POSTIE_DEBUG;
-    if ($g_POSTIE_DEBUG) {
-        //echo "$v\n";
-        error_log($v);
-    }
+    //if ($g_POSTIE_DEBUG)  {
+    //echo "$v\n";
+    error_log("Postie: $v");
+    // }
 }
 
 /**
@@ -2215,13 +2218,16 @@ function GetListOfArrayConfig() {
 function ReadDBConfig() {
     $config = array();
     global $wpdb;
-    $data = $wpdb->get_results("SELECT label,value FROM " . $GLOBALS["table_prefix"] . "postie_config;");
-    if (is_array($data)) {
-        foreach ($data as $row) {
-            if (in_array($row->label, GetListOfArrayConfig())) {
-                $config[$row->label] = unserialize($row->value);
-            } else {
-                $config[$row->label] = $row->value;
+    $wpdb->query("SHOW TABLES LIKE  '" . $GLOBALS["table_prefix"] . "postie_config'");
+    if ($wpdb->num_rows > 0) {
+        $data = $wpdb->get_results("SELECT label,value FROM " . $GLOBALS["table_prefix"] . "postie_config;");
+        if (is_array($data)) {
+            foreach ($data as $row) {
+                if (in_array($row->label, GetListOfArrayConfig())) {
+                    $config[$row->label] = unserialize($row->value);
+                } else {
+                    $config[$row->label] = $row->value;
+                }
             }
         }
     }
@@ -2313,18 +2319,18 @@ function GetDBConfig() {
     $config['ICON_SIZES'] = array(32, 48, 64);
     if (!isset($config["ICON_SIZE"]))
         $config["ICON_SIZE"] = 32;
-    if (!isset($config["AUDIOTEMPLATE"]))
-        $config["AUDIOTEMPLATE"] = $simple_link;
+
+    //audio
+    include('templates/audio_templates.php');
     if (!isset($config["SELECTED_AUDIOTEMPLATE"]))
         $config['SELECTED_AUDIOTEMPLATE'] = 'simple_link';
-    include('templates/audio_templates.php');
     $config['AUDIOTEMPLATES'] = $audioTemplates;
     if (!isset($config["SELECTED_VIDEO1TEMPLATE"]))
         $config['SELECTED_VIDEO1TEMPLATE'] = 'simple_link';
-    include('templates/video1_templates.php');
-    $config['VIDEO1TEMPLATES'] = $video1Templates;
-    if (!isset($config["VIDEO1TEMPLATE"]))
-        $config["VIDEO1TEMPLATE"] = $simple_link;
+    if (!isset($config["AUDIOTEMPLATE"]))
+        $config["AUDIOTEMPLATE"] = $simple_link;
+
+    //video1
     if (!isset($config["VIDEO1TYPES"]))
         $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2',
             '3gp2', 'mov', 'mpeg');
@@ -2332,10 +2338,12 @@ function GetDBConfig() {
         $config['AUDIOTYPES'] = array('m4a', 'mp3', 'ogg', 'wav', 'mpeg');
     if (!isset($config["SELECTED_VIDEO2TEMPLATE"]))
         $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
-    include('templates/video2_templates.php');
-    $config['VIDEO2TEMPLATES'] = $video2Templates;
-    if (!isset($config["VIDEO2TEMPLATE"]))
-        $config["VIDEO2TEMPLATE"] = $simple_link;
+    include('templates/video1_templates.php');
+    $config['VIDEO1TEMPLATES'] = $video1Templates;
+    if (!isset($config["VIDEO1TEMPLATE"]))
+        $config["VIDEO1TEMPLATE"] = $simple_link;
+
+    //video2
     if (!isset($config["VIDEO2TYPES"]))
         $config['VIDEO2TYPES'] = array('x-flv');
     if (!isset($config["POST_STATUS"]))
@@ -2344,14 +2352,21 @@ function GetDBConfig() {
         $config["IMAGE_NEW_WINDOW"] = false;
     if (!isset($config["FILTERNEWLINES"]))
         $config["FILTERNEWLINES"] = true;
-    include('templates/image_templates.php');
-    $config['IMAGETEMPLATES'] = $imageTemplates;
+    include('templates/video2_templates.php');
+    $config['VIDEO2TEMPLATES'] = $video2Templates;
+    if (!isset($config["VIDEO2TEMPLATE"]))
+        $config["VIDEO2TEMPLATE"] = $simple_link;
+
+    //image
     if (!isset($config["SELECTED_IMAGETEMPLATE"]))
         $config['SELECTED_IMAGETEMPLATE'] = 'wordpress_default';
-    if (!isset($config["IMAGETEMPLATE"]))
-        $config["IMAGETEMPLATE"] = $wordpress_default;
     if (!isset($config["SMTP"]))
         $config["SMTP"] = array();
+    include('templates/image_templates.php');
+    if (!isset($config["IMAGETEMPLATE"]))
+        $config["IMAGETEMPLATE"] = $wordpress_default;
+    $config['IMAGETEMPLATES'] = $imageTemplates;
+
     return($config);
 }
 
@@ -2473,7 +2488,7 @@ function TestForMarkdown() {
  * and ensures that arrayed items are stored as such
  */
 function postie_validate_settings($in) {
-    DebugDump($in);
+    //DebugDump($in);
     $out = array();
 
     // use the default as a template: 
@@ -2485,7 +2500,7 @@ function postie_validate_settings($in) {
     // some fields are always forced to lower case:
     $lowercase = array('authorized_addresses', 'smtp', 'supported_file_types', 'video1types', 'video2types', 'audiotypes');
     foreach ($lowercase as $field) {
-        $out[$field] = ( is_array($out[$field]) ) ? array_map(strtolower, $out[$field]) : strtolower($out[$field]);
+        $out[$field] = ( is_array($out[$field]) ) ? array_map("strtolower", $out[$field]) : strtolower($out[$field]);
     }
     $arrays = get_arrayed_settings();
 
@@ -2524,7 +2539,7 @@ function UpdatePostiePermissions($role_access) {
     $admin->add_cap("config_postie");
     $admin->add_cap("post_via_postie");
 
-    DebugDump($admin);
+    //DebugDump($admin);
 
     if (!is_array($role_access)) {
         $role_access = array();
@@ -2532,10 +2547,12 @@ function UpdatePostiePermissions($role_access) {
     foreach ($wp_roles->role_names as $roleId => $name) {
         $role = &$wp_roles->get_role($roleId);
         if ($roleId != "administrator") {
-            if ($role_access[$roleId]) {
+            if (array_key_exists($roleId, $role_access)) {
                 $role->add_cap("post_via_postie");
+                //DebugEcho("added $roleId");
             } else {
                 $role->remove_cap("post_via_postie");
+                //DebugEcho("removed $roleId");
             }
         }
     }
@@ -2608,4 +2625,7 @@ function VodafoneHandler(&$content, &$attachments) {
     }
 }
 
+if (!ini_get('safe_mode')) {
+    ini_set('memory_limit', $original_mem_limit);
+}
 ?>

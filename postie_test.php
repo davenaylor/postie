@@ -2,7 +2,6 @@
 // try to connect to server with different protocols/ and userids
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "postie-functions.php");
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
-//require_once('admin.php');
 require_once("postie-functions.php");
 
 $config = get_postie_config();
@@ -50,24 +49,21 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
         </tr>
     </table>
     <br/>
-    
+
     <h2>Clock Tests</h2>
     <p>This shows what time it would be if you posted right now</p>
     <?php
     $content = "";
     $data = DeterminePostDate($content);
     ?>
-    <p><?php print("GMT:" . $data[1]); ?></p>
-    <p><?php print("Current:" . $data[0]); ?></p>
-    
+    <table>
+        <tr><th>GMT:</th><td><?php print( $data[1]); ?></td></tr>
+        <tr><th>Current:</th><td><?php print( $data[0]); ?></td></tr>
+    </table>
     <h2>Mail Tests</h2>
     <p>These try to confirm that the email configuration is correct.</p>
 
     <table>
-        <tr>
-            <th>Test</th>
-            <th>Result</th>
-        </tr>
         <tr>
             <th>Connect to Mail Host</th>
             <td>
