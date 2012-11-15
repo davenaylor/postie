@@ -65,7 +65,6 @@ if (!function_exists('fnmatch')) {
                         '/^' . strtr(addcslashes($pattern, '/\\.+^$(){}=!<>|'), array('*' => '.*', '?' => '.?')) . '$/i', $string
         );
     }
-
 }
 
 /**
@@ -82,8 +81,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         "cids" => array(), //holds the cids for HTML email
         "image_files" => array() //holds the files for each image
     );
-    print("<p>Message Id is :" .
-            htmlentities($mimeDecodedEmail->headers["message-id"]) . "</p><br/>\n");
+    print("<p>Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]) . "</p><br/>\n");
     if (defined('POSTIE_DEBUG')) {
         foreach ($mimeDecodedEmail->parts as $parts) {
             print("<p>" . $parts->ctype_primary . " " . $parts->ctype_secondary) . "</p>\n";
@@ -92,8 +90,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         var_dump($mimeDecodedEmail);
     }
     FilterTextParts($mimeDecodedEmail, $prefer_text_type);
-    $tmpPost = array('post_title' => 'tmptitle',
-        'post_content' => 'tmpPost');
+    $tmpPost = array('post_title' => 'tmptitle', 'post_content' => 'tmpPost');
     /* in order to do attachments correctly, we need to associate the
       attachments with a post. So we add the post here, then update it
      */
@@ -1882,8 +1879,7 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
     //assign the default title/subject
     if ($mimeDecodedEmail->headers['subject'] == NULL) {
         if ($allow_subject_in_mail) {
-            list($subject, $content) =
-                    ParseInMessageSubject($content, $default_title);
+            list($subject, $content) = ParseInMessageSubject($content, $default_title);
         } else {
             $subject = $default_title;
         }
@@ -1921,7 +1917,8 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
             // }
         }
         if (!$allow_html_in_subject) {
-            $subject = htmlentities($subject);
+            $subject = htmlentities($subject, ENT_COMPAT | ENT_HTML401, $message_encoding);
+            //$subject = htmlentities($subject);
         }
     }
     //This is for ISO-2022-JP - Can anyone confirm that this is still neeeded?
