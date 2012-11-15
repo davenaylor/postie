@@ -37,8 +37,7 @@
     $config = get_option('postie-settings');
     if (empty($config))
         $config = ResetPostieConfig();
-    if (defined('POSTIE_DEBUG'))
-        var_dump($config);
+    DebugDump($config);
     $arrays = get_arrayed_settings();
 // some fields are stored as arrays, because that makes back-end processing much easier
 // and we need to convert those fields to strings here, for the options form

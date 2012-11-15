@@ -1,5 +1,7 @@
 <?php
 
+$g_POSTIE_DEBUG = true;
+
 function postie_disable_revisions($restore = false) {
     global $_wp_post_type_features, $_postie_revisions;
 
@@ -65,6 +67,24 @@ if (!function_exists('fnmatch')) {
                         '/^' . strtr(addcslashes($pattern, '/\\.+^$(){}=!<>|'), array('*' => '.*', '?' => '.?')) . '$/i', $string
         );
     }
+
+}
+
+function DebugDump($v) {
+    global $g_POSTIE_DEBUG;
+    if ($g_POSTIE_DEBUG) {
+        $o = print_r($v, true);
+        //echo $o;
+        error_log($o);
+    }
+}
+
+function DebugEcho($v) {
+    global $g_POSTIE_DEBUG;
+    if ($g_POSTIE_DEBUG) {
+        //echo "$v\n";
+        error_log($v);
+    }
 }
 
 /**
@@ -82,30 +102,22 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         "image_files" => array() //holds the files for each image
     );
     print("<p>Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]) . "</p><br/>\n");
-    if (defined('POSTIE_DEBUG')) {
-        foreach ($mimeDecodedEmail->parts as $parts) {
-            print("<p>" . $parts->ctype_primary . " " . $parts->ctype_secondary) . "</p>\n";
-        }
-        echo "<p>Email is:</p>";
-        var_dump($mimeDecodedEmail);
-    }
+    DebugDump($mimeDecodedEmail);
+
     FilterTextParts($mimeDecodedEmail, $prefer_text_type);
     $tmpPost = array('post_title' => 'tmptitle', 'post_content' => 'tmpPost');
     /* in order to do attachments correctly, we need to associate the
       attachments with a post. So we add the post here, then update it
      */
     $post_id = wp_insert_post($tmpPost);
-    if (defined('POSTIE_DEBUG')) {
-        echo "the id is $post_id\n";
-    }
+    DebugEcho("the id is $post_id\n");
+
     $content = GetContent($mimeDecodedEmail, $attachments, $post_id, $poster, $config);
-    if (defined('POSTIE_DEBUG')) {
-        echo "the content is $content\n";
-    }
+    DebugEcho("the content is $content\n");
+
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
-    if (defined('POSTIE_DEBUG')) {
-        echo "the subject is $subject, right after calling GetSubject\n";
-    }
+    DebugEcho("the subject is $subject, right after calling GetSubject\n");
+
     $customImages = SpecialMessageParsing($content, $attachments, $config);
     $post_excerpt = GetPostExcerpt($content, $filternewlines, $convertnewline);
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
@@ -1014,14 +1026,10 @@ function FilterNewLines($content, $convertNewLines = false) {
     //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
     if ($convertNewLines) {
         $newContent = preg_replace('/LINEBREAK/', "<br />\n", $newContent);
-        if (defined('POSTIE_DEBUG')) {
-            echo "converting newlines\n";
-        }
+        DebugEcho("converting newlines\n");
     } else {
         $newContent = preg_replace('/LINEBREAK/', " ", $newContent);
-        if (defined('POSTIE_DEBUG')) {
-            echo "not converting newlines\n";
-        }
+        DebugEcho("not converting newlines\n");
     }
     return($newContent);
 }
@@ -1203,11 +1211,9 @@ function AllowCommentsOnPost(&$content) {
  */
 function DeterminePostDate(&$content, $message_date = NULL, $offset = 0) {
     $delay = 0;
-    if (defined('POSTIE_DEBUG')) {
-        echo "inside Determine Post Date, message_date = $message_date\n";
-    }
-    if (eregi("delay:(-?[0-9dhm]+)", $content, $matches)
-            && trim($matches[1])) {
+    DebugEcho("inside Determine Post Date, message_date = $message_date\n");
+
+    if (eregi("delay:(-?[0-9dhm]+)", $content, $matches) && trim($matches[1])) {
         if (eregi("(-?[0-9]+)d", $matches[1], $dayMatches)) {
             $days = $dayMatches[1];
         }
@@ -2020,10 +2026,9 @@ function GetPostCategories(&$subject, $defaultCategory) {
  * This function just outputs a simple html report about what is being posted in
  */
 function DisplayEmailPost($details) {
-    if (defined('POSTIE_DEBUG')) {
-        print_r($config);
-        print_r($details);
-    }
+    DebugDump($config);
+    DebugDump($details);
+
     $theFinalContent = $details['post_content'];
     // Report
     print '</pre><p><b>Post Author</b>: ' . $details["post_author"] . '<br />' . "\n";
@@ -2468,8 +2473,7 @@ function TestForMarkdown() {
  * and ensures that arrayed items are stored as such
  */
 function postie_validate_settings($in) {
-    if (defined('POSTIE_DEBUG'))
-        var_dump($in);
+    DebugDump($in);
     $out = array();
 
     // use the default as a template: 
@@ -2519,6 +2523,9 @@ function UpdatePostiePermissions($role_access) {
     $admin = $wp_roles->get_role("administrator");
     $admin->add_cap("config_postie");
     $admin->add_cap("post_via_postie");
+
+    DebugDump($admin);
+
     if (!is_array($role_access)) {
         $role_access = array();
     }

@@ -106,6 +106,8 @@ function activate_postie() {
     static $init = false;
     $options = get_option('postie-settings');
 
+    error_log("activate");
+    DebugDump($options);
     if ($init)
         return;
 
@@ -117,11 +119,6 @@ function activate_postie() {
     $updated = false;
     $migration = false;
 
-    /*
-      global $wpdb;
-      $GLOBALS["table_prefix"]. "postie_config";
-      $result = $wpdb->get_results("SELECT label,value FROM $postietable ;");
-     */
     $result = GetConfig();
     if (is_array($result)) {
         foreach ($result as $key => $val) {
@@ -135,7 +132,6 @@ function activate_postie() {
     $options = postie_validate_settings($options);
     update_option('postie-settings', $options);
     $init = true;
-    // $wpdb->query("DROP TABLE IF EXISTS $postietable"); // safely updated options, so we can remove the old table
     return $options;
 }
 
