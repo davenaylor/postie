@@ -37,7 +37,8 @@
     $config = get_option('postie-settings');
     if (empty($config))
         $config = ResetPostieConfig();
-    DebugDump($config);
+    //DebugDump($config);
+
     $arrays = get_arrayed_settings();
 // some fields are stored as arrays, because that makes back-end processing much easier
 // and we need to convert those fields to strings here, for the options form
@@ -183,13 +184,13 @@
                             </select>
                         </td>
                     </tr>
-                    <?php echo BuildBooleanSelect("Delete email after posting", 'postie-settings[delete_mail_after_processing]', $delete_mail_after_processing, "Only set to no for testing purposes"); ?>
+                    <?php echo BuildBooleanSelect(__("Delete email after posting"), 'postie-settings[delete_mail_after_processing]', $delete_mail_after_processing, __("Only set to no for testing purposes")); ?>
                 </table>
             </div>
             <div id="simpleTabs-content-2" class="simpleTabs-content">
                 <table class='form-table'>
 
-                    <?php echo BuildBooleanSelect("Allow Anyone To Post Via Email", "postie-settings[turn_authorization_off]", $turn_authorization_off, "Changing this to yes is NOT RECOMMEDED - anything that gets sent in will automatically be posted. This could make it easier to compromise your server - YOU HAVE BEEN WARNED."); ?>
+                    <?php echo BuildBooleanSelect(__("Allow Anyone To Post Via Email"), "postie-settings[turn_authorization_off]", $turn_authorization_off, "Changing this to yes is NOT RECOMMEDED - anything that gets sent in will automatically be posted. This could make it easier to compromise your server - YOU HAVE BEEN WARNED."); ?>
                     <tr>
                         <th scope="row"><?php _e('Roles That Can Post:', 'postie') ?>
                             <br />
@@ -377,7 +378,7 @@
                         </th>
                         <td>
                             <input type='hidden' id='postie-settings-selected_imagetemplate' name='postie-settings[selected_imagetemplate]'
-                                   value="<?php echo attribute_escape($selected_imagetemplate) ?>" />
+                                   value="<?php echo esc_attr($selected_imagetemplate) ?>" />
                             <select name='imagetemplateselect' id='imagetemplateselect' 
                                     onchange="changeStyle('imageTemplatePreview','postie-settings-imagetemplate',
                                         'imagetemplateselect', 'postie-settings-selected_imagetemplate','smiling.jpg');" >
@@ -395,7 +396,7 @@
                                                 if ($key == 'custom')
                                                     $value = $imagetemplate;
                                                 echo '<option' . $select . 'value="' .
-                                                attribute_escape($value) . '" >' . $key . '</option>';
+                                                esc_attr($value) . '" >' . $key . '</option>';
                                             }
                                         }
                                         ?>
@@ -405,7 +406,7 @@
                             <div id='imageTemplatePreview'></div>
                             <textarea onchange='changeStyle("imageTemplatePreview", "postie-settings-imagetemplate", "imagetemplateselect", 
                                 "postie-settings-selected_imagetemplate", "smiling.jpg", true);' cols='70' rows='7' id='postie-settings-imagetemplate' name='postie-settings[imagetemplate]'>
-                                      <?php echo attribute_escape($imagetemplate) ?>
+                                      <?php echo esc_attr($imagetemplate) ?>
                             </textarea>
                         </td>
                     </tr> 
@@ -425,7 +426,7 @@
                         <?php $templateDir = get_option('siteurl') . '/' . PLUGINDIR . '/postie/templates'; ?>
                         <td>
                             <input type='hidden' id='postie-settings-selected_video1template' name='postie-settings[selected_video1template]'
-                                   value="<?php echo attribute_escape($selected_video1template) ?>" />
+                                   value="<?php echo esc_attr($selected_video1template) ?>" />
                             <select name='video1templateselect' id='video1templateselect' 
                                     onchange="changeStyle('video1TemplatePreview','postie-settings-video1template', 'video1templateselect', 'postie-settings-selected_video1template','hi.mp4');" />
                                     <?php
@@ -442,7 +443,7 @@
                                             if ($key == 'custom')
                                                 $value = $video1template;
                                             echo '<option' . $select . 'value="' .
-                                            attribute_escape($value) . '" >' . $key . '</option>';
+                                            esc_attr($value) . '" >' . $key . '</option>';
                                         }
                                     }
                                     ?>
@@ -452,7 +453,7 @@
                             <div id='video1TemplatePreview'></div>
                             <textarea onchange="changeStyle('video1TemplatePreview','postie-settings-video1template',
                                 'video1templateselect', 'postie-settings-selected_video1template','hi.mp4',true);" cols='70' rows='7' id='postie-settings-video1template'
-                                      name='postie-settings[video1template]'><?php echo attribute_escape($video1template) ?></textarea>
+                                      name='postie-settings[video1template]'><?php echo esc_attr($video1template) ?></textarea>
                         </td>
                     </tr>
                     <tr> 
@@ -467,7 +468,7 @@
                             <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
                         <td>
                             <input type='hidden' id='postie-settings-selected_video2template' name='postie-settings[selected_video2template]'
-                                   value="<?php echo attribute_escape($selected_video2template) ?>" />
+                                   value="<?php echo esc_attr($selected_video2template) ?>" />
                             <select name='video2templateselect' id='video2templateselect' 
                                     onchange="changeStyle('video2TemplatePreview','postie-settings-video2template',
                                         'video2templateselect', 'postie-settings-selected_video2template','hi.flv');" >
@@ -484,7 +485,7 @@
                                                 }
                                                 if ($key == 'custom')
                                                     $value = $video2template;
-                                                echo '<option' . $select . 'value="' . attribute_escape($value) . '" >' . $key . '</option>';
+                                                echo '<option' . $select . 'value="' . esc_attr($value) . '" >' . $key . '</option>';
                                             }
                                         }
                                         ?>
@@ -495,7 +496,7 @@
                             <textarea onchange="changeStyle('video2TemplatePreview','postie-settings-video2template',
                                 'video2templateselect', 'postie-settings-selected_video2template','hi.flv',true);" cols='70' rows='7' id='postie-settings-video2template'
                                       name='postie-settings[video2template]'>
-                                          <?php echo attribute_escape($video2template) ?>
+                                          <?php echo esc_attr($video2template) ?>
                             </textarea>
                         </td>
                     </tr>
@@ -511,7 +512,7 @@
                             <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
                         <td>
                             <input type='hidden' id='postie-settings-selected_audiotemplate' name='postie-settings[selected_audiotemplate]'
-                                   value="<?php echo attribute_escape($selected_audiotemplate) ?>" />
+                                   value="<?php echo esc_attr($selected_audiotemplate) ?>" />
                             <select name='audiotemplateselect' id='audiotemplateselect' 
                                     onchange="changeStyle('audioTemplatePreview','postie-settings-audiotemplate',
                                         'audiotemplateselect', 'postie-settings-selected_audiotemplate','funky.mp3', false);" >
@@ -529,7 +530,7 @@
                                                 if ($key == 'custom')
                                                     $value = $audiotemplate;
                                                 echo '<option' . $select . 'value="' .
-                                                attribute_escape($value) . '" >' . $key . '</option>';
+                                                esc_attr($value) . '" >' . $key . '</option>';
                                             }
                                         }
                                         ?>
@@ -539,7 +540,7 @@
                             <div id='audioTemplatePreview'></div>
                             <textarea onchange="changeStyle('audioTemplatePreview','postie-settings-audiotemplate',
                                 'audiotemplateselect', 'postie-settings-selected_audiotemplate','funky.mp3', true);" cols='70' rows='7' id='postie-settings-audiotemplate'
-                                      name='postie-settings[audiotemplate]'><?php echo attribute_escape($audiotemplate) ?></textarea>
+                                      name='postie-settings[audiotemplate]'><?php echo esc_attr($audiotemplate) ?></textarea>
                         </td>
                     </tr>
                     <tr> 
@@ -562,7 +563,7 @@
                         <th scope='row'><?php _e('Attachment icon set', 'postie') ?><br /></th>
                         <td>
                             <input type='hidden' id='postie-settings-icon_set' name='postie-settings[icon_set]'
-                                   value="<?php echo attribute_escape($icon_set) ?>" />
+                                   value="<?php echo esc_attr($icon_set) ?>" />
 
                             <?php
                             $icon_sets = array('silver', 'black', 'white', 'custom', 'none');
@@ -579,7 +580,7 @@
                                         } else {
                                             $select = ' ';
                                         }
-                                        echo '<option' . $select . 'value="' . attribute_escape($key) . '" >' . $key . '</option>';
+                                        echo '<option' . $select . 'value="' . esc_attr($key) . '" >' . $key . '</option>';
                                     }
                                 }
                                 ?>
@@ -589,7 +590,7 @@
                     <tr><th scope='row'><?php _e('Attachment icon size (in pixels)', 'postie') ?><br />
                         <td>
                             <input type='hidden' id='postie-settings-icon_size' name='postie-settings[icon_size]'
-                                   value="<?php echo attribute_escape($icon_size) ?>" />
+                                   value="<?php echo esc_attr($icon_size) ?>" />
                             <select name='icon_size_select' id='icon_size_select' onchange="changeIconSet(this, true);" >
                                 <?php
                                 $styleOptions = $icon_sizes;
@@ -601,7 +602,7 @@
                                         } else {
                                             $select = ' ';
                                         }
-                                        echo '<option' . $select . 'value="' . attribute_escape($key) . '" >' . $key . '</option>';
+                                        echo '<option' . $select . 'value="' . esc_attr($key) . '" >' . $key . '</option>';
                                     }
                                 }
                                 ?>
@@ -648,6 +649,7 @@
         });
 
     });
+    
     function changeIconSet(selectBox, size) {
         var iconSet=document.getElementById('postie-settings-icon_set');
         var iconSize=document.getElementById('postie-settings-icon_size');
@@ -675,6 +677,7 @@
             iconDir + iconSet.value + '/doc' +   
             '-' + iconSize.value + ".png' />Interesting document</a>"; 
     }
+    
     function changeStyle(preview,template,select,selected,sample,custom) {
         var preview = document.getElementById(preview);
         var pageStyles = document.getElementById(select);
@@ -723,15 +726,10 @@
             arrow.innerHTML='&#9654;';
         }
     }
-    changeStyle('imageTemplatePreview','postie-settings-imagetemplate', 'imagetemplateselect',
-    'postie-settings-selected_imagetemplate','smiling.jpg', false);
-    changeStyle('audioTemplatePreview','postie-settings-audiotemplate',
-    'audiotemplateselect',
-    'postie-settings-selected_audiotemplate','funky.mp3', false);
-    changeStyle('video1TemplatePreview','postie-settings-video1template', 'video1templateselect',
-    'postie-settings-selected_video1template','hi.mp4', false);
-    changeStyle('video2TemplatePreview','postie-settings-video2template',
-    'video2templateselect',
-    'postie-settings-selected_video2template','hi.flv', false);
+    
+    changeStyle('imageTemplatePreview','postie-settings-imagetemplate', 'imagetemplateselect',    'postie-settings-selected_imagetemplate','smiling.jpg', false);
+    changeStyle('audioTemplatePreview','postie-settings-audiotemplate',    'audiotemplateselect',    'postie-settings-selected_audiotemplate','funky.mp3', false);
+    changeStyle('video1TemplatePreview','postie-settings-video1template', 'video1templateselect',    'postie-settings-selected_video1template','hi.mp4', false);
+    changeStyle('video2TemplatePreview','postie-settings-video2template',    'video2templateselect',    'postie-settings-selected_video2template','hi.flv', false);
     changeIconSet(document.getElementById('icon_set_select'));
 </script>

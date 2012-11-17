@@ -17,12 +17,6 @@
 
 $g_POSTIE_DEBUG = true;
 
-if (!ini_get('safe_mode')) {
-    $original_mem_limit = ini_get('memory_limit');
-    ini_set('memory_limit', -1);
-    ini_set('max_execution_time', 300);
-}
-
 function postie_disable_revisions($restore = false) {
     global $_wp_post_type_features, $_postie_revisions;
 
@@ -125,10 +119,8 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     $post_excerpt = GetPostExcerpt($content, $filternewlines, $convertnewline);
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
     $message_date = NULL;
-    if (array_key_exists("date", $mimeDecodedEmail->headers)
-            && !empty($mimeDecodedEmail->headers["date"])) {
-        $message_date = HandleMessageEncoding(
-                $mimeDecodedEmail->headers["content-transfer-encoding"], $mimeDecodedEmail->ctype_parameters["charset"], $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
+    if (array_key_exists("date", $mimeDecodedEmail->headers) && !empty($mimeDecodedEmail->headers["date"])) {
+        $message_date = HandleMessageEncoding($mimeDecodedEmail->headers["content-transfer-encoding"], $mimeDecodedEmail->ctype_parameters["charset"], $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
         //$message_date = $mimeDecodedEmail->headers['date'];
     }
     list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
@@ -522,7 +514,7 @@ function TestPOP3MessageFetch() {
  */
 function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true) {
     require_once(ABSPATH . WPINC . DIRECTORY_SEPARATOR . 'class-pop3.php');
-    $pop3 = &new POP3();
+    $pop3 = new POP3();
     print("\nConnecting to $server:$port ($protocol))  \n");
     if (!$pop3->connect($server, $port)) {
         if (strpos($pop3->ERROR, "POP3: premature NOOP OK, NOT an RFC 1939 Compliant server") === false) {
@@ -609,6 +601,11 @@ function PostToDB($details, $isReply, $postToDb = true, $customImageField = fals
     }
 }
 
+function echo_log($m) {
+    echo $m;
+    error_log("Postie: $m");
+}
+
 /**
  * This function determines if the mime attachment is on the BANNED_FILE_LIST
  * @param string
@@ -619,11 +616,11 @@ function BannedFileName($filename, $bannedFiles) {
         return false;
     foreach ($bannedFiles as $bannedFile) {
         if (fnmatch($bannedFile, $filename)) {
-            print("<p>Ignoring $filename - it is on the banned files list.");
-            return(true);
+            echo_log("Ignoring $filename - it is on the banned files list.");
+            return true;
         }
     }
-    return(false);
+    return false;
 }
 
 //tear apart the meta part for useful information
@@ -1068,42 +1065,33 @@ function StripPGP($content) {
     return $return;
 }
 
-function ConvertToISO_8859_1($encoding, $charset, $body, $blogEncoding) {
-    $charset = strtolower($charset);
-    $encoding = strtolower($encoding);
-    if (strtolower($blogEncoding == "iso-8859-1") && (strtolower($charset) != 'iso-8859-1')) {
-        if ($encoding == 'base64' || $encoding == 'quoted-printable') {
+function ConvertUTF8ToISO_8859_1($contenttransferencoding, $currentcharset, $body) {
+    if ((strtolower($currentcharset) != 'iso-8859-1')) {
+        $contenttransferencoding = strtolower($contenttransferencoding);
+        if ($contenttransferencoding == 'base64' || $contenttransferencoding == 'quoted-printable') {
             $body = utf8_decode($body);
         }
     }
-    return($body);
+    return $body;
 }
 
-function HandleMessageEncoding($encoding, $charset, $body, $blogEncoding = 'utf-8', $dequote = true) {
+function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogEncoding = 'utf-8', $dequote = true) {
     $charset = strtolower($charset);
-    $encoding = strtolower($encoding);
-    /*
-      if ($encoding == '') {
-      $encoding = '7bit';
-      }
-     */
-    if ($dequote && strtolower($encoding) == 'quoted-printable') {
-        //echo "handling quoted printable";
+    $contenttransferencoding = strtolower($contenttransferencoding);
+
+    if ($dequote && strtolower($contenttransferencoding) == 'quoted-printable') {
         $body = quoted_printable_decode($body);
-        //echo "now body is:\n\n $body\n\n";
     }
-    //HandleQuotedPrintable($encoding, $body, $dequote);
     if ($blogEncoding == 'iso-8859-1') {
-        $text = ConvertToISO_8859_1($encoding, $charset, $body, $blogEncoding);
+        $text = ConvertUTF8ToISO_8859_1($contenttransferencoding, $charset, $body);
     } else {
-        $text = ConvertToUTF_8($encoding, $charset, $body);
+        $text = ConvertToUTF_8($charset, $body);
     }
-    return($text);
+    return $text;
 }
 
-function ConvertToUTF_8($encoding, $charset, $body) {
+function ConvertToUTF_8($charset, $body) {
     $charset = strtolower($charset);
-    $encoding = strtolower($encoding);
 
     switch ($charset) {
         case "iso-8859-1":
@@ -1112,12 +1100,10 @@ function ConvertToUTF_8($encoding, $charset, $body) {
         case "iso-2022-jp":
             $body = iconv("ISO-2022-JP", "UTF-8//TRANSLIT", $body);
             break;
-        case ($charset == "windows-1252" || $charset == "cp-1252" ||
-        $charset == "cp 1252"):
+        case ($charset == "windows-1252" || $charset == "cp-1252" || $charset == "cp 1252"):
             $body = cp1252_to_utf8($body);
             break;
-        case ($charset == "windows-1256" || $charset == "cp-1256" ||
-        $charset == "cp 1256"):
+        case ($charset == "windows-1256" || $charset == "cp-1256" || $charset == "cp 1256"):
             $body = iconv("Windows-1256", "UTF-8//TRANSLIT", $body);
             break;
         case 'koi8-r':
@@ -1195,9 +1181,10 @@ function HandleQuotedPrintable($encoding, &$body, $dequote = true) {
  * @return boolean
  */
 function AllowCommentsOnPost(&$content) {
-    $comments_allowed = get_option('default_comment_status');
-    if (eregi("comments:([0|1|2])", $content, $matches)) {
-        $content = ereg_replace("comments:$matches[1]", "", $content);
+    $comments_allowed = get_option('default_comment_status'); // 'open' or 'closed'
+
+    if (preg_match("/comments:([0|1|2])/i", $content, $matches)) {
+        $content = preg_replace("/comments:$matches[1]/i", "", $content);
         if ($matches[1] == "1") {
             $comments_allowed = "open";
         } else if ($matches[1] == "2") {
@@ -1206,7 +1193,7 @@ function AllowCommentsOnPost(&$content) {
             $comments_allowed = "closed";
         }
     }
-    return($comments_allowed);
+    return $comments_allowed;
 }
 
 /**
@@ -1243,7 +1230,7 @@ function DeterminePostDate(&$content, $message_date = NULL, $offset = 0) {
       echo "post_date=$post_date\n";
       echo "--------------------DELAY------------\n";
      */
-    return(array($post_date, $post_date_gmt, $delay));
+    return array($post_date, $post_date_gmt, $delay);
 }
 
 /**
@@ -1639,8 +1626,15 @@ function DisplayMIMEPartTypes($mimeDecodedEmail) {
  * @return boolean
  */
 function CheckEmailAddress($address, $authorized) {
-    $isAuthorized = in_array(strtolower($address), $authorized);
-    return $isAuthorized;
+    $r = false;
+    if (is_array($authorized)) {
+        $a = strtolower(trim($address));
+        if (!empty($a)) {
+            $isAuthorized = in_array(strtolower($a), array_map('strtolower', $authorized));
+            $r = $isAuthorized;
+        }
+    }
+    return $r;
 }
 
 /**
@@ -2058,18 +2052,17 @@ function DisplayEmailPost($details) {
  * @param string
  */
 function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL) {
-    $string = "<tr>
-	<th scope=\"row\">" . __($label, 'postie') . ":</th>
-	<td><select name=\"$id\" id=\"$id\">
-    <option value=\"1\">" . __("Yes", 'postie') . "</option>
-    <option value=\"0\" " . (!$current_value ? "SELECTED" : NULL) .
-            ">" . __("No", 'postie') . '</option>
+    $html = "<tr>
+	<th scope='row'>" . $label . ":</th>
+	<td><select name='$id' id='$id'>
+            <option value='1'>" . __("Yes", 'postie') . "</option>
+            <option value='0' " . (!$current_value ? "selected='selected'" : "") . ">" . __("No", 'postie') . '</option>
 	</select>';
-    if ($recommendation != NULL) {
-        $string.='<span class="recommendation">' . __($recommendation, 'postie') . '</span>';
+    if (!empty($recommendation)) {
+        $html.='<span class="recommendation">' . $recommendation . '</span>';
     }
-    $string.="</td>\n</tr>";
-    return($string);
+    $html.="</td>\n</tr>";
+    return $html;
 }
 
 /**
@@ -2080,22 +2073,21 @@ function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL)
  * @param string
  */
 function BuildTextArea($label, $id, $current_value, $recommendation = NULL) {
-    $string = "<tr> <th scope=\"row\">" . __($label, 'postie') . ":";
+    $html = "<tr> <th scope='row'>" . $label . ":";
     if ($recommendation) {
-        $string.="<br /><span class='recommendation'>" . __($recommendation, 'postie') . "</span>";
+        $html.="<br /><span class='recommendation'>" . $recommendation . "</span>";
     }
-    $string.="</th>";
+    $html.="</th>";
 
-    $string .="<td><textarea cols=40 rows=3 name=\"$id\" id=\"$id\">";
+    $html .="<td><textarea cols=40 rows=3 name='$id' id='$id'>";
     $current_value = preg_split("/[,\r\n]+/", trim($current_value));
     if (is_array($current_value)) {
         foreach ($current_value as $item) {
-            $string .= "$item\n";
+            $html .= "$item\n";
         }
     }
-    $string .= "</textarea></td>
-	</tr>";
-    return($string);
+    $html .= "</textarea></td></tr>";
+    return $html;
 }
 
 /**
@@ -2625,7 +2617,4 @@ function VodafoneHandler(&$content, &$attachments) {
     }
 }
 
-if (!ini_get('safe_mode')) {
-    ini_set('memory_limit', $original_mem_limit);
-}
 ?>

@@ -4,6 +4,12 @@ include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mimedecode.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
 
+if (!ini_get('safe_mode')) {
+    $original_mem_limit = ini_get('memory_limit');
+    ini_set('memory_limit', -1);
+    ini_set('max_execution_time', 300);
+}
+
 print("<pre>\n");
 print("This is the postie plugin\n");
 print("time:" . time() . "\n");
@@ -51,4 +57,8 @@ foreach ($emails as $email) {
 } // end looping over messages
 print $message;
 print("</pre>\n");
+
+if (!ini_get('safe_mode')) {
+    ini_set('memory_limit', $original_mem_limit);
+}
 ?>

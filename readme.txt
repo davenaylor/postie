@@ -22,6 +22,15 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 
 = What's new? = 
 
+* 1.4.6 (future)
+    * Fixed bug where authorized addresses were being checked with case sensitive rather than insensitive.
+    * Started process of logging all error messages to the log as well as the page (where appropriate)
+    * Fixed a number of missing internationalization strings (no translations added however)
+    * Added documentation for the comments: command
+    * Removed a number of deprecated WordPress functions.
+    * Fixed numerous warning messages
+    * added phpUnit tests
+
 * 1.4.5 (2012.11.14)
     * Fixed bug in XSS attack vulnerability code. Thanks to R Reid http://blog.strictly-software.com/2012/03/fixing-postie-plugin-for-wordpress-to.html
     * Fixed bug where emails with multiple categories has the incorrect title
