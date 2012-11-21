@@ -66,14 +66,121 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
     public function testConvertToUTF_8() {
         $this->assertEquals("に投稿できる", ConvertToUTF_8('iso-2022-jp', iconv("UTF-8", "ISO-2022-JP", "に投稿できる")));
-        $this->assertEquals("Код Обмена Информацией, 8 бит", ConvertToUTF_8('koi8-r', iconv("UTF-8", "koi8-r","Код Обмена Информацией, 8 бит")));
+        $this->assertEquals("Код Обмена Информацией, 8 бит", ConvertToUTF_8('koi8-r', iconv("UTF-8", "koi8-r", "Код Обмена Информацией, 8 бит")));
     }
-    
-    public function testDeterminePostDate(){
-        $content="test";
-        $r=DeterminePostDate($content);
-        $this->assertEquals(0, $r[3]);
+
+    public function testDeterminePostDate() {
+        $content = "test";
+        $r = DeterminePostDate($content);
+        $this->assertTrue(is_array($r));
+        $this->assertEquals(3, count($r));
+        $this->assertEquals(0, $r[2]);
+        $this->assertEquals("test", $content);
+
+        $content = "test delay:";
+        $r = DeterminePostDate($content);
+        $this->assertEquals(0, $r[2]);
+        $this->assertEquals("test delay:", $content);
+
+        $content = "test delay:1h";
+        $r = DeterminePostDate($content);
+        $this->assertEquals(3600, $r[2]);
+        $this->assertEquals("test ", $content);
+
+        $content = "test delay:1d";
+        $r = DeterminePostDate($content);
+        $this->assertEquals(86400, $r[2]);
+        $this->assertEquals("test ", $content);
+
+        $content = "test delay:1m";
+        $r = DeterminePostDate($content);
+        $this->assertEquals(60, $r[2]);
+        $this->assertEquals("test ", $content);
+
+        $content = "test delay:m";
+        $r = DeterminePostDate($content);
+        $this->assertEquals(0, $r[2]);
+        $this->assertEquals("test ", $content);
+
+        $content = "test delay:dhm";
+        $r = DeterminePostDate($content);
+        $this->assertEquals(0, $r[2]);
+        $this->assertEquals("test ", $content);
+
+        $content = "test delay:x";
+        $r = DeterminePostDate($content);
+        $this->assertEquals(0, $r[2]);
+        $this->assertEquals("test delay:x", $content);
+
+        $content = "test delay:-1m";
+        $r = DeterminePostDate($content);
+        $this->assertEquals(-60, $r[2]);
+        $this->assertEquals("test ", $content);
+
+        $content = "test delay:1d1h1m";
+        $r = DeterminePostDate($content);
+        $this->assertEquals(90060, $r[2]);
+        $this->assertEquals("test ", $content);
+
+        $content = "test delay:d1hm";
+        $r = DeterminePostDate($content);
+        $this->assertEquals(3600, $r[2]);
+        $this->assertEquals("test ", $content);
+
+        $content = "test";
+        $r = DeterminePostDate($content, '2012-11-20 08:00', 1);
+        $this->assertEquals('2012-11-20 17:00:00', $r[0]);
+        $this->assertEquals(0, $r[2]);
+        $this->assertEquals("test", $content);
     }
+
+    public function testEndFilter() {
+        $c = "test";
+        $this->assertEquals("test", EndFilter($c, "xxx"));
+
+        $c = "test xxx";
+        $this->assertEquals("test ", EndFilter($c, "xxx"));
+
+        $c = "test xxx test";
+        $this->assertEquals("test ", EndFilter($c, "xxx"));
+    }
+
+    public function testFilterNewLines() {
+        $c = "test";
+        $this->assertEquals("test", FilterNewLines($c));
+        $this->assertEquals("test", FilterNewLines($c, true));
+
+        $c = "test\n";
+        $this->assertEquals("test ", FilterNewLines($c));
+        $this->assertEquals("test<br />\n", FilterNewLines($c, true));
+
+        $c = "test\r\n";
+        $this->assertEquals("test ", FilterNewLines($c));
+        $this->assertEquals("test<br />\n", FilterNewLines($c, true));
+
+        $c = "test\r";
+        $this->assertEquals("test ", FilterNewLines($c));
+        $this->assertEquals("test<br />\n", FilterNewLines($c, true));
+
+        $c = "test\n\n";
+        $this->assertEquals("test ", FilterNewLines($c));
+        $this->assertEquals("test<br />\n", FilterNewLines($c, true));
+
+        $c = "test\r\n\r\n";
+        $this->assertEquals("test ", FilterNewLines($c));
+        $this->assertEquals("test<br />\n", FilterNewLines($c, true));
+
+        $c = "test\r\n\r\ntest\n\ntest\rtest\r\ntest\ntest";
+        $this->assertEquals("test test test test test test", FilterNewLines($c));
+        $this->assertEquals("test<br />\ntest<br />\ntest<br />\ntest<br />\ntest<br />\ntest", FilterNewLines($c, true));
+    }
+
+    public function testGetNameFromEmail() {
+        $this->assertEquals("", GetNameFromEmail(""));
+        $this->assertEquals("Wayne", GetNameFromEmail('Wayne <wayne@devzing.com>'));
+        $this->assertEquals("wayne", GetNameFromEmail('wayne@devzing.com'));
+    }
+
 }
 
 ?>

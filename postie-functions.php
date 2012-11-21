@@ -67,20 +67,24 @@ if (!function_exists('fnmatch')) {
 
 }
 
+function LogInfo($v) {
+    error_log("Postie: $v");
+}
+
 function DebugDump($v) {
     global $g_POSTIE_DEBUG;
     //if ($g_POSTIE_DEBUG)  {
     $o = print_r($v, true);
-    //echo $o;
-    error_log("Postie: $o");
+    echo $o;
+    LogInfo($o);
     //}
 }
 
 function DebugEcho($v) {
     global $g_POSTIE_DEBUG;
     //if ($g_POSTIE_DEBUG)  {
-    //echo "$v\n";
-    error_log("Postie: $v");
+    echo "$v\n";
+    LogInfo($v);
     // }
 }
 
@@ -994,7 +998,7 @@ function remove_signature($content, $filterList) {
  * @param string
  * @param filter
  */
-function EndFilter(&$content, $end) {
+function EndFilter($content, $end) {
     $pos = strpos($content, $end);
     if ($pos === false)
         return $content;
@@ -1017,37 +1021,15 @@ function FilterNewLines($content, $convertNewLines = false) {
         'ACTUAL_NEW_LINE',
         'LINEBREAK'
     );
-    // strip extra line breaks, and replace double line breaks with paragraph
-    // tags
-    $result = preg_replace($search, $replace, $content);
-    //$newContent='<p>' . preg_replace('/ACTUAL_NEW_LINE/',"</p>\n<p>",$result);
 
-    $newContent = preg_replace('/(ACTUAL_NEW_LINE|LINEBREAK\s*LINEBREAK)/', "\n\n", $result);
-    //$newContent=preg_replace('/<p>LINEBREAK$/', '', $newContent);
+    $result = preg_replace($search, $replace, $content);
+
     if ($convertNewLines) {
-        $newContent = preg_replace('/LINEBREAK/', "<br />\n", $newContent);
-        DebugEcho("converting newlines\n");
+        $newContent = preg_replace('/(ACTUAL_NEW_LINE|LINEBREAK)/', "<br />\n", $result);
     } else {
-        $newContent = preg_replace('/LINEBREAK/', " ", $newContent);
-        DebugEcho("not converting newlines\n");
+        $newContent = preg_replace('/(ACTUAL_NEW_LINE|LINEBREAK)/', " ", $result);
     }
-    return($newContent);
-}
-
-function FixEmailQuotes($content) {
-    # place e-mails quotes (indicated with >) in blockquote and pre tags
-    $search = array(
-        "/^>/"
-    );
-    $replace = array(
-        '<br />&gt;'
-    );
-    // strip extra line breaks, and replace double line breaks with paragraph
-    // tags
-    $result = preg_replace($search, $replace, $content);
-    //return('<p>' . preg_replace('/ACTUAL_NEW_LINE/',"<\/p>\n<p>",$result)
-    //. '</p>');
-    return($result);
+    return $newContent;
 }
 
 //strip pgp stuff
@@ -1203,24 +1185,29 @@ function DeterminePostDate(&$content, $message_date = NULL, $offset = 0) {
     $delay = 0;
     DebugEcho("inside Determine Post Date, message_date = $message_date\n");
 
-    if (eregi("delay:(-?[0-9dhm]+)", $content, $matches) && trim($matches[1])) {
-        if (eregi("(-?[0-9]+)d", $matches[1], $dayMatches)) {
+    if (preg_match("/delay:(-?[0-9dhm]+)/i", $content, $matches) && trim($matches[1])) {
+        $days = 0;
+        $hours = 0;
+        $minutes = 0;
+        if (preg_match("/(-?[0-9]+)d/i", $matches[1], $dayMatches)) {
             $days = $dayMatches[1];
         }
-        if (eregi("(-?[0-9]+)h", $matches[1], $hourMatches)) {
+        if (preg_match("/(-?[0-9]+)h/i", $matches[1], $hourMatches)) {
             $hours = $hourMatches[1];
         }
-        if (eregi("(-?[0-9]+)m", $matches[1], $minuteMatches)) {
+        if (preg_match("/(-?[0-9]+)m/i", $matches[1], $minuteMatches)) {
             $minutes = $minuteMatches[1];
         }
         $delay = (($days * 24 + $hours) * 60 + $minutes) * 60;
-        $content = ereg_replace("delay:$matches[1]", "", $content);
+        $content = preg_replace("/delay:$matches[1]/i", "", $content);
     }
-    if (!empty($message_date) && $delay == 0) {
-        $dateInSeconds = strtotime($message_date);
+    if (empty($message_date)) {
+        $dateInSeconds = time();
     } else {
-        $dateInSeconds = time() + $delay;
+        $dateInSeconds = strtotime($message_date);
     }
+    $dateInSeconds += $delay;
+
     $post_date = gmdate('Y-m-d H:i:s', $dateInSeconds + ($offset * 3600));
     $post_date_gmt = gmdate('Y-m-d H:i:s', $dateInSeconds);
 
@@ -1261,6 +1248,7 @@ function FilterAppleFile(&$mimeDecodedEmail) {
     for ($i = 0; $i < count($mimeDecodedEmail->parts); $i++) {
         if ($mimeDecodedEmail->parts[$i]->ctype_secondary == "applefile") {
             $found = true;
+            LogInfo("Removing 'applefile'");
         } else {
             $newParts[] = &$mimeDecodedEmail->parts[$i];
         }
@@ -1658,6 +1646,7 @@ function RemoveExtraCharactersInEmailAddress($address) {
  * it just returns the username (everything before @)
  */
 function GetNameFromEmail($address) {
+    $name = "";
     $matches = array();
     if (preg_match('/^([^<>]+)<([^<> ()]+)>$/', $address, $matches)) {
         $name = $matches[1];
@@ -1665,7 +1654,7 @@ function GetNameFromEmail($address) {
         $name = $matches[1];
     }
 
-    return($name);
+    return trim($name);
 }
 
 /**
@@ -2038,10 +2027,7 @@ function DisplayEmailPost($details) {
     print '<b>Subject</b>: ' . $details["post_title"] . '<br />' . "\n";
     print '<b>Postname</b>: ' . $details["post_name"] . '<br />' . "\n";
     print '<b>Post Id</b>: ' . $details["ID"] . '<br />' . "\n";
-    print '<b>Posted content:</b></p><hr />' .
-            $details["post_content"] . '<hr /><pre>';
-    //if (function_exists('memory_get_peak_usage'))
-    // echo  "Memory used: ". memory_get_peak_usage(). "\n";
+    print '<b>Posted content:</b></p><hr />' . $details["post_content"] . '<hr /><pre>';
 }
 
 /**
@@ -2223,7 +2209,7 @@ function ReadDBConfig() {
             }
         }
     }
-    return($config);
+    return $config;
 }
 
 /**

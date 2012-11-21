@@ -15,8 +15,10 @@
     <li id='question-13'><a href='#answer-13'>Can I select tags or categories based on the content of the e-mail?</a></li>
     <li id='question-14'><a href='#answer-14'>Is the IMAP extension required for postie?</a></li>
     <li id='question-15'><a href='#answer-15'>How can I embed youtube or vimeo videos?</a></li>
-    <li id='question-16'><a href='#answer-15'>How can I control whether comments are allowed?</a></li>
+    <li id='question-16'><a href='#answer-16'>How can I control whether comments are allowed?</a></li>
+    <li id='question-17'><a href='#answer-16'>Why doesn't Postie automatically publish my emails when running manually works</a></li>
 </ul>
+
 <h3>Frequently Asked Questions</h3>
 <h4 id='answer-0'>How can I get postie to display inline images?</h4>
 
@@ -185,3 +187,17 @@
     <li>comments:1 - means open</li>
     <li>comments:2 - means registered only</li>
 </ul>
+
+<h4 id='answer-17'>Why doesn't Postie automatically publish my emails when running manually works</h4>
+<p>WordPress cron (which Postie relies on) doesn't run unless a page is accessed on the 
+    site. So if you send an email, but nobody accesses the site for 3 days Postie won't 
+    be given the chance to fetch the email and publish the post.</p>
+
+<p>To ensure that Postie runs smoothly on a low or no volume site you need to ensure that 
+    a page gets hit (any page is fine). Use something like cron + curl on Linux or install 
+    curl on Windows and use the Scheduled Tasks control panel. If you are using a hosting company
+    that doesn't allow you access to cron you can use a service like 
+    <a href="https://www.setcronjob.com/" target="_blank">SetCronJob</a>.</p>
+
+<p>It is also possible to turn the WordPress cron off. Please make sure something like
+    define('DISABLE_WP_CRON', true); is not in your wp-config.php file.</p>
