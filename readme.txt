@@ -24,9 +24,11 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 
 * 1.4.6 (future)
     * Fixed bug where authorized addresses were being checked with case sensitive rather than insensitive.
+    * Started using PHP Simple HTML DOM Parser http://simplehtmldom.sourceforge.net/
     * Started process of logging all error messages to the log as well as the page (where appropriate)
     * Fixed a number of missing internationalization strings (no translations added however)
     * Added documentation for the comments: command
+    * Added feature to specify a custom post type in the subject line. Thanks to Raam Dev http://raamdev.com for his code.
     * Removed a number of deprecated WordPress functions.
     * Fixed numerous warning messages
     * added phpUnit tests
@@ -136,6 +138,10 @@ This fetches the mail every ten minutes with wget
     * You can include images in the excerpt by using the shortcode #eimg1#,
       #eimg2# etc.
 
+= Post type =
+  You can specify the post type by including it as the first part of the subject
+  E.g. <post type>//<real subject>
+
 = Category and tag handling =
 * If you put a category name in the subject with a : it will be used
   as the category for the post
@@ -160,6 +166,8 @@ This fetches the mail every ten minutes with wget
   Subject: -1- -Mo- -Br- My Subject
 
   On my blog it would post to General (Id 1), Moblog, and Brewing all at one time
+
+= Tags =
 * You can add tags by adding a line in the body of the message like so:
   tags: foo, bar
 * You can also set a default tag to be applied if no tags are included.
@@ -188,7 +196,7 @@ template:
   <div class='imageframe alignleft'><a href='{IMAGE}'><img src="{THUMBNAIL}"
   alt="{CAPTION}" title="{CAPTION}" 
   class="attachment" /></a><div
-class='imagecaption'>{CAPTION}</div></div>
+  class='imagecaption'>{CAPTION}</div></div>
      
     * {THUMBNAIL} gets replaced with the url to the thumbnail image
     * {MEDIUM} gets replaced with the url to the medium-sized image

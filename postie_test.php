@@ -11,6 +11,7 @@ $parent_file = 'options-general.php?page=postie/postie.php';
 get_currentuserinfo();
 
 if (!current_user_can('manage_options')) {
+    LogInfo("non-admin tried to set options");
     echo "<h2> Sorry only admin can run this file</h2>";
     exit();
 }
@@ -29,9 +30,9 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
     }
 
     if (!TestPostieDirectory()) {
-        print("<h1>Warning!</h1><p>Postie expects to be in its own directory named postie.</p>");
+        EchoInfo("<b>Warning!</b> Postie expects to be in its own directory named postie.");
     } else {
-        print("<p>Postie is in " . dirname(__FILE__) . "</p>");
+        EchoInfo("Postie is in " . dirname(__FILE__));
     }
     ?>
 
@@ -69,22 +70,22 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
             <td>
                 <?php
                 if (!$mail_server || !$mail_server_port || !$mail_userid) {
-                    print("NO - check server settings");
+                    EchoInfo("NO - check server settings");
                 }
                 switch (strtolower($config["input_protocol"])) {
                     case 'imap':
                     case 'imap-ssl':
                     case 'pop3-ssl':
                         if (!HasIMAPSupport()) {
-                            print("Sorry - you do not have IMAP php module installed - it is required for this mail setting.");
+                            EchoInfo("Sorry - you do not have IMAP php module installed - it is required for this mail setting.");
                         } else {
                             require_once("postieIMAP.php");
                             $mail_server = &PostieIMAP::Factory($config["input_protocol"]);
                             if (!$mail_server->connect($config["mail_server"], $config["mail_server_port"], $config["mail_userid"], $config["mail_password"])) {
-                                print("Unable to connect. The server said - " . $mail_server->error());
-                                print("<br/>Try putting in your full email address as a userid and try again.");
+                                EchoInfo("Unable to connect. The server said - " . $mail_server->error());
+                                EchoInfo("Try putting in your full email address as a userid and try again.");
                             } else {
-                                print("Yes");
+                                EchoInfo("Yes");
                             }
                         }
                         break;
@@ -93,10 +94,10 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
                         require_once(ABSPATH . WPINC . DIRECTORY_SEPARATOR . 'class-pop3.php');
                         $pop3 = &new POP3();
                         if (!$pop3->connect($config["mail_server"], $config["mail_server_port"])) {
-                            print("Unable to connect. The server said - " . $pop3->ERROR);
-                            print("<br/>Try putting in your full email address as a userid and try again.");
+                            EchoInfo("Unable to connect. The server said - " . $pop3->ERROR);
+                            EchoInfo("<br/>Try putting in your full email address as a userid and try again.");
                         } else {
-                            print("Yes");
+                            EchoInfo("Yes");
                         }
                         break;
                 }

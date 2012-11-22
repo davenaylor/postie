@@ -21,7 +21,7 @@
                 exit;
                 break;
             case "runpostie":
-                echo "Checking for mail manually\n";
+                EchoInfo("Checking for mail manually");
                 include('get_mail.php');
                 exit;
                 break;
@@ -223,26 +223,22 @@
                             <select name='postie-settings[post_status]' id='postie-settings-post_status'>
                                 <option value="publish" <?php
                                 if ($post_status == "publish") {
-                                    echo
-                                    "selected";
+                                    echo "selected";
                                 }
                                 ?>>Published</option>
                                 <option value="draft" <?php
                                         if ($post_status == "draft") {
-                                            echo
-                                            "selected";
+                                            echo "selected";
                                         }
                                 ?>>Draft</option>
                                 <option value="pending" <?php
                                         if ($post_status == "pending") {
-                                            echo
-                                            "selected";
+                                            echo "selected";
                                         }
                                 ?>>Pending Review</option>
                                 <option value="private" <?php
                                         if ($post_status == "private") {
-                                            echo
-                                            "selected";
+                                            echo "selected";
                                         }
                                 ?>>Private</option>
                             </select>                </td> 

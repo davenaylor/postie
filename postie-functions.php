@@ -15,7 +15,7 @@
  * category per e-mail address
  */
 
-$g_POSTIE_DEBUG = true;
+define('POSTIE_DEBUG', true);
 
 function postie_disable_revisions($restore = false) {
     global $_wp_post_type_features, $_postie_revisions;
@@ -71,21 +71,26 @@ function LogInfo($v) {
     error_log("Postie: $v");
 }
 
+function EchoInfo($v) {
+    echo("<p>Postie: $v</p>/n");
+    LogInfo($v);
+}
+
 function DebugDump($v) {
-    global $g_POSTIE_DEBUG;
-    //if ($g_POSTIE_DEBUG)  {
-    $o = print_r($v, true);
-    echo $o;
-    LogInfo($o);
-    //}
+    if (defined('POSTIE_DEBUG')) {
+        if (POSTIE_DEBUG) {
+            $o = print_r($v, true);
+            EchoInfo($o);
+        }
+    }
 }
 
 function DebugEcho($v) {
-    global $g_POSTIE_DEBUG;
-    //if ($g_POSTIE_DEBUG)  {
-    echo "$v\n";
-    LogInfo($v);
-    // }
+    if (defined('POSTIE_DEBUG')) {
+        if (POSTIE_DEBUG) {
+            EchoInfo($v);
+        }
+    }
 }
 
 /**
@@ -102,7 +107,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         "cids" => array(), //holds the cids for HTML email
         "image_files" => array() //holds the files for each image
     );
-    print("<p>Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]) . "</p><br/>\n");
+    EchoInfo("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
     DebugDump($mimeDecodedEmail);
 
     FilterTextParts($mimeDecodedEmail, $prefer_text_type);
@@ -111,13 +116,13 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
       attachments with a post. So we add the post here, then update it
      */
     $post_id = wp_insert_post($tmpPost);
-    DebugEcho("the id is $post_id\n");
+    EchoInfo("new post id is $post_id");
 
     $content = GetContent($mimeDecodedEmail, $attachments, $post_id, $poster, $config);
-    DebugEcho("the content is $content\n");
+    DebugEcho("the content is $content");
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
-    DebugEcho("the subject is $subject, right after calling GetSubject\n");
+    DebugEcho("the subject is $subject, right after calling GetSubject");
 
     $customImages = SpecialMessageParsing($content, $attachments, $config);
     $post_excerpt = GetPostExcerpt($content, $filternewlines, $convertnewline);
@@ -185,6 +190,9 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     } else {
         $post_status = $post_status;
     }
+
+    $post_type = GetPostType($subject);
+
     // DEBUG
     $details = array(
         'post_author' => $poster,
@@ -197,6 +205,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         //    'post_content'  => apply_filters('content_save_pre',$content),
         'post_content' => $content,
         'post_title' => $subject,
+        'post_type' => $post_type, /* Added by Raam Dev <raam@raamdev.com> */
         //   'post_modified'  => $post_date,
         //   'post_modified_gmt' => $post_date_gmt,
         'ping_status' => get_option('default_ping_status'),
@@ -237,6 +246,39 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
 }
 
 /** FUNCTIONS * */
+/*
+ * Added by Raam Dev <raam@raamdev.com>
+ * Adds support for handling Custom Post Types by adding the
+ * Custom Post Type name to the email subject separated by
+ * $custom_post_type_delim, e.g. "Movies // My Favorite Movie"
+ */
+function GetPostType(&$subject) {
+
+    $custom_post_type_delim = "//";
+    if (strpos($subject, $custom_post_type_delim) !== FALSE) {
+
+        // Captures the custom post type in the subject before $custom_post_type_delim
+        $separated_subject = explode($custom_post_type_delim, $subject);
+        $custom_post_type = $separated_subject[0];
+        $subject = $separated_subject[1];
+
+        $custom_post_type = trim(strtolower($custom_post_type));
+
+        // Check if custom post type exists, if not, set default post type of 'post'
+        $known_post_types = get_post_types();
+
+        if (in_array($custom_post_type, $known_post_types)) {
+            $post_type = $custom_post_type;
+        } else {
+            $post_type = 'post';
+        }
+    } else {
+        $post_type = 'post';
+    }
+
+    return $post_type;
+}
+
 function clickableLink($text, $shortcode = false) {
     # this functions deserves credit to the fine folks at phpbb.com
     # It turns urls into links, and video urls into embedded players
@@ -423,7 +465,7 @@ function FetchMail($server = NULL, $port = NULL, $email = NULL, $password = NULL
         die("Missing Configuration For Mail Server\n");
     }
     if ($server == "pop.gmail.com") {
-        print("\nMAKE SURE POP IS TURNED ON IN SETTING AT Gmail\n");
+        EchoInfo("MAKE SURE POP IS TURNED ON IN SETTING AT Gmail");
     }
     switch (strtolower($protocol)) {
         case 'smtp': //direct 
@@ -462,7 +504,7 @@ function FetchMail($server = NULL, $port = NULL, $email = NULL, $password = NULL
  * Handles fetching messages from an imap server
  */
 function TestIMAPMessageFetch() {
-    print("**************RUNING IN TESTING MODE************\n");
+    EchoInfo("**************RUNING IN TESTING MODE************");
     $config = get_postie_config();
     extract($config);
     $email = $test_email_account;
@@ -477,15 +519,16 @@ function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password
     require_once("postieIMAP.php");
 
     $mail_server = &PostieIMAP::Factory($protocol);
-    print("\nConnecting to $server:$port ($protocol) \n");
+    EchoInfo("Connecting to $server:$port ($protocol)");
     if (!$mail_server->connect($server, $port, $email, $password)) {
-        print("Mail Connection Time Out\n
-                Common Reasons: \n
-                Server Down \n
-                Network Issue \n
-                Port/Protocol MisMatch \n
-                ");
-        die("The Server said:" . $mail_server->error() . "\n");
+        EchoInfo("Mail Connection Time Out");
+        EchoInfo("Common Reasons: ");
+        EchoInfo("Server Down ");
+        EchoInfo("Network Issue ");
+        EchoInfo("Port/Protocol MisMatch ");
+
+        EchoInfo("The Server said:" . $mail_server->error());
+        die();
     }
     $msg_count = $mail_server->getNumberOfMessages();
     $emails = array();
@@ -505,7 +548,7 @@ function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password
 }
 
 function TestPOP3MessageFetch() {
-    print("**************RUNING IN TESTING MODE************\n");
+    EchoInfo("**************RUNING IN TESTING MODE************");
     $config = get_postie_config();
     extract($config);
     $email = $test_email_account;
@@ -519,16 +562,12 @@ function TestPOP3MessageFetch() {
 function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true) {
     require_once(ABSPATH . WPINC . DIRECTORY_SEPARATOR . 'class-pop3.php');
     $pop3 = new POP3();
-    print("\nConnecting to $server:$port ($protocol))  \n");
+    EchoInfo("Connecting to $server:$port ($protocol))");
     if (!$pop3->connect($server, $port)) {
         if (strpos($pop3->ERROR, "POP3: premature NOOP OK, NOT an RFC 1939 Compliant server") === false) {
-            print("Mail Connection Time Out\n
-                    Common Reasons: \n
-                    Server Down \n
-                    Network Issue \n
-                    Port/Protocol MisMatch \n
-                    ");
-            die("The Server Said $pop3->ERROR \n");
+            EchoInfo("Mail Connection Time Out. Common Reasons: Server Down, Network Issue, Port/Protocol MisMatch");
+            EchoInfo("The Server Said $pop3->ERROR");
+            die();
         }
     }
 
@@ -547,14 +586,14 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
         $emails[$i] = implode('', $pop3->get($i));
         if ($deleteMessages) {
             if (!$pop3->delete($i)) {
-                echo 'Oops ' . $pop3->ERROR . '\n';
+                EchoInfo('pop3 cannot delete message ' . $pop3->ERROR);
                 $pop3->reset();
                 exit;
             } else {
-                echo "Mission complete, message $i deleted.\n";
+                EchoInfo("Mission complete, message $i deleted.");
             }
         } else {
-            print("Not deleting messages!\n");
+            EchoInfo("Not deleting messages!\n");
         }
     }
     //clean up
@@ -605,11 +644,6 @@ function PostToDB($details, $isReply, $postToDb = true, $customImageField = fals
     }
 }
 
-function echo_log($m) {
-    echo $m;
-    error_log("Postie: $m");
-}
-
 /**
  * This function determines if the mime attachment is on the BANNED_FILE_LIST
  * @param string
@@ -620,7 +654,7 @@ function BannedFileName($filename, $bannedFiles) {
         return false;
     foreach ($bannedFiles as $bannedFile) {
         if (fnmatch($bannedFile, $filename)) {
-            echo_log("Ignoring $filename - it is on the banned files list.");
+            EchoInfo("Ignoring $filename - it is on the banned files list.");
             return true;
         }
     }
@@ -636,12 +670,11 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
       echo "you need to install the php-imap extension for full functionality, including mime header decoding\n";
      */
     $meta_return = NULL;
-    echo "primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary . "\n";
+    EchoInfo("primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
     DecodeBase64Part($part);
     if (BannedFileName($part->ctype_parameters['name'], $banned_files_list))
-        return(NULL);
-    if ($part->ctype_primary == "application"
-            && $part->ctype_secondary == "octet-stream") {
+        return NULL;
+    if ($part->ctype_primary == "application" && $part->ctype_secondary == "octet-stream") {
         if ($part->disposition == "attachment") {
             $image_endings = array("jpg", "png", "gif", "jpeg", "pjpeg");
             foreach ($image_endings as $type) {
@@ -659,8 +692,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             }
         }
     }
-    if ($part->ctype_primary == "multipart"
-            && $part->ctype_secondary == "appledouble") {
+    if ($part->ctype_primary == "multipart" && $part->ctype_secondary == "appledouble") {
         $mimeDecodedEmail = DecodeMIMEMail("Content-Type: multipart/mixed; boundary=" . $part->ctype_parameters["boundary"] . "\n" . $part->body);
         FilterTextParts($mimeDecodedEmail, $prefer_text_type);
         FilterAppleFile($mimeDecodedEmail);
@@ -693,8 +725,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $meta_return .= etf2HTML($part->body) . "\n";
                 } elseif ($part->ctype_secondary == 'html') {
                     //strip excess HTML
-                    //$meta_return .= HTML2HTML($part->body ) . "\n";
-                    $meta_return .= $part->body . "\n";
+                    $meta_return .= HTML2HTML($part->body) . "\n";
                 } else {
                     //regular text, so just strip the pgp signature
                     if (ALLOW_HTML_IN_BODY) {
@@ -715,8 +746,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 $the_post = get_post($file_id);
                 $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $imagetemplate);
                 if ($cid) {
-                    $attachments["cids"][$cid] = array($file,
-                        count($attachments["html"]) - 1);
+                    $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
                 }
                 break;
             case 'audio':
@@ -759,17 +789,15 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $cid = trim($part->headers["content-id"], "<>");
                     ; //cids are in <cid>
                     $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
-                    $attachments["html"][$filename] = "<a href='$file'>" .
-                            $icon . $filename . '</a>' . "\n";
+                    $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
                     if ($cid) {
-                        $attachments["cids"][$cid] = array($file,
-                            count($attachments["html"]) - 1);
+                        $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
                     }
                 }
                 break;
         }
     }
-    return($meta_return);
+    return $meta_return;
 }
 
 function ubb2HTML(&$text) {
@@ -846,39 +874,14 @@ function etf2HTML($content) {
 
 // This function cleans up HTML in the e-mail
 function HTML2HTML($content) {
-    $search = array(
-        '/<html [^<]*>/is',
-        '/<\/html>/i',
-        '/<\/?title>/i',
-        '/<body[^<]*>/i',
-        '/<\/body>/i',
-        '/<\/?head>/i',
-        '/<meta[^<]*>/i',
-        '/<style[^<]*>.*<\/style>/is',
-        '/<!--.*?-->/is',
-        '/<\/?o:[^<]*>/i',
-        '/<!DOCTYPE[^<]*>/',
-            //'/<img src=[\'"][^<]*>/'
-//		'/<img src="cid:(.*)" .*>/'
-    );
-
-    $replace = array(
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        '',
-        ''
-    );
-    // strip extra line breaks
-    $content = preg_replace($search, $replace, trim($content));
-    return ($content);
+    $html = str_get_html($content);
+    if ($html) {
+        $b = $html->find('body');
+        if ($b) {
+            $content = $b[0]->outertext;
+        }
+    }
+    return $content;
 }
 
 /**
@@ -899,14 +902,14 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
      */
 
     //See if the email address is one of the special authorized ones
-    print("Confirming Access For $from \n");
+    EchoInfo("Confirming Access For $from ");
     $sql = 'SELECT id FROM ' . $wpdb->users . ' WHERE user_email=\'' . addslashes($from) . "' LIMIT 1;";
     $user_ID = $wpdb->get_var($sql);
     if (!empty($user_ID)) {
         $user = new WP_User($user_ID);
         if ($user->has_cap("post_via_postie")) {
             $poster = $user_ID;
-            echo "posting as user $poster";
+            EchoInfo("posting as user $poster");
         } else {
             $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
             user_login  = '$admin_username'");
@@ -919,13 +922,13 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     }
     $validSMTP = checkSMTP($mimeDecodedEmail, $smtp);
     if (!$poster || !$validSMTP) {
-        echo 'Invalid sender: ' . htmlentities($from) . "! Not adding email!\n";
+        EchoInfo('Invalid sender: ' . htmlentities($from) . "! Not adding email!");
         if ($forward_rejected_mail) {
             $admin_email = get_option("admin_email");
             if (MailToRecipients($mimeDecodedEmail, $test_email, array($admin_email), $return_to_sender)) {
-                echo "A copy of the message has been forwarded to the administrator.\n";
+                EchoInfo("A copy of the message has been forwarded to the administrator.");
             } else {
-                echo "The message was unable to be forwarded to the adminstrator.\n";
+                EchoInfo("The message was unable to be forwarded to the adminstrator.");
             }
         }
         return;
@@ -934,7 +937,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
 }
 
 function post_as_admin($admin_username) {
-    print("$from is authorized to post as the administrator\n");
+    EchoInfo("$from is authorized to post as the administrator");
     //$from = get_option("admin_email");
     //$adminUser=$admin_username;
     //echo "adminUser='$adminUser'";
@@ -1153,7 +1156,6 @@ function DecodeBase64Part(&$part) {
 
 function HandleQuotedPrintable($encoding, &$body, $dequote = true) {
     if ($dequote && strtolower($encoding) == 'quoted-printable') {
-        echo "handling quoted printable";
         $body = quoted_printable_decode($body);
     }
 }
@@ -1183,7 +1185,6 @@ function AllowCommentsOnPost(&$content) {
  */
 function DeterminePostDate(&$content, $message_date = NULL, $offset = 0) {
     $delay = 0;
-    DebugEcho("inside Determine Post Date, message_date = $message_date\n");
 
     if (preg_match("/delay:(-?[0-9dhm]+)/i", $content, $matches) && trim($matches[1])) {
         $days = 0;
@@ -1272,7 +1273,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
         fwrite($fp, $part->body);
         fclose($fp);
     } else {
-        echo "could not write to temp file: '$tmpFile' ";
+        EchoInfo("could not write to temp file: '$tmpFile' ");
     }
     if ($part->ctype_parameters['name'] == '') {
         if ($part->d_parameters['filename'] != '') {
@@ -1604,7 +1605,7 @@ function DecodeMIMEMail($email, $decodeHeaders = false) {
  */
 function DisplayMIMEPartTypes($mimeDecodedEmail) {
     foreach ($mimeDecodedEmail->parts as $part) {
-        print("<p>" . $part->ctype_primary . " / " . $part->ctype_secondary . "/ " . $part->headers['content-transfer-encoding'] . "\n");
+        EchoInfo($part->ctype_primary . " / " . $part->ctype_secondary . "/ " . $part->headers['content-transfer-encoding']);
     }
 }
 
@@ -1651,6 +1652,8 @@ function GetNameFromEmail($address) {
     if (preg_match('/^([^<>]+)<([^<> ()]+)>$/', $address, $matches)) {
         $name = $matches[1];
     } else if (preg_match('/<([^<>@ ()]+)>/', $address, $matches)) {
+        $name = $matches[1];
+    } else if (preg_match('/(.+?)@(.+)/', $address, $matches)) {
         $name = $matches[1];
     }
 
@@ -1944,7 +1947,6 @@ function postie_get_tags(&$content, $defaultTags) {
  *
  */
 function GetPostExcerpt(&$content, $filterNewLines, $convertNewLines) {
-    global $wpdb;
     $post_excerpt = '';
     if (preg_match('/:excerptstart ?(.*):excerptend/s', $content, $matches)) {
         $content = str_replace($matches[0], "", $content);
@@ -1952,7 +1954,7 @@ function GetPostExcerpt(&$content, $filterNewLines, $convertNewLines) {
         if ($filterNewLines)
             $post_excerpt = FilterNewLines($post_excerpt, $convertNewLines);
     }
-    return($post_excerpt);
+    return $post_excerpt;
 }
 
 /**
@@ -1978,7 +1980,7 @@ function GetPostCategories(&$subject, $defaultCategory) {
         foreach ($matches[1] as $match) {
             $match = trim($match);
             $category = NULL;
-            print("Working on $match\n");
+            EchoInfo("Categories - Working on $match");
 
             $sql_name = 'SELECT term_id 
                          FROM ' . $wpdb->terms . ' 
@@ -2005,7 +2007,7 @@ function GetPostCategories(&$subject, $defaultCategory) {
     if (!count($post_categories)) {
         $post_categories[] = $defaultCategory;
     }
-    return($post_categories);
+    return $post_categories;
 }
 
 /**
@@ -2017,17 +2019,19 @@ function DisplayEmailPost($details) {
 
     $theFinalContent = $details['post_content'];
     // Report
-    print '</pre><p><b>Post Author</b>: ' . $details["post_author"] . '<br />' . "\n";
-    print '<b>Date</b>: ' . $details["post_date"] . '<br />' . "\n";
+    EchoInfo('<b>Post Author</b>: ' . $details["post_author"]);
+    EchoInfo('<b>Date</b>: ' . $details["post_date"]);
     foreach ($details["post_category"] as $category) {
-        print '<b>Category</b>: ' . $category . '<br />' . "\n";
+        EchoInfo('<b>Category</b>: ' . $category);
     }
-    print '<b>Ping Status</b>: ' . $details["ping_status"] . '<br />' . "\n";
-    print '<b>Comment Status</b>: ' . $details["comment_status"] . '<br />' . "\n";
-    print '<b>Subject</b>: ' . $details["post_title"] . '<br />' . "\n";
-    print '<b>Postname</b>: ' . $details["post_name"] . '<br />' . "\n";
-    print '<b>Post Id</b>: ' . $details["ID"] . '<br />' . "\n";
-    print '<b>Posted content:</b></p><hr />' . $details["post_content"] . '<hr /><pre>';
+    EchoInfo('<b>Ping Status</b>: ' . $details["ping_status"]);
+    EchoInfo('<b>Comment Status</b>: ' . $details["comment_status"]);
+    EchoInfo('<b>Subject</b>: ' . $details["post_title"]);
+    EchoInfo('<b>Postname</b>: ' . $details["post_name"]);
+    EchoInfo('<b>Post Id</b>: ' . $details["ID"]);
+    EchoInfo('<b>Post Type</b>: ' . $details["post_type"]); /* Added by Raam Dev <raam@raamdev.com> */
+    EchoInfo('<b>Posted content:</b>');
+    EchoInfo($details["post_content"]);
 }
 
 /**
@@ -2043,9 +2047,9 @@ function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL)
 	<td><select name='$id' id='$id'>
             <option value='1'>" . __("Yes", 'postie') . "</option>
             <option value='0' " . (!$current_value ? "selected='selected'" : "") . ">" . __("No", 'postie') . '</option>
-	</select>';
+    </select>';
     if (!empty($recommendation)) {
-        $html.='<span class="recommendation">' . $recommendation . '</span>';
+        $html.='<span class = "recommendation">' . $recommendation . '</span>';
     }
     $html.="</td>\n</tr>";
     return $html;
@@ -2162,7 +2166,7 @@ function get_postie_config_defaults() {
         'selected_video1template' => 'simple_link',
         'selected_video2template' => 'simple_link',
         'shortcode' => false,
-        'sig_pattern_list' => array('--', '- --'),
+        'sig_pattern_list' => array('--', '---'),
         'smtp' => array(),
         'start_image_count_at_zero' => false,
         'supported_file_types' => array('video', 'application'),
@@ -2174,7 +2178,9 @@ function get_postie_config_defaults() {
         'video2types' => array('x-flv'),
         'video1templates' => $video1Templates,
         'video2templates' => $video2Templates,
-        'wrap_pre' => 'no'
+        'wrap_pre' => 'no
+
+    '
     );
 }
 
@@ -2196,7 +2202,9 @@ function GetListOfArrayConfig() {
 function ReadDBConfig() {
     $config = array();
     global $wpdb;
-    $wpdb->query("SHOW TABLES LIKE  '" . $GLOBALS["table_prefix"] . "postie_config'");
+    $wpdb->query("SHOW TABLES LIKE  '
+
+    " . $GLOBALS["table_prefix"] . "postie_config'");
     if ($wpdb->num_rows > 0) {
         $data = $wpdb->get_results("SELECT label,value FROM " . $GLOBALS["table_prefix"] . "postie_config;");
         if (is_array($data)) {
@@ -2224,79 +2232,96 @@ function GetDBConfig() {
     if (!isset($config["PREFER_TEXT_TYPE"]))
         $config["PREFER_TEXT_TYPE"] = "plain";
     if (!isset($config["DEFAULT_TITLE"]))
-        $config["DEFAULT_TITLE"] = "Live From The Field";
+        $config["DEFAULT_TITLE"] = "Live Fro
+        m The Field";
     if (!isset($config["INPUT_PROTOCOL"]))
-        $config["INPUT_PROTOCOL"] = "pop3";
+        $config["INPUT_PROTOCOL"]
+                = "pop3";
     if (!isset($config["IMAGE_PLACEHOLDER"]))
-        $config["IMAGE_PLACEHOLDER"] = "#img%#";
+        $config["IMAGE_PLACEHOLDER"] = "#img%
+        #";
     if (!isset($config["IMAGES_APPEND"]))
         $config["IMAGES_APPEND"] = true;
+
     if (!isset($config["ALLOW_SUBJECT_IN_MAIL"]))
         $config["ALLOW_SUBJECT_IN_MAIL"] = true;
     if (!isset($config["DROP_SIGNATURE"]))
         $config["DROP_SIGNATURE"] = true;
     if (!isset($config["MESSAGE_START"]))
         $config["MESSAGE_START"] = ":start";
+
     if (!isset($config["MESSAGE_END"]))
         $config["MESSAGE_END"] = ":end";
-    if (!isset($config["FORWARD_REJECTED_MAIL"]))
-        $config["FORWARD_REJECTED_MAIL"] = true;
+    if
+    (!isset($config["FORWARD_REJECTED_MAIL"]))
+        $config["FORWARD_REJECTED_MAIL"] =                true;
     if (!isset($config["RETURN_TO_SENDER"]))
         $config["RETURN_TO_SENDER"] = false;
     if (!isset($config["CONFIRMATION_EMAIL"]))
-        $config["CONFIRMATION_EMAIL"] = '';
+        $config["CONFIRMATION_EMAIL"] = ''        ;
     if (!isset($config["ALLOW_HTML_IN_SUBJECT"]))
-        $config["ALLOW_HTML_IN_SUBJECT"] = true;
+        $config["ALLOW_HTML_IN_SUBJECT"] =                true;
     if (!isset($config["ALLOW_HTML_IN_BODY"]))
-        $config["ALLOW_HTML_IN_BODY"] = true;
+        $config["ALLOW_HTML_IN_BODY"] =                true;
     if (!isset($config["START_IMAGE_COUNT_AT_ZERO"]))
         $config["START_IMAGE_COUNT_AT_ZERO"] = false;
     if (!isset($config["MESSAGE_ENCODING"]))
-        $config["MESSAGE_ENCODING"] = "UTF-8";
+        $config["MESSAGE_ENCODING"] =                "UTF-8";
     if (!isset($config["MESSAGE_DEQUOTE"]))
         $config["MESSAGE_DEQUOTE"] = true;
+
     if (!isset($config["TURN_AUTHORIZATION_OFF"]))
         $config["TURN_AUTHORIZATION_OFF"] = false;
     if (!isset($config["CUSTOM_IMAGE_FIELD"]))
-        $config["CUSTOM_IMAGE_FIELD"] = false;
+        $config["CUSTOM_IMAGE_
+        FIELD"] = false;
     if (!isset($config["CONVERTNEWLINE"]))
         $config["CONVERTNEWLINE"] = false;
     if (!isset($config["SIG_PATTERN_LIST"]))
-        $config["SIG_PATTERN_LIST"] = array('--', '- --');
+        $config["SIG_PATTERN_LIST"] = array('--', '---');
     if (!isset($config["BANNED_FILES_LIST"]))
         $config["BANNED_FILES_LIST"] = array();
     if (!isset($config["SUPPORTED_FILE_TYPES"]))
-        $config["SUPPORTED_FILE_TYPES"] = array("video", "application");
+        $config["SUPPORTED_FILE_TYPES"] = array("video", "applicatio
+        n");
     if (!isset($config["AUTHORIZED_ADDRESSES"]))
         $config["AUTHORIZED_ADDRESSES"] = array();
     if (!isset($config["MAIL_SERVER"]))
         $config["MAIL_SERVER"] = NULL;
-    if (!isset($config["MAIL_SERVER_PORT"]))
+    if (!isset($config["MAIL_SERVER
+        _PORT"]))
         $config["MAIL_SERVER_PORT"] = NULL;
-    if (!isset($config["MAIL_USERID"]))
+    if (!isset($config["MAIL_USERID"]
+    ))
         $config["MAIL_USERID"] = NULL;
     if (!isset($config["MAIL_PASSWORD"]))
         $config["MAIL_PASSWORD"] = NULL;
-    if (!isset($config["DEFAULT_POST_CATEGORY"]))
+    if (!isset($config["DEFAULT_POST_CATEGO
+        RY"]))
         $config["DEFAULT_POST_CATEGORY"] = NULL;
-    if (!isset($config["DEFAULT_POST_TAGS"]))
+    if (!isset($config["D
+        EFAULT_POST_TAGS"]))
         $config["DEFAULT_POST_TAGS"] = NULL;
-    if (!isset($config["TIME_OFFSET"]))
+    if (!isset($config["T
+        IME_OFFSET"]))
         $config["TIME_OFFSET"] = get_option('gmt_offset');
     if (!isset($config["WRAP_PRE"]))
-        $config["WRAP_PRE"] = 'no';
-    if (!isset($config["CONVERTURLS"]))
+    $config["WRAP_PRE"] = 'no';
+    if (!isset($config["CONVERTUR
+        LS"]))
         $config["CONVERTURLS"] = true;
     if (!isset($config["SHORTCODE"]))
         $config["SHORTCODE"] = false;
     if (!isset($config["ADD_META"]))
         $config["ADD_META"] = 'no';
-    $config['ICON_SETS'] = array('silver', 'black', 'white', 'custom', 'none');
+    $config['ICON_SETS'] = array('silver', 'black', 'w
+        hite', 'custom', 'none');
     if (!isset($config["ICON_SET"]))
         $config["ICON_SET"] = 'silver';
     $config['ICON_SIZES'] = array(32, 48, 64);
     if (!isset($config["ICON_SIZE"]))
         $config["ICON_SIZE"] = 32;
+
 
     //audio
     include('templates/audio_templates.php');
@@ -2309,8 +2334,10 @@ function GetDBConfig() {
         $config["AUDIOTEMPLATE"] = $simple_link;
 
     //video1
+
     if (!isset($config["VIDEO1TYPES"]))
-        $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2',
+        $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp',
+            '3gpp', '3gpp2',
             '3gp2', 'mov', 'mpeg');
     if (!isset($config["AUDIOTYPES"]))
         $config['AUDIOTYPES'] = array('m4a', 'mp3', 'ogg', 'wav', 'mpeg');
@@ -2318,29 +2345,36 @@ function GetDBConfig() {
         $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
     include('templates/video1_templates.php');
     $config['VIDEO1TEMPLATES'] = $video1Templates;
-    if (!isset($config["VIDEO1TEMPLATE"]))
+    if
+    (!isset($config["VIDEO1TEMPLATE"]))
         $config["VIDEO1TEMPLATE"] = $simple_link;
 
     //video2
     if (!isset($config["VIDEO2TYPES"]))
         $config['VIDEO2TYPES'] = array('x-flv');
     if (!isset($config["POST_STATUS"]))
-        $config["POST_STATUS"] = 'publish';
-    if (!isset($config["IMAGE_NEW_WINDOW"]))
+    $config["POST_STATUS"] = 'publish';
+    if (!isset($config["IMAGE_NE
+        W_WINDOW"]))
         $config["IMAGE_NEW_WINDOW"] = false;
-    if (!isset($config["FILTERNEWLINES"]))
+    if (!isset($config["FILTERN
+        EWLINES"]))
         $config["FILTERNEWLINES"] = true;
-    include('templates/video2_templates.php');
+    include('templates/video2_templ
+        ates.php');
     $config['VIDEO2TEMPLATES'] = $video2Templates;
-    if (!isset($config["VIDEO2TEMPLATE"]))
+    if (!isset($config["V
+        IDEO2TEMPLATE"]))
         $config["VIDEO2TEMPLATE"] = $simple_link;
 
     //image
     if (!isset($config["SELECTED_IMAGETEMPLATE"]))
-        $config['SELECTED_IMAGETEMPLATE'] = 'wordpress_default';
+        $config['SELECTED_IMAGETEMPLATE'] = 'wordpr
+        ess_default';
     if (!isset($config["SMTP"]))
         $config["SMTP"] = array();
-    include('templates/image_templates.php');
+    include('templates/image_tem
+        plates.php');
     if (!isset($config["IMAGETEMPLATE"]))
         $config["IMAGETEMPLATE"] = $wordpress_default;
     $config['IMAGETEMPLATES'] = $imageTemplates;
@@ -2349,7 +2383,8 @@ function GetDBConfig() {
 }
 
 /**
- * This function returns the old-format config (pre 1.4)
+ * This function returns the old
+  -format config (pre 1.4)
  * @return array
  */
 function GetConfig() {
@@ -2374,7 +2409,7 @@ function GetConfig() {
 }
 
 /**
- * end of functions used to retrieve the old (pre 1.4) config
+ * end of functions u sed to retrieve the old (pre 1.4) config
  * =======================================================
  */
 
@@ -2399,7 +2434,7 @@ function get_postie_config() {
  */
 function get_arrayed_settings() {
     return array(
-        ',' => array('audiotypes', 'video1types', 'video2types', 'default_post_tags'),
+        ', ' => array('audiotypes', 'video1types', 'video2types', 'default_post_tags'),
         "\n" => array('smtp', 'authorized_addresses', 'supported_file_types',
             'banned_files_list', 'sig_pattern_list'));
 }
@@ -2431,12 +2466,12 @@ function HasFunctions($function_list, $display = true) {
     foreach ($function_list as $function) {
         if (!function_exists($function)) {
             if ($display) {
-                print("<p>Missing $function");
+                EchoInfo("Missing $function");
             }
-            return(false);
+            return false;
         }
     }
-    return(true);
+    return true;
 }
 
 /**
@@ -2476,7 +2511,8 @@ function postie_validate_settings($in) {
         $out[$key] = array_key_exists($key, $in) ? $in[$key] : $default;
 
     // some fields are always forced to lower case:
-    $lowercase = array('authorized_addresses', 'smtp', 'supported_file_types', 'video1types', 'video2types', 'audiotypes');
+    $lowercase = array('authorized_add
+        resses', 'smtp', 'supported_file_types', 'video1types', 'video2types', 'audiotypes');
     foreach ($lowercase as $field) {
         $out[$field] = ( is_array($out[$field]) ) ? array_map("strtolower", $out[$field]) : strtolower($out[$field]);
     }
@@ -2488,7 +2524,8 @@ function postie_validate_settings($in) {
                 $out[$field] = explode($sep, trim($out[$field]));
             foreach ($out[$field] as $key => $val) {
                 $tst = trim($val);
-                if (empty($tst)) {
+                if
+                (empty($tst)) {
                     unset($out[$field][$key]);
                 } else {
                     $out[$field][$key] = $tst;
@@ -2593,7 +2630,9 @@ function VodafoneHandler(&$content, &$attachments) {
             //The content is now just the text of the message
             $content = $matches[1];
             //Now to clean up the attachments
-            $vodafone_images = array("live.gif", "smiley.gif", "border_left_txt.gif", "border_top.gif", "border_bot.gif", "border_right.gif", "banner1.gif", "i_text.gif", "i_picture.gif",);
+            $vodafone_images = array("live.gif", "smiley.gif", "border_left_txt.gif",
+                "border_top.gif",
+                "border_bot.gif", "border_right.gif", "banner1.gif", "i_text.gif", "i_picture.gif",);
             while (list($key, $value) = each($attachments['cids'])) {
                 if (!in_array($key, $vodafone_images)) {
                     $content .= "<br/>" . $attachments['html'][$attachments['cids'][$key][1]];

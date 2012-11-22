@@ -2,6 +2,7 @@
 
 require 'wpstub.php';
 require'../postie-functions.php';
+require'../simple_html_dom.php';
 
 class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
@@ -179,6 +180,92 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("", GetNameFromEmail(""));
         $this->assertEquals("Wayne", GetNameFromEmail('Wayne <wayne@devzing.com>'));
         $this->assertEquals("wayne", GetNameFromEmail('wayne@devzing.com'));
+    }
+
+    public function testGetPostType() {
+        $subject = "test";
+        $this->assertEquals("post", GetPostType($subject));
+        $this->assertEquals("test", $subject);
+
+        $subject = "custom//test";
+        $this->assertEquals("custom", GetPostType($subject));
+        $this->assertEquals("test", $subject);
+
+        $subject = "//test";
+        $this->assertEquals("post", GetPostType($subject));
+        $this->assertEquals("test", $subject);
+
+        $subject = "//";
+        $this->assertEquals("post", GetPostType($subject));
+        $this->assertEquals("", $subject);
+    }
+
+    public function testGetPostExcerpt() {
+        $c = "test";
+        $this->assertEquals("", GetPostExcerpt($c, false, false));
+
+        $c = ":excerptstart test :excerptend test";
+        $this->assertEquals("test ", GetPostExcerpt($c, false, false));
+
+        $c = ":excerptstart test";
+        $this->assertEquals("", GetPostExcerpt($c, false, false));
+
+        $c = "test :excerptend test";
+        $this->assertEquals("", GetPostExcerpt($c, false, false));
+    }
+
+    public function testGetPostCategories() {
+        global $wpdb;
+
+        $s = "test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals("default", $c[0]);
+        $this->assertEquals("test", $s);
+
+        $wpdb->t_get_var = "1";
+        $s = "1: test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals("1", $c[0]);
+        $this->assertEquals("test", $s);
+
+        $wpdb->t_get_var = "general";
+        $s = "general: test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals("general", $c[0]);
+        $this->assertEquals("test", $s);
+
+        $s = "[general] test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals("general", $c[0]);
+        $this->assertEquals("test", $s);
+
+        $s = "-general- test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals("general", $c[0]);
+        $this->assertEquals("test", $s);
+
+        $wpdb->t_get_var = "";
+        $s = "specific: test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals("default", $c[0]);
+        $this->assertEquals("test", $s);
+
+        $wpdb->t_get_var = "1";
+        $s = "[1] [1] test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals(2, count($c));
+        $this->assertEquals("1", $c[0]);
+        $this->assertEquals("1", $c[1]);
+        $this->assertEquals("test", $s);
+    }
+
+    public function testHTML2HTML() {
+        $this->assertEquals("", HTML2HTML(""));
+        $this->assertEquals("test", HTML2HTML("test"));
+        $this->assertEquals("<body>test</body>", HTML2HTML("<html lang='en'><body>test</body></html>"));
+        $this->assertEquals("<body>test</body>", HTML2HTML("<html lang='en'><head><title>title</title></head><body>test</body></html>"));
+        $this->assertEquals("<body>test</body>", HTML2HTML("<body>test</body>"));
+        $this->assertEquals("<strong>test</strong>", HTML2HTML("<strong>test</strong>"));
     }
 
 }

@@ -92,6 +92,7 @@ if (is_admin()) {
     add_action('admin_init', 'postie_admin_settings');
     add_action('admin_menu', 'postie_loadjs_add_page');
     if (function_exists('load_plugin_textdomain')) {
+
         function postie_load_domain() {
             $plugin_dir = WP_PLUGIN_DIR . '/' . basename(dirname(__FILE__));
             load_plugin_textdomain('postie', $plugin_dir . "/languages/", basename(dirname(__FILE__)) . '/languages/');
@@ -103,14 +104,12 @@ if (is_admin()) {
 }
 
 function activate_postie() {
-    DebugEcho("activate started");
+    LogInfo("activiated");
 
     static $init = false;
     $options = get_option('postie-settings');
-    //DebugDump($options);
-    
-    if ($init){
-        DebugEcho("activate already happened");
+
+    if ($init) {
         return;
     }
 
@@ -154,10 +153,9 @@ function postie_warnings() {
             ) && !isset($_POST['submit'])) {
 
         function postie_enter_info() {
-            echo "
-      <div id='postie-info-warning' class='updated fade'><p><strong>" .
-            __('Postie is almost ready.', 'postie') . "</strong> "
-            . sprintf(__('You must <a href="%1$s">enter your email settings</a> for it to work.', 'postie'), "options-general.php?page=postie/postie.php") . "</p></div> ";
+            echo "<div id='postie-info-warning' class='updated fade'><p><strong>" . __('Postie is almost ready.', 'postie') . "</strong> "
+            . sprintf(__('You must <a href="%1$s">enter your email settings</a> for it to work.', 'postie'), "options-general.php?page=postie/postie.php")
+            . "</p></div> ";
         }
 
         add_action('admin_notices', 'postie_enter_info');
@@ -214,10 +212,7 @@ function check_postie() {
         }
         fclose($fp);
     } else {
-        echo "Cannot connect to server on port $port. Please check to make sure
-    that this port is open on your webhost.
-    Additional information:
-    $errno: $errstr";
+        EchoInfo("Cannot connect to server on port $port. Please check to make sure that this port is open on your webhost. Additional information: $errno: $errstr");
     }
 }
 

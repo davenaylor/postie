@@ -3,6 +3,7 @@
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mimedecode.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
+require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'simple_html_dom.php');
 
 if (!ini_get('safe_mode')) {
     $original_mem_limit = ini_get('memory_limit');
@@ -10,9 +11,8 @@ if (!ini_get('safe_mode')) {
     ini_set('max_execution_time', 300);
 }
 
-print("<pre>\n");
-print("This is the postie plugin\n");
-print("time:" . time() . "\n");
+EchoInfo("Starting mail fetch");
+EchoInfo("time:" . time());
 include('Revision');
 
 $test_email = null;
@@ -24,19 +24,18 @@ $message = 'Done.';
 //loop through messages
 foreach ($emails as $email) {
     if (function_exists('memory_get_usage'))
-        echo "memory at start of e-mail processing:" . memory_get_usage() . "\n";
+        EchoInfo("memory at start of e-mail processing:" . memory_get_usage());
     //sanity check to see if there is any info in the message
     if ($email == NULL) {
         $message = __('Dang, message is empty!', 'postie');
         continue;
     } else if ($email == 'already read') {
-        $message = "\n" . __("There does not seem to be any new mail.", 'postie') .
-                "\n";
+        $message = __("There does not seem to be any new mail.", 'postie');
         continue;
     }
     // check for XSS attacks - we disallow any javascript, meta, onload, or base64
     if (preg_match("@((%3C|<)/?script|<meta|document\.|\.cookie|\.createElement|onload\s*=|(eval|base64)\()@is", $email)) {
-        echo "possible XSS attack - ignoring email\n";
+        EchoInfo("possible XSS attack - ignoring email");
         continue;
     }
 
@@ -53,10 +52,9 @@ foreach ($emails as $email) {
         print("<p>Ignoring email - not authorized.\n");
     }
     if (function_exists('memory_get_usage'))
-        echo "memory at end of e-mail processing:" . memory_get_usage() . "\n";
+        EchoInfo("memory at end of e-mail processing:" . memory_get_usage());
 } // end looping over messages
-print $message;
-print("</pre>\n");
+EchoInfo($message);
 
 if (!ini_get('safe_mode')) {
     ini_set('memory_limit', $original_mem_limit);

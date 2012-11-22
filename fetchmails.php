@@ -14,8 +14,8 @@ function init() {
     global $wpdb, $aandcpostie_version;
     $table_name = $wpdb->prefix . 'postie_addresses';
     if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-        echo "creating table\n";
-        $sql = "CREATE TABLE " . $table_name . " (
+        EchoInfo("creating $table_name table");
+        $sql = "CREATE TABLE  $table_name  (
         id mediumint(9) NOT NULL AUTO_INCREMENT,
         server text NOT NULL,
         port smallint(4) DEFAULT '110' NOT NULL,
@@ -69,7 +69,7 @@ function insert_new_addresses($table_name, $addresses) {
                     " (server, port, email, passwd, protocol, offset, category) " .
                     "VALUES ('$server', $port, '$email', '$passwd', '$protocol', '$offset', '$category')";
         } else {
-            echo "updating\n";
+            EchoInfo("updating addresses");
             $query = "UPDATE $table_name set server='$server', port='$port',
           email='$email', passwd='$passwd', 
           protocol='$protocol', offset='$offset', category='$category' WHERE
@@ -86,7 +86,7 @@ function fetch_mails() {
     //Retreive emails 
     $fetch_query = 'SELECT * FROM ' . $wpdb->prefix . 'postie_addresses';
     $mailboxes = $wpdb->get_results($fetch_query);
-    print_r($mailboxes);
+    DebugDump($mailboxes);
     $config = get_config();
     foreach ($mailboxes as $mailbox) {
         $emails = FetchMail($mailbox->server, $mailbox->port, $mailbox->email, $mailbox->passwd, $mailbox->protocol);
@@ -94,7 +94,7 @@ function fetch_mails() {
         foreach ($emails as $email) {
             //sanity check to see if there is any info in the message
             if ($email == NULL) {
-                print 'Dang, message is empty!';
+                EchoInfo(__('Dang, message is empty!'));
                 continue;
             }
 
@@ -110,7 +110,7 @@ function fetch_mails() {
                 PostEmail($poster, $mimeDecodedEmail, $config);
             }
             else {
-                print("<p>Ignoring email - not authorized.\n");
+                EchoInfo("<p>Ignoring email - not authorized.\n");
             }
         } // end looping over messages
     }
