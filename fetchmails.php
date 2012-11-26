@@ -103,7 +103,7 @@ function fetch_mails() {
             //Check poster to see if a valid person
             $poster = ValidatePoster($mimeDecodedEmail, $config);
             if (!empty($poster)) {
-                if ($config['TEST_EMAIL'])
+                if (IsDebugMode())
                     DebugEmailOutput($email, $mimeDecodedEmail);
                 if ($mailbox->category)
                     $config['DEFAULT_POST_CATEGORY'] = $mailbox->category;

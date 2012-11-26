@@ -37,17 +37,19 @@
     $config = get_option('postie-settings');
     if (empty($config))
         $config = ResetPostieConfig();
-    //DebugDump($config);
+
+
 
     $arrays = get_arrayed_settings();
-// some fields are stored as arrays, because that makes back-end processing much easier
-// and we need to convert those fields to strings here, for the options form
+    // some fields are stored as arrays, because that makes back-end processing much easier
+    // and we need to convert those fields to strings here, for the options form
     foreach ($arrays as $sep => $fields) {
         foreach ($fields as $field) {
             $config[$field] = implode($sep, $config[$field]);
         }
     }
     extract($config);
+
     if ($interval == 'manual') {
         wp_clear_scheduled_hook('check_postie_hook');
     }
@@ -73,7 +75,9 @@
         <?php _e("this will run a special script to test your configuration options", 'postie'); ?>
     </form>
     <form name="postie-options" method="post" action='options.php'>
-        <?php settings_fields('postie-settings'); ?>
+        <?php
+        settings_fields('postie-settings');
+        ?>
         <input type="hidden" name="action" value="config" />
         <div id="simpleTabs">
             <div class="simpleTabs-nav">
@@ -142,7 +146,7 @@
                     <tr valign="top">
                         <th scope="row"><?php _e('Mail Password:', 'postie') ?></th>
                         <td>
-                            <input name='postie-settings[mail_password]' type="text" id='postie-settings-mail_password' value="<?php echo $mail_password; ?>" size="40" />
+                            <input name='postie-settings[mail_password]' type="password" id='postie-settings-mail_password' value="<?php echo $mail_password; ?>" size="40" />
                         </td>
                     </tr>
                     <tr><th>
@@ -187,6 +191,7 @@
                     <?php echo BuildBooleanSelect(__("Delete email after posting"), 'postie-settings[delete_mail_after_processing]', $delete_mail_after_processing, __("Only set to no for testing purposes")); ?>
                 </table>
             </div>
+
             <div id="simpleTabs-content-2" class="simpleTabs-content">
                 <table class='form-table'>
 
@@ -253,10 +258,12 @@
                     </tr> 
                 </table> 
             </div>
-            <div id="simpleTabs-content-3" class="simpleTabs-content">
-                <table class='form-table'>
-                    <tr valign="top">
-                        <th scope="row"><?php _e('Default post by mail category:', 'postie') ?></th>
+
+            <div id = "simpleTabs-content-3" class = "simpleTabs-content">
+                <table class = 'form-table'>
+                    <tr valign = "top">
+                        <th scope = "row"><?php _e('Default post by mail category:', 'postie')
+                            ?></th>
                         <td>
                             <?php
                             $defaultCat = $default_post_category;
@@ -285,9 +292,9 @@
                         <th width="33%" valign="top" scope="row"><?php _e('Preferred Text Type:', 'postie') ?> </th> 
                         <td>
                             <select name='postie-settings[prefer_text_type]' id='postie-settings-prefer_text_type'>
-                                <option value="plain">plain</option>
-                                <option value="html" <?php ($prefer_text_type == "html") ? "selected" : "" ?>>html</option>
-                            </select><br />
+                                <?php printf('<option value="plain" %s>plain</option>', ($prefer_text_type == "plain") ? "selected" : "") ?>
+                                <?php printf('<option value="html" %s>html</option>', ($prefer_text_type == "html") ? "selected" : "") ?>
+                            </select>
                         </td> 
                     </tr> 
                     <?php echo BuildBooleanSelect("Forward Rejected Mail", "postie-settings[forward_rejected_mail]", $forward_rejected_mail); ?>
@@ -323,8 +330,7 @@
                                 <?php _e("Send post confirmation e-mail to", 'postie') ?>
                             </th>
                             <td>
-                                <select name='postie-settings[confirmation_email]'
-                                        id='postie-settings-confirmation_email'>
+                                <select name='postie-settings[confirmation_email]' id='postie-settings-confirmation_email'>
                                     <option value="sender" <?php echo($confirmation_email == "sender") ? "selected" : "" ?>><?php _e('sender', 'postie') ?></option>
                                     <option value="admin" <?php echo ($confirmation_email == "admin") ? "selected" : "" ?>><?php _e('administrator', 'postie') ?></option>
                                     <option value="both" <?php echo ($confirmation_email == "both") ? "selected" : "" ?>><?php _e('sender and administrator', 'postie') ?></option>
@@ -400,9 +406,9 @@
                             &nbsp;&nbsp;
                             <?php _e('Preview', 'postie'); ?>
                             <div id='imageTemplatePreview'></div>
-                            <textarea onchange='changeStyle("imageTemplatePreview", "postie-settings-imagetemplate", "imagetemplateselect", 
-                                "postie-settings-selected_imagetemplate", "smiling.jpg", true);' cols='70' rows='7' id='postie-settings-imagetemplate' name='postie-settings[imagetemplate]'>
-                                      <?php echo esc_attr($imagetemplate) ?>
+                                      <textarea onchange='changeStyle("imageTemplatePreview", "postie-settings-imagetemplate", "imagetemplateselect", 
+                                          "postie-settings-selected_imagetemplate", "smiling.jpg", true);' cols='70' rows='7' id='postie-settings-imagetemplate' name='postie-settings[imagetemplate]'>
+                                <?php echo esc_attr($imagetemplate) ?>
                             </textarea>
                         </td>
                     </tr> 
@@ -447,8 +453,8 @@
                             &nbsp;&nbsp;
                             <?php _e('Preview', 'postie'); ?>
                             <div id='video1TemplatePreview'></div>
-                            <textarea onchange="changeStyle('video1TemplatePreview','postie-settings-video1template',
-                                'video1templateselect', 'postie-settings-selected_video1template','hi.mp4',true);" cols='70' rows='7' id='postie-settings-video1template'
+                                      <textarea onchange="changeStyle('video1TemplatePreview','postie-settings-video1template',
+                                          'video1templateselect', 'postie-settings-selected_video1template','hi.mp4',true);" cols='70' rows='7' id='postie-settings-video1template'
                                       name='postie-settings[video1template]'><?php echo esc_attr($video1template) ?></textarea>
                         </td>
                     </tr>
@@ -489,8 +495,8 @@
                             &nbsp;&nbsp;
                             <?php _e('Preview', 'postie'); ?>
                             <div id='video2TemplatePreview'></div>
-                            <textarea onchange="changeStyle('video2TemplatePreview','postie-settings-video2template',
-                                'video2templateselect', 'postie-settings-selected_video2template','hi.flv',true);" cols='70' rows='7' id='postie-settings-video2template'
+                                      <textarea onchange="changeStyle('video2TemplatePreview','postie-settings-video2template',
+                                          'video2templateselect', 'postie-settings-selected_video2template','hi.flv',true);" cols='70' rows='7' id='postie-settings-video2template'
                                       name='postie-settings[video2template]'>
                                           <?php echo esc_attr($video2template) ?>
                             </textarea>
@@ -534,8 +540,8 @@
                             &nbsp;&nbsp;
                             <?php _e('Preview', 'postie'); ?>
                             <div id='audioTemplatePreview'></div>
-                            <textarea onchange="changeStyle('audioTemplatePreview','postie-settings-audiotemplate',
-                                'audiotemplateselect', 'postie-settings-selected_audiotemplate','funky.mp3', true);" cols='70' rows='7' id='postie-settings-audiotemplate'
+                                      <textarea onchange="changeStyle('audioTemplatePreview','postie-settings-audiotemplate',
+                                          'audiotemplateselect', 'postie-settings-selected_audiotemplate','funky.mp3', true);" cols='70' rows='7' id='postie-settings-audiotemplate'
                                       name='postie-settings[audiotemplate]'><?php echo esc_attr($audiotemplate) ?></textarea>
                         </td>
                     </tr>

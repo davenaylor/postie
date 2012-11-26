@@ -12,7 +12,7 @@ if (!ini_get('safe_mode')) {
 }
 
 EchoInfo("Starting mail fetch");
-EchoInfo("time:" . time());
+EchoInfo("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
 include('Revision');
 
 $test_email = null;
@@ -21,10 +21,13 @@ extract($config);
 $emails = FetchMail($mail_server, $mail_server_port, $mail_userid, $mail_password, $input_protocol, $time_offset, $test_email, $delete_mail_after_processing);
 $message = 'Done.';
 
+EchoInfo(sprintf(__("There are %d messages to process", "postie"), count($emails)));
+
 //loop through messages
 foreach ($emails as $email) {
     if (function_exists('memory_get_usage'))
-        EchoInfo("memory at start of e-mail processing:" . memory_get_usage());
+        EchoInfo(__("memory at start of e-mail processing:") . memory_get_usage());
+
     //sanity check to see if there is any info in the message
     if ($email == NULL) {
         $message = __('Dang, message is empty!', 'postie');
@@ -44,12 +47,12 @@ foreach ($emails as $email) {
     //Check poster to see if a valid person
     $poster = ValidatePoster($mimeDecodedEmail, $config);
     if (!empty($poster)) {
-        if ($test_email)
+        if (IsDebugMode()) {
             DebugEmailOutput($email, $mimeDecodedEmail);
+        }
         PostEmail($poster, $mimeDecodedEmail, $config);
-    }
-    else {
-        print("<p>Ignoring email - not authorized.\n");
+    } else {
+        EchoInfo("Ignoring email - not authorized.");
     }
     if (function_exists('memory_get_usage'))
         EchoInfo("memory at end of e-mail processing:" . memory_get_usage());

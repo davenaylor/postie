@@ -26,6 +26,8 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
     * Fixed bug where authorized addresses were being checked with case sensitive rather than insensitive.
     * Started using PHP Simple HTML DOM Parser http://simplehtmldom.sourceforge.net/
     * Started process of logging all error messages to the log as well as the page (where appropriate)
+    * Fixed bug where "Preferred Text Type" was not displaying the saved value in settings page.
+    * Fixed bug where Postie was wiping out all other cron schedules.
     * Fixed a number of missing internationalization strings (no translations added however)
     * Added documentation for the comments: command
     * Added feature to specify a custom post type in the subject line. Thanks to Raam Dev http://raamdev.com for his code.

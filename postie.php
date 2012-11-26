@@ -192,7 +192,7 @@ add_filter('whitelist_options', 'postie_whitelist');
 
 function check_postie() {
     $host = get_option('siteurl');
-    preg_match("/https?:\/\/(.[^\/]*)(.*)/", $host, $matches);
+    preg_match("/https?:\/\/(.[^\/]*)(.*)/i", $host, $matches);
     $host = $matches[1];
     $url = "";
     if (isset($matches[2])) {
@@ -236,12 +236,12 @@ function postie_decron() {
 
 /* here we add some more options for how often to check for e-mail */
 
-function more_reccurences() {
-    return array(
-        'weekly' => array('interval' => 604800, 'display' => 'Once Weekly'),
-        'twiceperhour' => array('interval' => 1800, 'display' => 'Twice per hour '),
-        'tenminutes' => array('interval' => 600, 'display' => 'Every 10 minutes')
-    );
+function more_reccurences($schedules) {
+    $schedules['postie-weekly'] = array('interval' => 60 * 60 * 24 * 7, 'display' => __('Once Weekly'));
+    $schedules['postie-twiceperhour'] = array('interval' => 60 * 30, 'display' => __('Twice per hour '));
+    $schedules['postie-tenminutes'] = array('interval' => 60 * 10, 'display' => __('Every 10 minutes'));
+
+    return $schedules;
 }
 
 add_filter('cron_schedules', 'more_reccurences');
