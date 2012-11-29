@@ -79,4 +79,7 @@ function get_attachment_link() {
     return 'http://example.net/wp-content/uploads/filename.jpg';
 }
 
+function get_user_by(){
+    return false;
+}
 ?>

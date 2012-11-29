@@ -95,7 +95,7 @@ class PostieIMAP {
         if (IsDebugMode()) {
             $status = imap_status($this->_connection, $this->_server_string, SA_ALL); //get all messages in debug mode so we can reprocess them
             DebugEcho($this->_server_string);
-            DebugDump($status);
+            //DebugDump($status);
             return $status->unseen;
         } else {
             return imap_num_msg($this->_connection);

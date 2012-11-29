@@ -205,7 +205,7 @@
                                 <tr><th>Administrator role can always post.</th>
                                     <?php
                                     foreach ($wp_roles->role_names as $roleId => $name) {
-                                        $name = translate_with_context($name);
+                                        $name = translate_user_role($name);
                                         $role = &$wp_roles->get_role($roleId);
                                         if ($roleId != "administrator") {
                                             ?>
@@ -406,9 +406,9 @@
                             &nbsp;&nbsp;
                             <?php _e('Preview', 'postie'); ?>
                             <div id='imageTemplatePreview'></div>
-                                      <textarea onchange='changeStyle("imageTemplatePreview", "postie-settings-imagetemplate", "imagetemplateselect", 
-                                          "postie-settings-selected_imagetemplate", "smiling.jpg", true);' cols='70' rows='7' id='postie-settings-imagetemplate' name='postie-settings[imagetemplate]'>
-                                <?php echo esc_attr($imagetemplate) ?>
+                            <textarea onchange='changeStyle("imageTemplatePreview", "postie-settings-imagetemplate", "imagetemplateselect", 
+                                "postie-settings-selected_imagetemplate", "smiling.jpg", true);' cols='70' rows='7' id='postie-settings-imagetemplate' name='postie-settings[imagetemplate]'>
+                                      <?php echo esc_attr($imagetemplate) ?>
                             </textarea>
                         </td>
                     </tr> 
@@ -453,8 +453,8 @@
                             &nbsp;&nbsp;
                             <?php _e('Preview', 'postie'); ?>
                             <div id='video1TemplatePreview'></div>
-                                      <textarea onchange="changeStyle('video1TemplatePreview','postie-settings-video1template',
-                                          'video1templateselect', 'postie-settings-selected_video1template','hi.mp4',true);" cols='70' rows='7' id='postie-settings-video1template'
+                            <textarea onchange="changeStyle('video1TemplatePreview','postie-settings-video1template',
+                                'video1templateselect', 'postie-settings-selected_video1template','hi.mp4',true);" cols='70' rows='7' id='postie-settings-video1template'
                                       name='postie-settings[video1template]'><?php echo esc_attr($video1template) ?></textarea>
                         </td>
                     </tr>
@@ -495,8 +495,8 @@
                             &nbsp;&nbsp;
                             <?php _e('Preview', 'postie'); ?>
                             <div id='video2TemplatePreview'></div>
-                                      <textarea onchange="changeStyle('video2TemplatePreview','postie-settings-video2template',
-                                          'video2templateselect', 'postie-settings-selected_video2template','hi.flv',true);" cols='70' rows='7' id='postie-settings-video2template'
+                            <textarea onchange="changeStyle('video2TemplatePreview','postie-settings-video2template',
+                                'video2templateselect', 'postie-settings-selected_video2template','hi.flv',true);" cols='70' rows='7' id='postie-settings-video2template'
                                       name='postie-settings[video2template]'>
                                           <?php echo esc_attr($video2template) ?>
                             </textarea>
@@ -540,8 +540,8 @@
                             &nbsp;&nbsp;
                             <?php _e('Preview', 'postie'); ?>
                             <div id='audioTemplatePreview'></div>
-                                      <textarea onchange="changeStyle('audioTemplatePreview','postie-settings-audiotemplate',
-                                          'audiotemplateselect', 'postie-settings-selected_audiotemplate','funky.mp3', true);" cols='70' rows='7' id='postie-settings-audiotemplate'
+                            <textarea onchange="changeStyle('audioTemplatePreview','postie-settings-audiotemplate',
+                                'audiotemplateselect', 'postie-settings-selected_audiotemplate','funky.mp3', true);" cols='70' rows='7' id='postie-settings-audiotemplate'
                                       name='postie-settings[audiotemplate]'><?php echo esc_attr($audiotemplate) ?></textarea>
                         </td>
                     </tr>

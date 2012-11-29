@@ -54,6 +54,8 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse(CheckEmailAddress("bob", array("jane")));
         $this->assertTrue(CheckEmailAddress("bob", array("bob")));
         $this->assertTrue(CheckEmailAddress("bob", array("BoB")));
+        $this->assertTrue(CheckEmailAddress("bob", array("bob", "jane")));
+        $this->assertTrue(CheckEmailAddress("bob", array("jane", "bob")));
     }
 
     public function testConvertUTF8ToISO_8859_1() {
@@ -268,10 +270,22 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("<strong>test</strong>", HTML2HTML("<strong>test</strong>"));
     }
 
-    public function  testSafeFileName()
-    {
+    public function testSafeFileName() {
         $this->assertEquals("testtest", SafeFileName('test\/:*?"<>|test'));
     }
+
+    public function testremove_signature() {
+        $this->assertEquals("", remove_signature("", array()));
+        $this->assertEquals("test", remove_signature("test", array()));
+        $this->assertEquals("\n", remove_signature("", array("--", "- --")));
+        $this->assertEquals("test\n", remove_signature("test", array("--", "- --")));
+        $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n--\nsig line 1\nsig line 2", array("--", "- --")));
+        $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n- --\nsig line 1\nsig line 2", array("--", "- --")));
+        $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n-- \nsig line 1\nsig line 2", array("--", "- --")));
+        $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n --\nsig line 1\nsig line 2", array("--", "- --")));
+        $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n--", array("--", "- --")));
+    }
+
 }
 
 ?>

@@ -79,7 +79,9 @@ function EchoInfo($v) {
 function DebugDump($v) {
     if (IsDebugMode()) {
         $o = print_r($v, true);
+        echo "<pre>\n";
         EchoInfo($o);
+        echo "</pre>\n";
     }
 }
 
@@ -118,23 +120,27 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     DebugEcho("the content is $content");
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
-    DebugEcho("the subject is $subject, right after calling GetSubject");
 
     $customImages = SpecialMessageParsing($content, $attachments, $config);
     $post_excerpt = GetPostExcerpt($content, $filternewlines, $convertnewline);
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
     $message_date = NULL;
     if (array_key_exists("date", $mimeDecodedEmail->headers) && !empty($mimeDecodedEmail->headers["date"])) {
-        $message_date = HandleMessageEncoding($mimeDecodedEmail->headers["content-transfer-encoding"], $mimeDecodedEmail->ctype_parameters["charset"], $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
-//$message_date = $mimeDecodedEmail->headers['date'];
+        $cte = "";
+        $cs = "";
+        if (array_key_exists('content-transfer-encoding', $mimeDecodedEmail->headers)) {
+            $cte = $mimeDecodedEmail->headers["content-transfer-encoding"];
+        }
+        if (array_key_exists('charset', $mimeDecodedEmail->ctype_parameters)) {
+            $cs = $mimeDecodedEmail->ctype_parameters["charset"];
+        }
+        $message_date = HandleMessageEncoding($cte, $cs, $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
     }
     list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
     ubb2HTML($content);
 
     if ($converturls)
         $content = clickableLink($content, $shortcode);
-
-//$content = FixEmailQuotes($content);
 
     $id = checkReply($subject);
     $post_categories = GetPostCategories($subject, $default_post_category);
@@ -158,14 +164,12 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
             }
         }
     } else {
+        EchoInfo("Reply detected");
         $isReply = true;
-// strip out quoted content
+        // strip out quoted content
         $lines = explode("\n", $content);
-//$lines=preg_split('/([\r\n]|<br \/>)/',$content);
         $newContents = '';
         foreach ($lines as $line) {
-            //$match=preg_match("/^>.*/i",$line);
-            //echo "line=$line,  match=$match";
             if (preg_match("/^>.*/i", $line) == 0 &&
                     preg_match("/^(from|subject|to|date):.*?/i", $line) == 0 &&
                     preg_match("/^-+.*?(from|subject|to|date).*?/i", $line) == 0 &&
@@ -180,7 +184,6 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     if ($filternewlines)
         $content = FilterNewLines($content, $convertnewline);
 
-
     if ($delay != 0 && $post_status == 'publish') {
         $post_status = 'future';
     } else {
@@ -189,7 +192,6 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
 
     $post_type = GetPostType($subject);
 
-// DEBUG
     $details = array(
         'post_author' => $poster,
         'comment_author' => $postAuthorDetails['author'],
@@ -197,13 +199,10 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         'user_ID' => $postAuthorDetails['user_ID'],
         'email_author' => $postAuthorDetails['email'],
         'post_date' => $post_date,
-        //   'post_date_gmt'  => $post_date_gmt,
-//    'post_content'  => apply_filters('content_save_pre',$content),
+        'post_date_gmt' => $post_date_gmt,
         'post_content' => $content,
         'post_title' => $subject,
         'post_type' => $post_type, /* Added by Raam Dev <raam@raamdev.com> */
-//   'post_modified'  => $post_date,
-//   'post_modified_gmt' => $post_date_gmt,
         'ping_status' => get_option('default_ping_status'),
         'post_category' => $post_categories,
         'tags_input' => $post_tags,
@@ -216,9 +215,9 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     );
     $details = apply_filters('postie_post', $details);
     if (empty($details)) {
-// It is possible that the filter has removed the post, in which case, it should not be posted.
-// And if we created a placeholder post (because this was not a reply to an existing post),
-// then it should be removed
+        // It is possible that the filter has removed the post, in which case, it should not be posted.
+        // And if we created a placeholder post (because this was not a reply to an existing post),
+        // then it should be removed
         if (!$is_reply) {
             wp_delete_post($post_id);
         }
@@ -368,7 +367,7 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
             $theID = '';
         }
     }
-// now get rid of forwarding info in the content
+    // now get rid of forwarding info in the content
     $lines = preg_split("/\r\n/", $content);
     $newContents = '';
     foreach ($lines as $line) {
@@ -401,10 +400,13 @@ function checkReply(&$subject) {
      */
 
     global $wpdb;
-// see if subject starts with Re:
+
+    $id = NULL;
+
+    // see if subject starts with Re:
     if (preg_match("/(^Re:) (.*)/i", $subject, $matches)) {
         $subject = trim($matches[2]);
-// strip out category info into temporary variable
+        // strip out category info into temporary variable
         $tmpSubject = $subject;
         if (preg_match('/(.+): (.*)/', $tmpSubject, $matches)) {
             $tmpSubject = trim($matches[2]);
@@ -422,11 +424,9 @@ function checkReply(&$subject) {
             if (is_array($id)) {
                 $id = $id[count($id) - 1];
             }
-        } else {
-            $id = NULL;
         }
     }
-    return($id);
+    return $id;
 }
 
 function postie_read_me() {
@@ -570,7 +570,6 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
  */
 function PostToDB($details, $isReply, $postToDb = true, $customImageField = false) {
     if ($postToDb) {
-//$_POST['publish'] = true; //Added to make subscribe2 work - it will only handle it if the global varilable _POST is set
         if (!$isReply) {
             $post_ID = wp_insert_post($details);
         } else {
@@ -616,7 +615,7 @@ function BannedFileName($filename, $bannedFiles) {
         return false;
     foreach ($bannedFiles as $bannedFile) {
         if (fnmatch($bannedFile, $filename)) {
-            EchoInfo("Ignoring $filename - it is on the banned files list.");
+            EchoInfo("Ignoring attachment: $filename - it is on the banned files list.");
             return true;
         }
     }
@@ -627,10 +626,7 @@ function BannedFileName($filename, $bannedFiles) {
 function GetContent($part, &$attachments, $post_id, $poster, $config) {
     extract($config);
     global $charset, $encoding;
-    /*
-      if (!function_exists(imap_mime_header_decode))
-      echo "you need to install the php-imap extension for full functionality, including mime header decoding\n";
-     */
+
     $meta_return = NULL;
     EchoInfo("primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
 
@@ -867,13 +863,11 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     global $wpdb;
     $poster = NULL;
     $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
-    $resentFrom = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["resent-from"]));
-    /*
-      if ( empty($from) ) {
-      echo 'Invalid Sender - Emtpy! ';
-      return;
-      }
-     */
+
+    $resentFrom = "";
+    if (array_key_exists('resent-from', $mimeDecodedEmail->headers)) {
+        $resentFrom = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["resent-from"]));
+    }
 
     //See if the email address is one of the special authorized ones
     EchoInfo("Confirming Access For $from ");
@@ -888,11 +882,8 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
             $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
             user_login  = '$admin_username'");
         }
-    } elseif ($turn_authorization_off ||
-            CheckEmailAddress($from, $authorized_addresses) ||
-            CheckEmailAddress($resentFrom, $authorized_addresses)) {
-        $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
-          user_login  = '$admin_username'");
+    } elseif ($turn_authorization_off || CheckEmailAddress($from, $authorized_addresses) || CheckEmailAddress($resentFrom, $authorized_addresses)) {
+        $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
     }
     $validSMTP = checkSMTP($mimeDecodedEmail, $smtp);
     if (!$poster || !$validSMTP) {
@@ -937,6 +928,7 @@ function checkSMTP($mimeDecodedEmail, $smtpservers) {
  * @param string
  */
 function StartFilter(&$content, $start) {
+    DebugEcho("start filter $start");
     $pos = strpos($content, $start);
     if ($pos === false) {
         return($content);
@@ -956,12 +948,9 @@ function remove_signature($content, $filterList) {
     $arrcontent = explode("\n", $content);
     $strcontent = '';
     $pattern = '/^(' . implode('|', $filterList) . ')/';
-    for ($i = 0; $i <= count($arrcontent); $i++) {
+    for ($i = 0; $i < count($arrcontent); $i++) {
         $line = trim($arrcontent[$i]);
-        $nextline = $arrcontent[$i + 1];
         if (preg_match($pattern, trim($line))) {
-            //if (!strpos(trim($line), $pattern)==0) {
-            //print("<p>Found in $line");
             break;
         }
         $strcontent .= $line . "\n";
@@ -976,6 +965,7 @@ function remove_signature($content, $filterList) {
  * @param filter
  */
 function EndFilter($content, $end) {
+    DebugEcho("end filter $end");
     $pos = strpos($content, $end);
     if ($pos === false)
         return $content;
@@ -1283,11 +1273,11 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     $file = postie_handle_upload($the_file, $overrides, $time);
     //unlink($tmpFile);
 
-    if (isset($file['error'])){
+    if (isset($file['error'])) {
         throw new Exception($file['error']);
         return new WP_Error('upload_error', $file['error']);
     }
-    
+
     $url = $file['url'];
     $type = $file['type'];
     $file = $file['file'];
@@ -1793,7 +1783,7 @@ function ReplaceImageCIDs(&$content, &$attachments) {
  */
 function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
     extract($config);
-    ($start_image_count_at_zero ? $startIndex = 0 : $startIndex = 1);
+    $startIndex = $start_image_count_at_zero ? 0 : 1;
     if (!empty($attachments) && $auto_gallery) {
         $value = '[gallery]';
         if ($images_append) {
@@ -1805,8 +1795,9 @@ function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
     }
     $pictures = array();
     ksort($attachments);
+    $pics = "";
     foreach ($attachments as $i => $value) {
-// looks for ' #img1# ' etc... and replaces with image
+        // looks for ' #img1# ' etc... and replaces with image
         $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $image_placeholder);
         $eimg_placeholder_temp = str_replace("%", intval($startIndex + $i), "#eimg%#");
         $img_placeholder_temp = rtrim($img_placeholder_temp, '#');
@@ -1861,39 +1852,28 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
         $mimeDecodedEmail->headers['subject'] = $subject;
     } else {
         $subject = $mimeDecodedEmail->headers['subject'];
-        if ($mimeDecodedEmail->headers["content-transfer-encoding"] != '') {
+        if (array_key_exists('content-transfer-encoding', $mimeDecodedEmail->headers)) {
             $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
-        } else if ($mimeDecodedEmail->ctype_parameters["content-transfer-encoding"] != '') {
+        } else if (array_key_exists("content-transfer-encoding", $mimeDecodedEmail->ctype_parameters)) {
             $encoding = $mimeDecodedEmail->ctype_parameters["content-transfer-encoding"];
         } else {
             $encoding = '7bit';
         }
-        if (function_exists(imap_mime_header_decode)) {
+        if (function_exists('imap_mime_header_decode')) {
             $subject = '';
-            //$elements=imap_mime_header_decode($mimeDecodedEmail->headers['subject']);
-            //$text = "=?utf-8?b?w6XDpMO2?= unicode";
             $text = $mimeDecodedEmail->headers['subject'];
-            //$text="test emails with ISO 8859-2 cahracters ąęśćółńżźĄĘŚÓŁŃŻŹ";
-            //echo "text='$text'\n";
+
             $elements = imap_mime_header_decode($text);
             for ($i = 0; $i < count($elements); $i++) {
                 $thischarset = $elements[$i]->charset;
                 if ($thischarset == 'default')
                     $thischarset = $charset;
-                //echo "Charset: {$thischarset}\n";
-                //echo "Text: ". utf8_encode($elements[$i]->text). "\n\n";
+
                 $subject.=HandleMessageEncoding($encoding, $thischarset, $elements[$i]->text, $message_encoding, $message_dequote);
-                //echo "subject=$subject\n";
             }
-            //echo "now subject= $subject\n";
-            //if ($element->charset!='') {
-            //$charset = $element[0]->charset;
-            //echo "charset='$charset'\n";
-            // }
         }
         if (!$allow_html_in_subject) {
             $subject = htmlentities($subject, ENT_COMPAT | ENT_HTML401, $message_encoding);
-            //$subject = htmlentities($subject);
         }
     }
 //This is for ISO-2022-JP - Can anyone confirm that this is still neeeded?
@@ -1945,7 +1925,7 @@ function GetPostCategories(&$subject, $defaultCategory) {
     global $wpdb;
     $post_categories = array();
     $matches = array();
-//try and determine category
+    //try and determine category
     if (preg_match('/(.+): (.*)/', $subject, $matches)) {
         $subject = trim($matches[2]);
         $matches[1] = array($matches[1]);
@@ -1960,7 +1940,7 @@ function GetPostCategories(&$subject, $defaultCategory) {
         foreach ($matches[1] as $match) {
             $match = trim($match);
             $category = NULL;
-            EchoInfo("Categories - Working on $match");
+            //EchoInfo("Categories - Working on $match");
 
             $sql_name = 'SELECT term_id 
                          FROM ' . $wpdb->terms . ' 
@@ -1994,11 +1974,11 @@ function GetPostCategories(&$subject, $defaultCategory) {
  * This function just outputs a simple html report about what is being posted in
  */
 function DisplayEmailPost($details) {
-    DebugDump($config);
+    //DebugDump($config);
     DebugDump($details);
 
     $theFinalContent = $details['post_content'];
-// Report
+    // Report
     EchoInfo('<b>Post Author</b>: ' . $details["post_author"]);
     EchoInfo('<b>Date</b>: ' . $details["post_date"]);
     foreach ($details["post_category"] as $category) {
@@ -2605,9 +2585,9 @@ function SpecialMessageParsing(&$content, &$attachments, $config) {
             array_push($customImages, $matches[1]);
         }
 
-        return($customImages);
+        return $customImages;
     }
-    return(NULL);
+    return NULL;
 }
 
 /**
