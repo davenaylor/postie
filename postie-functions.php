@@ -439,7 +439,7 @@ function postie_read_me() {
 function PostieMenu() {
     if (function_exists('add_options_page')) {
         if (current_user_can('manage_options')) {
-            add_options_page("Postie", "Postie", 0, POSTIE_ROOT . "/postie.php", "ConfigurePostie");
+            add_options_page("Postie", "Postie", 'manage_options', POSTIE_ROOT . "/postie.php", "ConfigurePostie");
         }
     }
 }
@@ -2533,8 +2533,6 @@ function UpdatePostiePermissions($role_access) {
     $admin = $wp_roles->get_role("administrator");
     $admin->add_cap("config_postie");
     $admin->add_cap("post_via_postie");
-
-//DebugDump($admin);
 
     if (!is_array($role_access)) {
         $role_access = array();

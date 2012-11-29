@@ -54,15 +54,11 @@
  * Make it possible to post without a script at all
  */
 
-//Older Version History is in the HISTORY file
-//error_reporting(E_ALL  & ~E_NOTICE);
-//ini_set("display_errors", 1);
-
 define("POSTIE_ROOT", dirname(__FILE__));
 define("POSTIE_URL", WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)));
 
 function postie_loadjs_add_page() {
-    $postiepage = add_options_page('Postie', 'Postie', 8, POSTIE_ROOT . '/postie.php', 'postie_loadjs_options_page');
+    $postiepage = add_options_page('Postie', 'Postie', 'manage_options', POSTIE_ROOT . '/postie.php', 'postie_loadjs_options_page');
     add_action("admin_print_scripts-$postiepage", 'postie_loadjs_admin_head');
 }
 
@@ -88,7 +84,6 @@ if (isset($_GET["postie_read_me"])) {
 //Add Menu Configuration
 if (is_admin()) {
     require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "postie-functions.php");
-    //add_action("admin_menu","PostieMenu");
     add_action('admin_init', 'postie_admin_settings');
     add_action('admin_menu', 'postie_loadjs_add_page');
     if (function_exists('load_plugin_textdomain')) {
