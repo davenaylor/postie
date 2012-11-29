@@ -23,10 +23,11 @@ $message = 'Done.';
 
 EchoInfo(sprintf(__("There are %d messages to process", "postie"), count($emails)));
 
+if (function_exists('memory_get_usage'))
+    EchoInfo(__("memory at start of e-mail processing:") . memory_get_usage());
+
 //loop through messages
 foreach ($emails as $email) {
-    if (function_exists('memory_get_usage'))
-        EchoInfo(__("memory at start of e-mail processing:") . memory_get_usage());
 
     //sanity check to see if there is any info in the message
     if ($email == NULL) {
@@ -43,20 +44,22 @@ foreach ($emails as $email) {
     }
 
     $mimeDecodedEmail = DecodeMIMEMail($email, true);
-
+    if (IsDebugMode()) {
+        DebugEmailOutput($email, $mimeDecodedEmail);
+    }
+    
     //Check poster to see if a valid person
     $poster = ValidatePoster($mimeDecodedEmail, $config);
     if (!empty($poster)) {
-        if (IsDebugMode()) {
-            DebugEmailOutput($email, $mimeDecodedEmail);
-        }
         PostEmail($poster, $mimeDecodedEmail, $config);
     } else {
         EchoInfo("Ignoring email - not authorized.");
     }
-    if (function_exists('memory_get_usage'))
-        EchoInfo("memory at end of e-mail processing:" . memory_get_usage());
-} // end looping over messages
+}
+
+if (function_exists('memory_get_usage'))
+    EchoInfo("memory at end of e-mail processing:" . memory_get_usage());
+
 EchoInfo($message);
 
 if (!ini_get('safe_mode')) {

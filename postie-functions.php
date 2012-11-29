@@ -633,9 +633,13 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
      */
     $meta_return = NULL;
     EchoInfo("primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
+
     DecodeBase64Part($part);
-    if (BannedFileName($part->ctype_parameters['name'], $banned_files_list))
-        return NULL;
+
+    if (array_key_exists('name', $part->ctype_parameters))
+        if (BannedFileName($part->ctype_parameters['name'], $banned_files_list))
+            return NULL;
+
     if ($part->ctype_primary == "application" && $part->ctype_secondary == "octet-stream") {
         if ($part->disposition == "attachment") {
             $image_endings = array("jpg", "png", "gif", "jpeg", "pjpeg");
@@ -662,8 +666,11 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
         }
     } else {
-// fix filename (remove non-standard characters)
-        $filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $part->ctype_parameters['name']);
+        // fix filename (remove non-standard characters)
+        $filename = "";
+        if (array_key_exists('name', $part->ctype_parameters)) {
+            $filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $part->ctype_parameters['name']);
+        }
         switch (strtolower($part->ctype_primary)) {
             case 'multipart':
                 FilterTextParts($part, $prefer_text_type);
@@ -675,11 +682,16 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 $tmpcharset = trim($part->ctype_parameters['charset']);
                 if ($tmpcharset != '')
                     $charset = $tmpcharset;
-                $tmpencoding = trim($part->headers['content-transfer-encoding']);
-                if ($tmpencoding != '')
-                    $encoding = $tmpencoding;
+                if (array_key_exists('content-transfer-encoding', $part->headers)) {
+                    $tmpencoding = trim($part->headers['content-transfer-encoding']);
+                    if ($tmpencoding != '') {
+                        $encoding = $tmpencoding;
+                    }
+                }
 
-                $part->body = HandleMessageEncoding($part->headers["content-transfer-encoding"], $part->ctype_parameters["charset"], $part->body, $message_encoding, $message_dequote);
+                if (array_key_exists('content-transfer-encoding', $part->headers)) {
+                    $part->body = HandleMessageEncoding($part->headers["content-transfer-encoding"], $part->ctype_parameters["charset"], $part->body, $message_encoding, $message_dequote);
+                }
 
                 //go through each sub-section
                 if ($part->ctype_secondary == 'enriched') {
@@ -690,7 +702,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $meta_return .= HTML2HTML($part->body) . "\n";
                 } else {
                     //regular text, so just strip the pgp signature
-                    if (ALLOW_HTML_IN_BODY) {
+                    if ($allow_html_in_body) {
                         $meta_return .= $part->body . "\n";
                     } else {
                         $meta_return .= htmlentities($part->body) . "\n";
@@ -863,7 +875,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
       }
      */
 
-//See if the email address is one of the special authorized ones
+    //See if the email address is one of the special authorized ones
     EchoInfo("Confirming Access For $from ");
     $sql = 'SELECT id FROM ' . $wpdb->users . ' WHERE user_email=\'' . addslashes($from) . "' LIMIT 1;";
     $user_ID = $wpdb->get_var($sql);
@@ -1111,8 +1123,10 @@ function cp1252_to_utf8($str) {
  * This function handles decoding base64 if needed
  */
 function DecodeBase64Part(&$part) {
-    if (strtolower($part->headers['content-transfer-encoding']) == 'base64') {
-        $part->body = base64_decode($part->body);
+    if (array_key_exists('content-transfer-encoding', $part->headers)) {
+        if (strtolower($part->headers['content-transfer-encoding']) == 'base64') {
+            $part->body = base64_decode($part->body);
+        }
     }
 }
 
@@ -1261,24 +1275,26 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     }
 
     $time = current_time('mysql');
-    if ($post = get_post($post_id)) {
-        if (substr($post->post_date, 0, 4) > 0)
-            $time = $post->post_date;
-    }
+    $post = get_post($post_id);
+    if (substr($post->post_date, 0, 4) > 0)
+        $time = $post->post_date;
+
 
     $file = postie_handle_upload($the_file, $overrides, $time);
-//unlink($tmpFile);
+    //unlink($tmpFile);
 
-    if (isset($file['error']))
+    if (isset($file['error'])){
+        throw new Exception($file['error']);
         return new WP_Error('upload_error', $file['error']);
-
+    }
+    
     $url = $file['url'];
     $type = $file['type'];
     $file = $file['file'];
     $title = preg_replace('/\.[^.]+$/', '', basename($file));
     $content = '';
 
-// use image exif/iptc data for title and caption defaults if possible
+    // use image exif/iptc data for title and caption defaults if possible
     include_once(ABSPATH . '/wp-admin/includes/image.php');
     if ($image_meta = @wp_read_image_metadata($file)) {
         if (trim($image_meta['title']))
@@ -1287,7 +1303,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
             $content = $image_meta['caption'];
     }
 
-// Construct the attachment array
+    // Construct the attachment array
     $attachment = array_merge(array(
         'post_mime_type' => $type,
         'guid' => $url,
@@ -1298,7 +1314,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
         'post_author' => $poster
             ), $post_data);
 
-// Save the data
+    // Save the data
     $id = wp_insert_attachment($attachment, $file, $post_id);
     if (!is_wp_error($id)) {
         wp_update_attachment_metadata($id, wp_generate_attachment_metadata($id, $file));
@@ -1308,7 +1324,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
 }
 
 function postie_handle_upload(&$file, $overrides = false, $time = null) {
-// The default error handler.
+    // The default error handler.
     if (!function_exists('wp_handle_upload_error')) {
 
         function wp_handle_upload_error(&$file, $message) {
@@ -1317,16 +1333,16 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
 
     }
 
-// You may define your own function and pass the name in $overrides['upload_error_handler']
+    // You may define your own function and pass the name in $overrides['upload_error_handler']
     $upload_error_handler = 'wp_handle_upload_error';
 
-// You may define your own function and pass the name in $overrides['unique_filename_callback']
+    // You may define your own function and pass the name in $overrides['unique_filename_callback']
     $unique_filename_callback = null;
 
-// $_POST['action'] must be set and its value must equal $overrides['action'] or this:
+    // $_POST['action'] must be set and its value must equal $overrides['action'] or this:
     $action = 'wp_handle_upload';
 
-// Courtesy of php.net, the strings that describe the error indicated in $_FILES[{form field}]['error'].
+    // Courtesy of php.net, the strings that describe the error indicated in $_FILES[{form field}]['error'].
     $upload_error_strings = array(false,
         __("The uploaded file exceeds the <code>upload_max_filesize</code> directive in <code>php.ini</code>."),
         __("The uploaded file exceeds the <em>MAX_FILE_SIZE</em> directive that was specified in the HTML form."),
@@ -1336,34 +1352,34 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         __("Missing a temporary folder."),
         __("Failed to write file to disk."));
 
-// All tests are on by default. Most can be turned off by $override[{test_name}] = false;
+    // All tests are on by default. Most can be turned off by $override[{test_name}] = false;
     $test_form = true;
     $test_size = true;
 
-// If you override this, you must provide $ext and $type!!!!
+    // If you override this, you must provide $ext and $type!!!!
     $test_type = true;
     $mimes = false;
 
-// Install user overrides. Did we mention that this voids your warranty?
+    // Install user overrides. Did we mention that this voids your warranty?
     if (is_array($overrides))
         extract($overrides, EXTR_OVERWRITE);
 
-// A correct form post will pass this test.
+    // A correct form post will pass this test.
     if ($test_form && (!isset($_POST['action']) || ($_POST['action'] != $action ) ))
         return $upload_error_handler($file, __('Invalid form submission.'));
 
-// A successful upload will pass this test. It makes no sense to override this one.
+    // A successful upload will pass this test. It makes no sense to override this one.
     if ($file['error'] > 0)
         return $upload_error_handler($file, $upload_error_strings[$file['error']]);
 
-// A non-empty file will pass this test.
+    // A non-empty file will pass this test.
     if ($test_size && !($file['size'] > 0 ))
         return $upload_error_handler($file, __('File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini.'));
 
-// A properly uploaded file will pass this test. There should be no reason to override this one.
+    // A properly uploaded file will pass this test. There should be no reason to override this one.
     if (!file_exists($file['tmp_name']))
         return $upload_error_handler($file, __('Specified file failed upload test.'));
-// A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
+    // A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
     if ($test_type) {
         $wp_filetype = wp_check_filetype($file['name'], $mimes);
 
@@ -1379,26 +1395,27 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
             $type = $file['type'];
     }
 
-// A writable uploads dir will pass this test. Again, there's no point overriding this one.
+    // A writable uploads dir will pass this test. Again, there's no point overriding this one.
     if (!( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] ))
         return $upload_error_handler($file, $uploads['error']);
 
-// fix filename (remove non-standard characters)
+    // fix filename (remove non-standard characters)
     $file['name'] = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $file['name']);
     $filename = wp_unique_filename($uploads['path'], $file['name'], $unique_filename_callback);
 
-// Move the file to the uploads dir
+    // Move the file to the uploads dir
     $new_file = $uploads['path'] . "/$filename";
     if (false === @ rename($file['tmp_name'], $new_file)) {
+        print_r($file);
         return $upload_error_handler($file, sprintf(__('The uploaded file could not be moved to %s.'), $uploads['path']));
     }
 
-// Set correct file permissions
+    // Set correct file permissions
     $stat = stat(dirname($new_file));
     $perms = $stat['mode'] & 0000666;
     @ chmod($new_file, $perms);
 
-// Compute the URL
+    // Compute the URL
     $url = $uploads['url'] . "/$filename";
 
     $return = apply_filters('wp_handle_upload', array('file' => $new_file, 'url' => $url, 'type' => $type));
@@ -1445,7 +1462,8 @@ function FilterTextParts(&$mimeDecodedEmail, $preferTextType) {
         }
     }
     if ($found && $newParts) {
-//This is now the filtered list of just the preferred type.
+        //This is now the filtered list of just the preferred type.
+        echo count($newParts) . " parts\n";
         $mimeDecodedEmail->parts = $newParts;
     }
 }
@@ -1555,8 +1573,8 @@ function DecodeMIMEMail($email, $decodeHeaders = false) {
     $params['decode_bodies'] = false;
     $params['decode_headers'] = $decodeHeaders;
     $params['input'] = $email;
-//$decoded = imap_mime_header_decode($email);
-    $decoded = Mail_mimeDecode::decode($params);
+    $md = new Mail_mimeDecode($email);
+    $decoded = $md->decode($params);
     if (empty($decoded->parts))
         $decoded->parts = array(); // have an empty array at minimum, so that it is safe for "foreach"
     return $decoded;
@@ -1589,7 +1607,7 @@ function CheckEmailAddress($address, $authorized) {
 }
 
 /**
- * This method works around a problemw with email address with extra <> in the email address
+ * This method works around a problem with email address with extra <> in the email address
  * @param string
  * @return string
  */
@@ -2539,17 +2557,22 @@ function IsDebugMode() {
     return (defined('POSTIE_DEBUG') && POSTIE_DEBUG == true);
 }
 
+function SafeFileName($filename) {
+    return str_replace(array('\\', '/', ':', '*', '?', '"', '<', '>', '|'), array('', '', '', '', '', '', '', '', ''), $filename);
+}
+
 function DebugEmailOutput(&$email, &$mimeDecodedEmail) {
-    $file = fopen("test_emails/" . $mimeDecodedEmail->headers["message-id"] . ".txt", "w");
+    $fname = POSTIE_ROOT . DIRECTORY_SEPARATOR . "test_emails" . DIRECTORY_SEPARATOR . SafeFileName($mimeDecodedEmail->headers["message-id"]);
+    $file = fopen($fname . ".txt ", "w");
     fwrite($file, $email);
     fclose($file);
 
-    $file = fopen("test_emails/" . $mimeDecodedEmail->headers["message-id"] . "-mime.txt", "w");
+    $file = fopen($fname . "-mime.txt ", "w");
     fwrite($file, print_r($mimeDecodedEmail, true));
     fclose($file);
 
-    $file = fopen("test_emails/" . $mimeDecodedEmail->headers["message-id"] . ".php", "w");
-    fwrite($file, var_export($mimeDecodedEmail, true));
+    $file = fopen($fname . ".php ", "w");
+    fwrite($file, serialize($email));
     fclose($file);
 }
 
@@ -2580,7 +2603,7 @@ function SpecialMessageParsing(&$content, &$attachments, $config) {
     } else {
         $customImages = array();
         foreach ($attachments["html"] as $value) {
-            preg_match("/src=['\"]([^'\"]*)['\"]/", $value, $matches);
+            preg_match("/src = ['\"]([^'\"]*)['\"]/", $value, $matches);
             array_push($customImages, $matches[1]);
         }
 
@@ -2600,8 +2623,8 @@ function VodafoneHandler(&$content, &$attachments) {
             //The content is now just the text of the message
             $content = $matches[1];
             //Now to clean up the attachments
-            $vodafone_images = array("live.gif", "smiley.gif", "border_left_txt.gif",
-                "border_top.gif",
+            $vodafone_images = array("live.gif"
+                , "smiley.gif", "border_left_txt.gif", "border_top.gif",
                 "border_bot.gif", "border_right.gif", "banner1.gif", "i_text.gif", "i_picture.gif",);
             while (list($key, $value) = each($attachments['cids'])) {
                 if (!in_array($key, $vodafone_images)) {

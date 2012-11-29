@@ -268,6 +268,10 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("<strong>test</strong>", HTML2HTML("<strong>test</strong>"));
     }
 
+    public function  testSafeFileName()
+    {
+        $this->assertEquals("testtest", SafeFileName('test\/:*?"<>|test'));
+    }
 }
 
 ?>
