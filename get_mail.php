@@ -37,17 +37,19 @@ foreach ($emails as $email) {
         $message = __("There does not seem to be any new mail.", 'postie');
         continue;
     }
-    // check for XSS attacks - we disallow any javascript, meta, onload, or base64
-    if (preg_match("@((%3C|<)/?script|<meta|document\.|\.cookie|\.createElement|onload\s*=|(eval|base64)\()@is", $email)) {
-        EchoInfo("possible XSS attack - ignoring email");
-        continue;
-    }
 
     $mimeDecodedEmail = DecodeMIMEMail($email, true);
     if (IsDebugMode()) {
         DebugEmailOutput($email, $mimeDecodedEmail);
     }
-    
+
+    // check for XSS attacks - we disallow any javascript, meta, onload, or base64
+    if (preg_match("@((%3C|<)/?script|<meta|document\.|\.cookie|\.createElement|onload\s*=|(eval|base64)\()@is", $email, $matches)) {
+        EchoInfo("possible XSS attack - ignoring email");
+        DebugDump($matches);
+        continue;
+    }
+
     //Check poster to see if a valid person
     $poster = ValidatePoster($mimeDecodedEmail, $config);
     if (!empty($poster)) {

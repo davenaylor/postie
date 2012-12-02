@@ -111,6 +111,12 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $postAuthorDetails = getPostAuthorDetails($subject, $content, $decoded);
     }
 
+       function testGreek() {
+
+        $message = file_get_contents("data/greek.var");
+        $email = unserialize($message);
+        $decoded = DecodeMIMEMail($email);
+       }
 }
 
 ?>
