@@ -106,7 +106,6 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         "image_files" => array() //holds the files for each image
     );
     EchoInfo("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
-    DebugDump($mimeDecodedEmail);
 
     FilterTextParts($mimeDecodedEmail, $prefer_text_type);
     $tmpPost = array('post_title' => 'tmptitle', 'post_content' => 'tmpPost');
@@ -508,7 +507,7 @@ function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password
         $msg_count = 0;
     }
 
-// loop through messages 
+    // loop through messages 
     for ($i = 1; $i <= $msg_count; $i++) {
         $emails[$i] = $mail_server->fetchEmail($i);
         if ($deleteMessages) {
@@ -518,7 +517,7 @@ function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password
     if ($deleteMessages) {
         $mail_server->expungeMessages();
     }
-//clean up
+    //clean up
     $mail_server->disconnect();
     return $emails;
 }
@@ -710,8 +709,10 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             case 'image':
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 $file = wp_get_attachment_url($file_id);
-
-                $cid = trim($part->headers["content-id"], "<>");
+                $cid = "";
+                if (array_key_exists('content-id', $part->headers)) {
+                    $cid = trim($part->headers["content-id"], "<>");
+                }
                 ; //cids are in <cid>
                 $the_post = get_post($file_id);
                 $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $imagetemplate);
@@ -1785,48 +1786,51 @@ function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
     extract($config);
     $startIndex = $start_image_count_at_zero ? 0 : 1;
     if (!empty($attachments) && $auto_gallery) {
-        $value = '[gallery]';
+        $imageTemplate = '[gallery]';
         if ($images_append) {
-            $content .= $value;
+            $content .= $imageTemplate;
         } else {
-            $content = "$value\n" . $content;
+            $content = "$imageTemplate\n" . $content;
         }
+        DebugEcho("Auto gallery");
         return;
     }
-    $pictures = array();
-    ksort($attachments);
+
     $pics = "";
-    foreach ($attachments as $i => $value) {
+    $i = 0;
+    foreach ($attachments as $attachementName => $imageTemplate) {
         // looks for ' #img1# ' etc... and replaces with image
         $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $image_placeholder);
         $eimg_placeholder_temp = str_replace("%", intval($startIndex + $i), "#eimg%#");
         $img_placeholder_temp = rtrim($img_placeholder_temp, '#');
         $eimg_placeholder_temp = rtrim($eimg_placeholder_temp, '#');
-        if (stristr($content, $img_placeholder_temp) ||
-                stristr($content, $eimg_placeholder_temp)) {
+
+        if (stristr($content, $img_placeholder_temp) || stristr($content, $eimg_placeholder_temp)) {
             // look for caption
             $caption = '';
             $content = preg_replace("/&#0?39;/", "'", $content);
             $content = preg_replace("/&(#0?34|quot);/", "\"", $content);
-            if (preg_match("/$img_placeholder_temp caption=['\"]?(.*?)['\"]?#/", $content, $matches)) {
+            if (preg_match("/$img_placeholder_temp caption=['\"]?(.*?)['\"]?#/i", $content, $matches)) {
                 $caption = $matches[1];
+                DebugEcho("found caption: $caption");
                 $img_placeholder_temp = substr($matches[0], 0, -1);
                 $eimg_placeholder_temp = substr($matches[0], 0, -1);
+            } else {
+                DebugEcho("No caption found");
             }
-            $value = str_replace('{CAPTION}', $caption, $value);
+            $imageTemplate = str_replace('{CAPTION}', $caption, $imageTemplate);
             $img_placeholder_temp.='#';
             $eimg_placeholder_temp.='#';
-            $content = str_replace($img_placeholder_temp, $value, $content);
-            $content = str_replace($eimg_placeholder_temp, $value, $content);
-            //print(htmlspecialchars("value=$value\n",ENT_QUOTES));
-            //print(htmlspecialchars("content=\n***\n$content\n***\n",ENT_QUOTES));
+            $content = str_ireplace($img_placeholder_temp, $imageTemplate, $content);
+            $content = str_ireplace($eimg_placeholder_temp, $imageTemplate, $content);
         } else {
-            $value = str_replace('{CAPTION}', '', $value);
+            $imageTemplate = str_replace('{CAPTION}', '', $imageTemplate);
             /* if using the gallery shortcode, don't add pictures at all */
             if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
-                $pics .= $value;
+                $pics .= $imageTemplate;
             }
         }
+        $i++;
     }
     if ($images_append) {
         $content .= $pics;
@@ -1974,7 +1978,6 @@ function GetPostCategories(&$subject, $defaultCategory) {
  * This function just outputs a simple html report about what is being posted in
  */
 function DisplayEmailPost($details) {
-    //DebugDump($config);
     DebugDump($details);
 
     $theFinalContent = $details['post_content'];

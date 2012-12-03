@@ -286,6 +286,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n--", array("--", "- --")));
     }
 
+ 
 }
 
 ?>

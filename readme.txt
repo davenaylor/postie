@@ -34,6 +34,8 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
     * Removed a number of deprecated WordPress functions.
     * Fixed numerous warning messages
     * added phpUnit tests
+    * Allow wp-config.php to be in alternate location as described here: http://codex.wordpress.org/Hardening_WordPress#Securing_wp-config.php
+    * Fix a bug that didn't replace the #img# tags correctly.
 
 * 1.4.5 (2012.11.14)
     * Fixed bug in XSS attack vulnerability code. Thanks to R Reid http://blog.strictly-software.com/2012/03/fixing-postie-plugin-for-wordpress-to.html
@@ -187,6 +189,9 @@ This fetches the mail every ten minutes with wget
   
   Or, if you use IPTC captions, this caption will be used  (adding a caption
   in many photo editing programs (for example Picasa), will add an IPTC caption)
+
+  Note that the images are processed in the order they are attached as of version
+  1.4.6.
 
 * Image templates
   Postie now uses the default wordpress image template, but you can specify a

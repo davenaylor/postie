@@ -1,6 +1,13 @@
 <?php
 
-include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
+//support moving wp-config.php as described here http://codex.wordpress.org/Hardening_WordPress#Securing_wp-config.php
+$wp_config_path = dirname(dirname(dirname(dirname(__FILE__))));
+if (file_exists($wp_config_path . DIRECTORY_SEPARATOR . "wp-config.php")) {
+    include_once ($wp_config_path . DIRECTORY_SEPARATOR . "wp-config.php");
+} else {
+    include_once (dirname($wp_config_path)) . DIRECTORY_SEPARATOR . "wp-config.php";
+}
+
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mimedecode.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'simple_html_dom.php');
@@ -28,7 +35,6 @@ if (function_exists('memory_get_usage'))
 
 //loop through messages
 foreach ($emails as $email) {
-
     //sanity check to see if there is any info in the message
     if ($email == NULL) {
         $message = __('Dang, message is empty!', 'postie');
@@ -39,9 +45,9 @@ foreach ($emails as $email) {
     }
 
     $mimeDecodedEmail = DecodeMIMEMail($email, true);
-    if (IsDebugMode()) {
-        DebugEmailOutput($email, $mimeDecodedEmail);
-    }
+
+    DebugEmailOutput($email, $mimeDecodedEmail);
+
 
     // check for XSS attacks - we disallow any javascript, meta, onload, or base64
     if (preg_match("@((%3C|<)/?script|<meta|document\.|\.cookie|\.createElement|onload\s*=|(eval|base64)\()@is", $email, $matches)) {

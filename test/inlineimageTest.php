@@ -21,7 +21,9 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
             'start_image_count_at_zero' => false,
             'images_append' => false,
             'filternewlines' => true,
-            'convertnewline' => false
+            'convertnewline' => false,
+            'auto_gallery' => false,
+            'image_placeholder' => '#img%#'
         );
     }
 
@@ -111,12 +113,60 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $postAuthorDetails = getPostAuthorDetails($subject, $content, $decoded);
     }
 
-       function testGreek() {
+    function testGreek() {
 
         $message = file_get_contents("data/greek.var");
         $email = unserialize($message);
         $decoded = DecodeMIMEMail($email);
-       }
+    }
+
+    public function testReplaceImagePlaceHolders() {
+        $c = "";
+        $config = $this->standardConfig();
+        $attachements = array("image.jpg" => 'template with {CAPTION}');
+
+         ReplaceImagePlaceHolders(&$c, array(), $config);
+        $this->assertEquals("", $c);
+        
+        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        $this->assertEquals("template with ", $c);
+
+        $c = "#img1#";
+        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        $this->assertEquals("template with ", $c);
+        
+        $c = "test #img1# test";
+        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        $this->assertEquals("test template with  test", $c);
+        
+        $c = "test #img1 caption='1'# test";
+        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        $this->assertEquals("test template with 1 test", $c);
+        
+         $c = "test #img1 caption='1'# test #img2 caption='2'#";
+        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        $this->assertEquals("test template with 1 test #img2 caption='2'#", $c);
+        
+        $attachements = array("image1.jpg" => 'template with {CAPTION}', "image2.jpg" => 'template with {CAPTION}');
+        $c = "test #img1 caption='1'# test #img2 caption='2'#";
+        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        $this->assertEquals("test template with 1 test template with 2", $c);
+        
+        $config['auto_gallery']=true;
+        $c = "test";
+        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        $this->assertEquals("[gallery]\ntest", $c);
+        
+        $config['images_append']=true;
+        $c = "test";
+        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        $this->assertEquals("test[gallery]", $c);
+        
+        $c = "test";
+        ReplaceImagePlaceHolders(&$c, array(), $config);
+        $this->assertEquals("test", $c);
+    }
+
 }
 
 ?>

@@ -75,7 +75,9 @@ class PostieIMAP {
         if (preg_match("/google|gmail/i", $server)) {
             //Fix from Jim Hodgson http://www.jimhodgson.com/2006/07/19/postie/
             $this->_server_string = "{" . $server . ":" . $port . $option . "}INBOX";
-            //$this->_server_string = "{" . $server . ":" . $port . $option . "}[Gmail]/All Mail";
+//            if (IsDebugMode()) {
+//                $this->_server_string = "{" . $server . ":" . $port . $option . "}[Gmail]/All Mail";
+//            }
         } else {
             $this->_server_string = "{" . $server . ":" . $port . $option . "}";
         }
@@ -94,7 +96,7 @@ class PostieIMAP {
     function getNumberOfMessages() {
         if (IsDebugMode()) {
             $status = imap_status($this->_connection, $this->_server_string, SA_ALL); //get all messages in debug mode so we can reprocess them
-            DebugEcho($this->_server_string);
+            //DebugEcho($this->_server_string);
             //DebugDump($status);
             return $status->unseen;
         } else {
@@ -111,13 +113,20 @@ class PostieIMAP {
             die("Invalid IMAP/POP3 message index!");
         }
         $header_info = imap_headerinfo($this->_connection, $index);
+//        if (IsDebugMode()) {
+//            $header = imap_fetchheader($this->_connection, $index);
+//            $body = imap_body($this->_connection, $index);
+//            return $header . $body;
+//        } else  {
         if ($header_info->Recent == 'N' || $header_info->Unseen == 'U') {
             $email = imap_fetchheader($this->_connection, $index);
             $email .= imap_body($this->_connection, $index);
+
             return $email;
         } else {
-            return('already read');
+            return 'already read';
         }
+        //}
     }
 
     /**
