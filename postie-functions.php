@@ -677,6 +677,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 $tmpcharset = trim($part->ctype_parameters['charset']);
                 if ($tmpcharset != '')
                     $charset = $tmpcharset;
+                DebugEcho("charset: $tmpcharset");
                 if (array_key_exists('content-transfer-encoding', $part->headers)) {
                     $tmpencoding = trim($part->headers['content-transfer-encoding']);
                     if ($tmpencoding != '') {
@@ -685,7 +686,9 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 }
 
                 if (array_key_exists('content-transfer-encoding', $part->headers)) {
+                    DebugDump($part);
                     $part->body = HandleMessageEncoding($part->headers["content-transfer-encoding"], $part->ctype_parameters["charset"], $part->body, $message_encoding, $message_dequote);
+                    DebugDump($part);
                 }
 
                 //go through each sub-section
@@ -1018,8 +1021,11 @@ function StripPGP($content) {
 function ConvertUTF8ToISO_8859_1($contenttransferencoding, $currentcharset, $body) {
     if ((strtolower($currentcharset) != 'iso-8859-1')) {
         $contenttransferencoding = strtolower($contenttransferencoding);
-        if ($contenttransferencoding == 'base64' || $contenttransferencoding == 'quoted-printable') {
+        if ($contenttransferencoding == 'base64') {
             $body = utf8_decode($body);
+        }
+        if ($contenttransferencoding == 'quoted-printable') {
+            $body = iconv($currentcharset, 'UTF-8', quoted_printable_decode($body));
         }
     }
     return $body;
@@ -1029,15 +1035,22 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     $charset = strtolower($charset);
     $contenttransferencoding = strtolower($contenttransferencoding);
 
-    if ($dequote && strtolower($contenttransferencoding) == 'quoted-printable') {
-        $body = quoted_printable_decode($body);
+    DebugEcho("before HandleMessageEncoding: $body");
+    DebugEcho("charset: $charset");
+    DebugEcho("encoding: $contenttransferencoding");
+
+    if ($contenttransferencoding == 'base64') {
+        DebugEcho("base64 detected");
+        $body = base64_decode($body);
+        $body = iconv($charset, $blogEncoding, $body);
     }
-    if ($blogEncoding == 'iso-8859-1') {
-        $text = ConvertUTF8ToISO_8859_1($contenttransferencoding, $charset, $body);
-    } else {
-        $text = ConvertToUTF_8($charset, $body);
+    if ($dequote && $contenttransferencoding == 'quoted-printable') {
+        DebugEcho("quoted-printable detected");
+        $body = iconv($charset, $blogEncoding, quoted_printable_decode($body));
     }
-    return $text;
+
+    DebugEcho("after HandleMessageEncoding: $body");
+    return $body;
 }
 
 function ConvertToUTF_8($charset, $body) {
@@ -1071,8 +1084,11 @@ function ConvertToUTF_8($charset, $body) {
         case "iso-8859-15":
             $body = iconv("iso-8859-15", "UTF-8//TRANSLIT", $body);
             break;
+        default :
+            $body = iconv($charset, "UTF-8//TRANSLIT", $body);
+            break;
     }
-    return($body);
+    return $body;
 }
 
 /* this function will convert windows-1252 (also known as cp-1252 to utf-8 */
@@ -1116,14 +1132,9 @@ function cp1252_to_utf8($str) {
 function DecodeBase64Part(&$part) {
     if (array_key_exists('content-transfer-encoding', $part->headers)) {
         if (strtolower($part->headers['content-transfer-encoding']) == 'base64') {
-            $part->body = base64_decode($part->body);
+            DebugEcho("base64 detected");
+            $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8', base64_decode($part->body));
         }
-    }
-}
-
-function HandleQuotedPrintable($encoding, &$body, $dequote = true) {
-    if ($dequote && strtolower($encoding) == 'quoted-printable') {
-        $body = quoted_printable_decode($body);
     }
 }
 
@@ -2543,18 +2554,20 @@ function SafeFileName($filename) {
 }
 
 function DebugEmailOutput(&$email, &$mimeDecodedEmail) {
-    $fname = POSTIE_ROOT . DIRECTORY_SEPARATOR . "test_emails" . DIRECTORY_SEPARATOR . SafeFileName($mimeDecodedEmail->headers["message-id"]);
-    $file = fopen($fname . ".txt ", "w");
-    fwrite($file, $email);
-    fclose($file);
+    if (IsDebugMode()) {
+        $fname = POSTIE_ROOT . DIRECTORY_SEPARATOR . "test_emails" . DIRECTORY_SEPARATOR . SafeFileName($mimeDecodedEmail->headers["message-id"]);
+        $file = fopen($fname . ".txt ", "w");
+        fwrite($file, $email);
+        fclose($file);
 
-    $file = fopen($fname . "-mime.txt ", "w");
-    fwrite($file, print_r($mimeDecodedEmail, true));
-    fclose($file);
+        $file = fopen($fname . "-mime.txt ", "w");
+        fwrite($file, print_r($mimeDecodedEmail, true));
+        fclose($file);
 
-    $file = fopen($fname . ".php ", "w");
-    fwrite($file, serialize($email));
-    fclose($file);
+        $file = fopen($fname . ".php ", "w");
+        fwrite($file, serialize($email));
+        fclose($file);
+    }
 }
 
 /**

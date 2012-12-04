@@ -61,7 +61,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     public function testConvertUTF8ToISO_8859_1() {
         $this->assertEquals("test", ConvertUTF8ToISO_8859_1("random", "stuff", "test"));
         $this->assertEquals("Phasa Thai", ConvertUTF8ToISO_8859_1('quoted-printable', 'iso-8859-1', "Phasa Thai"));
-        $this->assertEquals("??????? Phasa Thai", ConvertUTF8ToISO_8859_1('quoted-printable', 'utf-8', "ภาษาไทย Phasa Thai"));
+        $this->assertEquals("ภาษาไทย Phasa Thai", ConvertUTF8ToISO_8859_1('quoted-printable', 'tis-620', "=C0=D2=C9=D2=E4=B7=C2 Phasa Thai"));
         $this->assertEquals("??????? Phasa Thai", ConvertUTF8ToISO_8859_1('base64', 'utf-8', "ภาษาไทย Phasa Thai"));
         $this->assertEquals("ภาษาไทย Phasa Thai", ConvertUTF8ToISO_8859_1('something', 'utf-8', "ภาษาไทย Phasa Thai"));
         $this->assertEquals("ภาษาไทย Phasa Thai", ConvertUTF8ToISO_8859_1('base64', 'iso-8859-1', "ภาษาไทย Phasa Thai"));

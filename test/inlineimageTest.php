@@ -113,11 +113,43 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $postAuthorDetails = getPostAuthorDetails($subject, $content, $decoded);
     }
 
-    function testGreek() {
+    function testQuotedPrintable() {
+        $str = quoted_printable_decode("ABC=C3=C4=CEABC=");
+        $str = iconv('ISO-8859-7', 'UTF-8', $str);
+        $this->assertEquals("ABCΓΔΞABC", $str);
 
+        $str = quoted_printable_decode('<span style=3D"font-family:arial,sans-serif;font-size:13px">ABC=C3=C4=CEABC=</span><br>');
+        $str = iconv('ISO-8859-7', 'UTF-8', $str);
+        $this->assertEquals('<span style="font-family:arial,sans-serif;font-size:13px">ABCΓΔΞABC=</span><br>', $str);
+    }
+
+    function testBase64() {
+        $str = base64_decode("QUJDw8TOQUJDCg==");
+        $str = iconv('ISO-8859-7', 'UTF-8', $str);
+        $this->assertEquals("ABCΓΔΞABC\n", $str);
+    }
+
+    function testHandleMessageEncoding() {
+        $e=HandleMessageEncoding('quoted-printable','iso-8859-7','<span style=3D"font-family:arial,sans-serif;font-size:13px">ABC=C3=C4=CEABC=</span><br>');
+        $this->assertEquals('<span style="font-family:arial,sans-serif;font-size:13px">ABCΓΔΞABC=</span><br>',$e);
+    }
+
+    function testGreek() {
+        $config = $this->standardConfig();
         $message = file_get_contents("data/greek.var");
         $email = unserialize($message);
+
         $decoded = DecodeMIMEMail($email);
+        print_r($decoded);
+
+        FilterTextParts($decoded, 'html');
+        $attachments = array(
+            "html" => array(), //holds the html for each image
+            "cids" => array(), //holds the cids for HTML email
+            "image_files" => array() //holds the files for each image
+        );
+        $content = GetContent($decoded, $attachments, 1, 'wayne@devzing.com', $config);
+        print_r($content);
     }
 
     public function testReplaceImagePlaceHolders() {
@@ -125,45 +157,49 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config = $this->standardConfig();
         $attachements = array("image.jpg" => 'template with {CAPTION}');
 
-         ReplaceImagePlaceHolders(&$c, array(), $config);
+        ReplaceImagePlaceHolders($c, array(), $config);
         $this->assertEquals("", $c);
-        
-        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+
+        ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("template with ", $c);
 
         $c = "#img1#";
-        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("template with ", $c);
-        
+
         $c = "test #img1# test";
-        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("test template with  test", $c);
-        
+
         $c = "test #img1 caption='1'# test";
-        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("test template with 1 test", $c);
-        
-         $c = "test #img1 caption='1'# test #img2 caption='2'#";
-        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+
+        $c = "test #img1 caption=\"I'd like some cheese.\"# test";
+        ReplaceImagePlaceHolders($c, $attachements, $config);
+        $this->assertEquals("test template with I'd like some cheese. test", $c);
+
+        $c = "test #img1 caption='1'# test #img2 caption='2'#";
+        ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("test template with 1 test #img2 caption='2'#", $c);
-        
+
         $attachements = array("image1.jpg" => 'template with {CAPTION}', "image2.jpg" => 'template with {CAPTION}');
         $c = "test #img1 caption='1'# test #img2 caption='2'#";
-        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("test template with 1 test template with 2", $c);
-        
-        $config['auto_gallery']=true;
+
+        $config['auto_gallery'] = true;
         $c = "test";
-        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("[gallery]\ntest", $c);
-        
-        $config['images_append']=true;
+
+        $config['images_append'] = true;
         $c = "test";
-        ReplaceImagePlaceHolders(&$c, $attachements, $config);
+        ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("test[gallery]", $c);
-        
+
         $c = "test";
-        ReplaceImagePlaceHolders(&$c, array(), $config);
+        ReplaceImagePlaceHolders($c, array(), $config);
         $this->assertEquals("test", $c);
     }
 

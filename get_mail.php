@@ -48,7 +48,6 @@ foreach ($emails as $email) {
 
     DebugEmailOutput($email, $mimeDecodedEmail);
 
-
     // check for XSS attacks - we disallow any javascript, meta, onload, or base64
     if (preg_match("@((%3C|<)/?script|<meta|document\.|\.cookie|\.createElement|onload\s*=|(eval|base64)\()@is", $email, $matches)) {
         EchoInfo("possible XSS attack - ignoring email");
