@@ -80,10 +80,10 @@ different one if you wish.
   You can also specify a custom image template. I use the following custom
 template:
 
-  <div class='imageframe alignleft'><a href='{IMAGE}'><img src="{THUMBNAIL}"
+  `<div class='imageframe alignleft'><a href='{IMAGE}'><img src="{THUMBNAIL}"
   alt="{CAPTION}" title="{CAPTION}" 
   class="attachment" /></a><div
-  class='imagecaption'>{CAPTION}</div></div>
+  class='imagecaption'>{CAPTION}</div></div>`
      
     * {THUMBNAIL} gets replaced with the url to the thumbnail image
     * {MEDIUM} gets replaced with the url to the medium-sized image
