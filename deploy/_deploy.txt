@@ -1,8 +1,5 @@
-generate readme.html
-generate faq.html
-commit
 update version number in postie.php
-update version number in readme.txt
-generate Revision
+update version number in docs\postie.txt
+run deploy.cmd
 commit
 branch trunk to new version
