@@ -178,6 +178,10 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $c = "test #img1 caption=\"I'd like some cheese.\"# test";
         ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("test template with I'd like some cheese. test", $c);
+        
+         $c = "test #img1 caption='[image-caption]'# test";
+        ReplaceImagePlaceHolders($c, $attachements, $config);
+        $this->assertEquals("test template with [image-caption] test", $c);
 
         $c = "test #img1 caption='1'# test #img2 caption='2'#";
         ReplaceImagePlaceHolders($c, $attachements, $config);

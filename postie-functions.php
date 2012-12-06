@@ -15,7 +15,8 @@
  * category per e-mail address
  */
 
-define('POSTIE_DEBUG', true);
+//to turn on debug output add the following line to wp-config.php
+//define('POSTIE_DEBUG', true);
 
 function postie_disable_revisions($restore = false) {
     global $_wp_post_type_features, $_postie_revisions;

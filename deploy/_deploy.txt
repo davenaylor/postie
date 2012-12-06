@@ -1,0 +1,8 @@
+generate readme.html
+generate faq.html
+commit
+update version number in postie.php
+update version number in readme.txt
+generate Revision
+commit
+branch trunk to new version
