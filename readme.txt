@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.4.2
-Stable tag: 1.4.5
+Stable tag: 1.4.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -358,6 +358,9 @@ define('DISABLE_WP_CRON', true); is not in your wp-config.php file.
 * XSS detection only issues a warning now
 
 == CHANGELOG ==
+
+= 1.4.7 (future)
+* 
 
 = 1.4.6 (2012.12.06) =
 * Changed XSS check to only emit warning until a better solution can be developed

@@ -4,6 +4,9 @@
 
 == CHANGELOG ==
 
+= 1.4.7 (future)
+* 
+
 = 1.4.6 (2012.12.06) =
 * Changed XSS check to only emit warning until a better solution can be developed
 * Fixed bug where authorized addresses were being checked with case sensitive rather than insensitive.
