@@ -53,8 +53,8 @@
  * Support private posts
  * Make it possible to post without a script at all
  * * TODO - fix corruption of rtf attachments
-* TODO - add port checking in tests
-* TODO - non-image uploads get ignored in content when using autogallery - see
+ * TODO - add port checking in tests
+ * TODO - non-image uploads get ignored in content when using autogallery - see
   replaceimageplaceholders
  */
 
@@ -160,7 +160,7 @@ function postie_warnings() {
         add_action('admin_notices', 'postie_enter_info');
     }
 
-    if (!function_exists('imap_mime_header_decode') && $_GET['activate'] == true) {
+    if (!function_exists('imap_mime_header_decode') && array_key_exists('activate', $_GET) && $_GET['activate'] == true) {
 
         function postie_imap_warning() {
             echo "<div id='postie-imap-warning' class='error'><p><strong>";
