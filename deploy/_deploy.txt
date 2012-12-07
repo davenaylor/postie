@@ -4,3 +4,4 @@ update version number in docs\postie.txt
 run deploy.cmd
 commit
 branch trunk to new version
+add release post on http://postieplugin.com/

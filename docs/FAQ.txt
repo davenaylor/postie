@@ -7,7 +7,7 @@ ports 993 and 995 (for pop3-ssl and imap-ssl) by default. I have heard that
 you can request that they open them for you ( you might have to pay extra). 
 
 You can check for open ports with the following command on your server:
-netstat -ln|grep -E ':::(993|995|143)'
+`netstat -ln|grep -E ':::(993|995|143)'`
 
 If nothing shows up, then the ports are not open.
 
@@ -183,4 +183,4 @@ that doesn't allow you access to cron you can use a service like
 <a href="https://www.setcronjob.com/" target="_blank">SetCronJob</a>.
 
 It is also possible to turn the WordPress cron off. Please make sure something like
-define('DISABLE_WP_CRON', true); is not in your wp-config.php file.
+`define('DISABLE_WP_CRON', true);` is not in your wp-config.php file.
