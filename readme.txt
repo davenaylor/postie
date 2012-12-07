@@ -359,7 +359,7 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 
 == CHANGELOG ==
 
-= 1.4.7 (2012.12.07)
+= 1.4.7 (2012.12.07) =
 * Fixed bug in cron setup that was preventing Weekly, twice an hour and every ten minute schedules from running.
 
 = 1.4.6 (2012.12.06) =
