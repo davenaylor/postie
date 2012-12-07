@@ -2335,8 +2335,7 @@ function GetDBConfig() {
     if (!isset($config["FILTERN
         EWLINES"]))
         $config["FILTERNEWLINES"] = true;
-    include('templates/video2_templ
-        ates.php');
+    include('templates/video2_templates.php');
     $config['VIDEO2TEMPLATES'] = $video2Templates;
     if (!isset($config["V
         IDEO2TEMPLATE"]))
@@ -2344,12 +2343,10 @@ function GetDBConfig() {
 
 //image
     if (!isset($config["SELECTED_IMAGETEMPLATE"]))
-        $config['SELECTED_IMAGETEMPLATE'] = 'wordpr
-        ess_default';
+        $config['SELECTED_IMAGETEMPLATE'] = 'wordpress_default';
     if (!isset($config["SMTP"]))
         $config["SMTP"] = array();
-    include('templates/image_tem
-        plates.php');
+    include('templates/image_templates.php');
     if (!isset($config["IMAGETEMPLATE"]))
         $config["IMAGETEMPLATE"] = $wordpress_default;
     $config['IMAGETEMPLATES'] = $imageTemplates;
@@ -2486,8 +2483,7 @@ function postie_validate_settings($in) {
         $out[$key] = array_key_exists($key, $in) ? $in[$key] : $default;
 
 // some fields are always forced to lower case:
-    $lowercase = array('authorized_add
-        resses', 'smtp', 'supported_file_types', 'video1types', 'video2types', 'audiotypes');
+    $lowercase = array('authorized_addresses', 'smtp', 'supported_file_types', 'video1types', 'video2types', 'audiotypes');
     foreach ($lowercase as $field) {
         $out[$field] = ( is_array($out[$field]) ) ? array_map("strtolower", $out[$field]) : strtolower($out[$field]);
     }

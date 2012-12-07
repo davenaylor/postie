@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.4.2
-Stable tag: 1.4.6
+Stable tag: 1.4.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -176,7 +176,7 @@ ports 993 and 995 (for pop3-ssl and imap-ssl) by default. I have heard that
 you can request that they open them for you ( you might have to pay extra). 
 
 You can check for open ports with the following command on your server:
-netstat -ln|grep -E ':::(993|995|143)'
+`netstat -ln|grep -E ':::(993|995|143)'`
 
 If nothing shows up, then the ports are not open.
 
@@ -352,15 +352,15 @@ that doesn't allow you access to cron you can use a service like
 <a href="https://www.setcronjob.com/" target="_blank">SetCronJob</a>.
 
 It is also possible to turn the WordPress cron off. Please make sure something like
-define('DISABLE_WP_CRON', true); is not in your wp-config.php file.
+`define('DISABLE_WP_CRON', true);` is not in your wp-config.php file.
 == Upgrade Notice ==
 * Attachments are now processed in the order they were attached.
 * XSS detection only issues a warning now
 
 == CHANGELOG ==
 
-= 1.4.7 (future)
-* 
+= 1.4.7 (2012.12.07)
+* Fixed bug in cron setup that was preventing Weekly, twice an hour and every ten minute schedules from running.
 
 = 1.4.6 (2012.12.06) =
 * Changed XSS check to only emit warning until a better solution can be developed

@@ -3,6 +3,7 @@
 require 'wpstub.php';
 require'../postie-functions.php';
 require'../simple_html_dom.php';
+require '../postie.php';
 
 class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
@@ -286,7 +287,12 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n--", array("--", "- --")));
     }
 
- 
+    public function testmore_reccurences() {
+        $sched = array();
+        $newsched = more_reccurences($sched);
+        $this->assertEquals(3, count($newsched));
+    }
+
 }
 
 ?>

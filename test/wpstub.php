@@ -31,6 +31,11 @@ function current_time() {
     return '2005-08-05 10:41:13';
 }
 
+function is_admin()
+{
+    return false;
+}
+
 function get_post() {
     $r = new stdClass();
     $r->post_date = '';
@@ -81,5 +86,21 @@ function get_attachment_link() {
 
 function get_user_by(){
     return false;
+}
+
+function register_activation_hook(){
+    
+}
+
+function add_action(){
+    
+}
+
+function add_filter(){
+    
+}
+
+function register_deactivation_hook(){
+    
 }
 ?>

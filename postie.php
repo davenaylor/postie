@@ -4,7 +4,7 @@
   Plugin Name: Postie
   Plugin URI: http://PostiePlugin.com/
   Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href='options-general.php?page=postie/postie.php'>Settings and options</a>) to configure your e-mail settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://wordpress.org/support/plugin/postie'>postie forum</a> for support.
-  Version: 1.4.6
+  Version: 1.4.7
   Author: Wayne Allen
   Author URI: http://allens-home.com/
   License: GPL2
@@ -225,7 +225,10 @@ function postie_cron($interval = false) {
     if ($interval == 'manual') {
         wp_clear_scheduled_hook('check_postie_hook');
     } else {
-        wp_schedule_event(time(), $interval, 'check_postie_hook');
+        DebugEcho("Setting $interval cron schedule");
+        if (false === wp_schedule_event(time(), $interval, 'check_postie_hook')) {
+            EchoInfo("Failed to set up cron task.");
+        }
     }
 }
 
@@ -233,17 +236,17 @@ function postie_decron() {
     wp_clear_scheduled_hook('check_postie_hook');
 }
 
-/* here we add some more options for how often to check for e-mail */
+/* here we add some more cron options for how often to check for e-mail */
 
-function more_reccurences($schedules) {
-    $schedules['postie-weekly'] = array('interval' => 60 * 60 * 24 * 7, 'display' => __('Once Weekly'));
-    $schedules['postie-twiceperhour'] = array('interval' => 60 * 30, 'display' => __('Twice per hour '));
-    $schedules['postie-tenminutes'] = array('interval' => 60 * 10, 'display' => __('Every 10 minutes'));
+function postie_more_reccurences($schedules) {
+    $schedules['weekly'] = array('interval' => (60 * 60 * 24 * 7), 'display' => __('Once Weekly'));
+    $schedules['twiceperhour'] = array('interval' => 60 * 30, 'display' => __('Twice per hour '));
+    $schedules['tenminutes'] = array('interval' => 60 * 10, 'display' => __('Every 10 minutes'));
 
     return $schedules;
 }
 
-add_filter('cron_schedules', 'more_reccurences');
+add_filter('cron_schedules', 'postie_more_reccurences');
 register_activation_hook(__FILE__, 'postie_cron');
 register_deactivation_hook(__FILE__, 'postie_decron');
 add_action('check_postie_hook', 'check_postie');

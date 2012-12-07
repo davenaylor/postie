@@ -24,8 +24,9 @@
 ports 993 and 995 (for pop3-ssl and imap-ssl) by default. I have heard that
 you can request that they open them for you ( you might have to pay extra).</p>
 
-<p>You can check for open ports with the following command on your server:
-netstat -ln|grep -E ':::(993|995|143)'</p>
+<p>You can check for open ports with the following command on your server:</p>
+
+<pre><code>netstat -ln|grep -E &#039;:::(993|995|143)&#039;</code></pre>
 
 <p>If nothing shows up, then the ports are not open.</p>
 
@@ -216,5 +217,8 @@ curl on Windows and use the Scheduled Tasks control panel. If you are using a ho
 that doesn't allow you access to cron you can use a service like 
 <a href="https://www.setcronjob.com/">SetCronJob</a>.</p>
 
-<p>It is also possible to turn the WordPress cron off. Please make sure something like
-define('DISABLE_WP_CRON', true); is not in your wp-config.php file.</p>	
+<p>It is also possible to turn the WordPress cron off. Please make sure something like</p>
+
+<pre><code>define(&#039;DISABLE_WP_CRON&#039;, true);</code></pre>
+
+<p>is not in your wp-config.php file.</p>	
