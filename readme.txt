@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.4.2
-Stable tag: 1.4.7
+Stable tag: 1.4.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -360,7 +360,9 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 == CHANGELOG ==
 
 = 1.4.8 (future) =
-* placeholder 
+* fix collisions with simple_html_dom
+* fix bug when trying to get file name from MIME part
+* fix bug causing Cannot modify header information warning 
 
 = 1.4.7 (2012.12.07) =
 * Fixed bug in cron setup that was preventing Weekly, twice an hour and every ten minute schedules from running.
