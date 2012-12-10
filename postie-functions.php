@@ -200,8 +200,8 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         'email_author' => $postAuthorDetails['email'],
         'post_date' => $post_date,
         'post_date_gmt' => $post_date_gmt,
-        'post_content' => $content,
-        'post_title' => $subject,
+        'post_content' =>  $content,
+        'post_title' =>  $subject,
         'post_type' => $post_type, /* Added by Raam Dev <raam@raamdev.com> */
         'ping_status' => get_option('default_ping_status'),
         'post_category' => $post_categories,
@@ -341,7 +341,21 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
      * Otherwise we get them from the headers    
      */
     global $wpdb;
-// see if subject starts with Fwd:
+
+    $theDate = $mimeDecodedEmail->headers['date'];
+    $theEmail = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
+    $regAuthor = get_user_by('email', $theEmail);
+    if ($regAuthor) {
+        $theAuthor = $regAuthor->user_login;
+        $theUrl = $regAuthor->user_url;
+        $theID = $regAuthor->ID;
+    } else {
+        $theAuthor = GetNameFromEmail($mimeDecodedEmail->headers['from']);
+        $theUrl = '';
+        $theID = '';
+    }
+
+    // see if subject starts with Fwd:
     if (preg_match("/(^Fwd:) (.*)/", $subject, $matches)) {
         $subject = trim($matches[2]);
         if (preg_match("/\nfrom:(.*?)\n/i", $content, $matches)) {
@@ -352,28 +366,13 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
             $theDate = $matches[1];
             $mimeDecodedEmail->headers['date'] = $theDate;
         }
-    } else {
-        $theDate = $mimeDecodedEmail->headers['date'];
-        $theEmail = RemoveExtraCharactersInEmailAddress(trim(
-                        $mimeDecodedEmail->headers["from"]));
-        $regAuthor = get_user_by('email', $theEmail);
-        if ($regAuthor) {
-            $theAuthor = $regAuthor->user_login;
-            $theUrl = $regAuthor->user_url;
-            $theID = $regAuthor->ID;
-        } else {
-            $theAuthor = GetNameFromEmail($mimeDecodedEmail->headers['from']);
-            $theUrl = '';
-            $theID = '';
-        }
     }
+
     // now get rid of forwarding info in the content
     $lines = preg_split("/\r\n/", $content);
     $newContents = '';
     foreach ($lines as $line) {
-        if (preg_match("/^(from|subject|to|date):.*?/i", $line, $matches) == 0 &&
-                //    preg_match("/^$/i",$line,$matches)==0 &&
-                preg_match("/^-+\s*forwarded\s*message\s*-+/i", $line, $matches) == 0) {
+        if (preg_match("/^(from|subject|to|date):.*?/i", $line, $matches) == 0 && preg_match("/^-+\s*forwarded\s*message\s*-+/i", $line, $matches) == 0) {
             $newContents.=preg_replace("/\r/", "", $line) . "\n";
         }
     }
@@ -1041,7 +1040,7 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     DebugEcho("encoding: $contenttransferencoding");
 
     if ($contenttransferencoding == 'base64') {
-        DebugEcho("base64 detected");
+        DebugEcho("HandleMessageEncoding: base64 detected");
         $body = base64_decode($body);
         $body = iconv($charset, $blogEncoding, $body);
     }
@@ -1133,8 +1132,13 @@ function cp1252_to_utf8($str) {
 function DecodeBase64Part(&$part) {
     if (array_key_exists('content-transfer-encoding', $part->headers)) {
         if (strtolower($part->headers['content-transfer-encoding']) == 'base64') {
-            DebugEcho("base64 detected");
-            $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8', base64_decode($part->body));
+            DebugEcho("DecodeBase64Part: base64 detected");
+            if (array_key_exists('charset', $part->ctype_parameters)) {
+                $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8', base64_decode($part->body));
+            } else {
+                $part->body = base64_decode($part->body);
+            }
+            $part->headers['content-transfer-encoding']='';
         }
     }
 }
@@ -1204,17 +1208,19 @@ function DeterminePostDate(&$content, $message_date = NULL, $offset = 0) {
  * This function takes the content of the message - looks for a subject at the begining surrounded by # and then removes that from the content
  */
 function ParseInMessageSubject($content, $defaultTitle) {
+    DebugEcho("Looking for subject in email body");
     if (substr($content, 0, 1) != "#") {
-//print("<p>Didn't start with # '".substr(ltrim($content),0,10)."'");
+        DebugEcho("No subject found, using default [1]");
         return(array($defaultTitle, $content));
     }
     $subjectEndIndex = strpos($content, "#", 1);
     if (!$subjectEndIndex > 0) {
+        DebugEcho("No subject found, using default [2]");
         return(array($defaultTitle, $content));
     }
     $subject = substr($content, 1, $subjectEndIndex - 1);
     $content = substr($content, $subjectEndIndex + 1, strlen($content));
-    return(array($subject, $content));
+    return array($subject, $content);
 }
 
 /**
@@ -1333,6 +1339,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         function wp_handle_upload_error(&$file, $message) {
             return array('error' => $message);
         }
+
     }
 
     // You may define your own function and pass the name in $overrides['upload_error_handler']
@@ -1779,10 +1786,16 @@ function ReplaceImageCIDs(&$content, &$attachments) {
             $used[] = $info[1]; //Index of html to ignore
         }
     }
+    //DebugEcho("# cid attachments: " . count($used));
+
     $html = array();
+    $att = array_values($attachments["html"]); //make sure there are numeric indexes
+    //DebugDump($attachments["html"]);
+    //DebugDump($att);
+
     for ($i = 0; $i < count($attachments["html"]); $i++) {
         if (!in_array($i, $used)) {
-            $html[] = $attachments["html"][$i];
+            $html[] = $att[$i];
         }
     }
     $attachments["html"] = $html;
@@ -1857,11 +1870,13 @@ function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
 function GetSubject(&$mimeDecodedEmail, &$content, $config) {
     extract($config);
     global $charset;
-//assign the default title/subject
+    //assign the default title/subject
     if ($mimeDecodedEmail->headers['subject'] == NULL) {
+        DebugEcho("No subject in email");
         if ($allow_subject_in_mail) {
             list($subject, $content) = ParseInMessageSubject($content, $default_title);
         } else {
+            DebugEcho("Using default subject");
             $subject = $default_title;
         }
         $mimeDecodedEmail->headers['subject'] = $subject;
@@ -1874,11 +1889,16 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
         } else {
             $encoding = '7bit';
         }
+        DebugEcho("Subject encoding: $encoding");
+        
         if (function_exists('imap_mime_header_decode')) {
             $subject = '';
             $text = $mimeDecodedEmail->headers['subject'];
 
             $elements = imap_mime_header_decode($text);
+            DebugEcho("MIME Header");
+            DebugDump($elements);
+            
             for ($i = 0; $i < count($elements); $i++) {
                 $thischarset = $elements[$i]->charset;
                 if ($thischarset == 'default')
@@ -1886,18 +1906,22 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
 
                 $subject.=HandleMessageEncoding($encoding, $thischarset, $elements[$i]->text, $message_encoding, $message_dequote);
             }
+            
         }
         if (!$allow_html_in_subject) {
+            DebugEcho("subject before htmlentities: $subject");
             $subject = htmlentities($subject, ENT_COMPAT | ENT_HTML401, $message_encoding);
+            DebugEcho("subject after htmlentities: $subject");
         }
     }
-//This is for ISO-2022-JP - Can anyone confirm that this is still neeeded?
-// escape sequence is 'ESC $ B' == 1b 24 42 hex.
+    //This is for ISO-2022-JP - Can anyone confirm that this is still neeeded?
+    // escape sequence is 'ESC $ B' == 1b 24 42 hex.
     if (strpos($subject, "\x1b\x24\x42") !== false) {
-// found iso-2022-jp escape sequence in subject... convert!
+        // found iso-2022-jp escape sequence in subject... convert!
+        DebugEcho("extra parsing for ISO-2022-JP");
         $subject = iconv("ISO-2022-JP//TRANSLIT", "UTF-8", $subject);
     }
-    return($subject);
+    return $subject;
 }
 
 /**
@@ -1989,9 +2013,7 @@ function GetPostCategories(&$subject, $defaultCategory) {
  * This function just outputs a simple html report about what is being posted in
  */
 function DisplayEmailPost($details) {
-    DebugDump($details);
-
-    $theFinalContent = $details['post_content'];
+    //DebugDump($details);
     // Report
     EchoInfo('<b>Post Author</b>: ' . $details["post_author"]);
     EchoInfo('<b>Date</b>: ' . $details["post_date"]);
@@ -2551,6 +2573,9 @@ function SafeFileName($filename) {
 
 function DebugEmailOutput(&$email, &$mimeDecodedEmail) {
     if (IsDebugMode()) {
+        DebugDump($email);
+        DebugDump($mimeDecodedEmail);
+
         $fname = POSTIE_ROOT . DIRECTORY_SEPARATOR . "test_emails" . DIRECTORY_SEPARATOR . SafeFileName($mimeDecodedEmail->headers["message-id"]);
         $file = fopen($fname . ".txt ", "w");
         fwrite($file, $email);

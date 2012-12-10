@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.4.2
-Stable tag: 1.4.8
+Stable tag: 1.4.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -358,6 +358,13 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 * XSS detection only issues a warning now
 
 == CHANGELOG ==
+
+= 1.4.9 (2012.12.10) =
+* Fixed bug where date, author, etc didn't get set.
+* Fixed bug where Postie was treating attached images as strings
+* Fixed bug where inline images were not being attached correctly
+* Fixed bug where the subject was not being decoded correctly if the charset was different from the system charset
+* Fixed bug where base64 strings were being double decoded.
 
 = 1.4.8 (2012.12.09) =
 * fix collisions with simple_html_dom

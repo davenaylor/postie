@@ -39,9 +39,11 @@ foreach ($emails as $email) {
     //sanity check to see if there is any info in the message
     if ($email == NULL) {
         $message = __('Dang, message is empty!', 'postie');
+        EchoInfo($message);
         continue;
     } else if ($email == 'already read') {
         $message = __("There does not seem to be any new mail.", 'postie');
+        EchoInfo($message);
         continue;
     }
 
@@ -66,8 +68,6 @@ foreach ($emails as $email) {
 
 if (function_exists('memory_get_usage'))
     EchoInfo("memory at end of e-mail processing:" . memory_get_usage());
-
-EchoInfo($message);
 
 if (!ini_get('safe_mode')) {
     ini_set('memory_limit', $original_mem_limit);

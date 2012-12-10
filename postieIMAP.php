@@ -109,16 +109,12 @@ class PostieIMAP {
      * @return string
      */
     function fetchEmail($index) {
-        if ($index < 1 || $index > ($this->getNumberOfMessages() + 1)) {
-            die("Invalid IMAP/POP3 message index!");
-        }
+//        if ($index < 1 || $index > ($this->getNumberOfMessages() + 1)) {
+//            die("Invalid IMAP/POP3 message index!");
+//        }
         $header_info = imap_headerinfo($this->_connection, $index);
-//        if (IsDebugMode()) {
-//            $header = imap_fetchheader($this->_connection, $index);
-//            $body = imap_body($this->_connection, $index);
-//            return $header . $body;
-//        } else  {
-        if ($header_info->Recent == 'N' || $header_info->Unseen == 'U') {
+
+        if (IsDebugMode() || $header_info->Recent == 'N' || $header_info->Unseen == 'U') {
             $email = imap_fetchheader($this->_connection, $index);
             $email .= imap_body($this->_connection, $index);
 
@@ -126,7 +122,6 @@ class PostieIMAP {
         } else {
             return 'already read';
         }
-        //}
     }
 
     /**
