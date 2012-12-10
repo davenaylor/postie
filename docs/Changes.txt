@@ -3,6 +3,8 @@
 * XSS detection only issues a warning now
 
 == CHANGELOG ==
+= 1.4.10 (future) =
+* placeholder
 
 = 1.4.9 (2012.12.10) =
 * Fixed bug where date, author, etc didn't get set.

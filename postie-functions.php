@@ -200,8 +200,8 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         'email_author' => $postAuthorDetails['email'],
         'post_date' => $post_date,
         'post_date_gmt' => $post_date_gmt,
-        'post_content' =>  $content,
-        'post_title' =>  $subject,
+        'post_content' => $content,
+        'post_title' => $subject,
         'post_type' => $post_type, /* Added by Raam Dev <raam@raamdev.com> */
         'ping_status' => get_option('default_ping_status'),
         'post_category' => $post_categories,
@@ -686,9 +686,9 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 }
 
                 if (array_key_exists('content-transfer-encoding', $part->headers)) {
-                    DebugDump($part);
+                    //DebugDump($part);
                     $part->body = HandleMessageEncoding($part->headers["content-transfer-encoding"], $part->ctype_parameters["charset"], $part->body, $message_encoding, $message_dequote);
-                    DebugDump($part);
+                    //DebugDump($part);
                 }
 
                 //go through each sub-section
@@ -850,6 +850,11 @@ function etf2HTML($content) {
 function HTML2HTML($content) {
     $html = str_get_html($content);
     if ($html) {
+        foreach ($html->find('script, style') as $node) {
+            $node->outertext = '';
+        }
+        $html->load($html->save());
+
         $b = $html->find('body');
         if ($b) {
             $content = $b[0]->outertext;
@@ -1035,7 +1040,7 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     $charset = strtolower($charset);
     $contenttransferencoding = strtolower($contenttransferencoding);
 
-    DebugEcho("before HandleMessageEncoding: $body");
+    DebugEcho("before HandleMessageEncoding");
     DebugEcho("charset: $charset");
     DebugEcho("encoding: $contenttransferencoding");
 
@@ -1049,7 +1054,7 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
         $body = iconv($charset, $blogEncoding, quoted_printable_decode($body));
     }
 
-    DebugEcho("after HandleMessageEncoding: $body");
+    DebugEcho("after HandleMessageEncoding");
     return $body;
 }
 
@@ -1138,7 +1143,7 @@ function DecodeBase64Part(&$part) {
             } else {
                 $part->body = base64_decode($part->body);
             }
-            $part->headers['content-transfer-encoding']='';
+            $part->headers['content-transfer-encoding'] = '';
         }
     }
 }
@@ -1871,7 +1876,7 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
     extract($config);
     global $charset;
     //assign the default title/subject
-    if ($mimeDecodedEmail->headers['subject'] == NULL) {
+    if (!array_key_exists('subject', $mimeDecodedEmail->headers) || empty($mimeDecodedEmail->headers['subject'])) {
         DebugEcho("No subject in email");
         if ($allow_subject_in_mail) {
             list($subject, $content) = ParseInMessageSubject($content, $default_title);
@@ -1890,15 +1895,15 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
             $encoding = '7bit';
         }
         DebugEcho("Subject encoding: $encoding");
-        
+
         if (function_exists('imap_mime_header_decode')) {
             $subject = '';
             $text = $mimeDecodedEmail->headers['subject'];
 
             $elements = imap_mime_header_decode($text);
-            DebugEcho("MIME Header");
-            DebugDump($elements);
-            
+            //DebugEcho("MIME Header");
+            //DebugDump($elements);
+
             for ($i = 0; $i < count($elements); $i++) {
                 $thischarset = $elements[$i]->charset;
                 if ($thischarset == 'default')
@@ -1906,7 +1911,6 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
 
                 $subject.=HandleMessageEncoding($encoding, $thischarset, $elements[$i]->text, $message_encoding, $message_dequote);
             }
-            
         }
         if (!$allow_html_in_subject) {
             DebugEcho("subject before htmlentities: $subject");
@@ -2573,8 +2577,8 @@ function SafeFileName($filename) {
 
 function DebugEmailOutput(&$email, &$mimeDecodedEmail) {
     if (IsDebugMode()) {
-        DebugDump($email);
-        DebugDump($mimeDecodedEmail);
+        //DebugDump($email);
+        //DebugDump($mimeDecodedEmail);
 
         $fname = POSTIE_ROOT . DIRECTORY_SEPARATOR . "test_emails" . DIRECTORY_SEPARATOR . SafeFileName($mimeDecodedEmail->headers["message-id"]);
         $file = fopen($fname . ".txt ", "w");
