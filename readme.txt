@@ -359,7 +359,7 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 
 == CHANGELOG ==
 
-= 1.4.8 (future) =
+= 1.4.8 (2012.12.09) =
 * fix collisions with simple_html_dom
 * fix bug when trying to get file name from MIME part
 * fix bug causing Cannot modify header information warning 
