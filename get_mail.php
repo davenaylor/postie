@@ -10,7 +10,8 @@ if (file_exists($wp_config_path . DIRECTORY_SEPARATOR . "wp-config.php")) {
 
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mimedecode.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
-require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'simple_html_dom.php');
+if(!function_exists('file_get_html')) 
+    require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'simple_html_dom.php');
 
 if (!ini_get('safe_mode')) {
     $original_mem_limit = ini_get('memory_limit');

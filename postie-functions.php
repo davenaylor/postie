@@ -664,7 +664,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     } else {
         // fix filename (remove non-standard characters)
         $filename = "";
-        if (array_key_exists('name', $part->ctype_parameters)) {
+        if (is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters)) {
             $filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $part->ctype_parameters['name']);
         }
         switch (strtolower($part->ctype_primary)) {
@@ -1333,7 +1333,6 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         function wp_handle_upload_error(&$file, $message) {
             return array('error' => $message);
         }
-
     }
 
     // You may define your own function and pass the name in $overrides['upload_error_handler']
