@@ -252,17 +252,17 @@ function GetPostType(&$subject) {
     $custom_post_type_delim = "//";
     if (strpos($subject, $custom_post_type_delim) !== FALSE) {
 
-// Captures the custom post type in the subject before $custom_post_type_delim
+        // Captures the custom post type in the subject before $custom_post_type_delim
         $separated_subject = explode($custom_post_type_delim, $subject);
         $custom_post_type = $separated_subject[0];
         $subject = $separated_subject[1];
 
         $custom_post_type = trim(strtolower($custom_post_type));
 
-// Check if custom post type exists, if not, set default post type of 'post'
+        // Check if custom post type exists, if not, set default post type of 'post'
         $known_post_types = get_post_types();
 
-        if (in_array($custom_post_type, $known_post_types)) {
+        if (in_array($custom_post_type, array_map('strtolower', $known_post_types))) {
             $post_type = $custom_post_type;
         } else {
             $post_type = 'post';
@@ -280,12 +280,12 @@ function clickableLink($text, $shortcode = false) {
 
     $text = preg_replace('#(script|about|applet|activex|chrome):#is', "\\1:", $text);
 
-// pad it with a space so we can match things at the start of the 1st line.
+    // pad it with a space so we can match things at the start of the 1st line.
     $ret = ' ' . $text;
     if (strpos($ret, 'youtube') !== false) {
-// try to embed youtube videos
+        // try to embed youtube videos
         $youtube = "#(^|[\n ]|>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9-]+).*?([ \n]|$|<)#is";
-#$youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
+        #$youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
         if ($shortcode) {
             $youtube_replace = "\\1[youtube \\3]\\4";
         } else {
@@ -295,10 +295,10 @@ function clickableLink($text, $shortcode = false) {
     }
 
     if (strpos($ret, 'vimeo') !== false) {
-// try to embed vimeo videos
-#    : http://vimeo.com/6348141
+        // try to embed vimeo videos
+        #    : http://vimeo.com/6348141
         $vimeo = "#(^|[\n ]|>)[\w]+?://(www\.)?vimeo\.com/([_a-zA-Z0-9-]+).*?([ \n]|$|<)#is";
-#$youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
+        #$youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
         if ($shortcode) {
             $vimeo_replace = "\\1[vimeo \\3]\\4";
         } else {
@@ -315,22 +315,22 @@ function clickableLink($text, $shortcode = false) {
         $ret = preg_replace($vimeo, $vimeo_replace, $ret);
     }
 
-// matches an "xxxx://yyyy" URL at the start of a line, or after a space.
-// xxxx can only be alpha characters.
-// yyyy is anything up to the first space, newline, comma, double quote or <
+    // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
+    // xxxx can only be alpha characters.
+    // yyyy is anything up to the first space, newline, comma, double quote or <
     $ret = preg_replace("#(^|[\n ])<?([\w]+?://[\w\#$%&~/.\-;:=,?@\[\]+]*)>?#is", "\\1<a href=\"\\2\" >\\2</a>", $ret);
 
-// matches a "www|ftp.xxxx.yyyy[/zzzz]" kinda lazy URL thing
-// Must contain at least 2 dots. xxxx contains either alphanum, or "-"
-// zzzz is optional.. will contain everything up to the first space, newline,
-// comma, double quote or <.
+    // matches a "www|ftp.xxxx.yyyy[/zzzz]" kinda lazy URL thing
+    // Must contain at least 2 dots. xxxx contains either alphanum, or "-"
+    // zzzz is optional.. will contain everything up to the first space, newline,
+    // comma, double quote or <.
     $ret = preg_replace("#(^|[\n ])<?((www|ftp)\.[\w\#$%&~/.\-;:=,?@\[\]+]*)>?#is", "\\1<a href=\"http://\\2\" >\\2</a>", $ret);
 
-// matches an email@domain type address at the start of a line, or after a space.
-// Note: Only the followed chars are valid; alphanums, "-", "_" and or ".".
+    // matches an email@domain type address at the start of a line, or after a space.
+    // Note: Only the followed chars are valid; alphanums, "-", "_" and or ".".
     $ret = preg_replace(
             "#(^|[\n ])([a-z0-9&\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)*[\w]+)#i", "\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>", $ret);
-// Remove our padding..
+    // Remove our padding..
     $ret = substr($ret, 1);
     return $ret;
 }
@@ -621,17 +621,17 @@ function BannedFileName($filename, $bannedFiles) {
     return false;
 }
 
-//tear apart the meta part for useful information
 function GetContent($part, &$attachments, $post_id, $poster, $config) {
     extract($config);
     global $charset, $encoding;
 
     $meta_return = NULL;
-    EchoInfo("primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
+    DebugEcho("primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
 
     DecodeBase64Part($part);
 
-    if (array_key_exists('name', $part->ctype_parameters))
+    //look for banned file names
+    if (is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters))
         if (BannedFileName($part->ctype_parameters['name'], $banned_files_list))
             return NULL;
 
@@ -653,6 +653,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             }
         }
     }
+
     if ($part->ctype_primary == "multipart" && $part->ctype_secondary == "appledouble") {
         $mimeDecodedEmail = DecodeMIMEMail("Content-Type: multipart/mixed; boundary=" . $part->ctype_parameters["boundary"] . "\n" . $part->body);
         FilterTextParts($mimeDecodedEmail, $prefer_text_type);
@@ -673,16 +674,16 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
                 }
                 break;
+
             case 'text':
-                $tmpcharset = trim($part->ctype_parameters['charset']);
-                if ($tmpcharset != '')
-                    $charset = $tmpcharset;
-                DebugEcho("charset: $tmpcharset");
-                if (array_key_exists('content-transfer-encoding', $part->headers)) {
-                    $tmpencoding = trim($part->headers['content-transfer-encoding']);
-                    if ($tmpencoding != '') {
-                        $encoding = $tmpencoding;
-                    }
+                if (array_key_exists('charset', $part->ctype_parameters) && !empty($part->ctype_parameters['charset'])) {
+                    $charset = $part->ctype_parameters['charset'];
+                    DebugEcho("charset: $charset");
+                }
+
+                if (array_key_exists('content-transfer-encoding', $part->headers) && !empty($part->headers['content-transfer-encoding'])) {
+                    $encoding = $part->headers['content-transfer-encoding'];
+                    DebugEcho("encoding: $encoding");
                 }
 
                 if (array_key_exists('content-transfer-encoding', $part->headers)) {
@@ -723,6 +724,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
                 }
                 break;
+                
             case 'audio':
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 $file = wp_get_attachment_url($file_id);
@@ -736,6 +738,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 }
                 $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $audioTemplate);
                 break;
+                
             case 'video':
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 $file = wp_get_attachment_url($file_id);
@@ -857,7 +860,7 @@ function HTML2HTML($content) {
 
         $b = $html->find('body');
         if ($b) {
-            $content = $b[0]->outertext;
+            $content = $b[0]->innertext;
         }
     }
     return $content;
@@ -888,12 +891,12 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
             $poster = $user_ID;
             EchoInfo("posting as user $poster");
         } else {
-            $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE
-            user_login  = '$admin_username'");
+            $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
         }
     } elseif ($turn_authorization_off || CheckEmailAddress($from, $authorized_addresses) || CheckEmailAddress($resentFrom, $authorized_addresses)) {
         $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
     }
+
     $validSMTP = checkSMTP($mimeDecodedEmail, $smtp);
     if (!$poster || !$validSMTP) {
         EchoInfo('Invalid sender: ' . htmlentities($from) . "! Not adding email!");
@@ -912,21 +915,23 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
 
 function post_as_admin($admin_username) {
     EchoInfo("$from is authorized to post as the administrator");
-//$from = get_option("admin_email");
-//$adminUser=$admin_username;
-//echo "adminUser='$adminUser'";
     return $poster;
 }
 
 function checkSMTP($mimeDecodedEmail, $smtpservers) {
     if (empty($smtpservers))
         return true;
+
     foreach ((array) $mimeDecodedEmail->headers['received'] as $received) {
         foreach ($smtpservers as $smtp) {
-            if (stristr($received, $smtp) !== false)
+            if (stristr($received, $smtp) !== false) {
+                EchoInfo("Sent from valid SMTP server.");
                 return true;
+            }
         }
     }
+
+    EchoInfo("Sent from invalid SMTP server.");
     return false;
 }
 
@@ -1018,9 +1023,7 @@ function StripPGP($content) {
         ' ',
         ''
     );
-// strip extra line breaks
-    $return = preg_replace($search, $replace, $content);
-    return $return;
+    return preg_replace($search, $replace, $content);
 }
 
 function ConvertUTF8ToISO_8859_1($contenttransferencoding, $currentcharset, $body) {
@@ -1138,7 +1141,8 @@ function DecodeBase64Part(&$part) {
     if (array_key_exists('content-transfer-encoding', $part->headers)) {
         if (strtolower($part->headers['content-transfer-encoding']) == 'base64') {
             DebugEcho("DecodeBase64Part: base64 detected");
-            if (array_key_exists('charset', $part->ctype_parameters)) {
+            DebugDump($part);
+            if (is_array($part->ctype_parameters) && array_key_exists('charset', $part->ctype_parameters)) {
                 $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8', base64_decode($part->body));
             } else {
                 $part->body = base64_decode($part->body);
@@ -1251,8 +1255,6 @@ function FilterAppleFile(&$mimeDecodedEmail) {
 
 function postie_media_handle_upload($part, $post_id, $poster, $post_data = array()) {
     $overrides = array('test_form' => false);
-//$overrides = array('test_form'=>false, 'test_size'=>false,
-//                  'test_type'=>false);
     $tmpFile = tempnam(getenv('TEMP'), 'postie');
     if (!is_writable($tmpFile)) {
         $uploadDir = wp_upload_dir();
@@ -1265,15 +1267,16 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     } else {
         EchoInfo("could not write to temp file: '$tmpFile' ");
     }
-    if ($part->ctype_parameters['name'] == '') {
+
+    $name = 'postie-media.' . $part->ctype_secondary;
+    if (!is_array($part->ctype_parameters) || $part->ctype_parameters['name'] == '') {
         if ($part->d_parameters['filename'] != '') {
             $name = $part->d_parameters['filename'];
-        } else {
-            $name = 'postie-media.' . $part->ctype_secondary;
         }
     } else {
         $name = $part->ctype_parameters['name'];
     }
+
     $the_file = array('name' => $name,
         'tmp_name' => $tmpFile,
         'size' => filesize($tmpFile),
@@ -1292,7 +1295,6 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     $post = get_post($post_id);
     if (substr($post->post_date, 0, 4) > 0)
         $time = $post->post_date;
-
 
     $file = postie_handle_upload($the_file, $overrides, $time);
     //unlink($tmpFile);
@@ -2019,18 +2021,18 @@ function GetPostCategories(&$subject, $defaultCategory) {
 function DisplayEmailPost($details) {
     //DebugDump($details);
     // Report
-    EchoInfo('<b>Post Author</b>: ' . $details["post_author"]);
-    EchoInfo('<b>Date</b>: ' . $details["post_date"]);
+    EchoInfo('Post Author: ' . $details["post_author"]);
+    EchoInfo('Date: ' . $details["post_date"]);
     foreach ($details["post_category"] as $category) {
-        EchoInfo('<b>Category</b>: ' . $category);
+        EchoInfo('Category: ' . $category);
     }
-    EchoInfo('<b>Ping Status</b>: ' . $details["ping_status"]);
-    EchoInfo('<b>Comment Status</b>: ' . $details["comment_status"]);
-    EchoInfo('<b>Subject</b>: ' . $details["post_title"]);
-    EchoInfo('<b>Postname</b>: ' . $details["post_name"]);
-    EchoInfo('<b>Post Id</b>: ' . $details["ID"]);
-    EchoInfo('<b>Post Type</b>: ' . $details["post_type"]); /* Added by Raam Dev <raam@raamdev.com> */
-    EchoInfo('<b>Posted content:</b>');
+    EchoInfo('Ping Status: ' . $details["ping_status"]);
+    EchoInfo('Comment Status: ' . $details["comment_status"]);
+    EchoInfo('Subject: ' . $details["post_title"]);
+    EchoInfo('Postname: ' . $details["post_name"]);
+    EchoInfo('Post Id: ' . $details["ID"]);
+    EchoInfo('Post Type: ' . $details["post_type"]); /* Added by Raam Dev <raam@raamdev.com> */
+    EchoInfo('Posted content:');
     EchoInfo($details["post_content"]);
 }
 

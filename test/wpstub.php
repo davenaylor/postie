@@ -1,6 +1,7 @@
 <?php
 
 define('ABSPATH', dirname(__FILE__) . '/');
+define('WP_PLUGIN_URL', 'localhost');
 
 class wpdb {
 
@@ -24,7 +25,7 @@ function get_option($option, $default = false) {
 }
 
 function get_post_types() {
-    return array("post", "page", "custom");
+    return array("post", "page", "custom", "image", "Video");
 }
 
 function current_time() {

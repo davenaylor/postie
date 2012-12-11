@@ -201,6 +201,14 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $subject = "//";
         $this->assertEquals("post", GetPostType($subject));
         $this->assertEquals("", $subject);
+        
+        $subject = "Image//test";
+        $this->assertEquals("image", GetPostType($subject));
+        $this->assertEquals("test", $subject);
+        
+        $subject = "video//test";
+        $this->assertEquals("video", GetPostType($subject));
+        $this->assertEquals("test", $subject);
     }
 
     public function testGetPostExcerpt() {
@@ -265,9 +273,9 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     public function testHTML2HTML() {
         $this->assertEquals("", HTML2HTML(""));
         $this->assertEquals("test", HTML2HTML("test"));
-        $this->assertEquals("<body>test</body>", HTML2HTML("<html lang='en'><body>test</body></html>"));
-        $this->assertEquals("<body>test</body>", HTML2HTML("<html lang='en'><head><title>title</title></head><body>test</body></html>"));
-        $this->assertEquals("<body>test</body>", HTML2HTML("<body>test</body>"));
+        $this->assertEquals("test", HTML2HTML("<html lang='en'><body>test</body></html>"));
+        $this->assertEquals("test", HTML2HTML("<html lang='en'><head><title>title</title></head><body>test</body></html>"));
+        $this->assertEquals("test", HTML2HTML("<body>test</body>"));
         $this->assertEquals("<strong>test</strong>", HTML2HTML("<strong>test</strong>"));
     }
 
@@ -289,7 +297,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
     public function testmore_reccurences() {
         $sched = array();
-        $newsched = more_reccurences($sched);
+        $newsched = postie_more_reccurences($sched);
         $this->assertEquals(3, count($newsched));
     }
 
