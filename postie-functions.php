@@ -73,16 +73,22 @@ function LogInfo($v) {
 }
 
 function EchoInfo($v) {
-    echo("<p>$v</p>\n");
+    if (headers_sent()) {
+        echo("<p>$v</p>\n");
+    }
     LogInfo($v);
 }
 
 function DebugDump($v) {
     if (IsDebugMode()) {
         $o = print_r($v, true);
-        echo "<pre>\n";
+        if (headers_sent()) {
+            echo "<pre>\n";
+        }
         EchoInfo($o);
-        echo "</pre>\n";
+        if (headers_sent()) {
+            echo "</pre>\n";
+        }
     }
 }
 
@@ -255,7 +261,7 @@ function GetPostType(&$subject) {
         // Captures the custom post type in the subject before $custom_post_type_delim
         $separated_subject = explode($custom_post_type_delim, $subject);
         $custom_post_type = $separated_subject[0];
-        $subject = $separated_subject[1];
+        $subject = trim($separated_subject[1]);
 
         $custom_post_type = trim(strtolower($custom_post_type));
 
@@ -724,7 +730,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
                 }
                 break;
-                
+
             case 'audio':
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 $file = wp_get_attachment_url($file_id);
@@ -738,7 +744,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 }
                 $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $audioTemplate);
                 break;
-                
+
             case 'video':
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 $file = wp_get_attachment_url($file_id);
@@ -1479,7 +1485,7 @@ function FilterTextParts(&$mimeDecodedEmail, $preferTextType) {
     }
     if ($found && $newParts) {
         //This is now the filtered list of just the preferred type.
-        echo count($newParts) . " parts\n";
+        DebugEcho(count($newParts) . " parts");
         $mimeDecodedEmail->parts = $newParts;
     }
 }

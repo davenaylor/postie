@@ -8,6 +8,7 @@
 * Strip all body, script and style tags from HTML content
 * Remove XSS warning
 * Fix bug where post type was not being detected if only case is different
+* Fix bug with custom post type and leading spaces in the subject
 
 = 1.4.9 (2012.12.10) =
 * Fixed bug where date, author, etc didn't get set.

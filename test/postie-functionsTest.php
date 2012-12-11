@@ -206,6 +206,10 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("image", GetPostType($subject));
         $this->assertEquals("test", $subject);
         
+        $subject = "Image // test";
+        $this->assertEquals("image", GetPostType($subject));
+        $this->assertEquals("test", $subject);
+        
         $subject = "video//test";
         $this->assertEquals("video", GetPostType($subject));
         $this->assertEquals("test", $subject);
