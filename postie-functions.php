@@ -2031,7 +2031,7 @@ function GetPostCategories(&$subject, $defaultCategory) {
             } elseif ($category = $wpdb->get_var($sql_sub_name)) {
                 //then cateogry is a start of a name and found
             }
-            if ($category) {
+            if (!empty($category)) {
                 $post_categories[] = $category;
             }
         }

@@ -201,15 +201,15 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $subject = "//";
         $this->assertEquals("post", GetPostType($subject));
         $this->assertEquals("", $subject);
-        
+
         $subject = "Image//test";
         $this->assertEquals("image", GetPostType($subject));
         $this->assertEquals("test", $subject);
-        
+
         $subject = "Image // test";
         $this->assertEquals("image", GetPostType($subject));
         $this->assertEquals("test", $subject);
-        
+
         $subject = "video//test";
         $this->assertEquals("video", GetPostType($subject));
         $this->assertEquals("test", $subject);
@@ -243,6 +243,22 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("1", $c[0]);
         $this->assertEquals("test", $s);
 
+        $wpdb->t_get_var = null;
+        $s = "not a category: test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals(0, count($c));
+        $this->assertEquals("not a category: test", $s);
+
+        $s = "[not a category] test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals(0, count($c));
+        $this->assertEquals("[not a category] test", $s);
+
+        $s = "-not a category- test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals(0, count($c));
+        $this->assertEquals("-not a category- test", $s);
+
         $wpdb->t_get_var = "general";
         $s = "general: test";
         $c = GetPostCategories($s, "default");
@@ -253,6 +269,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $c = GetPostCategories($s, "default");
         $this->assertEquals("general", $c[0]);
         $this->assertEquals("test", $s);
+
 
         $s = "-general- test";
         $c = GetPostCategories($s, "default");
