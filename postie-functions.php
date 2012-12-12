@@ -85,7 +85,7 @@ function DebugDump($v) {
         if (headers_sent()) {
             echo "<pre>\n";
         }
-        EchoInfo($o);
+        EchoInfo(htmlspecialchars($o));
         if (headers_sent()) {
             echo "</pre>\n";
         }
@@ -597,6 +597,9 @@ function PostToDB($details, $isReply, $postToDb = true, $customImageField = fals
             $post_ID = wp_insert_comment($comment);
         }
         if ($customImageField) {
+            DebugEcho("Saving custom image fields");
+            //DebugDump($details['customImages']);
+
             if (count($details['customImages']) > 1) {
                 $imageField = 1;
                 foreach ($details['customImages'] as $image) {
@@ -669,9 +672,13 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
         }
     } else {
         // fix filename (remove non-standard characters)
+        DebugEcho("extracting file name for attachement");
+        //DebugDump($part);
+
         $filename = "";
         if (is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters)) {
             $filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $part->ctype_parameters['name']);
+            DebugEcho("Filename: $filename");
         }
         switch (strtolower($part->ctype_primary)) {
             case 'multipart':
@@ -723,11 +730,13 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 if (array_key_exists('content-id', $part->headers)) {
                     $cid = trim($part->headers["content-id"], "<>");
                 }
-                ; //cids are in <cid>
+
                 $the_post = get_post($file_id);
+                DebugEcho("Html Attachement: $filename");
                 $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $imagetemplate);
                 if ($cid) {
                     $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
+                    DebugEcho("CID Attachement: $cid");
                 }
                 break;
 
@@ -877,6 +886,7 @@ function HTML2HTML($content) {
  * @return integer|NULL
  */
 function ValidatePoster(&$mimeDecodedEmail, $config) {
+    $test_email = '';
     extract($config);
     global $wpdb;
     $poster = NULL;
@@ -914,7 +924,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
                 EchoInfo("The message was unable to be forwarded to the adminstrator.");
             }
         }
-        return;
+        return '';
     }
     return $poster;
 }
@@ -1147,7 +1157,7 @@ function DecodeBase64Part(&$part) {
     if (array_key_exists('content-transfer-encoding', $part->headers)) {
         if (strtolower($part->headers['content-transfer-encoding']) == 'base64') {
             DebugEcho("DecodeBase64Part: base64 detected");
-            DebugDump($part);
+            //DebugDump($part);
             if (is_array($part->ctype_parameters) && array_key_exists('charset', $part->ctype_parameters)) {
                 $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8', base64_decode($part->body));
             } else {
@@ -1521,7 +1531,7 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
             $headers .= "Cc: " . $recipient . "\r\n";
         }
     }
-// Set email subject
+    // Set email subject
     if ($reject) {
         $alert_subject = $blogname . ": Unauthorized Post Attempt from $from";
         if ($mail_content->ctype_parameters['boundary']) {
@@ -1529,7 +1539,7 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
         } else {
             $boundary = uniqid("B_");
         }
-// Set sender details
+        // Set sender details
         /*
           if (isset($mail_content->headers["mime-version"])) {
           $headers .= "Mime-Version: ". $mail_content->headers["mime-version"] . "\r\n";
@@ -1540,16 +1550,14 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
          */
 
         $headers.="Content-Type:multipart/alternative; boundary=\"$boundary\"\r\n";
-// SDM 20041123
-// construct mail message
+        // SDM 20041123
+        // construct mail message
         $message = "An unauthorized message has been sent to $blogname.\n";
         $message .= "Sender: $from\n";
         $message .= "Subject: $subject\n";
         $message .= "\n\nIf you wish to allow posts from this address, please add " . $from . " to the registered users list and manually add the content of the e-mail found below.";
         $message .= "\n\nOtherwise, the e-mail has already been deleted from the server and you can ignore this message.";
-        $message .= "\n\nIf you would like to prevent postie from forwarding mail
-    in the future, please change the FORWARD_REJECTED_MAIL setting in the Postie
-    settings panel";
+        $message .= "\n\nIf you would like to prevent postie from forwarding mail in the future, please change the FORWARD_REJECTED_MAIL setting in the Postie settings panel";
         $message .= "\n\nThe original content of the e-mail has been attached.\n\n";
         $mailtext = "--$boundary\r\n";
         $mailtext .= "Content-Type: text/plain;format=flowed;charset=\"iso-8859-1\";reply-type=original\n";
@@ -1563,18 +1571,20 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
         }
         foreach ($mailparts as $part) {
             $mailtext .= "--$boundary\r\n";
-            $mailtext .= "Content-Type: " . $part->headers["content-type"] . "\n";
-            $mailtext .= "Content-Transfer-Encoding: " . $part->headers["content-transfer-encoding"] . "\n";
-            if (isset($part->headers["content-disposition"])) {
+            if (array_key_exists('content-type', $part->headers))
+                $mailtext .= "Content-Type: " . $part->headers["content-type"] . "\n";
+            if (array_key_exists('content-transfer-encoding', $part->headers))
+                $mailtext .= "Content-Transfer-Encoding: " . $part->headers["content-transfer-encoding"] . "\n";
+            if (array_key_exists('content-disposition', $part->headers)) {
                 $mailtext .= "Content-Disposition: " . $part->headers["content-disposition"] . "\n";
             }
             $mailtext .= "\n";
-            $mailtext .= $part->body;
+            if (property_exists($part, 'body'))
+                $mailtext .= $part->body;
         }
     } else {
         $alert_subject = "Successfully posted to $blogname";
-        $mailtext = "Your post '$subject' has been successfully published to " .
-                "$blogname <$blogurl>.\n";
+        $mailtext = "Your post '$subject' has been successfully published to $blogname <$blogurl>.\n";
     }
 
 
@@ -1790,6 +1800,7 @@ function parseTemplate($id, $type, $template, $size = 'medium') {
  * @param array - array of HTML for images for post
  */
 function ReplaceImageCIDs(&$content, &$attachments) {
+    DebugEcho("ReplaceImageCIDs");
     $used = array();
     foreach ($attachments["cids"] as $key => $info) {
         $key = str_replace('/', '\/', $key);
@@ -1802,16 +1813,26 @@ function ReplaceImageCIDs(&$content, &$attachments) {
     //DebugEcho("# cid attachments: " . count($used));
 
     $html = array();
-    $att = array_values($attachments["html"]); //make sure there are numeric indexes
-    //DebugDump($attachments["html"]);
-    //DebugDump($att);
+//    $att = array_values($attachments["html"]); //make sure there are numeric indexes
+//    DebugEcho('$attachments');
+//    DebugDump($attachments);
+//    DebugEcho('$used');
+//    DebugDump($used);
 
-    for ($i = 0; $i < count($attachments["html"]); $i++) {
-        if (!in_array($i, $used)) {
-            $html[] = $att[$i];
+//    for ($i = 0; $i < count($attachments["html"]); $i++) {
+//        if (!in_array($i, $used)) {
+//            $html[] = $att[$i];
+//        }
+//    }
+
+    foreach ($attachments['html'] as $key => $value) {
+        if (!in_array($value, $used)) {
+            $html[$key] = $value;
         }
     }
+
     $attachments["html"] = $html;
+    //DebugDump($attachments);
 }
 
 /**
@@ -2610,7 +2631,8 @@ function DebugEmailOutput(&$email, &$mimeDecodedEmail) {
 function SpecialMessageParsing(&$content, &$attachments, $config) {
     extract($config);
     if (preg_match('/You have been sent a message from Vodafone mobile/', $content)) {
-        VodafoneHandler($content, $attachments); //Everything for this type of message is handled below
+        DebugEcho("Vodafone message");
+        VodafoneHandler($content, $attachments);
         return;
     }
     if ($message_start) {
@@ -2629,9 +2651,15 @@ function SpecialMessageParsing(&$content, &$attachments, $config) {
         ReplaceImagePlaceHolders($content, $attachments["html"], $config);
     } else {
         $customImages = array();
-        foreach ($attachments["html"] as $value) {
-            preg_match("/src = ['\"]([^'\"]*)['\"]/", $value, $matches);
-            array_push($customImages, $matches[1]);
+        DebugEcho("Looking for custom images");
+        //DebugDump($attachments["html"]);
+
+        foreach ($attachments["html"] as $key => $value) {
+            //DebugEcho("checking " . htmlentities($value));
+            if (preg_match("/src\s*=\s*['\"]([^'\"]*)['\"]/i", $value, $matches)) {
+                DebugEcho("found custom image: " . $matches[1]);
+                array_push($customImages, $matches[1]);
+            }
         }
 
         return $customImages;
