@@ -3,6 +3,12 @@
 * All script, style and body tags are stripped from html emails.
 
 == CHANGELOG ==
+= 1.4.11.(future) =
+* Fixed bug where having a colon in the subject caused the subject to get truncated
+* Added donation link to admin screen
+* Fixed bug where #img# captions with double-byte characters were not working
+* Fixed bug where default settings were corrupt
+
 = 1.4.10 (2012.12.11) =
 * Fixed warning when there is no subject
 * Removed all script and style tags from HTML content in place of XSS warning

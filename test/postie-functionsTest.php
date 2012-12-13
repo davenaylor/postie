@@ -236,6 +236,11 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $c = GetPostCategories($s, "default");
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("test", $s);
+        
+        $s = ":test";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals("default", $c[0]);
+        $this->assertEquals(":test", $s);
 
         $wpdb->t_get_var = "1";
         $s = "1: test";
@@ -246,17 +251,17 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $wpdb->t_get_var = null;
         $s = "not a category: test";
         $c = GetPostCategories($s, "default");
-        $this->assertEquals(0, count($c));
+        $this->assertEquals("default", $c[0]);
         $this->assertEquals("not a category: test", $s);
 
         $s = "[not a category] test";
         $c = GetPostCategories($s, "default");
-        $this->assertEquals(0, count($c));
+        $this->assertEquals("default", $c[0]);
         $this->assertEquals("[not a category] test", $s);
 
         $s = "-not a category- test";
         $c = GetPostCategories($s, "default");
-        $this->assertEquals(0, count($c));
+       $this->assertEquals("default", $c[0]);
         $this->assertEquals("-not a category- test", $s);
 
         $wpdb->t_get_var = "general";
@@ -280,7 +285,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $s = "specific: test";
         $c = GetPostCategories($s, "default");
         $this->assertEquals("default", $c[0]);
-        $this->assertEquals("test", $s);
+        $this->assertEquals("specific: test", $s);
 
         $wpdb->t_get_var = "1";
         $s = "[1] [1] test";

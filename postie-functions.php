@@ -18,6 +18,32 @@
 //to turn on debug output add the following line to wp-config.php
 //define('POSTIE_DEBUG', true);
 
+if (!function_exists('mb_str_replace')) {
+
+    function mb_str_replace($search, $replace, $subject, &$count = 0) {
+        if (!is_array($subject)) {
+            // Normalize $search and $replace so they are both arrays of the same length
+            $searches = is_array($search) ? array_values($search) : array($search);
+            $replacements = is_array($replace) ? array_values($replace) : array($replace);
+            $replacements = array_pad($replacements, count($searches), '');
+
+            foreach ($searches as $key => $search) {
+                $parts = mb_split(preg_quote($search), $subject);
+                $count += count($parts) - 1;
+                $subject = implode($replacements[$key], $parts);
+            }
+        } else {
+            // Call mb_str_replace for each subject in array, recursively
+            foreach ($subject as $key => $value) {
+                $subject[$key] = mb_str_replace($search, $replace, $value, $count);
+            }
+        }
+
+        return $subject;
+    }
+
+}
+
 function postie_disable_revisions($restore = false) {
     global $_wp_post_type_features, $_postie_revisions;
 
@@ -606,8 +632,6 @@ function PostToDB($details, $isReply, $postToDb = true, $customImageField = fals
                     add_post_meta($post_ID, 'image' . $imageField, $image);
                     $imageField++;
                 }
-            } else {
-                add_post_meta($post_ID, 'image', $details['customImages'][0]);
             }
         }
     }
@@ -701,7 +725,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
                 if (array_key_exists('content-transfer-encoding', $part->headers)) {
                     //DebugDump($part);
-                    $part->body = HandleMessageEncoding($part->headers["content-transfer-encoding"], $part->ctype_parameters["charset"], $part->body, $message_encoding, $message_dequote);
+                    $part->body = HandleMessageEncoding($encoding, $charset, $part->body, $message_encoding, $message_dequote);
                     //DebugDump($part);
                 }
 
@@ -1818,7 +1842,6 @@ function ReplaceImageCIDs(&$content, &$attachments) {
 //    DebugDump($attachments);
 //    DebugEcho('$used');
 //    DebugDump($used);
-
 //    for ($i = 0; $i < count($attachments["html"]); $i++) {
 //        if (!in_array($i, $used)) {
 //            $html[] = $att[$i];
@@ -1859,12 +1882,15 @@ function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
     foreach ($attachments as $attachementName => $imageTemplate) {
         // looks for ' #img1# ' etc... and replaces with image
         $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $image_placeholder);
-        $eimg_placeholder_temp = str_replace("%", intval($startIndex + $i), "#eimg%#");
         $img_placeholder_temp = rtrim($img_placeholder_temp, '#');
+
+        $eimg_placeholder_temp = str_replace("%", intval($startIndex + $i), "#eimg%#");
         $eimg_placeholder_temp = rtrim($eimg_placeholder_temp, '#');
 
+        DebugEcho("img_placeholder_temp: $img_placeholder_temp");
         if (stristr($content, $img_placeholder_temp) || stristr($content, $eimg_placeholder_temp)) {
             // look for caption
+            DebugEcho("Found $img_placeholder_temp or $eimg_placeholder_temp");
             $caption = '';
             $content = preg_replace("/&#0?39;/", "'", $content);
             $content = preg_replace("/&(#0?34|quot);/", "\"", $content);
@@ -1876,12 +1902,18 @@ function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
             } else {
                 DebugEcho("No caption found");
             }
-            $imageTemplate = str_replace('{CAPTION}', $caption, $imageTemplate);
+            DebugEcho("parameterize templete: " . htmlentities($imageTemplate));
+            $imageTemplate = mb_str_replace('{CAPTION}', $caption, $imageTemplate);
+            DebugEcho("populated templete: " . htmlentities($imageTemplate));
+
             $img_placeholder_temp.='#';
             $eimg_placeholder_temp.='#';
+
+            DebugEcho("replacing " . htmlentities($img_placeholder_temp) . " with template");
             $content = str_ireplace($img_placeholder_temp, $imageTemplate, $content);
             $content = str_ireplace($eimg_placeholder_temp, $imageTemplate, $content);
         } else {
+            DebugEcho("No #img$i# found");
             $imageTemplate = str_replace('{CAPTION}', '', $imageTemplate);
             /* if using the gallery shortcode, don't add pictures at all */
             if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
@@ -1995,16 +2027,17 @@ function GetPostExcerpt(&$content, $filterNewLines, $convertNewLines) {
  */
 function GetPostCategories(&$subject, $defaultCategory) {
     global $wpdb;
+    $original_subject = $subject;
     $post_categories = array();
     $matches = array();
     //try and determine category
-    if (preg_match('/(.+): (.*)/', $subject, $matches)) {
+    if (preg_match('/(.+): (.*)/', $subject, $matches)) { // <category>:<Subject>
         $subject = trim($matches[2]);
         $matches[1] = array($matches[1]);
-    } else if (preg_match_all('/\[(.[^\[]*)\]/', $subject, $matches)) {
+    } else if (preg_match_all('/\[(.[^\[]*)\]/', $subject, $matches)) { // [<category1>] [<category2>] <Subject>
         preg_match("/]([^\[]*)$/", $subject, $subject_matches);
         $subject = trim($subject_matches[1]);
-    } else if (preg_match_all('/-(.[^-]*)-/', $subject, $matches)) {
+    } else if (preg_match_all('/-(.[^-]*)-/', $subject, $matches)) { // -<category>- -<category2>- <Subject>
         preg_match("/-(.[^-]*)$/", $subject, $subject_matches);
         $subject = trim($subject_matches[1]);
     }
@@ -2038,6 +2071,7 @@ function GetPostCategories(&$subject, $defaultCategory) {
     }
     if (!count($post_categories)) {
         $post_categories[] = $defaultCategory;
+        $subject = $original_subject;
     }
     return $post_categories;
 }
@@ -2261,14 +2295,11 @@ function GetDBConfig() {
     if (!isset($config["PREFER_TEXT_TYPE"]))
         $config["PREFER_TEXT_TYPE"] = "plain";
     if (!isset($config["DEFAULT_TITLE"]))
-        $config["DEFAULT_TITLE"] = "Live Fro
-        m The Field";
+        $config["DEFAULT_TITLE"] = "Live From The Field";
     if (!isset($config["INPUT_PROTOCOL"]))
-        $config["INPUT_PROTOCOL"]
-                = "pop3";
+        $config["INPUT_PROTOCOL"] = "pop3";
     if (!isset($config["IMAGE_PLACEHOLDER"]))
-        $config["IMAGE_PLACEHOLDER"] = "#img%
-        #";
+        $config["IMAGE_PLACEHOLDER"] = "#img%#";
     if (!isset($config["IMAGES_APPEND"]))
         $config["IMAGES_APPEND"] = true;
 
@@ -2311,8 +2342,7 @@ function GetDBConfig() {
     if (!isset($config["BANNED_FILES_LIST"]))
         $config["BANNED_FILES_LIST"] = array();
     if (!isset($config["SUPPORTED_FILE_TYPES"]))
-        $config["SUPPORTED_FILE_TYPES"] = array("video", "applicatio
-        n");
+        $config["SUPPORTED_FILE_TYPES"] = array("video", "application");
     if (!isset($config["AUTHORIZED_ADDRESSES"]))
         $config["AUTHORIZED_ADDRESSES"] = array();
     if (!isset($config["MAIL_SERVER"]))
@@ -2336,15 +2366,13 @@ function GetDBConfig() {
         $config["TIME_OFFSET"] = get_option('gmt_offset');
     if (!isset($config["WRAP_PRE"]))
         $config["WRAP_PRE"] = 'no';
-    if (!isset($config["CONVERTUR
-        LS"]))
+    if (!isset($config["CONVERTURLS"]))
         $config["CONVERTURLS"] = true;
     if (!isset($config["SHORTCODE"]))
         $config["SHORTCODE"] = false;
     if (!isset($config["ADD_META"]))
         $config["ADD_META"] = 'no';
-    $config['ICON_SETS'] = array('silver', 'black', 'w
-        hite', 'custom', 'none');
+    $config['ICON_SETS'] = array('silver', 'black', 'white', 'custom', 'none');
     if (!isset($config["ICON_SET"]))
         $config["ICON_SET"] = 'silver';
     $config['ICON_SIZES'] = array(32, 48, 64);
@@ -2363,19 +2391,15 @@ function GetDBConfig() {
         $config["AUDIOTEMPLATE"] = $simple_link;
 
 //video1
-
     if (!isset($config["VIDEO1TYPES"]))
-        $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp',
-            '3gpp', '3gpp2',
-            '3gp2', 'mov', 'mpeg');
+        $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', '3gp2', 'mov', 'mpeg');
     if (!isset($config["AUDIOTYPES"]))
         $config['AUDIOTYPES'] = array('m4a', 'mp3', 'ogg', 'wav', 'mpeg');
     if (!isset($config["SELECTED_VIDEO2TEMPLATE"]))
         $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
     include('templates/video1_templates.php');
     $config['VIDEO1TEMPLATES'] = $video1Templates;
-    if
-    (!isset($config["VIDEO1TEMPLATE"]))
+    if (!isset($config["VIDEO1TEMPLATE"]))
         $config["VIDEO1TEMPLATE"] = $simple_link;
 
 //video2
@@ -2383,16 +2407,13 @@ function GetDBConfig() {
         $config['VIDEO2TYPES'] = array('x-flv');
     if (!isset($config["POST_STATUS"]))
         $config["POST_STATUS"] = 'publish';
-    if (!isset($config["IMAGE_NE
-        W_WINDOW"]))
+    if (!isset($config["IMAGE_NEW_WINDOW"]))
         $config["IMAGE_NEW_WINDOW"] = false;
-    if (!isset($config["FILTERN
-        EWLINES"]))
+    if (!isset($config["FILTERNEWLINES"]))
         $config["FILTERNEWLINES"] = true;
     include('templates/video2_templates.php');
     $config['VIDEO2TEMPLATES'] = $video2Templates;
-    if (!isset($config["V
-        IDEO2TEMPLATE"]))
+    if (!isset($config["VIDEO2TEMPLATE"]))
         $config["VIDEO2TEMPLATE"] = $simple_link;
 
 //image
@@ -2461,8 +2482,7 @@ function get_postie_config() {
 function get_arrayed_settings() {
     return array(
         ', ' => array('audiotypes', 'video1types', 'video2types', 'default_post_tags'),
-        "\n" => array('smtp', 'authorized_addresses', 'supported_file_types',
-            'banned_files_list', 'sig_pattern_list'));
+        "\n" => array('smtp', 'authorized_addresses', 'supported_file_types', 'banned_files_list', 'sig_pattern_list'));
 }
 
 /**
@@ -2517,7 +2537,7 @@ function TestPostieDirectory() {
  */
 function TestForMarkdown() {
     if (in_array("markdown.php", get_option("active_plugins"))) {
-        return(true);
+        return true;
     }
     return false;
 }
@@ -2609,18 +2629,23 @@ function DebugEmailOutput(&$email, &$mimeDecodedEmail) {
         //DebugDump($email);
         //DebugDump($mimeDecodedEmail);
 
-        $fname = POSTIE_ROOT . DIRECTORY_SEPARATOR . "test_emails" . DIRECTORY_SEPARATOR . SafeFileName($mimeDecodedEmail->headers["message-id"]);
-        $file = fopen($fname . ".txt ", "w");
-        fwrite($file, $email);
-        fclose($file);
+        $dname = POSTIE_ROOT . DIRECTORY_SEPARATOR . "test_emails" . DIRECTORY_SEPARATOR;
+        if (is_dir($dname)) {
+            $fname = $dname . SafeFileName($mimeDecodedEmail->headers["message-id"]);
+            $file = fopen($fname . ".txt ", "w");
+            fwrite($file, $email);
+            fclose($file);
 
-        $file = fopen($fname . "-mime.txt ", "w");
-        fwrite($file, print_r($mimeDecodedEmail, true));
-        fclose($file);
+            $file = fopen($fname . "-mime.txt ", "w");
+            fwrite($file, print_r($mimeDecodedEmail, true));
+            fclose($file);
 
-        $file = fopen($fname . ".php ", "w");
-        fwrite($file, serialize($email));
-        fclose($file);
+            $file = fopen($fname . ".php ", "w");
+            fwrite($file, serialize($email));
+            fclose($file);
+        } else {
+            DebugEcho("The directory $dname does not exist, creating this optional directory will allow saving copies of emails for debugging purposes.");
+        }
     }
 }
 

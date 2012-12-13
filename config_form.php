@@ -1,9 +1,22 @@
 <div class="wrap"> 
+    <div style="float:right; width: 220px; border: 1px solid darkgrey; padding:2px;border-radius:10px;" >
+        <p class="" style="text-align:center;font-weight: bolder; margin-top: 0px; margin-bottom: 2px;">Please Donate</p>
+        <p style="margin-top: 0;margin-bottom: 2px;">Your generous donation allows me to continue developing Postie for the WordPress community.</p>
+        <form style="" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+            <input type="hidden" name="cmd" value="_s-xclick">
+            <input type="hidden" name="hosted_button_id" value="HPK99BJ88V4C2">
+            <div style="text-align:center;">
+                <input style="border: none; margin: 0;" type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" name="submit" alt="PayPal - The safer, easier way to pay online!">
+            </div>
+        </form>
+    </div>
     <h2>
         <a style='text-decoration:none' href='options-general.php?page=postie/postie.php'>
             <img src="../wp-content/plugins/postie/images/mail.png" alt="postie" /><?php _e('Postie Options', 'postie'); ?>
         </a>
     </h2>
+
+
     <?php
     require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
     if (isset($_POST["action"])) {
@@ -38,8 +51,6 @@
     if (empty($config))
         $config = ResetPostieConfig();
 
-
-
     $arrays = get_arrayed_settings();
     // some fields are stored as arrays, because that makes back-end processing much easier
     // and we need to convert those fields to strings here, for the options form
@@ -60,6 +71,9 @@
     <?php if (isset($_GET['message'])) : ?>
         <div class="updated"><p><?php _e($messages[$_GET['message']], 'postie'); ?></p></div>
     <?php endif; ?>
+
+
+
     <form name="postie-options" method="post"> 
         <input type="hidden" name="action" value="reset" />
         <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie') ?> &raquo;" type="submit" class='button'>
@@ -74,6 +88,7 @@
         <input name="Submit" value="<?php _e("Test Config", 'postie'); ?>&raquo;" type="submit" class='button'>
         <?php _e("this will run a special script to test your configuration options", 'postie'); ?>
     </form>
+
     <form name="postie-options" method="post" action='options.php'>
         <?php
         settings_fields('postie-settings');
