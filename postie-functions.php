@@ -695,12 +695,11 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
         }
     } else {
-        // fix filename (remove non-standard characters)
-        DebugEcho("extracting file name for attachement");
-        //DebugDump($part);
+        DebugDump($part);
 
         $filename = "";
         if (is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters)) {
+            // fix filename (remove non-standard characters)
             $filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $part->ctype_parameters['name']);
             DebugEcho("Filename: $filename");
         }
@@ -1073,7 +1072,7 @@ function ConvertUTF8ToISO_8859_1($contenttransferencoding, $currentcharset, $bod
             $body = utf8_decode($body);
         }
         if ($contenttransferencoding == 'quoted-printable') {
-            $body = iconv($currentcharset, 'UTF-8', quoted_printable_decode($body));
+            $body = iconv($currentcharset, "UTF-8//TRANSLIT", quoted_printable_decode($body));
         }
     }
     return $body;
@@ -1098,82 +1097,13 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     }
 
     DebugEcho("after HandleMessageEncoding");
-
-    $body = iconv($charset, $blogEncoding, $body);
+    if (strtolower($charset) != 'default')
+        $body = iconv($charset, $blogEncoding . '//TRANSLIT', $body);
     return $body;
 }
 
 function ConvertToUTF_8($charset, $body) {
-    $charset = strtolower($charset);
-
-    switch ($charset) {
-        case "iso-8859-1":
-            $body = utf8_encode($body);
-            break;
-        case "iso-2022-jp":
-            $body = iconv("ISO-2022-JP", "UTF-8//TRANSLIT", $body);
-            break;
-        case ($charset == "windows-1252" || $charset == "cp-1252" || $charset == "cp 1252"):
-            $body = cp1252_to_utf8($body);
-            break;
-        case ($charset == "windows-1256" || $charset == "cp-1256" || $charset == "cp 1256"):
-            $body = iconv("Windows-1256", "UTF-8//TRANSLIT", $body);
-            break;
-        case 'koi8-r':
-            $body = iconv("koi8-r", "UTF-8//TRANSLIT", $body);
-            break;
-        case 'iso-8859-2':
-            $body = iconv("iso-8859-2", "UTF-8//TRANSLIT", $body);
-            break;
-        case "big5":
-            $body = iconv("BIG5", "UTF-8//TRANSLIT", $body);
-            break;
-        case "gb2312":
-            $body = iconv("GB2312", "UTF-8//TRANSLIT", $body);
-            break;
-        case "iso-8859-15":
-            $body = iconv("iso-8859-15", "UTF-8//TRANSLIT", $body);
-            break;
-        default :
-            $body = iconv($charset, "UTF-8//TRANSLIT", $body);
-            break;
-    }
-    return $body;
-}
-
-/* this function will convert windows-1252 (also known as cp-1252 to utf-8 */
-
-function cp1252_to_utf8($str) {
-    $cp1252_map = array(
-        "\xc2\x80" => "\xe2\x82\xac",
-        "\xc2\x82" => "\xe2\x80\x9a",
-        "\xc2\x83" => "\xc6\x92",
-        "\xc2\x84" => "\xe2\x80\x9e",
-        "\xc2\x85" => "\xe2\x80\xa6",
-        "\xc2\x86" => "\xe2\x80\xa0",
-        "\xc2\x87" => "\xe2\x80\xa1",
-        "\xc2\x88" => "\xcb\x86",
-        "\xc2\x89" => "\xe2\x80\xb0",
-        "\xc2\x8a" => "\xc5\xa0",
-        "\xc2\x8b" => "\xe2\x80\xb9",
-        "\xc2\x8c" => "\xc5\x92",
-        "\xc2\x8e" => "\xc5\xbd",
-        "\xc2\x91" => "\xe2\x80\x98",
-        "\xc2\x92" => "\xe2\x80\x99",
-        "\xc2\x93" => "\xe2\x80\x9c",
-        "\xc2\x94" => "\xe2\x80\x9d",
-        "\xc2\x95" => "\xe2\x80\xa2",
-        "\xc2\x96" => "\xe2\x80\x93",
-        "\xc2\x97" => "\xe2\x80\x94",
-        "\xc2\x98" => "\xcb\x9c",
-        "\xc2\x99" => "\xe2\x84\xa2",
-        "\xc2\x9a" => "\xc5\xa1",
-        "\xc2\x9b" => "\xe2\x80\xba",
-        "\xc2\x9c" => "\xc5\x93",
-        "\xc2\x9e" => "\xc5\xbe",
-        "\xc2\x9f" => "\xc5\xb8"
-    );
-    return strtr(utf8_encode($str), $cp1252_map);
+    return iconv($charset, "UTF-8//TRANSLIT", $body);
 }
 
 /**
@@ -1185,7 +1115,7 @@ function DecodeBase64Part(&$part) {
             DebugEcho("DecodeBase64Part: base64 detected");
             //DebugDump($part);
             if (is_array($part->ctype_parameters) && array_key_exists('charset', $part->ctype_parameters)) {
-                $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8', base64_decode($part->body));
+                $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8//TRANSLIT', base64_decode($part->body));
             } else {
                 $part->body = base64_decode($part->body);
             }
@@ -1950,6 +1880,7 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
         $mimeDecodedEmail->headers['subject'] = $subject;
     } else {
         $subject = $mimeDecodedEmail->headers['subject'];
+        DebugEcho(("Predecoded subject: $subject"));
         if (array_key_exists('content-transfer-encoding', $mimeDecodedEmail->headers)) {
             $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
         } else if (array_key_exists("content-transfer-encoding", $mimeDecodedEmail->ctype_parameters)) {
@@ -1964,13 +1895,13 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
             $text = $mimeDecodedEmail->headers['subject'];
 
             $elements = imap_mime_header_decode($text);
-            //DebugEcho("MIME Header");
-            //DebugDump($elements);
+            DebugEcho("MIME Header");
+            DebugDump($elements);
 
             for ($i = 0; $i < count($elements); $i++) {
                 $thischarset = $elements[$i]->charset;
-                if ($thischarset == 'default')
-                    $thischarset = $charset;
+//                if ($thischarset == 'default')
+//                    $thischarset = $charset;
 
                 $subject.=HandleMessageEncoding($encoding, $thischarset, $elements[$i]->text, $message_encoding, $message_dequote);
             }
@@ -1986,7 +1917,7 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
     if (strpos($subject, "\x1b\x24\x42") !== false) {
         // found iso-2022-jp escape sequence in subject... convert!
         DebugEcho("extra parsing for ISO-2022-JP");
-        $subject = iconv("ISO-2022-JP//TRANSLIT", "UTF-8", $subject);
+        $subject = iconv("ISO-2022-JP", "UTF-8//TRANSLIT", $subject);
     }
     return $subject;
 }
