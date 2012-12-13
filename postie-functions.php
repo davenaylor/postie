@@ -1995,15 +1995,19 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
  */
 function postie_get_tags(&$content, $defaultTags) {
     $post_tags = array();
-//try and determine tags
-    if (preg_match('/tags: ?(.*)\n/i', $content, $matches)) {
-        $content = str_replace($matches[0], "", $content);
-        $post_tags = preg_split("/,\s*/", $matches[1]);
+    //try and determine tags
+    if (preg_match('/tags: ?(.*)$/im', $content, $matches)) {
+        if (!empty($matches[1])) {
+            DebugEcho("Found tags: $matches[1]");
+            $content = str_replace($matches[0], "", $content);
+            $post_tags = preg_split("/,\s*/", $matches[1]);
+            DebugDump($post_tags);
+        }
     }
-    if (!count($post_tags) && !empty($defaultTags)) {
+    if (count($post_tags) == 0 && is_array($defaultTags)) {
         $post_tags = $defaultTags;
     }
-    return($post_tags);
+    return $post_tags;
 }
 
 /**

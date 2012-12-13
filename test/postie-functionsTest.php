@@ -5,6 +5,10 @@ require'../postie-functions.php';
 require'../simple_html_dom.php';
 require '../postie.php';
 
+define('WP_DEBUG', true);
+define('WP_DEBUG_LOG', true);
+define('POSTIE_DEBUG', true);
+
 class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
     public function testAllowCommentsOnPost() {
@@ -147,6 +151,9 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
         $c = "test xxx test";
         $this->assertEquals("test ", EndFilter($c, "xxx"));
+
+        $c = "tags: Station, Kohnen, Flugzeug\n:end\n21.10.2012";
+        $this->assertEquals("tags: Station, Kohnen, Flugzeug\n", EndFilter($c, ":end"));
     }
 
     public function testFilterNewLines() {
@@ -236,7 +243,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $c = GetPostCategories($s, "default");
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("test", $s);
-        
+
         $s = ":test";
         $c = GetPostCategories($s, "default");
         $this->assertEquals("default", $c[0]);
@@ -261,7 +268,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
         $s = "-not a category- test";
         $c = GetPostCategories($s, "default");
-       $this->assertEquals("default", $c[0]);
+        $this->assertEquals("default", $c[0]);
         $this->assertEquals("-not a category- test", $s);
 
         $wpdb->t_get_var = "general";
@@ -325,6 +332,83 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $sched = array();
         $newsched = postie_more_reccurences($sched);
         $this->assertEquals(3, count($newsched));
+    }
+
+    public function testpostie_get_tags() {
+        $c = "";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(0, count($t));
+        $this->assertEquals("", $c);
+
+        $c = "test";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(0, count($t));
+        $this->assertEquals("test", $c);
+        
+         $c = "test";
+        $t = postie_get_tags($c, array("tag1"));
+        $this->assertEquals(1, count($t));
+        $this->assertEquals("tag1", $t[0]);
+        $this->assertEquals("test", $c);
+
+        $c = "test tags:";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(0, count($t));
+        $this->assertEquals("test tags:", $c);
+
+        $c = "test tags:\n";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(0, count($t));
+        $this->assertEquals("test tags:\n", $c);
+
+        $c = "test tags: tag1";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(1, count($t));
+        $this->assertEquals("test ", $c);
+        
+        $c = "test\ntags: tag1";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(1, count($t));
+        $this->assertEquals("test\n", $c);
+
+        $c = "test tags: tag1\n";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(1, count($t));
+        $this->assertEquals("tag1", $t[0]);
+        $this->assertEquals("test \n", $c);
+
+        $c = "test tags:tag1";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(1, count($t));
+        $this->assertEquals("tag1", $t[0]);
+        $this->assertEquals("test ", $c);
+        
+         $c = "test tags:tag1";
+        $t = postie_get_tags($c, array("tagx"));
+        $this->assertEquals(1, count($t));
+        $this->assertEquals("tag1", $t[0]);
+        $this->assertEquals("test ", $c);
+        
+        $c = "test tags:tag1,tag2";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(2, count($t));
+        $this->assertEquals("tag1", $t[0]);
+        $this->assertEquals("tag2", $t[1]);
+        $this->assertEquals("test ", $c);
+        
+        $c = "test tags: tag3,tag4\nmore stuff\n:end";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(2, count($t));
+        $this->assertEquals("tag3", $t[0]);
+        $this->assertEquals("tag4", $t[1]);
+        $this->assertEquals("test \nmore stuff\n:end", $c);
+        
+        $c = "test tags:tag1,tag2\nmore stuff\n:end";
+        $t = postie_get_tags($c, "");
+        $this->assertEquals(2, count($t));
+        $this->assertEquals("tag1", $t[0]);
+        $this->assertEquals("tag2", $t[1]);
+        $this->assertEquals("test \nmore stuff\n:end", $c);
     }
 
 }

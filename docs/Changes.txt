@@ -8,6 +8,7 @@
 * Added donation link to admin screen
 * Fixed bug where #img# captions with double-byte characters were not working
 * Fixed bug where default settings were corrupt
+* Fixed several bugs in tag detection logic
 
 = 1.4.10 (2012.12.11) =
 * Fixed warning when there is no subject
