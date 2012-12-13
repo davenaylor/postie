@@ -149,7 +149,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     EchoInfo("new post id is $post_id");
 
     $content = GetContent($mimeDecodedEmail, $attachments, $post_id, $poster, $config);
-    DebugEcho("the content is $content");
+    //DebugEcho("the content is $content");
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
 
@@ -1086,18 +1086,20 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     DebugEcho("before HandleMessageEncoding");
     DebugEcho("charset: $charset");
     DebugEcho("encoding: $contenttransferencoding");
+    //DebugDump($body);
 
     if ($contenttransferencoding == 'base64') {
         DebugEcho("HandleMessageEncoding: base64 detected");
         $body = base64_decode($body);
-        $body = iconv($charset, $blogEncoding, $body);
     }
     if ($dequote && $contenttransferencoding == 'quoted-printable') {
         DebugEcho("quoted-printable detected");
-        $body = iconv($charset, $blogEncoding, quoted_printable_decode($body));
+        $body = quoted_printable_decode($body);
     }
 
     DebugEcho("after HandleMessageEncoding");
+
+    $body = iconv($charset, $blogEncoding, $body);
     return $body;
 }
 
@@ -2001,7 +2003,7 @@ function postie_get_tags(&$content, $defaultTags) {
             DebugEcho("Found tags: $matches[1]");
             $content = str_replace($matches[0], "", $content);
             $post_tags = preg_split("/,\s*/", $matches[1]);
-            DebugDump($post_tags);
+            //DebugDump($post_tags);
         }
     }
     if (count($post_tags) == 0 && is_array($defaultTags)) {
@@ -2097,8 +2099,8 @@ function DisplayEmailPost($details) {
     EchoInfo('Postname: ' . $details["post_name"]);
     EchoInfo('Post Id: ' . $details["ID"]);
     EchoInfo('Post Type: ' . $details["post_type"]); /* Added by Raam Dev <raam@raamdev.com> */
-    EchoInfo('Posted content:');
-    EchoInfo($details["post_content"]);
+//    EchoInfo('Posted content:');
+//    EchoInfo($details["post_content"]);
 }
 
 /**
