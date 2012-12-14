@@ -270,6 +270,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     }
     postie_disable_revisions(true);
     postie_increase_memory(true);
+    DebugEcho("Done");
 }
 
 /** FUNCTIONS * */
@@ -449,9 +450,8 @@ function checkReply(&$subject) {
             preg_match("/-(.[^-]*)$/", $tmpSubject, $tmpSubject_matches);
             $tmpSubject = trim($tmpSubject_matches[1]);
         }
-        $checkExistingPostQuery = "SELECT ID FROM $wpdb->posts WHERE 
-        '$tmpSubject' = post_title";
-        if ($id = $wpdb->get_var($wpdb->prepare($checkExistingPostQuery))) {
+        $checkExistingPostQuery = "SELECT ID FROM $wpdb->posts WHERE '$tmpSubject' = post_title";
+        if ($id = $wpdb->get_var($wpdb->prepare($checkExistingPostQuery, array()))) {
             if (is_array($id)) {
                 $id = $id[count($id) - 1];
             }
@@ -602,7 +602,11 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
 function PostToDB($details, $isReply, $postToDb = true, $customImageField = false) {
     if ($postToDb) {
         if (!$isReply) {
-            $post_ID = wp_insert_post($details);
+            $post_ID = wp_insert_post($details, true);
+            if (is_wp_error($post_ID)) {
+                EchoInfo("Error: " . $post_ID->get_error_message());
+                wp_delete_post($details['ID']);
+            }
         } else {
             $comment = array(
                 'comment_author' => $details['comment_author'],
@@ -622,7 +626,7 @@ function PostToDB($details, $isReply, $postToDb = true, $customImageField = fals
 
             $post_ID = wp_insert_comment($comment);
         }
-        if ($customImageField) {
+        if ($customImageField && $post_ID) {
             DebugEcho("Saving custom image fields");
             //DebugDump($details['customImages']);
 
@@ -731,18 +735,22 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 //go through each sub-section
                 if ($part->ctype_secondary == 'enriched') {
                     //convert enriched text to HTML
+                    DebugEcho("enriched");
                     $meta_return .= etf2HTML($part->body) . "\n";
                 } elseif ($part->ctype_secondary == 'html') {
                     //strip excess HTML
+                    DebugEcho("html");
                     $meta_return .= HTML2HTML($part->body) . "\n";
                 } else {
                     //regular text, so just strip the pgp signature
+                    DebugEcho("plain text");
                     if ($allow_html_in_body) {
-                        $meta_return .= $part->body . "\n";
+                        $meta_return .= $part->body;
                     } else {
-                        $meta_return .= htmlentities($part->body) . "\n";
+                        $meta_return .= htmlentities($part->body);
                     }
                     $meta_return = StripPGP($meta_return);
+                    $meta_return = "<div>$meta_return</div>\n";
                 }
                 break;
 
@@ -801,12 +809,14 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         break;
                     $file_id = postie_media_handle_upload($part, $post_id, $poster);
                     $file = wp_get_attachment_url($file_id);
-                    $cid = trim($part->headers["content-id"], "<>");
-                    ; //cids are in <cid>
-                    $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
-                    $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
-                    if ($cid) {
-                        $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
+                    if (array_key_exists('content-id', $part->headers)) {
+                        $cid = trim($part->headers["content-id"], "<>");
+                        //cids are in <cid>
+                        $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                        $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
+                        if ($cid) {
+                            $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
+                        }
                     }
                 }
                 break;
@@ -891,14 +901,14 @@ function etf2HTML($content) {
 function HTML2HTML($content) {
     $html = str_get_html($content);
     if ($html) {
-        foreach ($html->find('script, style') as $node) {
-            $node->outertext = '';
-        }
-        $html->load($html->save());
+//        foreach ($html->find('script, style') as $node) {
+//            $node->outertext = '';
+//        }
+//        $html->load($html->save());
 
         $b = $html->find('body');
         if ($b) {
-            $content = $b[0]->innertext;
+            $content = "<div>" . $b[0]->innertext . "</div>\n";
         }
     }
     return $content;
@@ -1229,10 +1239,13 @@ function FilterAppleFile(&$mimeDecodedEmail) {
 function postie_media_handle_upload($part, $post_id, $poster, $post_data = array()) {
     $overrides = array('test_form' => false);
     $tmpFile = tempnam(getenv('TEMP'), 'postie');
+    DebugEcho("tmpfile: $tmpFile");
     if (!is_writable($tmpFile)) {
         $uploadDir = wp_upload_dir();
         $tmpFile = tempnam($uploadDir['path'], 'postie');
+        DebugEcho("tmpfile not writeable, using: $tmpFile");
     }
+
     $fp = fopen($tmpFile, 'w');
     if ($fp) {
         fwrite($fp, $part->body);
@@ -1249,13 +1262,16 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     } else {
         $name = $part->ctype_parameters['name'];
     }
+    DebugEcho("name: $name, size: " . filesize($tmpFile));
 
     $the_file = array('name' => $name,
         'tmp_name' => $tmpFile,
         'size' => filesize($tmpFile),
         'error' => ''
     );
+
     if (stristr('.zip', $name)) {
+        DebugEcho("exploding zip file");
         $parts = explode('.', $name);
         $ext = $parts[count($parts) - 1];
         $type = $part->primary . '/' . $part->secondary;
@@ -1266,13 +1282,16 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
 
     $time = current_time('mysql');
     $post = get_post($post_id);
-    if (substr($post->post_date, 0, 4) > 0)
+    if (substr($post->post_date, 0, 4) > 0) {
+        DebugEcho("using post date");
         $time = $post->post_date;
+    }
 
     $file = postie_handle_upload($the_file, $overrides, $time);
     //unlink($tmpFile);
 
     if (isset($file['error'])) {
+        DebugDump($file['error']);
         throw new Exception($file['error']);
         return new WP_Error('upload_error', $file['error']);
     }
@@ -1286,10 +1305,14 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     // use image exif/iptc data for title and caption defaults if possible
     include_once(ABSPATH . '/wp-admin/includes/image.php');
     if ($image_meta = @wp_read_image_metadata($file)) {
-        if (trim($image_meta['title']))
+        if (trim($image_meta['title'])) {
             $title = $image_meta['title'];
-        if (trim($image_meta['caption']))
+            DebugEcho("Using metadata title: $title");
+        }
+        if (trim($image_meta['caption'])) {
             $content = $image_meta['caption'];
+            DebugEcho("Using metadata caption: $caption");
+        }
     }
 
     // Construct the attachment array
@@ -1307,6 +1330,8 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     $id = wp_insert_attachment($attachment, $file, $post_id);
     if (!is_wp_error($id)) {
         wp_update_attachment_metadata($id, wp_generate_attachment_metadata($id, $file));
+    } else {
+        EchoInfo("There was an error adding the attachement: " . $id->get_error_message());
     }
 
     return $id;
@@ -1395,7 +1420,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     // Move the file to the uploads dir
     $new_file = $uploads['path'] . "/$filename";
     if (false === @ rename($file['tmp_name'], $new_file)) {
-        print_r($file);
+        DebugDump($file);
         return $upload_error_handler($file, sprintf(__('The uploaded file could not be moved to %s.'), $uploads['path']));
     }
 
@@ -1846,7 +1871,7 @@ function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
             $content = str_ireplace($img_placeholder_temp, $imageTemplate, $content);
             $content = str_ireplace($eimg_placeholder_temp, $imageTemplate, $content);
         } else {
-            DebugEcho("No #img$i# found");
+            DebugEcho("No $img_placeholder_temp or $eimg_placeholder_temp found");
             $imageTemplate = str_replace('{CAPTION}', '', $imageTemplate);
             /* if using the gallery shortcode, don't add pictures at all */
             if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {

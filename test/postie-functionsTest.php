@@ -310,9 +310,9 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     public function testHTML2HTML() {
         $this->assertEquals("", HTML2HTML(""));
         $this->assertEquals("test", HTML2HTML("test"));
-        $this->assertEquals("test", HTML2HTML("<html lang='en'><body>test</body></html>"));
-        $this->assertEquals("test", HTML2HTML("<html lang='en'><head><title>title</title></head><body>test</body></html>"));
-        $this->assertEquals("test", HTML2HTML("<body>test</body>"));
+        $this->assertEquals("<div>test</div>\n", HTML2HTML("<html lang='en'><body>test</body></html>"));
+        $this->assertEquals("<div>test</div>\n", HTML2HTML("<html lang='en'><head><title>title</title></head><body>test</body></html>"));
+        $this->assertEquals("<div>test</div>\n", HTML2HTML("<body>test</body>"));
         $this->assertEquals("<strong>test</strong>", HTML2HTML("<strong>test</strong>"));
     }
 

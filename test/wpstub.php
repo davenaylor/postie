@@ -1,6 +1,6 @@
 <?php
 
-define('ABSPATH', dirname(__FILE__) . '/');
+define('ABSPATH', dirname(dirname(__FILE__)) . '/');
 define('WP_PLUGIN_URL', 'localhost');
 
 class wpdb {
