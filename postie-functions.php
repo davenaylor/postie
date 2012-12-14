@@ -658,7 +658,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     extract($config);
     global $charset, $encoding;
 
-    $meta_return = NULL;
+    $meta_return = '';
     DebugEcho("primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
 
     DecodeBase64Part($part);
@@ -695,8 +695,6 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
         }
     } else {
-        DebugDump($part);
-
         $filename = "";
         if (is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters)) {
             // fix filename (remove non-standard characters)
@@ -705,6 +703,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
         }
         switch (strtolower($part->ctype_primary)) {
             case 'multipart':
+                //DebugDump($part);
                 FilterTextParts($part, $prefer_text_type);
                 foreach ($part->parts as $section) {
                     $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
@@ -712,6 +711,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 break;
 
             case 'text':
+                DebugDump($part);
                 if (array_key_exists('charset', $part->ctype_parameters) && !empty($part->ctype_parameters['charset'])) {
                     $charset = $part->ctype_parameters['charset'];
                     DebugEcho("charset: $charset");
@@ -981,11 +981,11 @@ function checkSMTP($mimeDecodedEmail, $smtpservers) {
  * @param string
  */
 function StartFilter(&$content, $start) {
-    DebugEcho("start filter $start");
     $pos = strpos($content, $start);
     if ($pos === false) {
-        return($content);
+        return $content;
     }
+    DebugEcho("start filter $start");
     $content = substr($content, $pos + strlen($start), strlen($content));
 }
 
@@ -1018,10 +1018,10 @@ function remove_signature($content, $filterList) {
  * @param filter
  */
 function EndFilter($content, $end) {
-    DebugEcho("end filter $end");
     $pos = strpos($content, $end);
     if ($pos === false)
         return $content;
+    DebugEcho("end filter $end");
     return $content = substr($content, 0, $pos);
 }
 
@@ -1116,6 +1116,7 @@ function DecodeBase64Part(&$part) {
             //DebugDump($part);
             if (is_array($part->ctype_parameters) && array_key_exists('charset', $part->ctype_parameters)) {
                 $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8//TRANSLIT', base64_decode($part->body));
+                $part->ctype_parameters['charset'] = 'default'; //so we don't double decode
             } else {
                 $part->body = base64_decode($part->body);
             }
@@ -1834,14 +1835,14 @@ function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
             } else {
                 DebugEcho("No caption found");
             }
-            DebugEcho("parameterize templete: " . htmlentities($imageTemplate));
+            //DebugEcho("parameterize templete: " . htmlentities($imageTemplate));
             $imageTemplate = mb_str_replace('{CAPTION}', $caption, $imageTemplate);
-            DebugEcho("populated templete: " . htmlentities($imageTemplate));
+            //DebugEcho("populated templete: " . htmlentities($imageTemplate));
 
             $img_placeholder_temp.='#';
             $eimg_placeholder_temp.='#';
 
-            DebugEcho("replacing " . htmlentities($img_placeholder_temp) . " with template");
+            //DebugEcho("replacing " . htmlentities($img_placeholder_temp) . " with template");
             $content = str_ireplace($img_placeholder_temp, $imageTemplate, $content);
             $content = str_ireplace($eimg_placeholder_temp, $imageTemplate, $content);
         } else {
@@ -1895,8 +1896,8 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
             $text = $mimeDecodedEmail->headers['subject'];
 
             $elements = imap_mime_header_decode($text);
-            DebugEcho("MIME Header");
-            DebugDump($elements);
+            //DebugEcho("MIME Header");
+            //DebugDump($elements);
 
             for ($i = 0; $i < count($elements); $i++) {
                 $thischarset = $elements[$i]->charset;

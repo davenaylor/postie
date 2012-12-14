@@ -36,6 +36,7 @@ if (function_exists('memory_get_usage'))
 
 //loop through messages
 foreach ($emails as $email) {
+    DebugEcho("------------------------------------");
     //sanity check to see if there is any info in the message
     if ($email == NULL) {
         $message = __('Dang, message is empty!', 'postie');
