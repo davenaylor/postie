@@ -154,6 +154,10 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
         $c = "tags: Station, Kohnen, Flugzeug\n:end\n21.10.2012";
         $this->assertEquals("tags: Station, Kohnen, Flugzeug\n", EndFilter($c, ":end"));
+        
+        $c = "This is a test :end";
+        $this->assertEquals("This is a test ", EndFilter($c, ":end"));
+        
     }
 
     public function testFilterNewLines() {

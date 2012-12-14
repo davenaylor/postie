@@ -29,8 +29,6 @@
 /*
   $Id$
  * -= Requests Pending =-
- * German Umlats don't work
- * Problems under PHP5 
  * Problem with some mail server
  * Multiple emails should tie to a single account
  * Each user should be able to have a default category
@@ -52,10 +50,10 @@
  *    www.cdavies.org/permalink/watchingbrowserembeddedgpvideosinlinux.php
  * Support private posts
  * Make it possible to post without a script at all
- * * TODO - fix corruption of rtf attachments
+ * TODO - fix corruption of rtf attachments
  * TODO - add port checking in tests
- * TODO - non-image uploads get ignored in content when using autogallery - see
-  replaceimageplaceholders
+ * TODO - non-image uploads get ignored in content when using autogallery - see replaceimageplaceholders
+ * TODO - code to set featured image
  */
 
 define("POSTIE_ROOT", dirname(__FILE__));

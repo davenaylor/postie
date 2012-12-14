@@ -980,13 +980,13 @@ function checkSMTP($mimeDecodedEmail, $smtpservers) {
  * @param string
  * @param string
  */
-function StartFilter(&$content, $start) {
+function StartFilter($content, $start) {
     $pos = strpos($content, $start);
     if ($pos === false) {
         return $content;
     }
     DebugEcho("start filter $start");
-    $content = substr($content, $pos + strlen($start), strlen($content));
+    return substr($content, $pos + strlen($start), strlen($content));
 }
 
 /**
@@ -2599,10 +2599,10 @@ function SpecialMessageParsing(&$content, &$attachments, $config) {
         return;
     }
     if ($message_start) {
-        StartFilter($content, $message_start);
+        $content = StartFilter($content, $message_start);
     }
     if ($message_end) {
-        EndFilter($content, $message_end);
+        $content = EndFilter($content, $message_end);
     }
     if ($drop_signature) {
         $content = remove_signature($content, $sig_pattern_list);

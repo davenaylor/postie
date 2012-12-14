@@ -32,8 +32,7 @@ function current_time() {
     return '2005-08-05 10:41:13';
 }
 
-function is_admin()
-{
+function is_admin() {
     return false;
 }
 
@@ -56,17 +55,17 @@ function wp_check_filetype() {
 
 function wp_upload_dir() {
     return array(
-        'path' => '/tmp',
+        'path' => sys_get_temp_dir(),
         'url' => 'http://example.com/upload/',
-        'subdir' => '/tmp/',
-        'basedir' => '/tmp;',
+        'subdir' => sys_get_temp_dir(),
+        'basedir' => sys_get_temp_dir(),
         'baseurl' => 'http://example.com/',
         'error' => false
     );
 }
 
 function wp_unique_filename() {
-    return '/tmp/file.txt';
+    return tempnam(sys_get_temp_dir(), "postie");
 }
 
 function wp_get_attachment_url() {
@@ -85,23 +84,24 @@ function get_attachment_link() {
     return 'http://example.net/wp-content/uploads/filename.jpg';
 }
 
-function get_user_by(){
+function get_user_by() {
     return false;
 }
 
-function register_activation_hook(){
+function register_activation_hook() {
     
 }
 
-function add_action(){
+function add_action() {
     
 }
 
-function add_filter(){
+function add_filter() {
     
 }
 
-function register_deactivation_hook(){
+function register_deactivation_hook() {
     
 }
+
 ?>

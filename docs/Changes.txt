@@ -10,6 +10,7 @@
 * Fixed bug where default settings were corrupt
 * Fixed several bugs in tag detection logic
 * Fixed bug where non-base64 and non-quoted-printable sections were not converted to utf-8
+* Fixed bug where the end filter wasn't removed from the post
 
 = 1.4.10 (2012.12.11) =
 * Fixed warning when there is no subject
