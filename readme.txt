@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.4.2
-Stable tag: 1.4.10
+Stable tag: 1.4.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -358,6 +358,17 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 * All script, style and body tags are stripped from html emails.
 
 == CHANGELOG ==
+= 1.4.11.(2012.12.14) =
+* Fixed bug where having a colon in the subject caused the subject to get truncated
+* Added donation link to admin screen
+* Fixed bug where #img# captions with double-byte characters were not working
+* Fixed bug where default settings were corrupt
+* Fixed several bugs in tag detection logic
+* Fixed bug where non-base64 and non-quoted-printable sections were not converted to utf-8
+* Fixed bug where the end filter wasn't removed from the post
+* Add additional logging to attachment upload process
+* Changes to support WP 3.5
+
 = 1.4.10 (2012.12.11) =
 * Fixed warning when there is no subject
 * Removed all script and style tags from HTML content in place of XSS warning

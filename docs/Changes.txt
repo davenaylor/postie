@@ -3,7 +3,7 @@
 * All script, style and body tags are stripped from html emails.
 
 == CHANGELOG ==
-= 1.4.11.(future) =
+= 1.4.11.(2012.12.14) =
 * Fixed bug where having a colon in the subject caused the subject to get truncated
 * Added donation link to admin screen
 * Fixed bug where #img# captions with double-byte characters were not working
