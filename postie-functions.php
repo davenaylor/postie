@@ -486,7 +486,7 @@ function ConfigurePostie() {
  * This function handles determining the protocol and fetching the mail
  * @return array
  */
-function FetchMail($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true) {
+function FetchMail($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true, $maxemails = 0) {
     $emails = array();
     if (!$server || !$port || !$email) {
         EchoInfo("Missing Configuration For Mail Server");
@@ -511,12 +511,12 @@ function FetchMail($server = NULL, $port = NULL, $email = NULL, $password = NULL
             if (!HasIMAPSupport()) {
                 EchoInfo("Sorry - you do not have IMAP php module installed - it is required for this mail setting.");
             } else {
-                $emails = IMAPMessageFetch($server, $port, $email, $password, $protocol, $offset, $test, $deleteMessages);
+                $emails = IMAPMessageFetch($server, $port, $email, $password, $protocol, $offset, $test, $deleteMessages, $maxemails);
             }
             break;
         case 'pop3':
         default:
-            $emails = POP3MessageFetch($server, $port, $email, $password, $protocol, $offset, $test, $deleteMessages);
+            $emails = POP3MessageFetch($server, $port, $email, $password, $protocol, $offset, $test, $deleteMessages, $maxemails);
     }
 
     return $emails;
@@ -525,7 +525,7 @@ function FetchMail($server = NULL, $port = NULL, $email = NULL, $password = NULL
 /**
  * Handles fetching messages from an imap server
  */
-function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true) {
+function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true, $maxemails = 0) {
     require_once("postieIMAP.php");
     $emails = array();
     $mail_server = &PostieIMAP::Factory($protocol);
@@ -545,6 +545,10 @@ function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password
         if ($deleteMessages) {
             $mail_server->deleteMessage($i);
         }
+        if ($maxemails != 0 && $i >= $maxemails) {
+            DebugEcho("Max emails ($maxemails)");
+            break;
+        }
     }
     if ($deleteMessages) {
         $mail_server->expungeMessages();
@@ -557,7 +561,7 @@ function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password
 /**
  * Retrieves email via POP3
  */
-function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true) {
+function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true, $maxemails = 0) {
     require_once(ABSPATH . WPINC . DIRECTORY_SEPARATOR . 'class-pop3.php');
 
     $emails = array();
@@ -587,6 +591,10 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
                 $pop3->reset();
                 exit;
             }
+        }
+        if ($maxemails != 0 && $i >= $maxemails) {
+            DebugEcho("Max emails ($maxemails)");
+            break;
         }
     }
     //clean up
@@ -2179,6 +2187,7 @@ function get_postie_config_defaults() {
         'mail_server_port' => 110,
         'mail_userid' => NULL,
         'mail_password' => NULL,
+        'maxemails' => 0,
         'message_start' => ":start",
         'message_end' => ":end",
         'message_encoding' => "UTF-8",
@@ -2275,8 +2284,7 @@ function GetDBConfig() {
 
     if (!isset($config["MESSAGE_END"]))
         $config["MESSAGE_END"] = ":end";
-    if
-    (!isset($config["FORWARD_REJECTED_MAIL"]))
+    if (!isset($config["FORWARD_REJECTED_MAIL"]))
         $config["FORWARD_REJECTED_MAIL"] = true;
     if (!isset($config["RETURN_TO_SENDER"]))
         $config["RETURN_TO_SENDER"] = false;
