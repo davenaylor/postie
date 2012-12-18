@@ -99,8 +99,12 @@ function LogInfo($v) {
 }
 
 function EchoInfo($v) {
-    if (headers_sent()) {
-        echo("<p>$v</p>\n");
+    if (php_sapi_name() == "cli") {
+        echo "$v\n";
+    } else {
+        if (headers_sent()) {
+            echo "<p>" . htmlspecialchars($v) . "</p>\n";
+        }
     }
     LogInfo($v);
 }
@@ -108,12 +112,14 @@ function EchoInfo($v) {
 function DebugDump($v) {
     if (IsDebugMode()) {
         $o = print_r($v, true);
-        if (headers_sent()) {
-            echo "<pre>\n";
-        }
-        EchoInfo(htmlspecialchars($o));
-        if (headers_sent()) {
-            echo "</pre>\n";
+        if (php_sapi_name() == "cli") {
+            echo "$o\n";
+        } else {
+            if (headers_sent()) {
+                echo "<pre>\n";
+                EchoInfo($o);
+                echo "</pre>\n";
+            }
         }
     }
 }
@@ -1831,6 +1837,8 @@ function ReplaceImageCIDs(&$content, &$attachments) {
  */
 function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
     extract($config);
+    $content = html_entity_decode($content, ENT_QUOTES);
+
     $startIndex = $start_image_count_at_zero ? 0 : 1;
     if (!empty($attachments) && $auto_gallery) {
         $imageTemplate = '[gallery]';
@@ -1858,24 +1866,22 @@ function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
             // look for caption
             DebugEcho("Found $img_placeholder_temp or $eimg_placeholder_temp");
             $caption = '';
-            $content = preg_replace("/&#0?39;/", "'", $content);
-            $content = preg_replace("/&(#0?34|quot);/", "\"", $content);
-            if (preg_match("/$img_placeholder_temp caption=['\"]?(.*?)['\"]?#/i", $content, $matches)) {
-                $caption = $matches[1];
-                DebugEcho("found caption: $caption");
+            if (preg_match("/$img_placeholder_temp caption=(.*?)#/i", $content, $matches)) {
+                $caption = trim($matches[1]);
+                $caption = substr($caption, 1, strlen($caption) - 2);
+                DebugEcho("caption: $caption");
                 $img_placeholder_temp = substr($matches[0], 0, -1);
                 $eimg_placeholder_temp = substr($matches[0], 0, -1);
             } else {
                 DebugEcho("No caption found");
             }
             //DebugEcho("parameterize templete: " . htmlentities($imageTemplate));
-            $imageTemplate = mb_str_replace('{CAPTION}', $caption, $imageTemplate);
-            //DebugEcho("populated templete: " . htmlentities($imageTemplate));
+            $imageTemplate = mb_str_replace('{CAPTION}', htmlspecialchars($caption, ENT_QUOTES), $imageTemplate);
+            //DebugEcho("populated templete: " . $imageTemplate);
 
             $img_placeholder_temp.='#';
             $eimg_placeholder_temp.='#';
 
-            //DebugEcho("replacing " . htmlentities($img_placeholder_temp) . " with template");
             $content = str_ireplace($img_placeholder_temp, $imageTemplate, $content);
             $content = str_ireplace($eimg_placeholder_temp, $imageTemplate, $content);
         } else {
