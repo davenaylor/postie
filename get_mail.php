@@ -62,6 +62,7 @@ foreach ($emails as $email) {
     } else {
         EchoInfo("Ignoring email - not authorized.");
     }
+    flush();
 }
 
 if (function_exists('memory_get_usage'))

@@ -158,10 +158,17 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     //DebugEcho("the content is $content");
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
+    //DebugEcho("post subject: $content");
 
     $customImages = SpecialMessageParsing($content, $attachments, $config);
+    //DebugEcho("post special message: $content");
+
     $post_excerpt = GetPostExcerpt($content, $filternewlines, $convertnewline);
+    //DebugEcho("post exerpt: $content");
+
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
+    //DebugEcho("post author: $content");
+
     $message_date = NULL;
     if (array_key_exists("date", $mimeDecodedEmail->headers) && !empty($mimeDecodedEmail->headers["date"])) {
         $cte = "";
@@ -175,15 +182,23 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         $message_date = HandleMessageEncoding($cte, $cs, $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
     }
     list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
-    ubb2HTML($content);
+    //DebugEcho("post date: $content");
 
-    if ($converturls)
+    ubb2HTML($content);
+    //DebugEcho("post ubb: $content");
+
+    if ($converturls) {
         $content = clickableLink($content, $shortcode);
+        //DebugEcho("post clickable: $content");
+    }
 
     $id = checkReply($subject);
     $post_categories = GetPostCategories($subject, $default_post_category);
     $post_tags = postie_get_tags($content, $default_post_tags);
+    //DebugEcho("post tags: $content");
+
     $comment_status = AllowCommentsOnPost($content);
+    //DebugEcho("post comment: $content");
 
     if ((empty($id) || is_null($id))) {
         $id = $post_id;
@@ -219,8 +234,10 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         $content = $newContents;
         wp_delete_post($post_id);
     }
-    if ($filternewlines)
+    if ($filternewlines) {
         $content = FilterNewLines($content, $convertnewline);
+        //DebugEcho("post filter newlines: $content");
+    }
 
     if ($delay != 0 && $post_status == 'publish') {
         $post_status = 'future';
@@ -674,7 +691,7 @@ function BannedFileName($filename, $bannedFiles) {
 
 function GetContent($part, &$attachments, $post_id, $poster, $config) {
     extract($config);
-    global $charset, $encoding;
+    //global $charset, $encoding;
 
     $meta_return = '';
     DebugEcho("primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
@@ -729,12 +746,16 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 break;
 
             case 'text':
-                DebugDump($part);
+                DebugEcho("ctype_primary: text");
+                //DebugDump($part);
+
+                $charset = "";
                 if (array_key_exists('charset', $part->ctype_parameters) && !empty($part->ctype_parameters['charset'])) {
                     $charset = $part->ctype_parameters['charset'];
                     DebugEcho("charset: $charset");
                 }
 
+                $encoding = "";
                 if (array_key_exists('content-transfer-encoding', $part->headers) && !empty($part->headers['content-transfer-encoding'])) {
                     $encoding = $part->headers['content-transfer-encoding'];
                     DebugEcho("encoding: $encoding");
@@ -765,7 +786,9 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     }
                     $meta_return = StripPGP($meta_return);
                     $meta_return = "<div>$meta_return</div>\n";
+                    //DebugEcho($meta_return);
                 }
+                DebugEcho("----");
                 break;
 
             case 'image':
@@ -915,15 +938,19 @@ function etf2HTML($content) {
 function HTML2HTML($content) {
     $html = str_get_html($content);
     if ($html) {
-//        foreach ($html->find('script, style') as $node) {
-//            $node->outertext = '';
-//        }
-//        $html->load($html->save());
+        DebugEcho("Looking for invalid tags");
+        foreach ($html->find('script, style, head') as $node) {
+            DebugEcho("Removing: " . $node->outertext);
+            $node->outertext = '';
+        }
+        $html->load($html->save());
 
         $b = $html->find('body');
         if ($b) {
             $content = "<div>" . $b[0]->innertext . "</div>\n";
         }
+    } else {
+        DebugEcho("No HTML found");
     }
     return $content;
 }
@@ -1837,7 +1864,9 @@ function ReplaceImageCIDs(&$content, &$attachments) {
  */
 function ReplaceImagePlaceHolders(&$content, $attachments, $config) {
     extract($config);
-    $content = html_entity_decode($content, ENT_QUOTES);
+    if (!$allow_html_in_body) {
+        $content = html_entity_decode($content, ENT_QUOTES);
+    }
 
     $startIndex = $start_image_count_at_zero ? 0 : 1;
     if (!empty($attachments) && $auto_gallery) {
@@ -1948,7 +1977,7 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
         }
         if (!$allow_html_in_subject) {
             DebugEcho("subject before htmlentities: $subject");
-            $subject = htmlentities($subject, ENT_COMPAT | ENT_HTML401, $message_encoding);
+            $subject = htmlentities($subject, ENT_COMPAT, $message_encoding);
             DebugEcho("subject after htmlentities: $subject");
         }
     }
@@ -2070,8 +2099,7 @@ function DisplayEmailPost($details) {
     EchoInfo('Postname: ' . $details["post_name"]);
     EchoInfo('Post Id: ' . $details["ID"]);
     EchoInfo('Post Type: ' . $details["post_type"]); /* Added by Raam Dev <raam@raamdev.com> */
-//    EchoInfo('Posted content:');
-//    EchoInfo($details["post_content"]);
+    //EchoInfo('Posted content: '.$details["post_content"]);
 }
 
 /**
@@ -2639,27 +2667,32 @@ function SpecialMessageParsing(&$content, &$attachments, $config) {
     }
     if ($message_start) {
         $content = StartFilter($content, $message_start);
+        //DebugEcho("post start: $content");
     }
     if ($message_end) {
         $content = EndFilter($content, $message_end);
+        //DebugEcho("post end: $content");
     }
     if ($drop_signature) {
         $content = remove_signature($content, $sig_pattern_list);
+        //DebugEcho("post signature: $content");
     }
     if ($prefer_text_type == "html" && count($attachments["cids"])) {
         ReplaceImageCIDs($content, $attachments);
+        //DebugEcho("post CIDs: $content");
     }
     if (!$custom_image_field) {
         ReplaceImagePlaceHolders($content, $attachments["html"], $config);
+        //DebugEcho("post placeholders: $content");
     } else {
         $customImages = array();
-        DebugEcho("Looking for custom images");
+        //DebugEcho("Looking for custom images");
         //DebugDump($attachments["html"]);
 
         foreach ($attachments["html"] as $key => $value) {
             //DebugEcho("checking " . htmlentities($value));
             if (preg_match("/src\s*=\s*['\"]([^'\"]*)['\"]/i", $value, $matches)) {
-                DebugEcho("found custom image: " . $matches[1]);
+                //DebugEcho("found custom image: " . $matches[1]);
                 array_push($customImages, $matches[1]);
             }
         }
