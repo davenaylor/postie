@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.13
+Stable tag: 1.4.14
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -225,6 +225,18 @@ gmail preferences.
       this would be just foo)
     * password - your password 
 
+= Can I use postie with GoDaddy hosting? =
+
+Yes, but you must use an email set up using the GoDaddy email service and the following settings:
+
+* protocol - pop3
+* server - pop.secureserver.net
+* port - 110
+* userid - xxxxx@yourdomain
+* password - your password 
+
+GoDaddy hosting does not allow you to connect to non-GoDaddy mail servers like Gmail.
+
 = My posts show up as being posted by 'admin' instead of me. Why? =
 
 If your admin account is linked to bar@gmail.com, and you send mail from
@@ -358,8 +370,12 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 * All script, style and body tags are stripped from html emails.
 
 == CHANGELOG ==
+1.4.14 (2012.12.29) =
+* Fixed a bug where attached images were not being detected properly causing a "File is empty. Please upload something more substantial." error
+* Tweaked some CSS.
+
 1.4.13 (2012.12.26) =
-* Fixed bug that was trucating content at the first html encoded character. 
+* Fixed bug that was truncating content at the first html encoded character. 
 
 1.4.12 (2012.12.17) =
 * Added feature to limit the number of emails processed
