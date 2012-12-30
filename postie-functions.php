@@ -1164,7 +1164,7 @@ function DecodeBase64Part(&$part) {
     if (array_key_exists('content-transfer-encoding', $part->headers)) {
         if (strtolower($part->headers['content-transfer-encoding']) == 'base64') {
             DebugEcho("DecodeBase64Part: base64 detected");
-            DebugDump($part);
+            //DebugDump($part);
             if (isset($part->disposition) && $part->disposition == 'attachment') {
                 $part->body = base64_decode($part->body);
             } else if (is_array($part->ctype_parameters) && array_key_exists('charset', $part->ctype_parameters)) {
