@@ -106,7 +106,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
         $customImages = SpecialMessageParsing($content, $attachments, $config);
         $this->assertEquals(null, $customImages);
-        $this->assertEquals("<div>test content\n\n", $content);
+        $this->assertEquals("test content\n\n", $content);
 
         $post_excerpt = GetPostExcerpt($content, $filternewlines, $convertnewline);
 

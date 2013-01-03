@@ -421,6 +421,14 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("test \nmore stuff\n:end", $c);
     }
 
+    public function testclickableLink() {
+        $this->assertEquals("", clickableLink(""));
+        $this->assertEquals("test", clickableLink("test"));
+        $this->assertEquals('<a href="http://www.example.com"  >http://www.example.com</a>', clickableLink("http://www.example.com"));
+        $this->assertEquals('<a href="http://www.example.com">www.example.com</a>', clickableLink("www.example.com"));
+        $this->assertEquals('<a href="http://www.example.com">www.example.com</a> <a href="http://www.example.com">www.example.com</a>', clickableLink("www.example.com www.example.com"));
+        $this->assertEquals('<a href="mailto:bob@example.com">bob@example.com</a>', clickableLink("bob@example.com"));
+    }
 }
 
 ?>

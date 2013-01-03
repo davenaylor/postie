@@ -3,6 +3,11 @@
 * All script, style and body tags are stripped from html emails.
 
 == CHANGELOG ==
+= 1.4.16 (2013.01.03) =
+* Fixed a bug where an extra div tag was getting added.
+* Fixed a bug when linkifying URLs.
+* Fixed a bug where inline images were not being detected.
+
 = 1.4.15 (2013.01.02) =
 * Fixed a bug when a category is specified with [] and a colon (:) is in the subject, but not specifying a category
 

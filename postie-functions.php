@@ -145,8 +145,11 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         "image_files" => array() //holds the files for each image
     );
     EchoInfo("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
+    //DebugDump($mimeDecodedEmail);
 
     FilterTextParts($mimeDecodedEmail, $prefer_text_type);
+    //DebugDump($mimeDecodedEmail);
+
     $tmpPost = array('post_title' => 'tmptitle', 'post_content' => 'tmpPost');
     /* in order to do attachments correctly, we need to associate the
       attachments with a post. So we add the post here, then update it
@@ -247,6 +250,8 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
 
     $post_type = GetPostType($subject);
 
+    //DebugEcho("pre-insert content: $content");
+
     $details = array(
         'post_author' => $poster,
         'comment_author' => $postAuthorDetails['author'],
@@ -331,64 +336,75 @@ function GetPostType(&$subject) {
 }
 
 function clickableLink($text, $shortcode = false) {
-# this functions deserves credit to the fine folks at phpbb.com
-# It turns urls into links, and video urls into embedded players
+    # this functions deserves credit to the fine folks at phpbb.com
+    # It turns urls into links, and video urls into embedded players
+    //DebugEcho("begin: clickableLink");
 
     $text = preg_replace('#(script|about|applet|activex|chrome):#is', "\\1:", $text);
-
+    //DebugEcho($text);
     // pad it with a space so we can match things at the start of the 1st line.
     $ret = ' ' . $text;
     if (strpos($ret, 'youtube') !== false) {
         // try to embed youtube videos
         $youtube = "#(^|[\n ]|>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9-]+).*?([ \n]|$|<)#is";
-        #$youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
         if ($shortcode) {
             $youtube_replace = "\\1[youtube \\3]\\4";
         } else {
             $youtube_replace = "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />\\4";
         }
         $ret = preg_replace($youtube, $youtube_replace, $ret);
+        //DebugEcho("youtube: $ret");
     }
 
     if (strpos($ret, 'vimeo') !== false) {
         // try to embed vimeo videos
         #    : http://vimeo.com/6348141
         $vimeo = "#(^|[\n ]|>)[\w]+?://(www\.)?vimeo\.com/([_a-zA-Z0-9-]+).*?([ \n]|$|<)#is";
-        #$youtube="#(^|[\n ]|<p[^<]*>)[\w]+?://(www\.)?youtube\.com/watch\?v=([_a-zA-Z0-9]+).*?([ \n]|$|</p>)#is";
         if ($shortcode) {
             $vimeo_replace = "\\1[vimeo \\3]\\4";
         } else {
-            $vimeo_replace = "\\1<object width='400' height='300'><param name='allowfullscreen'
-    value='true' /><param name='allowscriptaccess' value='always' /><param
-    name='movie'
-    value='http://vimeo.com/moogaloop.swf?clip_id=\\3&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1'
-    /><embed
-    src='http://vimeo.com/moogaloop.swf?clip_id=\\3&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1'
-    type='application/x-shockwave-flash' allowfullscreen='true'
-    allowscriptaccess='always' width='400' height='300'></embed></object>\\4";
-            //$vimeo_replace= "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />\\4"; 
+            $vimeo_replace = "\\1<object width='400' height='300'><param name='allowfullscreen' value='true' /><param name='allowscriptaccess' value='always' /><param name='movie' value='http://vimeo.com/moogaloop.swf?clip_id=\\3&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1' /><embed src='http://vimeo.com/moogaloop.swf?clip_id=\\3&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1' type='application/x-shockwave-flash' allowfullscreen='true' allowscriptaccess='always' width='400' height='300'></embed></object>\\4";
         }
         $ret = preg_replace($vimeo, $vimeo_replace, $ret);
+        //DebugEcho("vimeo: $ret");
     }
 
     // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
     // xxxx can only be alpha characters.
     // yyyy is anything up to the first space, newline, comma, double quote or <
     $ret = preg_replace("#(^|[\n ])<?([\w]+?://[\w\#$%&~/.\-;:=,?@\[\]+]*)>?#is", "\\1<a href=\"\\2\" >\\2</a>", $ret);
-
+    //DebugEcho("xxxx://yyyy: $ret");
     // matches a "www|ftp.xxxx.yyyy[/zzzz]" kinda lazy URL thing
-    // Must contain at least 2 dots. xxxx contains either alphanum, or "-"
-    // zzzz is optional.. will contain everything up to the first space, newline,
-    // comma, double quote or <.
-    $ret = preg_replace("#(^|[\n ])<?((www|ftp)\.[\w\#$%&~/.\-;:=,?@\[\]+]*)>?#is", "\\1<a href=\"http://\\2\" >\\2</a>", $ret);
-
-    // matches an email@domain type address at the start of a line, or after a space.
-    // Note: Only the followed chars are valid; alphanums, "-", "_" and or ".".
-    $ret = preg_replace(
-            "#(^|[\n ])([a-z0-9&\-_.]+?)@([\w\-]+\.([\w\-\.]+\.)*[\w]+)#i", "\\1<a href=\"mailto:\\2@\\3\">\\2@\\3</a>", $ret);
+    $ret = make_links($ret);
+    //DebugEcho("www|ftp.xxxx.yyyy[/zzzz]: $ret");
     // Remove our padding..
     $ret = substr($ret, 1);
+
+    //DebugEcho("end: clickableLink");
     return $ret;
+}
+
+function make_links($text) {
+    return preg_replace(
+                    array(
+                '/(?(?=<a[^>]*>.+<\/a>)
+             (?:<a[^>]*>.+<\/a>)
+             |
+             ([^="\']?)((?:https?|ftp|bf2|):\/\/[^<> \n\r]+)
+         )/iex',
+                '/<a([^>]*)target="?[^"\']+"?/i',
+                '/<a([^>]+)>/i',
+                '/(^|\s)(www.[^<> \n\r]+)/iex',
+                '/(([_A-Za-z0-9-]+)(\\.[_A-Za-z0-9-]+)*@([A-Za-z0-9-]+)
+       (\\.[A-Za-z0-9-]+)*)/iex'
+                    ), array(
+                "stripslashes((strlen('\\2')>0?'\\1<a href=\"\\2\">\\2</a>\\3':'\\0'))",
+                '<a\\1',
+                '<a\\1 >',
+                "stripslashes((strlen('\\2')>0?'\\1<a href=\"http://\\2\">\\2</a>\\3':'\\0'))",
+                "stripslashes((strlen('\\2')>0?'<a href=\"mailto:\\0\">\\0</a>':'\\0'))"
+                    ), $text
+    );
 }
 
 function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
@@ -699,7 +715,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     DecodeBase64Part($part);
 
     //look for banned file names
-    if (is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters))
+    if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters))
         if (BannedFileName($part->ctype_parameters['name'], $banned_files_list))
             return NULL;
 
@@ -723,6 +739,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     }
 
     if ($part->ctype_primary == "multipart" && $part->ctype_secondary == "appledouble") {
+        DebugEcho("multipart appledouble");
         $mimeDecodedEmail = DecodeMIMEMail("Content-Type: multipart/mixed; boundary=" . $part->ctype_parameters["boundary"] . "\n" . $part->body);
         FilterTextParts($mimeDecodedEmail, $prefer_text_type);
         FilterAppleFile($mimeDecodedEmail);
@@ -731,16 +748,19 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
         }
     } else {
         $filename = "";
-        if (is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters)) {
+        if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters)) {
             // fix filename (remove non-standard characters)
             $filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $part->ctype_parameters['name']);
             DebugEcho("Filename: $filename");
         }
         switch (strtolower($part->ctype_primary)) {
             case 'multipart':
+                DebugEcho("multipart: " . count($part->parts));
                 //DebugDump($part);
                 FilterTextParts($part, $prefer_text_type);
                 foreach ($part->parts as $section) {
+                    DebugDump($section->headers);
+
                     $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
                 }
                 break;
@@ -764,6 +784,9 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 if (array_key_exists('content-transfer-encoding', $part->headers)) {
                     //DebugDump($part);
                     $part->body = HandleMessageEncoding($encoding, $charset, $part->body, $message_encoding, $message_dequote);
+                    if (!empty($charset)) {
+                        $part->ctype_parameters['charset'] = ""; //reset so we don't double decode
+                    }
                     //DebugDump($part);
                 }
 
@@ -777,18 +800,18 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     DebugEcho("html");
                     $meta_return .= HTML2HTML($part->body) . "\n";
                 } else {
-                    //regular text, so just strip the pgp signature
                     DebugEcho("plain text");
                     if ($allow_html_in_body) {
+                        DebugEcho("html allowed");
                         $meta_return .= $part->body;
+                        //$meta_return = "<div>$meta_return</div>\n";
                     } else {
+                        DebugEcho("html not allowed (htmlentities)");
                         $meta_return .= htmlentities($part->body);
                     }
                     $meta_return = StripPGP($meta_return);
-                    $meta_return = "<div>$meta_return</div>\n";
-                    //DebugEcho($meta_return);
                 }
-                DebugEcho("----");
+
                 break;
 
             case 'image':
@@ -811,8 +834,10 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             case 'audio':
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 $file = wp_get_attachment_url($file_id);
-                $cid = trim($part->headers["content-id"], "<>");
-                ; //cids are in <cid>
+                $cid = "";
+                if (array_key_exists('content-id', $part->headers)) {
+                    $cid = trim($part->headers["content-id"], "<>");
+                }
                 if (in_array($part->ctype_secondary, $audiotypes)) {
                     $audioTemplate = $audiotemplate;
                 } else {
@@ -825,8 +850,10 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             case 'video':
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 $file = wp_get_attachment_url($file_id);
-                $cid = trim($part->headers["content-id"], "<>");
-                ; //cids are in <cid>
+                $cid = "";
+                if (array_key_exists('content-id', $part->headers)) {
+                    $cid = trim($part->headers["content-id"], "<>");
+                }
                 if (in_array(strtolower($part->ctype_secondary), $video1types)) {
                     $videoTemplate = $video1template;
                 } elseif (in_array(strtolower($part->ctype_secondary), $video2types)) {
@@ -859,6 +886,8 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 break;
         }
     }
+    //DebugEcho("text: $meta_return");
+    DebugEcho("----");
     return $meta_return;
 }
 
@@ -1148,12 +1177,17 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     }
 
     DebugEcho("after HandleMessageEncoding");
-    if (strtolower($charset) != 'default')
+    if (!empty($charset) && strtolower($charset) != 'default') {
+        DebugEcho("converting from $charset to $blogEncoding");
+        //DebugEcho("before: $body");
         $body = iconv($charset, $blogEncoding . '//TRANSLIT', $body);
+        //DebugEcho("after: $body");
+    }
     return $body;
 }
 
 function ConvertToUTF_8($charset, $body) {
+    DebugEcho("convert to utf-8");
     return iconv($charset, "UTF-8//TRANSLIT", $body);
 }
 
@@ -1169,6 +1203,7 @@ function DecodeBase64Part(&$part) {
                 $part->body = base64_decode($part->body);
             } else if (is_array($part->ctype_parameters) && array_key_exists('charset', $part->ctype_parameters)) {
                 $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8//TRANSLIT', base64_decode($part->body));
+                DebugEcho("convertef from: " . $part->ctype_parameters['charset']);
                 $part->ctype_parameters['charset'] = 'default'; //so we don't double decode
             } else {
                 $part->body = base64_decode($part->body);
@@ -1298,12 +1333,14 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     }
 
     $name = 'postie-media.' . $part->ctype_secondary;
-    if (!is_array($part->ctype_parameters) || $part->ctype_parameters['name'] == '') {
-        if ($part->d_parameters['filename'] != '') {
-            $name = $part->d_parameters['filename'];
+    if (property_exists($part, 'ctype_parameters')) {
+        if (!is_array($part->ctype_parameters) || $part->ctype_parameters['name'] == '') {
+            if ($part->d_parameters['filename'] != '') {
+                $name = $part->d_parameters['filename'];
+            }
+        } else {
+            $name = $part->ctype_parameters['name'];
         }
-    } else {
-        $name = $part->ctype_parameters['name'];
     }
     DebugEcho("name: $name, size: " . filesize($tmpFile));
 
@@ -1481,48 +1518,42 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
 }
 
 /**
- * Searches for the existance of a certain MIME TYPE in the tree of mime attachments
- * @param primary mime
- * @param secondary mime
- * @return boolean
- */
-function SearchForMIMEType($part, $primary, $secondary) {
-    if ($part->ctype_primary == $primary && $part->ctype_secondary == $secondary) {
-        return true;
-    }
-    if ($part->ctype_primary == "multipart") {
-        for ($i = 0; $i < count($part->parts); $i++) {
-            if (SearchForMIMEType($part->parts[$i], $primary, $secondary)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-/**
  * This method sorts thru the mime parts of the message. It is looking for a certain type of text attachment. If 
  * that type is present it filters out all other text types. If it is not - then nothing is done
  * @param object
  */
-function FilterTextParts(&$mimeDecodedEmail, $preferTextType) {
+function FilterTextParts($mimeDecodedEmail, $preferTextType) {
+    DebugEcho("FilterTextParts: begin " . count($mimeDecodedEmail->parts));
     $newParts = array();
     $found = false;
+    
     for ($i = 0; $i < count($mimeDecodedEmail->parts); $i++) {
-        if (in_array($mimeDecodedEmail->parts[$i]->ctype_primary, array("text", "multipart"))) {
-            if (SearchForMIMEType($mimeDecodedEmail->parts[$i], "text", $preferTextType)) {
-                $newParts[] = &$mimeDecodedEmail->parts[$i];
-                $found = true;
+        DebugEcho("part: $i " . $mimeDecodedEmail->parts[$i]->ctype_primary);
+
+        if ($mimeDecodedEmail->parts[$i]->ctype_primary == "text") {
+            if ($mimeDecodedEmail->parts[$i]->ctype_secondary == $preferTextType) {
+                $newParts[] = $mimeDecodedEmail->parts[$i];
             }
         } else {
-            $newParts[] = &$mimeDecodedEmail->parts[$i];
+            $newParts[] = $mimeDecodedEmail->parts[$i];
         }
+
+//        if (in_array($mimeDecodedEmail->parts[$i]->ctype_primary, array("text", "multipart"))) {
+//            if (SearchForMIMEType($mimeDecodedEmail->parts[$i], "text", $preferTextType)) {
+//                $newParts[] = $mimeDecodedEmail->parts[$i];
+//                $found = true;
+//                DebugEcho("found");
+//            }
+//        } else {
+//            $newParts[] = $mimeDecodedEmail->parts[$i];
+//        }
     }
-    if ($found && $newParts) {
+    if ($newParts) {
         //This is now the filtered list of just the preferred type.
         DebugEcho(count($newParts) . " parts");
         $mimeDecodedEmail->parts = $newParts;
     }
+    DebugEcho("FilterTextParts: end");
 }
 
 /**
@@ -1790,19 +1821,21 @@ function parseTemplate($id, $type, $template, $size = 'medium') {
 
     $template = str_replace('{TITLE}', $attachment->post_title, $template);
     $template = str_replace('{ID}', $id, $template);
-    $template = str_replace('{THUMBNAIL}', $img_src[0], $template);
-    $template = str_replace('{THUMB}', $img_src[0], $template);
-    $template = str_replace('{MEDIUM}', $img_src[1], $template);
-    $template = str_replace('{LARGE}', $img_src[2], $template);
+    if ($type == 'image') {
+        $template = str_replace('{THUMBNAIL}', $img_src[0], $template);
+        $template = str_replace('{THUMB}', $img_src[0], $template);
+        $template = str_replace('{MEDIUM}', $img_src[1], $template);
+        $template = str_replace('{LARGE}', $img_src[2], $template);
+        $template = str_replace('{THUMBWIDTH}', $widths[0] . 'px', $template);
+        $template = str_replace('{THUMBHEIGHT}', $heights[0] . 'px', $template);
+        $template = str_replace('{MEDIUMWIDTH}', $widths[1] . 'px', $template);
+        $template = str_replace('{MEDIUMHEIGHT}', $heights[1] . 'px', $template);
+        $template = str_replace('{LARGEWIDTH}', $widths[2] . 'px', $template);
+        $template = str_replace('{LARGEHEIGHT}', $heights[2] . 'px', $template);
+    }
     $template = str_replace('{FULL}', $fileLink, $template);
     $template = str_replace('{FILELINK}', $fileLink, $template);
     $template = str_replace('{PAGELINK}', $pageLink, $template);
-    $template = str_replace('{THUMBWIDTH}', $widths[0] . 'px', $template);
-    $template = str_replace('{THUMBHEIGHT}', $heights[0] . 'px', $template);
-    $template = str_replace('{MEDIUMWIDTH}', $widths[1] . 'px', $template);
-    $template = str_replace('{MEDIUMHEIGHT}', $heights[1] . 'px', $template);
-    $template = str_replace('{LARGEWIDTH}', $widths[2] . 'px', $template);
-    $template = str_replace('{LARGEHEIGHT}', $heights[2] . 'px', $template);
     $template = str_replace('{FILENAME}', $fileName, $template);
     $template = str_replace('{IMAGE}', $fileLink, $template);
     $template = str_replace('{URL}', $fileLink, $template);
@@ -1952,12 +1985,15 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
     } else {
         $subject = $mimeDecodedEmail->headers['subject'];
         DebugEcho(("Predecoded subject: $subject"));
+
         if (array_key_exists('content-transfer-encoding', $mimeDecodedEmail->headers)) {
             $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
         } else if (array_key_exists("content-transfer-encoding", $mimeDecodedEmail->ctype_parameters)) {
             $encoding = $mimeDecodedEmail->ctype_parameters["content-transfer-encoding"];
         } else {
-            $encoding = '7bit';
+            $encoding = 'ISO-8859-1';
+            $subject = iconv($encoding, 'UTF-8', $mimeDecodedEmail->headers['subject']);
+            DebugEcho(("ISO-8859-1 decoded subject: $subject"));
         }
         DebugEcho("Subject encoding: $encoding");
 
@@ -1971,8 +2007,8 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
 
             for ($i = 0; $i < count($elements); $i++) {
                 $thischarset = $elements[$i]->charset;
-//                if ($thischarset == 'default')
-//                    $thischarset = $charset;
+                if ($thischarset == 'default')
+                    $thischarset = "ISO-8859-1";
 
                 $subject.=HandleMessageEncoding($encoding, $thischarset, $elements[$i]->text, $message_encoding, $message_dequote);
             }
@@ -1990,6 +2026,7 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
         DebugEcho("extra parsing for ISO-2022-JP");
         $subject = iconv("ISO-2022-JP", "UTF-8//TRANSLIT", $subject);
     }
+    DebugEcho("Subject: $subject");
     return $subject;
 }
 
@@ -2043,7 +2080,7 @@ function GetPostCategories(&$subject, $defaultCategory) {
 
     if (preg_match_all('/\[(.[^\[]*)\]/', $subject, $matches)) { // [<category1>] [<category2>] <Subject>
         preg_match("/]([^\[]*)$/", $subject, $subject_matches);
-        DebugDump($subject_matches);
+        //DebugDump($subject_matches);
         $subject = trim($subject_matches[1]);
         $matchtypes[] = $matches;
     }
