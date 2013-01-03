@@ -9,9 +9,20 @@ class wpdb {
     public $terms = 'wp_terms';
 
     public function get_var($query, $column_offset = 0, $row_offset = 0) {
-        return $this->t_get_var;
+        if (is_array($this->t_get_var)) {
+            if (count($this->t_get_var) > 0) {
+                $r = $this->t_get_var[0];
+                unset($this->t_get_var[0]);
+                $this->t_get_var = array_values($this->t_get_var);
+            } else {
+                $r = null;
+            }
+        } else {
+            $r = $this->t_get_var;
+            $this->t_get_var = "";
+        }
+        return $r;
     }
-
 }
 
 class WP_Error {

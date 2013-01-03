@@ -3,6 +3,9 @@
 * All script, style and body tags are stripped from html emails.
 
 == CHANGELOG ==
+1.4.15 (2013.01.02) =
+* Fixed a bug when a category is specified with [] and a colon (:) is in the subject, but not specifying a category
+
 1.4.14 (2012.12.29) =
 * Fixed a bug where attached images were not being detected properly causing a "File is empty. Please upload something more substantial." error
 * Tweaked some CSS.

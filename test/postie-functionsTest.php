@@ -154,10 +154,9 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
         $c = "tags: Station, Kohnen, Flugzeug\n:end\n21.10.2012";
         $this->assertEquals("tags: Station, Kohnen, Flugzeug\n", EndFilter($c, ":end"));
-        
+
         $c = "This is a test :end";
         $this->assertEquals("This is a test ", EndFilter($c, ":end"));
-        
     }
 
     public function testFilterNewLines() {
@@ -281,12 +280,13 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("general", $c[0]);
         $this->assertEquals("test", $s);
 
+        $wpdb->t_get_var = "general";
         $s = "[general] test";
         $c = GetPostCategories($s, "default");
         $this->assertEquals("general", $c[0]);
         $this->assertEquals("test", $s);
 
-
+        $wpdb->t_get_var = "general";
         $s = "-general- test";
         $c = GetPostCategories($s, "default");
         $this->assertEquals("general", $c[0]);
@@ -298,13 +298,19 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("specific: test", $s);
 
-        $wpdb->t_get_var = "1";
+        $wpdb->t_get_var = array("1", "1");
         $s = "[1] [1] test";
         $c = GetPostCategories($s, "default");
         $this->assertEquals(2, count($c));
         $this->assertEquals("1", $c[0]);
         $this->assertEquals("1", $c[1]);
         $this->assertEquals("test", $s);
+
+        $wpdb->t_get_var = array(null, null, null, "general");
+        $s = "[general] test: with colon";
+        $c = GetPostCategories($s, "default");
+        $this->assertEquals("general", $c[0]);
+        $this->assertEquals("test: with colon", $s);
     }
 
     public function testHTML2HTML() {
@@ -348,8 +354,8 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $t = postie_get_tags($c, "");
         $this->assertEquals(0, count($t));
         $this->assertEquals("test", $c);
-        
-         $c = "test";
+
+        $c = "test";
         $t = postie_get_tags($c, array("tag1"));
         $this->assertEquals(1, count($t));
         $this->assertEquals("tag1", $t[0]);
@@ -369,7 +375,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $t = postie_get_tags($c, "");
         $this->assertEquals(1, count($t));
         $this->assertEquals("test ", $c);
-        
+
         $c = "test\ntags: tag1";
         $t = postie_get_tags($c, "");
         $this->assertEquals(1, count($t));
@@ -386,27 +392,27 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(1, count($t));
         $this->assertEquals("tag1", $t[0]);
         $this->assertEquals("test ", $c);
-        
-         $c = "test tags:tag1";
+
+        $c = "test tags:tag1";
         $t = postie_get_tags($c, array("tagx"));
         $this->assertEquals(1, count($t));
         $this->assertEquals("tag1", $t[0]);
         $this->assertEquals("test ", $c);
-        
+
         $c = "test tags:tag1,tag2";
         $t = postie_get_tags($c, "");
         $this->assertEquals(2, count($t));
         $this->assertEquals("tag1", $t[0]);
         $this->assertEquals("tag2", $t[1]);
         $this->assertEquals("test ", $c);
-        
+
         $c = "test tags: tag3,tag4\nmore stuff\n:end";
         $t = postie_get_tags($c, "");
         $this->assertEquals(2, count($t));
         $this->assertEquals("tag3", $t[0]);
         $this->assertEquals("tag4", $t[1]);
         $this->assertEquals("test \nmore stuff\n:end", $c);
-        
+
         $c = "test tags:tag1,tag2\nmore stuff\n:end";
         $t = postie_get_tags($c, "");
         $this->assertEquals(2, count($t));

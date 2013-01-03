@@ -2037,43 +2037,36 @@ function GetPostCategories(&$subject, $defaultCategory) {
     global $wpdb;
     $original_subject = $subject;
     $post_categories = array();
+    $matchtypes = array();
     $matches = array();
     //try and determine category
-    if (preg_match('/(.+): (.*)/', $subject, $matches)) { // <category>:<Subject>
-        $subject = trim($matches[2]);
-        $matches[1] = array($matches[1]);
-    } else if (preg_match_all('/\[(.[^\[]*)\]/', $subject, $matches)) { // [<category1>] [<category2>] <Subject>
+
+    if (preg_match_all('/\[(.[^\[]*)\]/', $subject, $matches)) { // [<category1>] [<category2>] <Subject>
         preg_match("/]([^\[]*)$/", $subject, $subject_matches);
+        DebugDump($subject_matches);
         $subject = trim($subject_matches[1]);
-    } else if (preg_match_all('/-(.[^-]*)-/', $subject, $matches)) { // -<category>- -<category2>- <Subject>
+        $matchtypes[] = $matches;
+    }
+    if (preg_match_all('/-(.[^-]*)-/', $subject, $matches)) { // -<category>- -<category2>- <Subject>
         preg_match("/-(.[^-]*)$/", $subject, $subject_matches);
         $subject = trim($subject_matches[1]);
+        $matchtypes[] = $matches;
     }
-    if (count($matches)) {
-        foreach ($matches[1] as $match) {
-            $match = trim($match);
-            $category = NULL;
-            //EchoInfo("Categories - Working on $match");
+    if (preg_match('/(.+): (.*)/', $subject, $matches)) { // <category>:<Subject>
+        $category = CategoryLookup($matches[1]);
+        if (!empty($category)) {
+            $subject = trim($matches[2]);
+            $post_categories[] = $category;
+        }
+    }
 
-            $sql_name = 'SELECT term_id 
-                         FROM ' . $wpdb->terms . ' 
-                         WHERE name=\'' . addslashes($match) . '\'';
-            $sql_id = 'SELECT term_id 
-                       FROM ' . $wpdb->terms . ' 
-                       WHERE term_id=\'' . addslashes($match) . '\'';
-            $sql_sub_name = 'SELECT term_id 
-                             FROM ' . $wpdb->terms . ' 
-                             WHERE name LIKE \'' . addslashes($match) . '%\' limit 1';
-
-            if ($category = $wpdb->get_var($sql_name)) {
-                //then category is a named and found 
-            } elseif ($category = $wpdb->get_var($sql_id)) {
-                //then cateogry was an ID and found 
-            } elseif ($category = $wpdb->get_var($sql_sub_name)) {
-                //then cateogry is a start of a name and found
-            }
-            if (!empty($category)) {
-                $post_categories[] = $category;
+    foreach ($matchtypes as $matches) {
+        if (count($matches)) {
+            foreach ($matches[1] as $match) {
+                $category = CategoryLookup($match);
+                if (!empty($category)) {
+                    $post_categories[] = $category;
+                }
             }
         }
     }
@@ -2082,6 +2075,26 @@ function GetPostCategories(&$subject, $defaultCategory) {
         $subject = $original_subject;
     }
     return $post_categories;
+}
+
+function CategoryLookup($trial_category) {
+    global $wpdb;
+    $trial_category = trim($trial_category);
+    $found_category = NULL;
+    EchoInfo("Categories - Working on $trial_category");
+
+    $sql_name = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE name=\'' . addslashes($trial_category) . '\'';
+    $sql_id = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE term_id=\'' . addslashes($trial_category) . '\'';
+    $sql_sub_name = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE name LIKE \'' . addslashes($trial_category) . '%\' limit 1';
+
+    if ($found_category = $wpdb->get_var($sql_name)) {
+        //then category is a named and found 
+    } elseif ($found_category = $wpdb->get_var($sql_id)) {
+        //then cateogry was an ID and found 
+    } elseif ($found_category = $wpdb->get_var($sql_sub_name)) {
+        //then cateogry is a start of a name and found
+    }
+    return $found_category;
 }
 
 /**
