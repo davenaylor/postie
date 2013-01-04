@@ -867,21 +867,29 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 break;
 
             default:
+                DebugEcho("found file type: " . $part->ctype_primary);
                 if (in_array(strtolower($part->ctype_primary), $supported_file_types)) {
                     //pgp signature - then forget it
-                    if ($part->ctype_secondary == 'pgp-signature')
+                    if ($part->ctype_secondary == 'pgp-signature') {
+                        DebugEcho("found pgp-signature - done");
                         break;
+                    }
                     $file_id = postie_media_handle_upload($part, $post_id, $poster);
                     $file = wp_get_attachment_url($file_id);
+                    DebugEcho("uploaded $file_id ($file)");
+                    $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                    $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
                     if (array_key_exists('content-id', $part->headers)) {
                         $cid = trim($part->headers["content-id"], "<>");
-                        //cids are in <cid>
-                        $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
-                        $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
                         if ($cid) {
                             $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
                         }
+                    } else {
+                        DebugEcho("No content-id");
                     }
+                } else {
+                    DebugEcho("Not in supported filetype list");
+                    DebugDump($supported_file_types);
                 }
                 break;
         }
@@ -1526,7 +1534,7 @@ function FilterTextParts($mimeDecodedEmail, $preferTextType) {
     DebugEcho("FilterTextParts: begin " . count($mimeDecodedEmail->parts));
     $newParts = array();
     $found = false;
-    
+
     for ($i = 0; $i < count($mimeDecodedEmail->parts); $i++) {
         DebugEcho("part: $i " . $mimeDecodedEmail->parts[$i]->ctype_primary);
 

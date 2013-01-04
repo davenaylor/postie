@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.16
+Stable tag: 1.4.17
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -370,6 +370,9 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 * All script, style and body tags are stripped from html emails.
 
 == CHANGELOG ==
+= 1.4.17 (2013.01.03) =
+* Fixed a bug where non image/video attachments were not getting added to the post.
+
 = 1.4.16 (2013.01.03) =
 * Fixed a bug where an extra div tag was getting added.
 * Fixed a bug when linkifying URLs.
