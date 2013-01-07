@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.18
+Stable tag: 1.4.19
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -371,6 +371,9 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 * Many method names have been changed as of 1.4.18. Any custom filters may need to be updated.
 
 == CHANGELOG ==
+= 1.4.19 (2013.01.07) =
+* Fixed a bug that prevented the settings from being saved
+
 = 1.4.18 (2013.01.06) =
 * Fixed a bug where linkifying was doing too much.
 * Updated lots of method names in preparation for some significant structural changes.

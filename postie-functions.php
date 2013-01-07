@@ -2318,9 +2318,7 @@ function config_GetDefaults() {
         'video2types' => array('x-flv'),
         'video1templates' => $video1Templates,
         'video2templates' => $video2Templates,
-        'wrap_pre' => 'no
-
-    '
+        'wrap_pre' => 'no'
     );
 }
 
@@ -2655,7 +2653,7 @@ function config_ValidateSettings($in) {
  * registers the settings and the admin optionspage
  */
 function postie_admin_settings() {
-    register_setting('postie-settings', 'postie-settings', 'postie_validate_settings');
+    register_setting('postie-settings', 'postie-settings', 'config_ValidateSettings');
 }
 
 /**

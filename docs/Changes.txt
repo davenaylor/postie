@@ -4,6 +4,9 @@
 * Many method names have been changed as of 1.4.18. Any custom filters may need to be updated.
 
 == CHANGELOG ==
+= 1.4.19 (2013.01.07) =
+* Fixed a bug that prevented the settings from being saved
+
 = 1.4.18 (2013.01.06) =
 * Fixed a bug where linkifying was doing too much.
 * Updated lots of method names in preparation for some significant structural changes.
