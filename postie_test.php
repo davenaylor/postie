@@ -21,7 +21,7 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
 <div class="wrap"> 
     <h1>Postie Configuration Test</h1>
     <?php
-    if (TestForMarkdown()) {
+    if (isMarkdownInstalled()) {
         ?>
         <h1>Warning!</h1>
         <p>You currently have the Markdown plugin installed. It will cause problems if you send in HTML
@@ -29,7 +29,7 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
         <?php
     }
 
-    if (!TestPostieDirectory()) {
+    if (!isPostieInCorrectDirectory()) {
         EchoInfo("<b>Warning!</b> Postie expects to be in its own directory named postie.");
     } else {
         EchoInfo("Postie is in " . dirname(__FILE__));

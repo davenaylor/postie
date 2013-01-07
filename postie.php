@@ -4,7 +4,7 @@
   Plugin Name: Postie
   Plugin URI: http://PostiePlugin.com/
   Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href='options-general.php?page=postie/postie.php'>Settings and options</a>) to configure your e-mail settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://wordpress.org/support/plugin/postie'>postie forum</a> for support.
-  Version: 1.4.17
+  Version: 1.4.18
   Author: Wayne Allen
   Author URI: http://allens-home.com/
   License: GPL2
@@ -80,7 +80,7 @@ if (isset($_GET["postie_read_me"])) {
     $title = __("Edit Plugins");
     $parent_file = 'plugins.php';
     include(ABSPATH . 'wp-admin/admin-header.php');
-    postie_read_me();
+    postie_ShowReadMe();
     include(ABSPATH . 'wp-admin/admin-footer.php');
 }
 //Add Menu Configuration
@@ -113,10 +113,10 @@ function activate_postie() {
     if (!$options) {
         $options = array();
     }
-    $default_options = get_postie_config_defaults();
+    $default_options = config_GetDefaults();
     $old_config = array();
 
-    $result = GetConfig();
+    $result = config_GetOld();
     if (is_array($result)) {
         foreach ($result as $key => $val) {
             $old_config[strtolower($key)] = $val;
@@ -126,7 +126,7 @@ function activate_postie() {
     // overlay the options on top of each other:
     // the current value of $options takes priority over the $old_config, which takes priority over the $default_options
     $options = array_merge($default_options, $old_config, $options);
-    $options = postie_validate_settings($options);
+    $options = config_ValidateSettings($options);
     update_option('postie-settings', $options);
     $init = true;
     DebugEcho("activate completed");

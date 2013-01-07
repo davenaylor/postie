@@ -22,7 +22,7 @@
     if (isset($_POST["action"])) {
         switch ($_POST["action"]) {
             case "reset":
-                ResetPostieConfig();
+                config_ResetToDefault();
                 $message = 1;
                 break;
             case "cronless":
@@ -49,9 +49,9 @@
     $parent_file = 'options-general.php';
     $config = get_option('postie-settings');
     if (empty($config))
-        $config = ResetPostieConfig();
+        $config = config_ResetToDefault();
 
-    $arrays = get_arrayed_settings();
+    $arrays = config_ArrayedSettings();
     // some fields are stored as arrays, because that makes back-end processing much easier
     // and we need to convert those fields to strings here, for the options form
     foreach ($arrays as $sep => $fields) {

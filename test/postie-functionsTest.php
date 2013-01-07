@@ -14,53 +14,53 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     public function testAllowCommentsOnPost() {
         $original_content = "test content, no comment control";
         $modified_content = "test content, no comment control";
-        $allow = AllowCommentsOnPost($modified_content);
+        $allow = tag_AllowCommentsOnPost($modified_content);
         $this->assertEquals("open", $allow);
         $this->assertEquals($original_content, $modified_content);
 
         $original_content = "test content, comment control closed ";
         $modified_content = "test content, comment control closed comments:0";
-        $allow = AllowCommentsOnPost($modified_content);
+        $allow = tag_AllowCommentsOnPost($modified_content);
         $this->assertEquals("closed", $allow);
         $this->assertEquals($original_content, $modified_content);
 
         $original_content = "test content, comment control open ";
         $modified_content = "test content, comment control open comments:1";
-        $allow = AllowCommentsOnPost($modified_content);
+        $allow = tag_AllowCommentsOnPost($modified_content);
         $this->assertEquals("open", $allow);
         $this->assertEquals($original_content, $modified_content);
 
         $original_content = "test content, comment control registered only ";
         $modified_content = "test content, comment control registered only comments:2";
-        $allow = AllowCommentsOnPost($modified_content);
+        $allow = tag_AllowCommentsOnPost($modified_content);
         $this->assertEquals("registered_only", $allow);
         $this->assertEquals($original_content, $modified_content);
     }
 
     public function testBannedFileName() {
-        $this->assertFalse(BannedFileName("", null));
-        $this->assertFalse(BannedFileName("", ""));
-        $this->assertFalse(BannedFileName("", array()));
-        $this->assertFalse(BannedFileName("test", array()));
-        $this->assertTrue(BannedFileName("test", array("test")));
-        $this->assertFalse(BannedFileName("test", array("test1")));
-        $this->assertTrue(BannedFileName("test.exe", array("*.exe")));
-        $this->assertFalse(BannedFileName("test.pdf", array("*.exe")));
-        $this->assertFalse(BannedFileName("test.pdf", array("*.exe", "*.js", "*.cmd")));
-        $this->assertFalse(BannedFileName("test.cmd.pdf", array("*.exe", "*.js", "*.cmd")));
-        $this->assertTrue(BannedFileName("test test.exe", array("*.exe")));
+        $this->assertFalse(isBannedFileName("", null));
+        $this->assertFalse(isBannedFileName("", ""));
+        $this->assertFalse(isBannedFileName("", array()));
+        $this->assertFalse(isBannedFileName("test", array()));
+        $this->assertTrue(isBannedFileName("test", array("test")));
+        $this->assertFalse(isBannedFileName("test", array("test1")));
+        $this->assertTrue(isBannedFileName("test.exe", array("*.exe")));
+        $this->assertFalse(isBannedFileName("test.pdf", array("*.exe")));
+        $this->assertFalse(isBannedFileName("test.pdf", array("*.exe", "*.js", "*.cmd")));
+        $this->assertFalse(isBannedFileName("test.cmd.pdf", array("*.exe", "*.js", "*.cmd")));
+        $this->assertTrue(isBannedFileName("test test.exe", array("*.exe")));
     }
 
     public function testCheckEmailAddress() {
-        $this->assertFalse(CheckEmailAddress(null, null));
-        $this->assertFalse(CheckEmailAddress(null, array()));
-        $this->assertFalse(CheckEmailAddress("", array()));
-        $this->assertFalse(CheckEmailAddress("", array("")));
-        $this->assertFalse(CheckEmailAddress("bob", array("jane")));
-        $this->assertTrue(CheckEmailAddress("bob", array("bob")));
-        $this->assertTrue(CheckEmailAddress("bob", array("BoB")));
-        $this->assertTrue(CheckEmailAddress("bob", array("bob", "jane")));
-        $this->assertTrue(CheckEmailAddress("bob", array("jane", "bob")));
+        $this->assertFalse(isEmailAddressAuthorized(null, null));
+        $this->assertFalse(isEmailAddressAuthorized(null, array()));
+        $this->assertFalse(isEmailAddressAuthorized("", array()));
+        $this->assertFalse(isEmailAddressAuthorized("", array("")));
+        $this->assertFalse(isEmailAddressAuthorized("bob", array("jane")));
+        $this->assertTrue(isEmailAddressAuthorized("bob", array("bob")));
+        $this->assertTrue(isEmailAddressAuthorized("bob", array("BoB")));
+        $this->assertTrue(isEmailAddressAuthorized("bob", array("bob", "jane")));
+        $this->assertTrue(isEmailAddressAuthorized("bob", array("jane", "bob")));
     }
 
     public function testConvertUTF8ToISO_8859_1() {
@@ -144,49 +144,49 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
     public function testEndFilter() {
         $c = "test";
-        $this->assertEquals("test", EndFilter($c, "xxx"));
+        $this->assertEquals("test", filter_end($c, "xxx"));
 
         $c = "test xxx";
-        $this->assertEquals("test ", EndFilter($c, "xxx"));
+        $this->assertEquals("test ", filter_end($c, "xxx"));
 
         $c = "test xxx test";
-        $this->assertEquals("test ", EndFilter($c, "xxx"));
+        $this->assertEquals("test ", filter_end($c, "xxx"));
 
         $c = "tags: Station, Kohnen, Flugzeug\n:end\n21.10.2012";
-        $this->assertEquals("tags: Station, Kohnen, Flugzeug\n", EndFilter($c, ":end"));
+        $this->assertEquals("tags: Station, Kohnen, Flugzeug\n", filter_end($c, ":end"));
 
         $c = "This is a test :end";
-        $this->assertEquals("This is a test ", EndFilter($c, ":end"));
+        $this->assertEquals("This is a test ", filter_end($c, ":end"));
     }
 
     public function testFilterNewLines() {
         $c = "test";
-        $this->assertEquals("test", FilterNewLines($c));
-        $this->assertEquals("test", FilterNewLines($c, true));
+        $this->assertEquals("test", filter_newlines($c));
+        $this->assertEquals("test", filter_newlines($c, true));
 
         $c = "test\n";
-        $this->assertEquals("test ", FilterNewLines($c));
-        $this->assertEquals("test<br />\n", FilterNewLines($c, true));
+        $this->assertEquals("test ", filter_newlines($c));
+        $this->assertEquals("test<br />\n", filter_newlines($c, true));
 
         $c = "test\r\n";
-        $this->assertEquals("test ", FilterNewLines($c));
-        $this->assertEquals("test<br />\n", FilterNewLines($c, true));
+        $this->assertEquals("test ", filter_newlines($c));
+        $this->assertEquals("test<br />\n", filter_newlines($c, true));
 
         $c = "test\r";
-        $this->assertEquals("test ", FilterNewLines($c));
-        $this->assertEquals("test<br />\n", FilterNewLines($c, true));
+        $this->assertEquals("test ", filter_newlines($c));
+        $this->assertEquals("test<br />\n", filter_newlines($c, true));
 
         $c = "test\n\n";
-        $this->assertEquals("test ", FilterNewLines($c));
-        $this->assertEquals("test<br />\n", FilterNewLines($c, true));
+        $this->assertEquals("test ", filter_newlines($c));
+        $this->assertEquals("test<br />\n", filter_newlines($c, true));
 
         $c = "test\r\n\r\n";
-        $this->assertEquals("test ", FilterNewLines($c));
-        $this->assertEquals("test<br />\n", FilterNewLines($c, true));
+        $this->assertEquals("test ", filter_newlines($c));
+        $this->assertEquals("test<br />\n", filter_newlines($c, true));
 
         $c = "test\r\n\r\ntest\n\ntest\rtest\r\ntest\ntest";
-        $this->assertEquals("test test test test test test", FilterNewLines($c));
-        $this->assertEquals("test<br />\ntest<br />\ntest<br />\ntest<br />\ntest<br />\ntest", FilterNewLines($c, true));
+        $this->assertEquals("test test test test test test", filter_newlines($c));
+        $this->assertEquals("test<br />\ntest<br />\ntest<br />\ntest<br />\ntest<br />\ntest", filter_newlines($c, true));
     }
 
     public function testGetNameFromEmail() {
@@ -197,110 +197,110 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
     public function testGetPostType() {
         $subject = "test";
-        $this->assertEquals("post", GetPostType($subject));
+        $this->assertEquals("post", tag_PostType($subject));
         $this->assertEquals("test", $subject);
 
         $subject = "custom//test";
-        $this->assertEquals("custom", GetPostType($subject));
+        $this->assertEquals("custom", tag_PostType($subject));
         $this->assertEquals("test", $subject);
 
         $subject = "//test";
-        $this->assertEquals("post", GetPostType($subject));
+        $this->assertEquals("post", tag_PostType($subject));
         $this->assertEquals("test", $subject);
 
         $subject = "//";
-        $this->assertEquals("post", GetPostType($subject));
+        $this->assertEquals("post", tag_PostType($subject));
         $this->assertEquals("", $subject);
 
         $subject = "Image//test";
-        $this->assertEquals("image", GetPostType($subject));
+        $this->assertEquals("image", tag_PostType($subject));
         $this->assertEquals("test", $subject);
 
         $subject = "Image // test";
-        $this->assertEquals("image", GetPostType($subject));
+        $this->assertEquals("image", tag_PostType($subject));
         $this->assertEquals("test", $subject);
 
         $subject = "video//test";
-        $this->assertEquals("video", GetPostType($subject));
+        $this->assertEquals("video", tag_PostType($subject));
         $this->assertEquals("test", $subject);
     }
 
     public function testGetPostExcerpt() {
         $c = "test";
-        $this->assertEquals("", GetPostExcerpt($c, false, false));
+        $this->assertEquals("", tag_Excerpt($c, false, false));
 
         $c = ":excerptstart test :excerptend test";
-        $this->assertEquals("test ", GetPostExcerpt($c, false, false));
+        $this->assertEquals("test ", tag_Excerpt($c, false, false));
 
         $c = ":excerptstart test";
-        $this->assertEquals("", GetPostExcerpt($c, false, false));
+        $this->assertEquals("", tag_Excerpt($c, false, false));
 
         $c = "test :excerptend test";
-        $this->assertEquals("", GetPostExcerpt($c, false, false));
+        $this->assertEquals("", tag_Excerpt($c, false, false));
     }
 
     public function testGetPostCategories() {
         global $wpdb;
 
         $s = "test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("test", $s);
 
         $s = ":test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("default", $c[0]);
         $this->assertEquals(":test", $s);
 
         $wpdb->t_get_var = "1";
         $s = "1: test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("1", $c[0]);
         $this->assertEquals("test", $s);
 
         $wpdb->t_get_var = null;
         $s = "not a category: test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("not a category: test", $s);
 
         $s = "[not a category] test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("[not a category] test", $s);
 
         $s = "-not a category- test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("-not a category- test", $s);
 
         $wpdb->t_get_var = "general";
         $s = "general: test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("general", $c[0]);
         $this->assertEquals("test", $s);
 
         $wpdb->t_get_var = "general";
         $s = "[general] test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("general", $c[0]);
         $this->assertEquals("test", $s);
 
         $wpdb->t_get_var = "general";
         $s = "-general- test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("general", $c[0]);
         $this->assertEquals("test", $s);
 
         $wpdb->t_get_var = "";
         $s = "specific: test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("specific: test", $s);
 
         $wpdb->t_get_var = array("1", "1");
         $s = "[1] [1] test";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals(2, count($c));
         $this->assertEquals("1", $c[0]);
         $this->assertEquals("1", $c[1]);
@@ -308,18 +308,18 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
         $wpdb->t_get_var = array(null, null, null, "general");
         $s = "[general] test: with colon";
-        $c = GetPostCategories($s, "default");
+        $c = tag_categories($s, "default");
         $this->assertEquals("general", $c[0]);
         $this->assertEquals("test: with colon", $s);
     }
 
     public function testHTML2HTML() {
-        $this->assertEquals("", HTML2HTML(""));
-        $this->assertEquals("test", HTML2HTML("test"));
-        $this->assertEquals("<div>test</div>\n", HTML2HTML("<html lang='en'><body>test</body></html>"));
-        $this->assertEquals("<div>test</div>\n", HTML2HTML("<html lang='en'><head><title>title</title></head><body>test</body></html>"));
-        $this->assertEquals("<div>test</div>\n", HTML2HTML("<body>test</body>"));
-        $this->assertEquals("<strong>test</strong>", HTML2HTML("<strong>test</strong>"));
+        $this->assertEquals("", filter_CleanHtml(""));
+        $this->assertEquals("test", filter_CleanHtml("test"));
+        $this->assertEquals("<div>test</div>\n", filter_CleanHtml("<html lang='en'><body>test</body></html>"));
+        $this->assertEquals("<div>test</div>\n", filter_CleanHtml("<html lang='en'><head><title>title</title></head><body>test</body></html>"));
+        $this->assertEquals("<div>test</div>\n", filter_CleanHtml("<body>test</body>"));
+        $this->assertEquals("<strong>test</strong>", filter_CleanHtml("<strong>test</strong>"));
     }
 
     public function testSafeFileName() {
@@ -327,15 +327,15 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testremove_signature() {
-        $this->assertEquals("", remove_signature("", array()));
-        $this->assertEquals("test", remove_signature("test", array()));
-        $this->assertEquals("\n", remove_signature("", array("--", "- --")));
-        $this->assertEquals("test\n", remove_signature("test", array("--", "- --")));
-        $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n--\nsig line 1\nsig line 2", array("--", "- --")));
-        $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n- --\nsig line 1\nsig line 2", array("--", "- --")));
-        $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n-- \nsig line 1\nsig line 2", array("--", "- --")));
-        $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n --\nsig line 1\nsig line 2", array("--", "- --")));
-        $this->assertEquals("line 1\nline 2\n", remove_signature("line 1\nline 2\n--", array("--", "- --")));
+        $this->assertEquals("", filter_RemoveSignature("", array()));
+        $this->assertEquals("test", filter_RemoveSignature("test", array()));
+        $this->assertEquals("\n", filter_RemoveSignature("", array("--", "- --")));
+        $this->assertEquals("test\n", filter_RemoveSignature("test", array("--", "- --")));
+        $this->assertEquals("line 1\nline 2\n", filter_RemoveSignature("line 1\nline 2\n--\nsig line 1\nsig line 2", array("--", "- --")));
+        $this->assertEquals("line 1\nline 2\n", filter_RemoveSignature("line 1\nline 2\n- --\nsig line 1\nsig line 2", array("--", "- --")));
+        $this->assertEquals("line 1\nline 2\n", filter_RemoveSignature("line 1\nline 2\n-- \nsig line 1\nsig line 2", array("--", "- --")));
+        $this->assertEquals("line 1\nline 2\n", filter_RemoveSignature("line 1\nline 2\n --\nsig line 1\nsig line 2", array("--", "- --")));
+        $this->assertEquals("line 1\nline 2\n", filter_RemoveSignature("line 1\nline 2\n--", array("--", "- --")));
     }
 
     public function testmore_reccurences() {
@@ -346,75 +346,75 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
     public function testpostie_get_tags() {
         $c = "";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(0, count($t));
         $this->assertEquals("", $c);
 
         $c = "test";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(0, count($t));
         $this->assertEquals("test", $c);
 
         $c = "test";
-        $t = postie_get_tags($c, array("tag1"));
+        $t = tag_Tags($c, array("tag1"));
         $this->assertEquals(1, count($t));
         $this->assertEquals("tag1", $t[0]);
         $this->assertEquals("test", $c);
 
         $c = "test tags:";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(0, count($t));
         $this->assertEquals("test tags:", $c);
 
         $c = "test tags:\n";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(0, count($t));
         $this->assertEquals("test tags:\n", $c);
 
         $c = "test tags: tag1";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(1, count($t));
         $this->assertEquals("test ", $c);
 
         $c = "test\ntags: tag1";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(1, count($t));
         $this->assertEquals("test\n", $c);
 
         $c = "test tags: tag1\n";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(1, count($t));
         $this->assertEquals("tag1", $t[0]);
         $this->assertEquals("test \n", $c);
 
         $c = "test tags:tag1";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(1, count($t));
         $this->assertEquals("tag1", $t[0]);
         $this->assertEquals("test ", $c);
 
         $c = "test tags:tag1";
-        $t = postie_get_tags($c, array("tagx"));
+        $t = tag_Tags($c, array("tagx"));
         $this->assertEquals(1, count($t));
         $this->assertEquals("tag1", $t[0]);
         $this->assertEquals("test ", $c);
 
         $c = "test tags:tag1,tag2";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(2, count($t));
         $this->assertEquals("tag1", $t[0]);
         $this->assertEquals("tag2", $t[1]);
         $this->assertEquals("test ", $c);
 
         $c = "test tags: tag3,tag4\nmore stuff\n:end";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(2, count($t));
         $this->assertEquals("tag3", $t[0]);
         $this->assertEquals("tag4", $t[1]);
         $this->assertEquals("test \nmore stuff\n:end", $c);
 
         $c = "test tags:tag1,tag2\nmore stuff\n:end";
-        $t = postie_get_tags($c, "");
+        $t = tag_Tags($c, "");
         $this->assertEquals(2, count($t));
         $this->assertEquals("tag1", $t[0]);
         $this->assertEquals("tag2", $t[1]);
@@ -422,13 +422,17 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testclickableLink() {
-        $this->assertEquals("", clickableLink(""));
-        $this->assertEquals("test", clickableLink("test"));
-        $this->assertEquals('<a href="http://www.example.com"  >http://www.example.com</a>', clickableLink("http://www.example.com"));
-        $this->assertEquals('<a href="http://www.example.com">www.example.com</a>', clickableLink("www.example.com"));
-        $this->assertEquals('<a href="http://www.example.com">www.example.com</a> <a href="http://www.example.com">www.example.com</a>', clickableLink("www.example.com www.example.com"));
-        $this->assertEquals('<a href="mailto:bob@example.com">bob@example.com</a>', clickableLink("bob@example.com"));
+        $this->assertEquals("", filter_linkify(""));
+        $this->assertEquals("test", filter_linkify("test"));
+        $this->assertEquals('<a href="http://www.example.com"  >http://www.example.com</a>', filter_linkify("http://www.example.com"));
+        $this->assertEquals('<a href="http://www.example.com">www.example.com</a>', filter_linkify("www.example.com"));
+        $this->assertEquals('<a href="http://www.example.com">www.example.com</a> <a href="http://www.example.com">www.example.com</a>', filter_linkify("www.example.com www.example.com"));
+        $this->assertEquals('<a href="mailto:bob@example.com">bob@example.com</a>', filter_linkify("bob@example.com"));
+        $this->assertEquals("<img src='http://www.example.com'/>", filter_linkify("<img src='http://www.example.com'/>"));
+        $this->assertEquals("<html><head><title></title></head><body><img src='http://www.example.com'/></body></html>", filter_linkify("<html><head><title></title></head><body><img src='http://www.example.com'/></body></html>"));
+        $this->assertEquals('<html><head><title></title></head><body><img src="http://www.example.com"/><a href="http://www.example.com">www.example.com</a></body></html>', filter_linkify('<html><head><title></title></head><body><img src="http://www.example.com"/>www.example.com</body></html>'));
     }
+
 }
 
 ?>

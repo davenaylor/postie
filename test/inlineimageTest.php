@@ -87,7 +87,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $partcnt = count($decoded->parts);
         $this->assertEquals(2, $partcnt);
 
-        FilterTextParts($decoded, "plain");
+        filter_PreferedText($decoded, "plain");
 
         $attachments = array(
             "html" => array(), //holds the html for each image
@@ -108,7 +108,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $this->assertEquals(null, $customImages);
         $this->assertEquals("test content\n\n", $content);
 
-        $post_excerpt = GetPostExcerpt($content, $filternewlines, $convertnewline);
+        $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
 
         $postAuthorDetails = getPostAuthorDetails($subject, $content, $decoded);
     }
@@ -142,7 +142,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $decoded = DecodeMIMEMail($email);
         print_r($decoded);
 
-        FilterTextParts($decoded, 'html');
+        filter_PreferedText($decoded, 'html');
         $attachments = array(
             "html" => array(), //holds the html for each image
             "cids" => array(), //holds the cids for HTML email
@@ -157,65 +157,65 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config = $this->standardConfig();
         $attachements = array("image.jpg" => '<img title="{CAPTION}" />');
 
-        ReplaceImagePlaceHolders($c, array(), $config);
+        filter_ReplaceImagePlaceHolders($c, array(), $config);
         $this->assertEquals("", $c);
 
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('<img title="" />', $c);
 
         $c = "#img1#";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('<img title="" />', $c);
 
         $c = "test #img1# test";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="" /> test', $c);
 
         $c = "test #img1 caption='1'# test";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="1" /> test', $c);
 
         $c = "test #img1 caption='! @ % ^ & * ( ) ~ \"Test\"'# test";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="! @ % ^ &amp; * ( ) ~ &quot;Test&quot;" /> test', $c);
 
         $c = "test <div>#img1 caption=&#39;! @ % ^ &amp; * ( ) ~ &quot;Test&quot;&#39;#</div> test";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("test <div><img title=\"! @ % ^ &amp; * ( ) ~ &quot;Test&quot;\" /></div> test", $c);
 
         $c = "test #img1 caption=\"I'd like some cheese.\"# test";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="I&#039;d like some cheese." /> test', $c);
 
         $c = "test #img1 caption=\"Eiskernbrecher mögens laut\"# test";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="Eiskernbrecher mögens laut" /> test', $c);
 
         $c = "test #img1 caption='[image-caption]'# test";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="[image-caption]" /> test', $c);
 
         $c = "test #img1 caption='1'# test #img2 caption='2'#";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="1" /> test #img2 caption=\'2\'#', $c);
 
         $attachements = array("image1.jpg" => 'template with {CAPTION}', "image2.jpg" => 'template with {CAPTION}');
         $c = "test #img1 caption='1'# test #img2 caption='2'#";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("test template with 1 test template with 2", $c);
 
         $config['auto_gallery'] = true;
         $c = "test";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("[gallery]\ntest", $c);
 
         $config['images_append'] = true;
         $c = "test";
-        ReplaceImagePlaceHolders($c, $attachements, $config);
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("test[gallery]", $c);
 
         $c = "test";
-        ReplaceImagePlaceHolders($c, array(), $config);
+        filter_ReplaceImagePlaceHolders($c, array(), $config);
         $this->assertEquals("test", $c);
     }
 
