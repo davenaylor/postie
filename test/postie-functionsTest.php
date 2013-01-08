@@ -424,13 +424,37 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     public function testclickableLink() {
         $this->assertEquals("", filter_linkify(""));
         $this->assertEquals("test", filter_linkify("test"));
-        $this->assertEquals('<a href="http://www.example.com"  >http://www.example.com</a>', filter_linkify("http://www.example.com"));
+        $this->assertEquals('<a href="http://www.example.com" >http://www.example.com</a>', filter_linkify("http://www.example.com"));
         $this->assertEquals('<a href="http://www.example.com">www.example.com</a>', filter_linkify("www.example.com"));
         $this->assertEquals('<a href="http://www.example.com">www.example.com</a> <a href="http://www.example.com">www.example.com</a>', filter_linkify("www.example.com www.example.com"));
         $this->assertEquals('<a href="mailto:bob@example.com">bob@example.com</a>', filter_linkify("bob@example.com"));
         $this->assertEquals("<img src='http://www.example.com'/>", filter_linkify("<img src='http://www.example.com'/>"));
         $this->assertEquals("<html><head><title></title></head><body><img src='http://www.example.com'/></body></html>", filter_linkify("<html><head><title></title></head><body><img src='http://www.example.com'/></body></html>"));
         $this->assertEquals('<html><head><title></title></head><body><img src="http://www.example.com"/><a href="http://www.example.com">www.example.com</a></body></html>', filter_linkify('<html><head><title></title></head><body><img src="http://www.example.com"/>www.example.com</body></html>'));
+        $this->assertEquals("<img src='http://www.example.com'/>", filter_linkify("<img src='http://www.example.com'/>"));
+    }
+
+    public function testfilter_Videos() {
+        $this->assertEquals("A youtube link <embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src='http://www.youtube.com/v/oAguHwl9Vzq&hl=en&fs=1' />", filter_Videos("A youtube link https://www.youtube.com/watch?v=oAguHwl9Vzq", false));
+        $this->assertEquals("A youtube link [youtube oAguHwl9Vzq]", filter_Videos("A youtube link https://www.youtube.com/watch?v=oAguHwl9Vzq",true));
+    }
+
+    public function testtag_Date() {
+        $this->assertEquals(null, tag_Date("", null));
+        $this->assertEquals(null, tag_Date("date:", null));
+        $this->assertEquals(null, tag_Date("date: nothing", null));
+        $this->assertEquals(null, tag_Date("date: 1", null));
+        $this->assertEquals("2013-12-31", tag_Date("date: 12/31/2013", null));
+        $this->assertEquals("2013-12-31", tag_Date("date:12/31/2013", null));
+        $this->assertEquals("2013-12-31", tag_Date("Date: 12/31/2013", null));
+        $this->assertEquals("2013-12-31", tag_Date("DATE: 12/31/2013", null));
+        $this->assertEquals("2013-12-31", tag_Date("date: 31-12-2013", null));
+        $this->assertEquals("2013-12-31", tag_Date("date: 31.12.2013", null));
+        $this->assertEquals("2013-12-31", tag_Date("date: Dec 31, 2013", null));
+
+        $c = "date: 12/31/2013\nstuff";
+        $this->assertEquals("2013-12-31", tag_Date($c, null));
+        $this->assertEquals("stuff", $c);
     }
 
 }

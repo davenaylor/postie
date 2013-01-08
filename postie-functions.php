@@ -130,6 +130,18 @@ function DebugEcho($v) {
     }
 }
 
+function tag_Date($content, $message_date) {
+
+    if (preg_match("/^date:\s?(.*)$/im", $content, $matches)) {
+        $newdate = strtotime($matches[1]);
+        if (false !== $newdate) {
+            $message_date = date("Y-m-d", $newdate);
+        }
+    }
+
+    return $message_date;
+}
+
 /**
  * This is the main handler for all of the processing
  */
@@ -161,16 +173,16 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     //DebugEcho("the content is $content");
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
-    //DebugEcho("post subject: $content");
+    DebugEcho("post subject: $content");
 
     $customImages = SpecialMessageParsing($content, $attachments, $config);
-    //DebugEcho("post special message: $content");
+    DebugEcho("post special message: $content");
 
     $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
-    //DebugEcho("post exerpt: $content");
+    DebugEcho("post exerpt: $content");
 
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
-    //DebugEcho("post author: $content");
+    DebugEcho("post author: $content");
 
     $message_date = NULL;
     if (array_key_exists("date", $mimeDecodedEmail->headers) && !empty($mimeDecodedEmail->headers["date"])) {
@@ -184,24 +196,27 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         }
         $message_date = HandleMessageEncoding($cte, $cs, $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
     }
+    $message_date = tag_Date($content, $message_date);
+
     list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
-    //DebugEcho("post date: $content");
+    DebugEcho("post date: $content");
 
     filter_ubb2HTML($content);
-    //DebugEcho("post ubb: $content");
+    DebugEcho("post ubb: $content");
 
     if ($converturls) {
-        $content = filter_linkify($content, $shortcode);
-        //DebugEcho("post clickable: $content");
+        $content = filter_Videos($content, $shortcode);//videos first so linkify doesn't mess with them
+        $content = filter_linkify($content);
+        DebugEcho("post clickable: $content");
     }
 
     $id = checkReply($subject);
     $post_categories = tag_categories($subject, $default_post_category);
     $post_tags = tag_Tags($content, $default_post_tags);
-    //DebugEcho("post tags: $content");
+    DebugEcho("post tags: $content");
 
     $comment_status = tag_AllowCommentsOnPost($content);
-    //DebugEcho("post comment: $content");
+    DebugEcho("post comment: $content");
 
     if ((empty($id) || is_null($id))) {
         $id = $post_id;
@@ -335,27 +350,47 @@ function tag_PostType(&$subject) {
     return $post_type;
 }
 
-function filter_linkify($text, $shortcode = false) {
+function filter_linkify($text) {
     # It turns urls into links, and video urls into embedded players
-    //DebugEcho("begin: clickableLink");
+    //DebugEcho("begin: filter_linkify");
 
     $html = str_get_html($text);
     if ($html) {
         //DebugEcho("filter_linkify: " . $html->save());
         foreach ($html->find('text') as $element) {
             //DebugEcho("filter_linkify: " . $element->innertext);
-            $element->innertext = linkifyText($element->innertext, $shortcode);
+            $element->innertext = make_links($element->innertext);
         }
         $ret = $html->save();
     } else {
-        $ret = linkifyText($text, $shortcode);
+        $ret = make_links($text);
     }
 
-    //DebugEcho("end: clickableLink");
+    //DebugEcho("end: filter_linkify");
     return $ret;
 }
 
-function linkifyText($text, $shortcode = false) {
+function filter_Videos($text, $shortcode = false) {
+    # It turns urls into links, and video urls into embedded players
+    //DebugEcho("begin: filter_Videos");
+
+    $html = str_get_html($text);
+    if ($html) {
+        //DebugEcho("filter_Videos: " . $html->save());
+        foreach ($html->find('text') as $element) {
+            //DebugEcho("filter_Videos: " . $element->innertext);
+            $element->innertext = linkifyVideo($element->innertext, $shortcode);
+        }
+        $ret = $html->save();
+    } else {
+        $ret = linkifyVideo($text, $shortcode);
+    }
+
+    //DebugEcho("end: filter_Videos");
+    return $ret;
+}
+
+function linkifyVideo($text, $shortcode = false) {
     //$text = preg_replace('#(script|about|applet|activex|chrome):#is', "\\1:", $text);
     //DebugEcho("linkify1: $text");
     // pad it with a space so we can match things at the start of the 1st line.
@@ -366,7 +401,7 @@ function linkifyText($text, $shortcode = false) {
         if ($shortcode) {
             $youtube_replace = "\\1[youtube \\3]\\4";
         } else {
-            $youtube_replace = "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src=\"http://www.youtube.com/v/\\3&hl=en&fs=1\" />\\4";
+            $youtube_replace = "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src='http://www.youtube.com/v/\\3&hl=en&fs=1' />\\4";
         }
         $ret = preg_replace($youtube, $youtube_replace, $ret);
         //DebugEcho("youtube: $ret");
@@ -385,14 +420,6 @@ function linkifyText($text, $shortcode = false) {
         //DebugEcho("vimeo: $ret");
     }
 
-    // matches an "xxxx://yyyy" URL at the start of a line, or after a space.
-    // xxxx can only be alpha characters.
-    // yyyy is anything up to the first space, newline, comma, double quote or <
-    $ret = preg_replace("#(^|[\n ])<?([\w]+?://[\w\#$%&~/.\-;:=,?@\[\]+]*)>?#is", "\\1<a href=\"\\2\" >\\2</a>", $ret);
-    //DebugEcho("xxxx://yyyy: $ret");
-    // matches a "www|ftp.xxxx.yyyy[/zzzz]" kinda lazy URL thing
-    $ret = make_links($ret);
-    //DebugEcho("www|ftp.xxxx.yyyy[/zzzz]: $ret");
     // Remove our padding..
     $ret = substr($ret, 1);
     return $ret;
@@ -774,7 +801,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 //DebugDump($part);
                 filter_PreferedText($part, $prefer_text_type);
                 foreach ($part->parts as $section) {
-                    DebugDump($section->headers);
+                    //DebugDump($section->headers);
 
                     $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
                 }
@@ -835,6 +862,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 $cid = "";
                 if (array_key_exists('content-id', $part->headers)) {
                     $cid = trim($part->headers["content-id"], "<>");
+                    DebugEcho("found cid: $cid");
                 }
 
                 $the_post = get_post($file_id);
@@ -1888,19 +1916,19 @@ function filter_ReplaceImageCIDs(&$content, &$attachments) {
             $used[] = $info[1]; //Index of html to ignore
         }
     }
-    //DebugEcho("# cid attachments: " . count($used));
+    DebugEcho("# cid attachments: " . count($used));
 
     $html = array();
-//    $att = array_values($attachments["html"]); //make sure there are numeric indexes
-//    DebugEcho('$attachments');
-//    DebugDump($attachments);
-//    DebugEcho('$used');
-//    DebugDump($used);
-//    for ($i = 0; $i < count($attachments["html"]); $i++) {
-//        if (!in_array($i, $used)) {
-//            $html[] = $att[$i];
-//        }
-//    }
+    $att = array_values($attachments["html"]); //make sure there are numeric indexes
+    DebugEcho('$attachments');
+    DebugDump($attachments);
+    DebugEcho('$used');
+    DebugDump($used);
+    for ($i = 0; $i < count($attachments["html"]); $i++) {
+        if (!in_array($i, $used)) {
+            $html[] = $att[$i];
+        }
+    }
 
     foreach ($attachments['html'] as $key => $value) {
         if (!in_array($value, $used)) {
@@ -2004,7 +2032,12 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
         $mimeDecodedEmail->headers['subject'] = $subject;
     } else {
         $subject = $mimeDecodedEmail->headers['subject'];
+        DebugDump($mimeDecodedEmail->headers);
         DebugEcho(("Predecoded subject: $subject"));
+
+        DebugEcho("detected: " . mb_detect_encoding($subject, mb_list_encodings(), true));
+        DebugEcho("Encoding ISO-8859-2: " . mb_convert_encoding($subject, 'UTF-8', 'ISO-8859-2'));
+        DebugEcho("Encoding Windows-1254: " . mb_convert_encoding($subject, 'UTF-8', 'Windows-1254'));
 
         if (array_key_exists('content-transfer-encoding', $mimeDecodedEmail->headers)) {
             $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
@@ -2736,11 +2769,11 @@ function SpecialMessageParsing(&$content, &$attachments, $config) {
     }
     if ($drop_signature) {
         $content = filter_RemoveSignature($content, $sig_pattern_list);
-        //DebugEcho("post signature: $content");
+        DebugEcho("post signature: $content");
     }
     if ($prefer_text_type == "html" && count($attachments["cids"])) {
         filter_ReplaceImageCIDs($content, $attachments);
-        //DebugEcho("post CIDs: $content");
+        DebugEcho("post CIDs: $content");
     }
     if (!$custom_image_field) {
         filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config);
