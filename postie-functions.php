@@ -1985,11 +1985,17 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config) {
             DebugEcho("Found $img_placeholder_temp or $eimg_placeholder_temp");
             $caption = '';
             if (preg_match("/$img_placeholder_temp caption=(.*?)#/i", $content, $matches)) {
+                //DebugDump($matches);
                 $caption = trim($matches[1]);
-                $caption = substr($caption, 1, strlen($caption) - 2);
+                if (strlen($caption)>2 && ($caption[0]=="'" || $caption[0]=='"')) {
+                    $caption = substr($caption, 1, strlen($caption) - 2);
+                }
                 DebugEcho("caption: $caption");
+
                 $img_placeholder_temp = substr($matches[0], 0, -1);
                 $eimg_placeholder_temp = substr($matches[0], 0, -1);
+                DebugEcho($img_placeholder_temp);
+                DebugEcho($eimg_placeholder_temp);
             } else {
                 DebugEcho("No caption found");
             }
@@ -2039,7 +2045,7 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
     } else {
         $subject = $mimeDecodedEmail->headers['subject'];
         DebugEcho(("Predecoded subject: $subject"));
-        
+
         if (!$allow_html_in_subject) {
             DebugEcho("subject before htmlentities: $subject");
             $subject = htmlentities($subject, ENT_COMPAT, $message_encoding);

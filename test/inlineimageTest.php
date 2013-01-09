@@ -4,66 +4,63 @@ require '../mimedecode.php';
 
 class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
-    function standardConfig() {
-        return array(
-            'prefer_text_type' => 'plain',
-            'allow_html_in_body' => false,
-            'banned_files_list' => array(),
-            'imagetemplate' => '<a href="{FILELINK}">{FILENAME}</a>',
-            'drop_signature' => true,
-            'message_encoding' => 'UTF-8',
-            'message_dequote' => true,
-            'allow_html_in_subject' => true,
-            'message_start' => ':start',
-            'message_end' => ':end',
-            'sig_pattern_list' => array('--', '- --'),
-            'custom_image_field' => false,
-            'start_image_count_at_zero' => false,
-            'images_append' => false,
-            'filternewlines' => true,
-            'convertnewline' => false,
-            'auto_gallery' => false,
-            'image_placeholder' => '#img%#'
-        );
-    }
-
-    function testBase64Subject(){
+    function testBase64Subject() {
         $message = file_get_contents("data/b-encoded-subject.var");
         $email = unserialize($message);
         $decoded = DecodeMIMEMail($email, true);
-         $this->assertEquals("テストですよ",$decoded->headers['subject']);
+        $this->assertEquals("テストですよ", $decoded->headers['subject']);
     }
-    
-        function testQuotedPrintableSubject(){
+
+    function testQuotedPrintableSubject() {
         $message = file_get_contents("data/q-encoded-subject.var");
         $email = unserialize($message);
         $decoded = DecodeMIMEMail($email, true);
-         $this->assertEquals("Pár minut před desátou a jsem v práci první",$decoded->headers['subject']);
+        $this->assertEquals("Pár minut před desátou a jsem v práci první", $decoded->headers['subject']);
     }
-    
+
     function testInlineImage() {
 
         $message = file_get_contents("data/inline.var");
         $email = unserialize($message);
-        $decoded = DecodeMIMEMail($email);
+        $mimeDecodedEmail = DecodeMIMEMail($email);
 
-        $partcnt = count($decoded->parts);
+        $partcnt = count($mimeDecodedEmail->parts);
         $this->assertEquals(2, $partcnt);
 
-        filter_PreferedText($decoded, "plain");
+        $config = config_GetDefaults();
+        $config['prefer_text_type'] = 'html';
+        extract($config);
 
+        //-- start test
         $attachments = array(
             "html" => array(), //holds the html for each image
             "cids" => array(), //holds the cids for HTML email
             "image_files" => array() //holds the files for each image
         );
 
-        $config = $this->standardConfig();
-        $config['prefer_text_type']='html';
-        
-        $content = GetContent($decoded, $attachments, 1, "wayne", $config);
-        
-        $this->assertEquals("",$content);
+        filter_PreferedText($mimeDecodedEmail, "plain");
+        $content = GetContent($mimeDecodedEmail, $attachments, 1, "wayne", $config);
+        $subject = GetSubject($mimeDecodedEmail, $content, $config);
+        $customImages = SpecialMessageParsing($content, $attachments, $config);
+        $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
+        $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
+        $message_date = NULL;
+        $message_date = tag_Date($content, $message_date);
+        list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
+        filter_ubb2HTML($content);
+        if ($converturls) {
+            $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
+            $content = filter_linkify($content);
+        }
+        $post_categories = tag_categories($subject, $default_post_category);
+        $post_tags = tag_Tags($content, $default_post_tags);
+        $comment_status = tag_AllowCommentsOnPost($content);
+        if ($filternewlines) {
+            $content = filter_newlines($content, $convertnewline);
+        }
+        $post_type = tag_PostType($subject);
+
+        $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>     ', $content);
     }
 
     function testMultipleImagesWithSig() {
@@ -88,7 +85,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
             "image_files" => array() //holds the files for each image
         );
 
-        $config = $this->standardConfig();
+        $config = config_GetDefaults();
         $content = GetContent($decoded, $attachments, 1, "wayne", $config);
     }
 
@@ -109,7 +106,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
             "image_files" => array() //holds the files for each image
         );
 
-        $config = $this->standardConfig();
+        $config = config_GetDefaults();
         $filternewlines = $config['filternewlines'];
         $convertnewline = $config['convertnewline'];
 
@@ -149,7 +146,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
     }
 
     function testGreek() {
-        $config = $this->standardConfig();
+        $config = config_GetDefaults();
         $message = file_get_contents("data/greek.var");
         $email = unserialize($message);
 
@@ -168,7 +165,9 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
     public function testReplaceImagePlaceHolders() {
         $c = "";
-        $config = $this->standardConfig();
+        $config = config_GetDefaults();
+        $config['allow_html_in_body']=true;
+        
         $attachements = array("image.jpg" => '<img title="{CAPTION}" />');
 
         filter_ReplaceImagePlaceHolders($c, array(), $config);
@@ -189,13 +188,21 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="1" /> test', $c);
 
+        $c = "test #img1 caption=# test";
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
+        $this->assertEquals('test <img title="" /> test', $c);
+        
+        $c = "test #img1 caption=1# test";
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
+        $this->assertEquals('test <img title="1" /> test', $c);
+        
         $c = "test #img1 caption='! @ % ^ & * ( ) ~ \"Test\"'# test";
         filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="! @ % ^ &amp; * ( ) ~ &quot;Test&quot;" /> test', $c);
 
         $c = "test <div>#img1 caption=&#39;! @ % ^ &amp; * ( ) ~ &quot;Test&quot;&#39;#</div> test";
         filter_ReplaceImagePlaceHolders($c, $attachements, $config);
-        $this->assertEquals("test <div><img title=\"! @ % ^ &amp; * ( ) ~ &quot;Test&quot;\" /></div> test", $c);
+        $this->assertEquals('test <div><img title="&amp;" />39;! @ % ^ &amp; * ( ) ~ &quot;Test&quot;&#39;#</div> test', $c);
 
         $c = "test #img1 caption=\"I'd like some cheese.\"# test";
         filter_ReplaceImagePlaceHolders($c, $attachements, $config);
@@ -219,9 +226,15 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $this->assertEquals("test template with 1 test template with 2", $c);
 
         $config['auto_gallery'] = true;
+        $config['images_append'] = false;
         $c = "test";
         filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals("[gallery]\ntest", $c);
+
+        $config['images_append'] = true;
+        $c = "test";
+        filter_ReplaceImagePlaceHolders($c, $attachements, $config);
+        $this->assertEquals("test[gallery]", $c);
 
         $config['images_append'] = true;
         $c = "test";
