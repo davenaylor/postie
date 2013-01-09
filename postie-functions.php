@@ -197,7 +197,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         }
         $message_date = HandleMessageEncoding($cte, $cs, $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
     }
-    $message_date = tag_Date($content, $message_date);
+    $message_date = tag_Date(&$content, $message_date);
 
     list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
     DebugEcho("post date: $content");
@@ -763,7 +763,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             return NULL;
 
     if ($part->ctype_primary == "application" && $part->ctype_secondary == "octet-stream") {
-        if ($part->disposition == "attachment") {
+        if (property_exists($part, 'disposition') && $part->disposition == "attachment") {
             $image_endings = array("jpg", "png", "gif", "jpeg", "pjpeg");
             foreach ($image_endings as $type) {
                 if (eregi(".$type\$", $part->d_parameters["filename"])) {

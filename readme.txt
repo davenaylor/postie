@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.19
+Stable tag: 1.4.20
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,8 +63,10 @@ This fetches the mail every five minutes with lynx
 
 This fetches the mail every ten minutes with wget 
 == Usage ==
-* If you put in :start - the message processing won't start until it sees that string
-* If you put in :end - the message processing will stop once it sees that string
+* If you put in :start - the message processing won't start until it sees that string.
+* If you put in :end - the message processing will stop once it sees that string.
+* Posts can have a specific publication date.
+  *    date: <date>
 * Posts can be delayed by adding a line with delayXdXhXm where X is a number.
   *    delay:1d - 1 day
   *    delay:1h - 1 hour
@@ -371,6 +373,10 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 * Many method names have been changed as of 1.4.18. Any custom filters may need to be updated.
 
 == CHANGELOG ==
+= 1.4.20 (2013.01.08) =
+* Added Date feature. You can now specify a specific publication date.
+* Fixed a bug with embeded youtube/vimeo links when shortcodes are turned off
+
 = 1.4.19 (2013.01.07) =
 * Fixed a bug that prevented the settings from being saved
 

@@ -40,7 +40,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $partcnt = count($decoded->parts);
         $this->assertEquals(2, $partcnt);
 
-        FilterTextParts($decoded, "plain");
+        filter_PreferedText($decoded, "plain");
 
         $attachments = array(
             "html" => array(), //holds the html for each image

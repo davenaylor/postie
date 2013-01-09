@@ -52,14 +52,20 @@ Examples:</p>
 		<h3>Upgrade Notice</h3>
 	<dl>
 		<dt>Attachments are now processed in the order they were attached.
-All script, style and body tags are stripped from html emails.</dt>
+All script, style and body tags are stripped from html emails.
+Many method names have been changed as of 1.4.18. Any custom filters may need to be updated.</dt>
 		<dd></dd>
 	</dl>
 
 	<h3 id='Usage'>Usage</h3>
 <ul>
-<li>If you put in :start - the message processing won't start until it sees that string</li>
-<li>If you put in :end - the message processing will stop once it sees that string</li>
+<li>If you put in :start - the message processing won't start until it sees that string.</li>
+<li>If you put in :end - the message processing will stop once it sees that string.</li>
+<li>Posts can have a specific publication date.
+
+<ul>
+<li>date: </li>
+</ul></li>
 <li>Posts can be delayed by adding a line with delayXdXhXm where X is a number.
 
 <ul>
