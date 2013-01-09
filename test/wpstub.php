@@ -23,6 +23,7 @@ class wpdb {
         }
         return $r;
     }
+
 }
 
 class WP_Error {
@@ -53,6 +54,7 @@ function get_post() {
     $r->post_parent = 0;
     $r->guid = '7b0d965d-b8b0-4654-ac9e-eeef1d8cf571';
     $r->post_title = '';
+    $r->post_excerpt='';
     return $r;
 }
 
@@ -76,7 +78,7 @@ function wp_upload_dir() {
 }
 
 function wp_unique_filename() {
-    return tempnam(sys_get_temp_dir(), "postie");
+    return uniqid("postie");
 }
 
 function wp_get_attachment_url() {
@@ -113,6 +115,26 @@ function add_filter() {
 
 function register_deactivation_hook() {
     
+}
+
+function apply_filters() {
+    
+}
+
+function wp_insert_attachment() {
+    return 1;
+}
+
+function wp_update_attachment_metadata() {
+    
+}
+
+function wp_generate_attachment_metadata() {
+    
+}
+
+function is_wp_error() {
+    return false;
 }
 
 ?>

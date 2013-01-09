@@ -29,10 +29,6 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
     function testInlineImage() {
 
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-
         $message = file_get_contents("data/inline.var");
         $email = unserialize($message);
         $decoded = DecodeMIMEMail($email);
@@ -50,6 +46,8 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
         $config = $this->standardConfig();
         $content = GetContent($decoded, $attachments, 1, "wayne", $config);
+        
+        $this->assertEquals("",$content);
     }
 
     function testMultipleImagesWithSig() {

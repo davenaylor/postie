@@ -1432,15 +1432,17 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     $content = '';
 
     // use image exif/iptc data for title and caption defaults if possible
-    include_once(ABSPATH . '/wp-admin/includes/image.php');
-    if ($image_meta = @wp_read_image_metadata($file)) {
-        if (trim($image_meta['title'])) {
-            $title = $image_meta['title'];
-            DebugEcho("Using metadata title: $title");
-        }
-        if (trim($image_meta['caption'])) {
-            $content = $image_meta['caption'];
-            DebugEcho("Using metadata caption: $caption");
+    if (file_exists(ABSPATH . '/wp-admin/includes/image.php')) {
+        include_once(ABSPATH . '/wp-admin/includes/image.php');
+        if ($image_meta = @wp_read_image_metadata($file)) {
+            if (trim($image_meta['title'])) {
+                $title = $image_meta['title'];
+                DebugEcho("Using metadata title: $title");
+            }
+            if (trim($image_meta['caption'])) {
+                $content = $image_meta['caption'];
+                DebugEcho("Using metadata caption: $caption");
+            }
         }
     }
 
@@ -1549,7 +1551,10 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     // Move the file to the uploads dir
     $new_file = $uploads['path'] . "/$filename";
     if (false === @ rename($file['tmp_name'], $new_file)) {
+        DebugEcho("upload: rename failed");
+        DebugEcho("new file: $new_file");
         DebugDump($file);
+        DebugDump($uploads);
         return $upload_error_handler($file, sprintf(__('The uploaded file could not be moved to %s.'), $uploads['path']));
     }
 
