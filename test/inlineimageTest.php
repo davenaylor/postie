@@ -27,6 +27,20 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         );
     }
 
+    function testBase64Subject(){
+        $message = file_get_contents("data/b-encoded-subject.var");
+        $email = unserialize($message);
+        $decoded = DecodeMIMEMail($email, true);
+         $this->assertEquals("テストですよ",$decoded->headers['subject']);
+    }
+    
+        function testQuotedPrintableSubject(){
+        $message = file_get_contents("data/q-encoded-subject.var");
+        $email = unserialize($message);
+        $decoded = DecodeMIMEMail($email, true);
+         $this->assertEquals("Pár minut před desátou a jsem v práci první",$decoded->headers['subject']);
+    }
+    
     function testInlineImage() {
 
         $message = file_get_contents("data/inline.var");

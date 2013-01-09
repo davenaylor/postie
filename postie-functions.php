@@ -2038,40 +2038,8 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
         $mimeDecodedEmail->headers['subject'] = $subject;
     } else {
         $subject = $mimeDecodedEmail->headers['subject'];
-        DebugDump($mimeDecodedEmail->headers);
         DebugEcho(("Predecoded subject: $subject"));
-
-        DebugEcho("detected: " . mb_detect_encoding($subject, mb_list_encodings(), true));
-        DebugEcho("Encoding ISO-8859-2: " . mb_convert_encoding($subject, 'UTF-8', 'ISO-8859-2'));
-        DebugEcho("Encoding Windows-1254: " . mb_convert_encoding($subject, 'UTF-8', 'Windows-1254'));
-
-        if (array_key_exists('content-transfer-encoding', $mimeDecodedEmail->headers)) {
-            $encoding = $mimeDecodedEmail->headers["content-transfer-encoding"];
-        } else if (array_key_exists("content-transfer-encoding", $mimeDecodedEmail->ctype_parameters)) {
-            $encoding = $mimeDecodedEmail->ctype_parameters["content-transfer-encoding"];
-        } else {
-            $encoding = 'ISO-8859-1';
-            $subject = iconv($encoding, 'UTF-8', $mimeDecodedEmail->headers['subject']);
-            DebugEcho(("ISO-8859-1 decoded subject: $subject"));
-        }
-        DebugEcho("Subject encoding: $encoding");
-
-        if (function_exists('imap_mime_header_decode')) {
-            $subject = '';
-            $text = $mimeDecodedEmail->headers['subject'];
-
-            $elements = imap_mime_header_decode($text);
-            //DebugEcho("MIME Header");
-            //DebugDump($elements);
-
-            for ($i = 0; $i < count($elements); $i++) {
-                $thischarset = $elements[$i]->charset;
-                if ($thischarset == 'default')
-                    $thischarset = "ISO-8859-1";
-
-                $subject.=HandleMessageEncoding($encoding, $thischarset, $elements[$i]->text, $message_encoding, $message_dequote);
-            }
-        }
+        
         if (!$allow_html_in_subject) {
             DebugEcho("subject before htmlentities: $subject");
             $subject = htmlentities($subject, ENT_COMPAT, $message_encoding);
@@ -2729,7 +2697,7 @@ function SafeFileName($filename) {
     return str_replace(array('\\', '/', ':', '*', '?', '"', '<', '>', '|'), array('', '', '', '', '', '', '', '', ''), $filename);
 }
 
-function DebugEmailOutput(&$email, &$mimeDecodedEmail) {
+function DebugEmailOutput($email, $mimeDecodedEmail) {
     if (IsDebugMode()) {
         //DebugDump($email);
         //DebugDump($mimeDecodedEmail);
