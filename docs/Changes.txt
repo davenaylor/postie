@@ -4,7 +4,7 @@
 * Many method names have been changed as of 1.4.18. Any custom filters may need to be updated.
 
 == CHANGELOG ==
-= 1.4.20 (2013.01.07) =
+= 1.4.20 (2013.01.08) =
 * Added Date feature. You can now specify a specific publication date.
 * Fixed a bug with embeded youtube/vimeo links when shortcodes are turned off
 

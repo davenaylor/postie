@@ -440,20 +440,52 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testtag_Date() {
-        $this->assertEquals(null, tag_Date("", null));
-        $this->assertEquals(null, tag_Date("date:", null));
-        $this->assertEquals(null, tag_Date("date: nothing", null));
-        $this->assertEquals(null, tag_Date("date: 1", null));
-        $this->assertEquals("2013-12-31", tag_Date("date: 12/31/2013", null));
-        $this->assertEquals("2013-12-31", tag_Date("date:12/31/2013", null));
-        $this->assertEquals("2013-12-31", tag_Date("Date: 12/31/2013", null));
-        $this->assertEquals("2013-12-31", tag_Date("DATE: 12/31/2013", null));
-        $this->assertEquals("2013-12-31", tag_Date("date: 31-12-2013", null));
-        $this->assertEquals("2013-12-31", tag_Date("date: 31.12.2013", null));
-        $this->assertEquals("2013-12-31", tag_Date("date: Dec 31, 2013", null));
+        $c="";
+        $this->assertEquals(null, tag_Date(&$c, null));
+        $this->assertEquals("", $c);
+        
+        $c="date:";
+        $this->assertEquals(null, tag_Date(&$c, null));
+        $this->assertEquals("date:", $c);
+        
+        $c="date: nothing";
+        $this->assertEquals(null, tag_Date(&$c, null));
+        $this->assertEquals("date: nothing", $c);
+        
+        $c="date: 1";
+        $this->assertEquals(null, tag_Date(&$c, null));
+        $this->assertEquals("date: 1", $c);
+        
+        $c="date: 12/31/2013";
+        $this->assertEquals("2013-12-31", tag_Date(&$c, null));
+        $this->assertEquals("", $c);
+        
+        $c="date:12/31/2013";
+        $this->assertEquals("2013-12-31", tag_Date(&$c, null));
+        $this->assertEquals("", $c);
+        
+        $c="Date: 12/31/2013";
+        $this->assertEquals("2013-12-31", tag_Date(&$c, null));
+        $this->assertEquals("", $c);
+        
+        $c="DATE: 12/31/2013";
+        $this->assertEquals("2013-12-31", tag_Date(&$c, null));
+        $this->assertEquals("", $c);
+        
+        $c="date: 31-12-2013";
+        $this->assertEquals("2013-12-31", tag_Date(&$c, null));
+        $this->assertEquals("", $c);
+        
+        $c="date: 31.12.2013";
+        $this->assertEquals("2013-12-31", tag_Date(&$c, null));
+        $this->assertEquals("", $c);
+        
+        $c="date: Dec 31, 2013";
+        $this->assertEquals("2013-12-31", tag_Date(&$c, null));
+        $this->assertEquals("", $c);
 
         $c = "date: 12/31/2013\nstuff";
-        $this->assertEquals("2013-12-31", tag_Date($c, null));
+        $this->assertEquals("2013-12-31", tag_Date(&$c, null));
         $this->assertEquals("stuff", $c);
     }
 

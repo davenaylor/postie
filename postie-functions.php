@@ -130,12 +130,13 @@ function DebugEcho($v) {
     }
 }
 
-function tag_Date($content, $message_date) {
+function tag_Date(&$content, $message_date) {
 
     if (preg_match("/^date:\s?(.*)$/im", $content, $matches)) {
         $newdate = strtotime($matches[1]);
         if (false !== $newdate) {
             $message_date = date("Y-m-d", $newdate);
+            $content = trim(str_replace($matches[0], '', $content));
         }
     }
 
@@ -205,7 +206,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     DebugEcho("post ubb: $content");
 
     if ($converturls) {
-        $content = filter_Videos($content, $shortcode);//videos first so linkify doesn't mess with them
+        $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
         $content = filter_linkify($content);
         DebugEcho("post clickable: $content");
     }
