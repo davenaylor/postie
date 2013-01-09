@@ -239,7 +239,7 @@
                                     <?php
                                     foreach ($wp_roles->role_names as $roleId => $name) {
                                         $name = translate_user_role($name);
-                                        $role = &$wp_roles->get_role($roleId);
+                                        $role = $wp_roles->get_role($roleId);
                                         if ($roleId != "administrator") {
                                             ?>
                                         <tr>

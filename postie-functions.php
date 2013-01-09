@@ -197,7 +197,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         }
         $message_date = HandleMessageEncoding($cte, $cs, $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
     }
-    $message_date = tag_Date(&$content, $message_date);
+    $message_date = tag_Date($content, $message_date);
 
     list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
     DebugEcho("post date: $content");
@@ -1355,7 +1355,7 @@ function filter_AppleFile(&$mimeDecodedEmail) {
             $found = true;
             LogInfo("Removing 'applefile'");
         } else {
-            $newParts[] = &$mimeDecodedEmail->parts[$i];
+            $newParts[] = $mimeDecodedEmail->parts[$i];
         }
     }
     if ($found && $newParts) {
@@ -2708,7 +2708,7 @@ function UpdatePostiePermissions($role_access) {
         $role_access = array();
     }
     foreach ($wp_roles->role_names as $roleId => $name) {
-        $role = &$wp_roles->get_role($roleId);
+        $role = $wp_roles->get_role($roleId);
         if ($roleId != "administrator") {
             if (array_key_exists($roleId, $role_access)) {
                 $role->add_cap("post_via_postie");

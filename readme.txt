@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.20
+Stable tag: 1.4.21
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -373,6 +373,9 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 * Many method names have been changed as of 1.4.18. Any custom filters may need to be updated.
 
 == CHANGELOG ==
+= 1.4.21 (2013.01.09) =
+* Removed all Call-time pass-by-references to support PHP 5.4
+
 = 1.4.20 (2013.01.08) =
 * Added Date feature. You can now specify a specific publication date.
 * Fixed a bug with embeded youtube/vimeo links when shortcodes are turned off

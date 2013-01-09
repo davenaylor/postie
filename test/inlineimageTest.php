@@ -45,6 +45,8 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         );
 
         $config = $this->standardConfig();
+        $config['prefer_text_type']='html';
+        
         $content = GetContent($decoded, $attachments, 1, "wayne", $config);
         
         $this->assertEquals("",$content);
