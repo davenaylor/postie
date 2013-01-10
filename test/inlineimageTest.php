@@ -4,34 +4,13 @@ require '../mimedecode.php';
 
 class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
-    function testBase64Subject() {
-        $message = file_get_contents("data/b-encoded-subject.var");
-        $email = unserialize($message);
-        $decoded = DecodeMIMEMail($email, true);
-        $this->assertEquals("テストですよ", $decoded->headers['subject']);
-    }
-
-    function testQuotedPrintableSubject() {
-        $message = file_get_contents("data/q-encoded-subject.var");
-        $email = unserialize($message);
-        $decoded = DecodeMIMEMail($email, true);
-        $this->assertEquals("Pár minut před desátou a jsem v práci první", $decoded->headers['subject']);
-    }
-
-    function testInlineImage() {
-
-        $message = file_get_contents("data/inline.var");
+    function process_file($test_file, $config) {
+        $message = file_get_contents($test_file);
         $email = unserialize($message);
         $mimeDecodedEmail = DecodeMIMEMail($email);
 
-        $partcnt = count($mimeDecodedEmail->parts);
-        $this->assertEquals(2, $partcnt);
-
-        $config = config_GetDefaults();
-        $config['prefer_text_type'] = 'html';
         extract($config);
 
-        //-- start test
         $attachments = array(
             "html" => array(), //holds the html for each image
             "cids" => array(), //holds the cids for HTML email
@@ -54,15 +33,47 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         }
         $post_categories = tag_categories($subject, $default_post_category);
         $post_tags = tag_Tags($content, $default_post_tags);
+        DebugDump($post_tags);
         $comment_status = tag_AllowCommentsOnPost($content);
         if ($filternewlines) {
             $content = filter_newlines($content, $convertnewline);
         }
         $post_type = tag_PostType($subject);
+        return $content;
+    }
 
+    function testBase64Subject() {
+        $message = file_get_contents("data/b-encoded-subject.var");
+        $email = unserialize($message);
+        $decoded = DecodeMIMEMail($email, true);
+        $this->assertEquals("テストですよ", $decoded->headers['subject']);
+    }
+
+    function testQuotedPrintableSubject() {
+        $message = file_get_contents("data/q-encoded-subject.var");
+        $email = unserialize($message);
+        $decoded = DecodeMIMEMail($email, true);
+        $this->assertEquals("Pár minut před desátou a jsem v práci první", $decoded->headers['subject']);
+    }
+
+    function testInlineImage() {
+
+        $config = config_GetDefaults();
+        $config['prefer_text_type'] = 'html';
+
+        $content = $this->process_file("data/inline.var", $config);
         $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>     ', $content);
     }
 
+        function testTagsImg() {
+
+        $config = config_GetDefaults();
+        $config['start_image_count_at_zero']=true;
+
+        $content = $this->process_file("data/only-tags-img.var", $config);
+        $this->assertEquals('<img />', $content);
+    }
+    
     function testMultipleImagesWithSig() {
 
         $this->markTestIncomplete(
@@ -166,8 +177,8 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
     public function testReplaceImagePlaceHolders() {
         $c = "";
         $config = config_GetDefaults();
-        $config['allow_html_in_body']=true;
-        
+        $config['allow_html_in_body'] = true;
+
         $attachements = array("image.jpg" => '<img title="{CAPTION}" />');
 
         filter_ReplaceImagePlaceHolders($c, array(), $config);
@@ -191,11 +202,11 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $c = "test #img1 caption=# test";
         filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="" /> test', $c);
-        
+
         $c = "test #img1 caption=1# test";
         filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="1" /> test', $c);
-        
+
         $c = "test #img1 caption='! @ % ^ & * ( ) ~ \"Test\"'# test";
         filter_ReplaceImagePlaceHolders($c, $attachements, $config);
         $this->assertEquals('test <img title="! @ % ^ &amp; * ( ) ~ &quot;Test&quot;" /> test', $c);

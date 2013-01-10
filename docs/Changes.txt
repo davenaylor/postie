@@ -6,6 +6,7 @@
 == CHANGELOG ==
 = 1.4.22 (2013.01.09) =
 * Fixed a bug where the subject was not being properly decoded when Q-encoding was used.
+* Fixed a bug in #img# caption detection.
 
 = 1.4.21 (2013.01.09) =
 * Removed all Call-time pass-by-references to support PHP 5.4
