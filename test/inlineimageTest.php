@@ -43,13 +43,6 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         filter_ubb2HTML($content);
         DebugEcho("post ubb: $content");
 
-        if ($converturls) {
-            $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
-            DebugEcho("post video: $content");
-
-            $content = filter_linkify($content);
-            DebugEcho("post linkify: $content");
-        }
         $post->post_categories = tag_categories($subject, $default_post_category);
         DebugEcho("post categories: $content");
 
@@ -65,6 +58,14 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         }
         $post->post_type = tag_PostType($subject);
         DebugEcho("post type: $content");
+
+        if ($converturls) {
+            $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
+            DebugEcho("post video: $content");
+
+            $content = filter_linkify($content);
+            DebugEcho("post linkify: $content");
+        }
 
         $post->content = $content;
         return $post;
@@ -90,7 +91,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config['prefer_text_type'] = 'html';
 
         $post = $this->process_file("data/inline.var", $config);
-        $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>     ', $post->content);
+        $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>   ', $post->content);
         $this->assertEquals('inline', $post->subject);
     }
 
@@ -98,14 +99,14 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
         $config = config_GetDefaults();
         $config['start_image_count_at_zero'] = true;
-        $config['imageTemplate'] = '<a href="{FILELINK}">{FILENAME}</a>';
+        $config['imagetemplate'] = '<a href="{FILELINK}">{FILENAME}</a>';
 
         $post = $this->process_file("data/only-tags-img.var", $config);
         $this->assertEquals('tags test', $post->subject);
         $this->assertEquals(2, count($post->post_tags));
         $this->assertEquals('test', $post->post_tags[0]);
         $this->assertEquals('tag2', $post->post_tags[1]);
-        $this->assertEquals('<img />', $post->content);
+        $this->assertEquals(' <a href="http://example.net/wp-content/uploads/filename">7b0d965d-b8b0-4654-ac9e-eeef1d8cf571</a><br />  ', $post->content);
     }
 
     function testMultipleImagesWithSig() {

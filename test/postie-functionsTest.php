@@ -487,6 +487,11 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $c = "date: 12/31/2013\nstuff";
         $this->assertEquals("2013-12-31", tag_Date($c, null));
         $this->assertEquals("stuff", $c);
+        
+        $c = "date: Dec 31, 2013 14:22";
+        $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null));
+        $this->assertEquals("", $c);
+        
     }
 
 }

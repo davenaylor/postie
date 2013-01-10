@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.21
+Stable tag: 1.4.22
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,8 +65,9 @@ This fetches the mail every ten minutes with wget
 == Usage ==
 * If you put in :start - the message processing won't start until it sees that string.
 * If you put in :end - the message processing will stop once it sees that string.
-* Posts can have a specific publication date.
+* Posts can have a specific publication date. Relative dates like "tomorrow", "monday", "first day of next month" are supported.
   *    date: <date>
+  *    date: <date> <time>
 * Posts can be delayed by adding a line with delayXdXhXm where X is a number.
   *    delay:1d - 1 day
   *    delay:1h - 1 hour
@@ -373,6 +374,12 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 * Many method names have been changed as of 1.4.18. Any custom filters may need to be updated.
 
 == CHANGELOG ==
+= 1.4.22 (2013.01.10) =
+* Fixed a bug where the subject was not being properly decoded when Q-encoding was used.
+* Fixed a bug in #img# caption detection.
+* Fixed a bug where the tag command was picking up too much text.
+* Enhanced the date command to allow times as well.
+
 = 1.4.21 (2013.01.09) =
 * Removed all Call-time pass-by-references to support PHP 5.4
 

@@ -135,7 +135,14 @@ function tag_Date(&$content, $message_date) {
     if (preg_match("/^date:\s?(.*)$/im", $content, $matches)) {
         $newdate = strtotime($matches[1]);
         if (false !== $newdate) {
-            $message_date = date("Y-m-d", $newdate);
+            $t = date("H:i:s", $newdate);
+            DebugEcho("time: $t");
+
+            $format = "Y-m-d";
+            if ($t != '00:00:00') {
+                $format.= " H:i:s";
+            }
+            $message_date = date($format, $newdate);
             $content = trim(str_replace($matches[0], '', $content));
         }
     }
@@ -176,7 +183,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
 
     $customImages = SpecialMessageParsing($content, $attachments, $config);
-    
+
     $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
 
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
@@ -199,14 +206,14 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
 
     filter_ubb2HTML($content);
 
+    $id = checkReply($subject);
+    $post_categories = tag_categories($subject, $default_post_category);
+    $post_tags = tag_Tags($content, $default_post_tags);
+
     if ($converturls) {
         $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
         $content = filter_linkify($content);
     }
-
-    $id = checkReply($subject);
-    $post_categories = tag_categories($subject, $default_post_category);
-    $post_tags = tag_Tags($content, $default_post_tags);
 
     $comment_status = tag_AllowCommentsOnPost($content);
 
@@ -368,10 +375,9 @@ function filter_Videos($text, $shortcode = false) {
 
     $html = str_get_html($text);
     if ($html) {
-        //DebugEcho("filter_Videos: " . $html->save());
+        DebugEcho("filter_Videos: " . $html->save());
         foreach ($html->find('text') as $element) {
-            DebugEcho("filter_Videos(o): '{$element->outertext}'" );
-            DebugEcho("filter_Videos (i): '{$element->innertext}'" );
+            DebugEcho("filter_Videos (i): '{$element->innertext}'");
             $element->innertext = linkifyVideo($element->innertext, $shortcode);
         }
         $ret = $html->save();
@@ -1979,7 +1985,7 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config) {
             if (preg_match("/$img_placeholder_temp caption=(.*?)#/i", $content, $matches)) {
                 //DebugDump($matches);
                 $caption = trim($matches[1]);
-                if (strlen($caption)>2 && ($caption[0]=="'" || $caption[0]=='"')) {
+                if (strlen($caption) > 2 && ($caption[0] == "'" || $caption[0] == '"')) {
                     $caption = substr($caption, 1, strlen($caption) - 2);
                 }
                 DebugEcho("caption: $caption");
@@ -1991,7 +1997,7 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config) {
             } else {
                 DebugEcho("No caption found");
             }
-            //DebugEcho("parameterize templete: " . htmlentities($imageTemplate));
+            //DebugEcho("parameterize templete: " . $imageTemplate);
             $imageTemplate = mb_str_replace('{CAPTION}', htmlspecialchars($caption, ENT_QUOTES), $imageTemplate);
             //DebugEcho("populated templete: " . $imageTemplate);
 
@@ -2733,11 +2739,11 @@ function SpecialMessageParsing(&$content, &$attachments, $config) {
     }
     if ($message_start) {
         $content = filter_start($content, $message_start);
-        //DebugEcho("post start: $content");
+        DebugEcho("post start: $content");
     }
     if ($message_end) {
         $content = filter_end($content, $message_end);
-        //DebugEcho("post end: $content");
+        DebugEcho("post end: $content");
     }
     if ($drop_signature) {
         $content = filter_RemoveSignature($content, $sig_pattern_list);
@@ -2749,7 +2755,7 @@ function SpecialMessageParsing(&$content, &$attachments, $config) {
     }
     if (!$custom_image_field) {
         filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config);
-        //DebugEcho("post placeholders: $content");
+        DebugEcho("post placeholders: $content");
     } else {
         $customImages = array();
         //DebugEcho("Looking for custom images");

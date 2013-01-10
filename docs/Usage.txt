@@ -1,8 +1,9 @@
 == Usage ==
 * If you put in :start - the message processing won't start until it sees that string.
 * If you put in :end - the message processing will stop once it sees that string.
-* Posts can have a specific publication date.
+* Posts can have a specific publication date. Relative dates like "tomorrow", "monday", "first day of next month" are supported.
   *    date: <date>
+  *    date: <date> <time>
 * Posts can be delayed by adding a line with delayXdXhXm where X is a number.
   *    delay:1d - 1 day
   *    delay:1h - 1 hour
