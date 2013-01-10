@@ -174,16 +174,12 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     //DebugEcho("the content is $content");
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
-    DebugEcho("post subject: $content");
 
     $customImages = SpecialMessageParsing($content, $attachments, $config);
-    DebugEcho("post special message: $content");
-
+    
     $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
-    DebugEcho("post exerpt: $content");
 
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
-    DebugEcho("post author: $content");
 
     $message_date = NULL;
     if (array_key_exists("date", $mimeDecodedEmail->headers) && !empty($mimeDecodedEmail->headers["date"])) {
@@ -200,24 +196,19 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     $message_date = tag_Date($content, $message_date);
 
     list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
-    DebugEcho("post date: $content");
 
     filter_ubb2HTML($content);
-    DebugEcho("post ubb: $content");
 
     if ($converturls) {
         $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
         $content = filter_linkify($content);
-        DebugEcho("post clickable: $content");
     }
 
     $id = checkReply($subject);
     $post_categories = tag_categories($subject, $default_post_category);
     $post_tags = tag_Tags($content, $default_post_tags);
-    DebugEcho("post tags: $content");
 
     $comment_status = tag_AllowCommentsOnPost($content);
-    DebugEcho("post comment: $content");
 
     if ((empty($id) || is_null($id))) {
         $id = $post_id;
@@ -379,7 +370,8 @@ function filter_Videos($text, $shortcode = false) {
     if ($html) {
         //DebugEcho("filter_Videos: " . $html->save());
         foreach ($html->find('text') as $element) {
-            //DebugEcho("filter_Videos: " . $element->innertext);
+            DebugEcho("filter_Videos(o): '{$element->outertext}'" );
+            DebugEcho("filter_Videos (i): '{$element->innertext}'" );
             $element->innertext = linkifyVideo($element->innertext, $shortcode);
         }
         $ret = $html->save();
@@ -405,7 +397,7 @@ function linkifyVideo($text, $shortcode = false) {
             $youtube_replace = "\\1<embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src='http://www.youtube.com/v/\\3&hl=en&fs=1' />\\4";
         }
         $ret = preg_replace($youtube, $youtube_replace, $ret);
-        //DebugEcho("youtube: $ret");
+        DebugEcho("youtube: $ret");
     }
 
     if (strpos($ret, 'vimeo') !== false) {
@@ -418,7 +410,7 @@ function linkifyVideo($text, $shortcode = false) {
             $vimeo_replace = "\\1<object width='400' height='300'><param name='allowfullscreen' value='true' /><param name='allowscriptaccess' value='always' /><param name='movie' value='http://vimeo.com/moogaloop.swf?clip_id=\\3&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1' /><embed src='http://vimeo.com/moogaloop.swf?clip_id=\\3&server=vimeo.com&show_title=1&show_byline=1&show_portrait=0&color=&fullscreen=1' type='application/x-shockwave-flash' allowfullscreen='true' allowscriptaccess='always' width='400' height='300'></embed></object>\\4";
         }
         $ret = preg_replace($vimeo, $vimeo_replace, $ret);
-        //DebugEcho("vimeo: $ret");
+        DebugEcho("vimeo: $ret");
     }
 
     // Remove our padding..

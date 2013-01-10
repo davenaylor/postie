@@ -5,6 +5,9 @@ require '../mimedecode.php';
 class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
     function process_file($test_file, $config) {
+
+        $post = new stdClass();
+
         $message = file_get_contents($test_file);
         $email = unserialize($message);
         $mimeDecodedEmail = DecodeMIMEMail($email);
@@ -19,27 +22,52 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
         filter_PreferedText($mimeDecodedEmail, "plain");
         $content = GetContent($mimeDecodedEmail, $attachments, 1, "wayne", $config);
-        $subject = GetSubject($mimeDecodedEmail, $content, $config);
-        $customImages = SpecialMessageParsing($content, $attachments, $config);
-        $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
-        $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
-        $message_date = NULL;
-        $message_date = tag_Date($content, $message_date);
-        list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
+        $post->subject = GetSubject($mimeDecodedEmail, $content, $config);
+        DebugEcho("post subject: $content");
+
+        $post->customImages = SpecialMessageParsing($content, $attachments, $config);
+        DebugEcho("post images: $content");
+
+        $post->post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
+        DebugEcho("post exerpt: $content");
+
+        $post->postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
+        DebugEcho("post author: $content");
+
+        $message_date = null;
+        list($post->post_date, $post->post_date_gmt, $post->delay) = DeterminePostDate($content, $message_date, $time_offset);
+        $post->message_date = tag_Date($content, $message_date);
+        DebugEcho("post comment: $content");
+        DebugEcho("post date: $content");
+
         filter_ubb2HTML($content);
+        DebugEcho("post ubb: $content");
+
         if ($converturls) {
             $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
+            DebugEcho("post video: $content");
+
             $content = filter_linkify($content);
+            DebugEcho("post linkify: $content");
         }
-        $post_categories = tag_categories($subject, $default_post_category);
-        $post_tags = tag_Tags($content, $default_post_tags);
-        DebugDump($post_tags);
-        $comment_status = tag_AllowCommentsOnPost($content);
+        $post->post_categories = tag_categories($subject, $default_post_category);
+        DebugEcho("post categories: $content");
+
+        $post->post_tags = tag_Tags($content, $default_post_tags);
+        DebugEcho("post tags: $content");
+
+        $post->comment_status = tag_AllowCommentsOnPost($content);
+        DebugEcho("post comment: $content");
+
         if ($filternewlines) {
             $content = filter_newlines($content, $convertnewline);
+            DebugEcho("post filter newlines: $content");
         }
-        $post_type = tag_PostType($subject);
-        return $content;
+        $post->post_type = tag_PostType($subject);
+        DebugEcho("post type: $content");
+
+        $post->content = $content;
+        return $post;
     }
 
     function testBase64Subject() {
@@ -61,19 +89,25 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config = config_GetDefaults();
         $config['prefer_text_type'] = 'html';
 
-        $content = $this->process_file("data/inline.var", $config);
-        $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>     ', $content);
+        $post = $this->process_file("data/inline.var", $config);
+        $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>     ', $post->content);
+        $this->assertEquals('inline', $post->subject);
     }
 
-        function testTagsImg() {
+    function testTagsImg() {
 
         $config = config_GetDefaults();
-        $config['start_image_count_at_zero']=true;
+        $config['start_image_count_at_zero'] = true;
+        $config['imageTemplate'] = '<a href="{FILELINK}">{FILENAME}</a>';
 
-        $content = $this->process_file("data/only-tags-img.var", $config);
-        $this->assertEquals('<img />', $content);
+        $post = $this->process_file("data/only-tags-img.var", $config);
+        $this->assertEquals('tags test', $post->subject);
+        $this->assertEquals(2, count($post->post_tags));
+        $this->assertEquals('test', $post->post_tags[0]);
+        $this->assertEquals('tag2', $post->post_tags[1]);
+        $this->assertEquals('<img />', $post->content);
     }
-    
+
     function testMultipleImagesWithSig() {
 
         $this->markTestIncomplete(
