@@ -182,8 +182,6 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
 
-    $customImages = SpecialMessageParsing($content, $attachments, $config);
-
     $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
 
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
@@ -210,12 +208,14 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     $post_categories = tag_categories($subject, $default_post_category);
     $post_tags = tag_Tags($content, $default_post_tags);
 
+    $comment_status = tag_AllowCommentsOnPost($content);
+
     if ($converturls) {
         $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
         $content = filter_linkify($content);
     }
 
-    $comment_status = tag_AllowCommentsOnPost($content);
+    $customImages = SpecialMessageParsing($content, $attachments, $config);
 
     if ((empty($id) || is_null($id))) {
         $id = $post_id;
@@ -375,9 +375,7 @@ function filter_Videos($text, $shortcode = false) {
 
     $html = str_get_html($text);
     if ($html) {
-        DebugEcho("filter_Videos: " . $html->save());
         foreach ($html->find('text') as $element) {
-            DebugEcho("filter_Videos (i): '{$element->innertext}'");
             $element->innertext = linkifyVideo($element->innertext, $shortcode);
         }
         $ret = $html->save();
@@ -2739,23 +2737,23 @@ function SpecialMessageParsing(&$content, &$attachments, $config) {
     }
     if ($message_start) {
         $content = filter_start($content, $message_start);
-        DebugEcho("post start: $content");
+        //DebugEcho("post start: $content");
     }
     if ($message_end) {
         $content = filter_end($content, $message_end);
-        DebugEcho("post end: $content");
+        //DebugEcho("post end: $content");
     }
     if ($drop_signature) {
         $content = filter_RemoveSignature($content, $sig_pattern_list);
-        DebugEcho("post signature: $content");
+        //DebugEcho("post signature: $content");
     }
     if ($prefer_text_type == "html" && count($attachments["cids"])) {
         filter_ReplaceImageCIDs($content, $attachments);
-        DebugEcho("post CIDs: $content");
+        //DebugEcho("post CIDs: $content");
     }
     if (!$custom_image_field) {
         filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config);
-        DebugEcho("post placeholders: $content");
+        //DebugEcho("post placeholders: $content");
     } else {
         $customImages = array();
         //DebugEcho("Looking for custom images");

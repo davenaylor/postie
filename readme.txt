@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.22
+Stable tag: 1.4.23
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -374,6 +374,9 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 * Many method names have been changed as of 1.4.18. Any custom filters may need to be updated.
 
 == CHANGELOG ==
+= 1.4.23 (2013.01.10) =
+* Fixed a bug with embedded CID referenced images
+
 = 1.4.22 (2013.01.10) =
 * Fixed a bug where the subject was not being properly decoded when Q-encoding was used.
 * Fixed a bug in #img# caption detection.
