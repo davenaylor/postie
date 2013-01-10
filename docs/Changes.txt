@@ -1,7 +1,13 @@
 == Upgrade Notice ==
-* Attachments are now processed in the order they were attached.
-* All script, style and body tags are stripped from html emails.
-* Many method names have been changed as of 1.4.18. Any custom filters may need to be updated.
+
+= 1.4.18 =
+Many method names have been changed. Any custom filters may need to be updated.
+
+= 1.4.10 =
+All script, style and body tags are stripped from html emails.
+
+= 1.4.6 =
+Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.4.23 (2013.01.10) =

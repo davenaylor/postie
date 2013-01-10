@@ -41,18 +41,31 @@ imap and pop3, with the option for ssl with both.  For usage notes, see the
 * (Postie ignores the settings under Settings->Writing->Writing-by-Email)
 
 = Automating checking e-mail =
+WordPress cron (which Postie relies on) doesn't run unless a page is accessed on 
+the site. So if you send an email, but nobody accesses the site for 3 days Postie 
+won't be given the chance to fetch the email and publish the post.
+
+To ensure that Postie runs smoothly on a low or no volume site you need to ensure 
+that a page gets hit (any page is fine). Use something like cron + curl on Linux 
+or install curl on Windows and use the Scheduled Tasks control panel. If you are 
+using a hosting company that doesn't allow you access to cron you can use a service 
+like SetCronJob.
 
 By default, postie checks for new e-mail every 30 minutes. You can select from
 a number of different checking intervals in the settings page, under the
-mailserver tab.
+Mailserver tab.
 
+= Forcing e-mail check =
 If you would prefer to have more fine-grained control of how postie checks
 for mail, you can also set up a crontab. This is for advanced users only.
-If your site runs on a UNIX/linux server, and you have shell access, you can
-enable mail checking using cron; if you don't know anything about cron, skip
-to the cronless postie section.
 
-Setup a cronjob to pull down the get\_mail.php
+Setup a cronjob to pull down the get\_mail.php - note that every time you access
+get\_mail.php Postie will run - it is like clicking Run Postie on the Admin screen.
+
+= Linux =
+If your site runs on a UNIX/linux server, and you have shell access, you can
+enable mail checking using cron. 
+
 Examples:
 
 */5 * * * * /usr/bin/lynx --source http://blog.robfelty.com/wp-content/plugins/postie/get\_mail.php >/dev/null 2>&1
@@ -62,12 +75,17 @@ This fetches the mail every five minutes with lynx
 */10 * * * * /usr/bin/wget -O /dev/null http://blog.robfelty.com/wp-content/plugins/postie/get\_mail.php >/dev/null 2>&1
 
 This fetches the mail every ten minutes with wget 
+
+= Windows =
+You will need to install [wget](http://gnuwin32.sourceforge.net/packages/wget.htm) or [curl](http://curl.haxx.se/dlwiz/)
+Then use the Task Scheduler control panel to call wget or cron.
+
 == Usage ==
 * If you put in :start - the message processing won't start until it sees that string.
 * If you put in :end - the message processing will stop once it sees that string.
 * Posts can have a specific publication date. Relative dates like "tomorrow", "monday", "first day of next month" are supported.
-  *    date: <date>
-  *    date: <date> <time>
+  *    date: date
+  *    date: date time
 * Posts can be delayed by adding a line with delayXdXhXm where X is a number.
   *    delay:1d - 1 day
   *    delay:1h - 1 hour
@@ -91,7 +109,7 @@ This fetches the mail every ten minutes with wget
 
 = Post type =
   You can specify the post type by including it as the first part of the subject
-  E.g. <post type>//<real subject>
+  E.g. post type//real subject
 
 = Category and tag handling =
 * If you put a category name in the subject with a : it will be used
@@ -101,7 +119,7 @@ This fetches the mail every ten minutes with wget
 * If you put the first part of a category name it will be posted in
   the first category that the system finds that matches - so if you put
 
-  Subject: Gen: New News
+  Gen: New News
 
   The system will post that in General.
 
@@ -142,10 +160,10 @@ This fetches the mail every ten minutes with wget
 
 * Image templates
   Postie now uses the default wordpress image template, but you can specify a
-different one if you wish.
+  different one if you wish.
 
   You can also specify a custom image template. I use the following custom
-template:
+  template:
 
   `<div class='imageframe alignleft'><a href='{IMAGE}'><img src="{THUMBNAIL}"
   alt="{CAPTION}" title="{CAPTION}" 
@@ -164,13 +182,14 @@ template:
 
 = Interoperability =
 * If your mail client doesn't support setting the subject (nokia) you
-  can do so by putting #your title here# at the beginning of your message
+  can do so by putting #your subject/title here# at the beginning of your message
 * POP3,POP3-SSL,IMAP,IMAP-SSL now supported - last three require
   php-imap support
 * The program understands enough about mime to not duplicate post
   if you send an HTML and plain text message
 * Automatically confirms that you are installed correctly
-== Frequently Asked Questions ==
+
+= Extending === Frequently Asked Questions ==
 
 = Postie won't connect to my mailserver. Why Not? =
 
@@ -369,9 +388,15 @@ that doesn't allow you access to cron you can use a service like
 It is also possible to turn the WordPress cron off. Please make sure something like
 `define('DISABLE_WP_CRON', true);` is not in your wp-config.php file.
 == Upgrade Notice ==
-* Attachments are now processed in the order they were attached.
-* All script, style and body tags are stripped from html emails.
-* Many method names have been changed as of 1.4.18. Any custom filters may need to be updated.
+
+= 1.4.18 =
+Many method names have been changed. Any custom filters may need to be updated.
+
+= 1.4.10 =
+All script, style and body tags are stripped from html emails.
+
+= 1.4.6 =
+Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.4.23 (2013.01.10) =

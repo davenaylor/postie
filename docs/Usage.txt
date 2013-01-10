@@ -2,8 +2,8 @@
 * If you put in :start - the message processing won't start until it sees that string.
 * If you put in :end - the message processing will stop once it sees that string.
 * Posts can have a specific publication date. Relative dates like "tomorrow", "monday", "first day of next month" are supported.
-  *    date: <date>
-  *    date: <date> <time>
+  *    date: date
+  *    date: date time
 * Posts can be delayed by adding a line with delayXdXhXm where X is a number.
   *    delay:1d - 1 day
   *    delay:1h - 1 hour
@@ -27,7 +27,7 @@
 
 = Post type =
   You can specify the post type by including it as the first part of the subject
-  E.g. <post type>//<real subject>
+  E.g. post type//real subject
 
 = Category and tag handling =
 * If you put a category name in the subject with a : it will be used
@@ -37,7 +37,7 @@
 * If you put the first part of a category name it will be posted in
   the first category that the system finds that matches - so if you put
 
-  Subject: Gen: New News
+  Gen: New News
 
   The system will post that in General.
 
@@ -78,10 +78,10 @@
 
 * Image templates
   Postie now uses the default wordpress image template, but you can specify a
-different one if you wish.
+  different one if you wish.
 
   You can also specify a custom image template. I use the following custom
-template:
+  template:
 
   `<div class='imageframe alignleft'><a href='{IMAGE}'><img src="{THUMBNAIL}"
   alt="{CAPTION}" title="{CAPTION}" 
@@ -100,9 +100,11 @@ template:
 
 = Interoperability =
 * If your mail client doesn't support setting the subject (nokia) you
-  can do so by putting #your title here# at the beginning of your message
+  can do so by putting #your subject/title here# at the beginning of your message
 * POP3,POP3-SSL,IMAP,IMAP-SSL now supported - last three require
   php-imap support
 * The program understands enough about mime to not duplicate post
   if you send an HTML and plain text message
 * Automatically confirms that you are installed correctly
+
+= Extending =
