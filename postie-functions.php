@@ -919,6 +919,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     DebugEcho("uploaded $file_id ($file)");
                     $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
                     $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
+                    DebugDump($part->headers);
                     if (array_key_exists('content-id', $part->headers)) {
                         $cid = trim($part->headers["content-id"], "<>");
                         if ($cid) {
