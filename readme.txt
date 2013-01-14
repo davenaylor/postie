@@ -10,8 +10,7 @@ Stable tag: 1.4.23
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-The Postie plugin allows you to blog via e-mail, including many advanced
-features not found in WordPress's default post by e-mail feature.
+Postie allows you to blog via e-mail, including many advanced features not found in WordPress's default post by e-mail feature.
 
 == Description ==
 Postie offers many advanced features for posting to your blog via e-mail,
@@ -399,8 +398,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.4.23 (2013.01.10) =
-* Fixed a bug with embedded CID referenced images
+= 1.4.23 (2013.01.13) =
+* Fixed a bug with embedded CID referenced images.
+* Fixed a bug where the original attachment name wasn't being used.
+* Fixed a bug where the #eimg# tags in the excerpt were not getting expanded.
 
 = 1.4.22 (2013.01.10) =
 * Fixed a bug where the subject was not being properly decoded when Q-encoding was used.
