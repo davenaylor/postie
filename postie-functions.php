@@ -150,14 +150,9 @@ function tag_Date(&$content, $message_date) {
     return $message_date;
 }
 
-/**
- * This is the main handler for all of the processing
- */
-function PostEmail($poster, $mimeDecodedEmail, $config) {
-    postie_disable_revisions();
-    postie_increase_memory();
+function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
+
     extract($config);
-    $post_to_db = true;
 
     $attachments = array(
         "html" => array(), //holds the html for each image
@@ -170,17 +165,14 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     filter_PreferedText($mimeDecodedEmail, $prefer_text_type);
     //DebugDump($mimeDecodedEmail);
 
-    $tmpPost = array('post_title' => 'tmptitle', 'post_content' => 'tmpPost');
-    /* in order to do attachments correctly, we need to associate the
-      attachments with a post. So we add the post here, then update it
-     */
-    $post_id = wp_insert_post($tmpPost);
-    EchoInfo("new post id is $post_id");
-
     $content = GetContent($mimeDecodedEmail, $attachments, $post_id, $poster, $config);
     //DebugEcho("the content is $content");
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
+
+    filter_Start($content, $config);
+    filter_End($content, $config);
+    filter_RemoveSignature($content, $config);
 
     $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
 
@@ -204,7 +196,6 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
 
     filter_ubb2HTML($content);
 
-    $id = checkReply($subject);
     $post_categories = tag_categories($subject, $default_post_category);
     $post_tags = tag_Tags($content, $default_post_tags);
 
@@ -215,11 +206,17 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         $content = filter_linkify($content);
     }
 
-    $customImages = SpecialMessageParsing($content, $attachments, $config);
+    filter_VodafoneHandler($content, $attachments, $config);
+    filter_ReplaceImageCIDs($content, $attachments, $config);
+    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config);
 
-    if ((empty($id) || is_null($id))) {
+    $customImages = tag_CustomImageField($content, $attachments, $config);
+    $post_type = tag_PostType($subject);
+
+    $id = GetParentPostForReply($subject);
+    if (empty($id)) {
         $id = $post_id;
-        $isReply = false;
+        $is_reply = false;
         if ($add_meta == 'yes') {
             if ($wrap_pre == 'yes') {
                 $content = $postAuthorDetails['content'] . "<pre>\n" . $content . "</pre>\n";
@@ -235,7 +232,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         }
     } else {
         EchoInfo("Reply detected");
-        $isReply = true;
+        $is_reply = true;
         // strip out quoted content
         $lines = explode("\n", $content);
         $newContents = '';
@@ -251,10 +248,6 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         $content = $newContents;
         wp_delete_post($post_id);
     }
-    if ($filternewlines) {
-        $content = filter_newlines($content, $convertnewline);
-        //DebugEcho("post filter newlines: $content");
-    }
 
     if ($delay != 0 && $post_status == 'publish') {
         $post_status = 'future';
@@ -262,7 +255,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         $post_status = $post_status;
     }
 
-    $post_type = tag_PostType($subject);
+    filter_newlines($content, $config);
 
     //DebugEcho("pre-insert content: $content");
 
@@ -287,7 +280,29 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         'customImages' => $customImages,
         'post_status' => $post_status
     );
+    return $details;
+}
+
+/**
+ * This is the main handler for all of the processing
+ */
+function PostEmail($poster, $mimeDecodedEmail, $config) {
+    postie_disable_revisions();
+    postie_increase_memory();
+    extract($config);
+    DebugDump($config);
+
+    /* in order to do attachments correctly, we need to associate the
+      attachments with a post. So we add the post here, then update it */
+    $tmpPost = array('post_title' => 'tmptitle', 'post_content' => 'tmpPost');
+    $post_id = wp_insert_post($tmpPost);
+    EchoInfo("new post id is $post_id");
+
+    $is_reply = false;
+    $details = CreatePost($poster, $mimeDecodedEmail, $post_id, $is_reply, $config);
+
     $details = apply_filters('postie_post', $details);
+
     if (empty($details)) {
         // It is possible that the filter has removed the post, in which case, it should not be posted.
         // And if we created a placeholder post (because this was not a reply to an existing post),
@@ -297,7 +312,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         }
     } else {
         DisplayEmailPost($details);
-        PostToDB($details, $isReply, $post_to_db, $custom_image_field);
+        PostToDB($details, $is_reply, true, $custom_image_field);
         if ($confirmation_email != '') {
             if ($confirmation_email == 'sender') {
                 $recipients = array($postAuthorDetails['email']);
@@ -508,13 +523,13 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
  * generated
  */
 
-function checkReply(&$subject) {
+function GetParentPostForReply(&$subject) {
     global $wpdb;
 
     $id = NULL;
 
     // see if subject starts with Re:
-    if (preg_match("/(^Re:) (.*)/i", $subject, $matches)) {
+    if (preg_match("/(^Re:)(.*)/i", $subject, $matches)) {
         $subject = trim($matches[2]);
         // strip out category info into temporary variable
         $tmpSubject = $subject;
@@ -762,7 +777,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
         if (property_exists($part, 'disposition') && $part->disposition == "attachment") {
             $image_endings = array("jpg", "png", "gif", "jpeg", "pjpeg");
             foreach ($image_endings as $type) {
-                if (eregi(".$type\$", $part->d_parameters["filename"])) {
+                if (preg_match("/.$type\$/i", $part->d_parameters["filename"])) {
                     $part->ctype_primary = "image";
                     $part->ctype_secondary = $type;
                     break;
@@ -789,7 +804,8 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
         $filename = "";
         if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters)) {
             // fix filename (remove non-standard characters)
-            $filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $part->ctype_parameters['name']);
+            //$filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $part->ctype_parameters['name']);
+            $filename = $part->ctype_parameters['name'];
             DebugEcho("Filename: $filename");
         }
         switch (strtolower($part->ctype_primary)) {
@@ -863,8 +879,8 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 }
 
                 $the_post = get_post($file_id);
-                DebugEcho("Html Attachement: $filename");
-                $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $imagetemplate);
+                DebugEcho("image Attachement: $filename");
+                $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $imagetemplate, $filename);
                 if ($cid) {
                     $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
                     DebugEcho("CID Attachement: $cid");
@@ -872,6 +888,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 break;
 
             case 'audio':
+                //DebugDump($part->headers);
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 $file = wp_get_attachment_url($file_id);
                 $cid = "";
@@ -884,7 +901,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
                     $audioTemplate = '<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
                 }
-                $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $audioTemplate);
+                $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $audioTemplate, $filename);
                 break;
 
             case 'video':
@@ -902,7 +919,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
                     $videoTemplate = '<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
                 }
-                $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $videoTemplate);
+                $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $videoTemplate, $filename);
                 //echo "videoTemplate = $videoTemplate\n";
                 break;
 
@@ -918,8 +935,8 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $file = wp_get_attachment_url($file_id);
                     DebugEcho("uploaded $file_id ($file)");
                     $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                    DebugEcho("default: $icon $filename");
                     $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
-                    DebugDump($part->headers);
                     if (array_key_exists('content-id', $part->headers)) {
                         $cid = trim($part->headers["content-id"], "<>");
                         if ($cid) {
@@ -1104,13 +1121,16 @@ function isValidSmtpServer($mimeDecodedEmail, $smtpservers) {
  * @param string
  * @param string
  */
-function filter_start($content, $start) {
-    $pos = strpos($content, $start);
-    if ($pos === false) {
-        return $content;
+function filter_Start(&$content, $config) {
+    $start = $config['message_start'];
+    if ($start) {
+        $pos = strpos($content, $start);
+        if ($pos === false) {
+            return $content;
+        }
+        DebugEcho("start filter $start");
+        $content = substr($content, $pos + strlen($start), strlen($content));
     }
-    DebugEcho("start filter $start");
-    return substr($content, $pos + strlen($start), strlen($content));
 }
 
 /**
@@ -1119,20 +1139,26 @@ function filter_start($content, $start) {
  * @param string
  * @param array - a list of patterns to determine if it is a sig block
  */
-function filter_RemoveSignature($content, $filterList) {
-    if (empty($filterList))
-        return $content;
-    $arrcontent = explode("\n", $content);
-    $strcontent = '';
-    $pattern = '/^(' . implode('|', $filterList) . ')/';
-    for ($i = 0; $i < count($arrcontent); $i++) {
-        $line = trim($arrcontent[$i]);
-        if (preg_match($pattern, trim($line))) {
-            break;
+function filter_RemoveSignature(&$content, $config) {
+    if ($config['drop_signature']) {
+        if (empty($config['sig_pattern_list']))
+            return;
+
+        DebugEcho("remove echo");
+        $arrcontent = explode("\n", $content);
+        $strcontent = '';
+        $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')/';
+        DebugEcho("pattern: $pattern");
+        for ($i = 0; $i < count($arrcontent); $i++) {
+            $line = trim($arrcontent[$i]);
+            DebugEcho($line);
+            if (preg_match($pattern, trim($line))) {
+                break;
+            }
+            $strcontent .= $line . "\n";
         }
-        $strcontent .= $line . "\n";
+        $content = $strcontent;
     }
-    return $strcontent;
 }
 
 /**
@@ -1141,39 +1167,44 @@ function filter_RemoveSignature($content, $filterList) {
  * @param string
  * @param filter
  */
-function filter_end($content, $end) {
-    $pos = strpos($content, $end);
-    if ($pos === false)
-        return $content;
-    DebugEcho("end filter $end");
-    return $content = substr($content, 0, $pos);
+function filter_End(&$content, $config) {
+    $end = $config['message_end'];
+    if ($end) {
+        $pos = strpos($content, $end);
+        if ($pos === false)
+            return $content;
+        DebugEcho("end filter $end");
+        $content = substr($content, 0, $pos);
+    }
 }
 
 //filter content for new lines
-function filter_newlines($content, $convertNewLines = false) {
-    $search = array(
-        "/\r\n/",
-        "/\r/",
-        "/\n\n/",
-        "/\r\n\r\n/",
-        "/\n/"
-    );
-    $replace = array(
-        "\n",
-        "\n",
-        'ACTUAL_NEW_LINE',
-        'ACTUAL_NEW_LINE',
-        'LINEBREAK'
-    );
+function filter_newlines(&$content, $config) {
+    if ($config['filternewlines']) {
 
-    $result = preg_replace($search, $replace, $content);
+        $search = array(
+            "/\r\n/",
+            "/\n\n/",
+            "/\r\n\r\n/",
+            "/\r/",
+            "/\n/"
+        );
+        $replace = array(
+            "LINEBREAK",
+            "LINEBREAK",
+            'LINEBREAK',
+            'LINEBREAK',
+            'LINEBREAK'
+        );
 
-    if ($convertNewLines) {
-        $newContent = preg_replace('/(ACTUAL_NEW_LINE|LINEBREAK)/', "<br />\n", $result);
-    } else {
-        $newContent = preg_replace('/(ACTUAL_NEW_LINE|LINEBREAK)/', " ", $result);
+        $result = preg_replace($search, $replace, $content);
+
+        if ($config['convertnewline']) {
+            $content = preg_replace('/(LINEBREAK)/', "<br />\n", $result);
+        } else {
+            $content = preg_replace('/(LINEBREAK)/', " ", $result);
+        }
     }
-    return $newContent;
 }
 
 //strip pgp stuff
@@ -1550,8 +1581,8 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     if (false === @ rename($file['tmp_name'], $new_file)) {
         DebugEcho("upload: rename failed");
         DebugEcho("new file: $new_file");
-        DebugDump($file);
-        DebugDump($uploads);
+        //DebugDump($file);
+        //DebugDump($uploads);
         return $upload_error_handler($file, sprintf(__('The uploaded file could not be moved to %s.'), $uploads['path']));
     }
 
@@ -1790,14 +1821,11 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet = 'silver', 
     $parts = explode('.', $fileName);
     $ext = $parts[count($parts) - 1];
     $docExts = array('doc', 'docx');
-    $docMimes = array('msword', 'vnd.ms-word',
-        'vnd.openxmlformats-officedocument.wordprocessingml.document');
+    $docMimes = array('msword', 'vnd.ms-word', 'vnd.openxmlformats-officedocument.wordprocessingml.document');
     $pptExts = array('ppt', 'pptx');
-    $pptMimes = array('mspowerpoint', 'vnd.ms-powerpoint',
-        'vnd.openxmlformats-officedocument.');
+    $pptMimes = array('mspowerpoint', 'vnd.ms-powerpoint', 'vnd.openxmlformats-officedocument.');
     $xlsExts = array('xls', 'xlsx');
-    $xlsMimes = array('msexcel', 'vnd.ms-excel',
-        'vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    $xlsMimes = array('msexcel', 'vnd.ms-excel', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     $iWorkMimes = array('zip', 'octet-stream');
     $mpgExts = array('mpg', 'mpeg', 'mp2');
     $mpgMimes = array('mpg', 'mpeg', 'mp2');
@@ -1844,11 +1872,12 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet = 'silver', 
     if (!file_exists(POSTIE_ROOT . $fileName))
         $fileName = "/icons/$iconSet/default-$size.png";
     $iconHtml = "<img src='" . POSTIE_URL . $fileName . "' alt='$fileType icon' />";
-    return($iconHtml);
+    DebugEcho("icon: $iconHtml");
+    return $iconHtml;
 }
 
-function parseTemplate($id, $type, $template, $size = 'medium') {
-
+function parseTemplate($id, $type, $template, $orig_filename) {
+    $size = 'medium';
     /* we check template for thumb, thumbnail, large, full and use that as
       size. If not found, we default to medium */
     if ($type == 'image') {
@@ -1887,7 +1916,7 @@ function parseTemplate($id, $type, $template, $size = 'medium') {
     $template = str_replace('{FULL}', $fileLink, $template);
     $template = str_replace('{FILELINK}', $fileLink, $template);
     $template = str_replace('{PAGELINK}', $pageLink, $template);
-    $template = str_replace('{FILENAME}', $fileName, $template);
+    $template = str_replace('{FILENAME}', $orig_filename, $template);
     $template = str_replace('{IMAGE}', $fileLink, $template);
     $template = str_replace('{URL}', $fileLink, $template);
     $template = str_replace('{RELFILENAME}', $relFileName, $template);
@@ -1897,9 +1926,10 @@ function parseTemplate($id, $type, $template, $size = 'medium') {
     } elseif (!preg_match("/$attachment->post_title/i", $fileName)) {
         $template = str_replace('{CAPTION}', $attachment->post_title, $template);
     } else {
-//$template=str_replace('{CAPTION}', '', $template);
+        
     }
-    return($template . '<br />');
+    DebugEcho("template: $template");
+    return $template . '<br />';
 }
 
 /**
@@ -1908,39 +1938,41 @@ function parseTemplate($id, $type, $template, $size = 'medium') {
  * @param string - text of post
  * @param array - array of HTML for images for post
  */
-function filter_ReplaceImageCIDs(&$content, &$attachments) {
-    DebugEcho("ReplaceImageCIDs");
-    $used = array();
-    foreach ($attachments["cids"] as $key => $info) {
-        $key = str_replace('/', '\/', $key);
-        $pattern = "/cid:$key/";
-        if (preg_match($pattern, $content)) {
-            $content = preg_replace($pattern, $info[0], $content);
-            $used[] = $info[1]; //Index of html to ignore
+function filter_ReplaceImageCIDs(&$content, &$attachments, $config) {
+    if ($config['prefer_text_type'] == "html" && count($attachments["cids"])) {
+        DebugEcho("ReplaceImageCIDs");
+        $used = array();
+        foreach ($attachments["cids"] as $key => $info) {
+            $key = str_replace('/', '\/', $key);
+            $pattern = "/cid:$key/";
+            if (preg_match($pattern, $content)) {
+                $content = preg_replace($pattern, $info[0], $content);
+                $used[] = $info[1]; //Index of html to ignore
+            }
         }
-    }
-    DebugEcho("# cid attachments: " . count($used));
+        DebugEcho("# cid attachments: " . count($used));
 
-    $html = array();
-    $att = array_values($attachments["html"]); //make sure there are numeric indexes
-    DebugEcho('$attachments');
-    DebugDump($attachments);
-    DebugEcho('$used');
-    DebugDump($used);
-    for ($i = 0; $i < count($attachments["html"]); $i++) {
-        if (!in_array($i, $used)) {
-            $html[] = $att[$i];
+        $html = array();
+        $att = array_values($attachments["html"]); //make sure there are numeric indexes
+        DebugEcho('$attachments');
+        //DebugDump($attachments);
+        DebugEcho('$used');
+        //DebugDump($used);
+        for ($i = 0; $i < count($attachments["html"]); $i++) {
+            if (!in_array($i, $used)) {
+                $html[] = $att[$i];
+            }
         }
-    }
 
-    foreach ($attachments['html'] as $key => $value) {
-        if (!in_array($value, $used)) {
-            $html[$key] = $value;
+        foreach ($attachments['html'] as $key => $value) {
+            if (!in_array($value, $used)) {
+                $html[$key] = $value;
+            }
         }
-    }
 
-    $attachments["html"] = $html;
-    //DebugDump($attachments);
+        $attachments["html"] = $html;
+        //DebugDump($attachments);
+    }
 }
 
 /**
@@ -1949,76 +1981,77 @@ function filter_ReplaceImageCIDs(&$content, &$attachments) {
  * @param array - array of HTML for images for post
  */
 function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config) {
-    extract($config);
-    if (!$allow_html_in_body) {
-        $content = html_entity_decode($content, ENT_QUOTES);
-    }
-
-    $startIndex = $start_image_count_at_zero ? 0 : 1;
-    if (!empty($attachments) && $auto_gallery) {
-        $imageTemplate = '[gallery]';
-        if ($images_append) {
-            $content .= $imageTemplate;
-        } else {
-            $content = "$imageTemplate\n" . $content;
+    if (!$config['custom_image_field']) {
+        if (!$config['allow_html_in_body']) {
+            $content = html_entity_decode($content, ENT_QUOTES);
         }
-        DebugEcho("Auto gallery");
-        return;
-    }
 
-    $pics = "";
-    $i = 0;
-    foreach ($attachments as $attachementName => $imageTemplate) {
-        // looks for ' #img1# ' etc... and replaces with image
-        $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $image_placeholder);
-        $img_placeholder_temp = rtrim($img_placeholder_temp, '#');
-
-        $eimg_placeholder_temp = str_replace("%", intval($startIndex + $i), "#eimg%#");
-        $eimg_placeholder_temp = rtrim($eimg_placeholder_temp, '#');
-
-        DebugEcho("img_placeholder_temp: $img_placeholder_temp");
-        if (stristr($content, $img_placeholder_temp) || stristr($content, $eimg_placeholder_temp)) {
-            // look for caption
-            DebugEcho("Found $img_placeholder_temp or $eimg_placeholder_temp");
-            $caption = '';
-            if (preg_match("/$img_placeholder_temp caption=(.*?)#/i", $content, $matches)) {
-                //DebugDump($matches);
-                $caption = trim($matches[1]);
-                if (strlen($caption) > 2 && ($caption[0] == "'" || $caption[0] == '"')) {
-                    $caption = substr($caption, 1, strlen($caption) - 2);
-                }
-                DebugEcho("caption: $caption");
-
-                $img_placeholder_temp = substr($matches[0], 0, -1);
-                $eimg_placeholder_temp = substr($matches[0], 0, -1);
-                DebugEcho($img_placeholder_temp);
-                DebugEcho($eimg_placeholder_temp);
+        $startIndex = $config ['start_image_count_at_zero'] ? 0 : 1;
+        if (!empty($attachments) && $config ['auto_gallery']) {
+            $imageTemplate = '[gallery]';
+            if ($config ['images_append']) {
+                $content .= $imageTemplate;
             } else {
-                DebugEcho("No caption found");
+                $content = "$imageTemplate\n" . $content;
             }
-            //DebugEcho("parameterize templete: " . $imageTemplate);
-            $imageTemplate = mb_str_replace('{CAPTION}', htmlspecialchars($caption, ENT_QUOTES), $imageTemplate);
-            //DebugEcho("populated templete: " . $imageTemplate);
-
-            $img_placeholder_temp.='#';
-            $eimg_placeholder_temp.='#';
-
-            $content = str_ireplace($img_placeholder_temp, $imageTemplate, $content);
-            $content = str_ireplace($eimg_placeholder_temp, $imageTemplate, $content);
-        } else {
-            DebugEcho("No $img_placeholder_temp or $eimg_placeholder_temp found");
-            $imageTemplate = str_replace('{CAPTION}', '', $imageTemplate);
-            /* if using the gallery shortcode, don't add pictures at all */
-            if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
-                $pics .= $imageTemplate;
-            }
+            DebugEcho("Auto gallery");
+            return;
         }
-        $i++;
-    }
-    if ($images_append) {
-        $content .= $pics;
-    } else {
-        $content = $pics . $content;
+
+        $pics = "";
+        $i = 0;
+        foreach ($attachments as $attachementName => $imageTemplate) {
+            // looks for ' #img1# ' etc... and replaces with image
+            $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $config['image_placeholder']);
+            $img_placeholder_temp = rtrim($img_placeholder_temp, '#');
+
+            $eimg_placeholder_temp = str_replace("%", intval($startIndex + $i), "#eimg%#");
+            $eimg_placeholder_temp = rtrim($eimg_placeholder_temp, '#');
+
+            DebugEcho("img_placeholder_temp: $img_placeholder_temp");
+            if (stristr($content, $img_placeholder_temp) || stristr($content, $eimg_placeholder_temp)) {
+                // look for caption
+                DebugEcho("Found $img_placeholder_temp or $eimg_placeholder_temp");
+                $caption = '';
+                if (preg_match("/$img_placeholder_temp caption=(.*?)#/i", $content, $matches)) {
+                    //DebugDump($matches);
+                    $caption = trim($matches[1]);
+                    if (strlen($caption) > 2 && ($caption[0] == "'" || $caption[0] == '"')) {
+                        $caption = substr($caption, 1, strlen($caption) - 2);
+                    }
+                    DebugEcho("caption: $caption");
+
+                    $img_placeholder_temp = substr($matches[0], 0, -1);
+                    $eimg_placeholder_temp = substr($matches[0], 0, -1);
+                    DebugEcho($img_placeholder_temp);
+                    DebugEcho($eimg_placeholder_temp);
+                } else {
+                    DebugEcho("No caption found");
+                }
+                //DebugEcho("parameterize templete: " . $imageTemplate);
+                $imageTemplate = mb_str_replace('{CAPTION}', htmlspecialchars($caption, ENT_QUOTES), $imageTemplate);
+                //DebugEcho("populated templete: " . $imageTemplate);
+
+                $img_placeholder_temp.='#';
+                $eimg_placeholder_temp.='#';
+
+                $content = str_ireplace($img_placeholder_temp, $imageTemplate, $content);
+                $content = str_ireplace($eimg_placeholder_temp, $imageTemplate, $content);
+            } else {
+                DebugEcho("No $img_placeholder_temp or $eimg_placeholder_temp found");
+                $imageTemplate = str_replace('{CAPTION}', '', $imageTemplate);
+                /* if using the gallery shortcode, don't add pictures at all */
+                if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
+                    $pics .= $imageTemplate;
+                }
+            }
+            $i++;
+        }
+        if ($config['images_append']) {
+            $content .= $pics;
+        } else {
+            $content = $pics . $content;
+        }
     }
 }
 
@@ -2725,71 +2758,41 @@ function DebugEmailOutput($email, $mimeDecodedEmail) {
     }
 }
 
-/**
- * This function provides a hook to be able to write special parses for provider emails that are difficult to work with 
- * If you want to extend this functionality - write a new function and call it from here
- */
-function SpecialMessageParsing(&$content, &$attachments, $config) {
-    extract($config);
-    if (preg_match('/You have been sent a message from Vodafone mobile/', $content)) {
-        DebugEcho("Vodafone message");
-        filter_VodafoneHandler($content, $attachments);
-        return;
-    }
-    if ($message_start) {
-        $content = filter_start($content, $message_start);
-        //DebugEcho("post start: $content");
-    }
-    if ($message_end) {
-        $content = filter_end($content, $message_end);
-        //DebugEcho("post end: $content");
-    }
-    if ($drop_signature) {
-        $content = filter_RemoveSignature($content, $sig_pattern_list);
-        //DebugEcho("post signature: $content");
-    }
-    if ($prefer_text_type == "html" && count($attachments["cids"])) {
-        filter_ReplaceImageCIDs($content, $attachments);
-        //DebugEcho("post CIDs: $content");
-    }
-    if (!$custom_image_field) {
-        filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config);
-        //DebugEcho("post placeholders: $content");
-    } else {
-        $customImages = array();
-        //DebugEcho("Looking for custom images");
+function tag_CustomImageField(&$content, &$attachments, $config) {
+    $customImages = array();
+    if ($config['custom_image_field']) {
+        DebugEcho("Looking for custom images");
         //DebugDump($attachments["html"]);
 
         foreach ($attachments["html"] as $key => $value) {
             //DebugEcho("checking " . htmlentities($value));
             if (preg_match("/src\s*=\s*['\"]([^'\"]*)['\"]/i", $value, $matches)) {
-                //DebugEcho("found custom image: " . $matches[1]);
+                DebugEcho("found custom image: " . $matches[1]);
                 array_push($customImages, $matches[1]);
             }
         }
-
-        return $customImages;
     }
-    return null;
+    return $customImages;
 }
 
 /**
  * Special Vodafone handler - their messages are mostly vendor trash - this strips them down.
  */
-function filter_VodafoneHandler(&$content, &$attachments) {
-    $index = strpos($content, "TEXT:");
-    if (strpos !== false) {
-        $alt_content = substr($content, $index, strlen($content));
-        if (preg_match("/<font face=\"verdana,helvetica,arial\" class=\"standard\" color=\"#999999\"><b>(.*)<\/b>/", $alt_content, $matches)) {
-            //The content is now just the text of the message
-            $content = $matches[1];
-            //Now to clean up the attachments
-            $vodafone_images = array("live.gif"
-                , "smiley.gif", "border_left_txt.gif", "border_top.gif",
-                "border_bot.gif", "border_right.gif", "banner1.gif", "i_text.gif", "i_picture.gif",);
-            while (list($key, $value) = each($attachments['cids'])) {
-                if (!in_array($key, $vodafone_images)) {
-                    $content .= "<br/>" . $attachments['html'][$attachments['cids'][$key][1]];
+function filter_VodafoneHandler(&$content, &$attachments, $config) {
+    if (preg_match('/You have been sent a message from Vodafone mobile/', $content)) {
+        DebugEcho("Vodafone message");
+        $index = strpos($content, "TEXT:");
+        if (strpos !== false) {
+            $alt_content = substr($content, $index, strlen($content));
+            if (preg_match("/<font face=\"verdana,helvetica,arial\" class=\"standard\" color=\"#999999\"><b>(.*)<\/b>/", $alt_content, $matches)) {
+                //The content is now just the text of the message
+                $content = $matches[1];
+                //Now to clean up the attachments
+                $vodafone_images = array("live.gif", "smiley.gif", "border_left_txt.gif", "border_top.gif", "border_bot.gif", "border_right.gif", "banner1.gif", "i_text.gif", "i_picture.gif",);
+                while (list($key, $value) = each($attachments['cids'])) {
+                    if (!in_array($key, $vodafone_images)) {
+                        $content .= "<br/>" . $attachments['html'][$attachments['cids'][$key][1]];
+                    }
                 }
             }
         }

@@ -137,4 +137,7 @@ function is_wp_error() {
     return false;
 }
 
+function sanitize_title($title){
+    return $title;
+}
 ?>

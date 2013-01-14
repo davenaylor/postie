@@ -143,50 +143,88 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testEndFilter() {
+        $config = config_GetDefaults();
         $c = "test";
-        $this->assertEquals("test", filter_end($c, "xxx"));
+        filter_End($c, $config);
+        $this->assertEquals("test", $c);
 
-        $c = "test xxx";
-        $this->assertEquals("test ", filter_end($c, "xxx"));
+        $c = "test :end";
+        filter_End($c, $config);
+        $this->assertEquals("test ", $c);
 
-        $c = "test xxx test";
-        $this->assertEquals("test ", filter_end($c, "xxx"));
+        $c = "test :end test";
+        filter_End($c, $config);
+        $this->assertEquals("test ", $c);
 
         $c = "tags: Station, Kohnen, Flugzeug\n:end\n21.10.2012";
-        $this->assertEquals("tags: Station, Kohnen, Flugzeug\n", filter_end($c, ":end"));
+        filter_End($c, $config);
+        $this->assertEquals("tags: Station, Kohnen, Flugzeug\n", $c);
 
         $c = "This is a test :end";
-        $this->assertEquals("This is a test ", filter_end($c, ":end"));
+        filter_End($c, $config);
+        $this->assertEquals("This is a test ", $c);
     }
 
     public function testFilterNewLines() {
+        $config = config_GetDefaults();
+
         $c = "test";
-        $this->assertEquals("test", filter_newlines($c));
-        $this->assertEquals("test", filter_newlines($c, true));
+        filter_newlines($c, $config);
+        $this->assertEquals("test", $c);
+
+        $c = "test";
+        filter_newlines($c, $config);
+        $this->assertEquals("test", $c);
 
         $c = "test\n";
-        $this->assertEquals("test ", filter_newlines($c));
-        $this->assertEquals("test<br />\n", filter_newlines($c, true));
+        filter_newlines($c, $config);
+        $this->assertEquals("test ", $c);
 
         $c = "test\r\n";
-        $this->assertEquals("test ", filter_newlines($c));
-        $this->assertEquals("test<br />\n", filter_newlines($c, true));
+        filter_newlines($c, $config);
+        $this->assertEquals("test ", $c);
 
         $c = "test\r";
-        $this->assertEquals("test ", filter_newlines($c));
-        $this->assertEquals("test<br />\n", filter_newlines($c, true));
+        filter_newlines($c, $config);
+        $this->assertEquals("test ", $c);
 
         $c = "test\n\n";
-        $this->assertEquals("test ", filter_newlines($c));
-        $this->assertEquals("test<br />\n", filter_newlines($c, true));
+        filter_newlines($c, $config);
+        $this->assertEquals("test ", $c);
 
         $c = "test\r\n\r\n";
-        $this->assertEquals("test ", filter_newlines($c));
-        $this->assertEquals("test<br />\n", filter_newlines($c, true));
+        filter_newlines($c, $config);
+        $this->assertEquals("test  ", $c);
 
         $c = "test\r\n\r\ntest\n\ntest\rtest\r\ntest\ntest";
-        $this->assertEquals("test test test test test test", filter_newlines($c));
-        $this->assertEquals("test<br />\ntest<br />\ntest<br />\ntest<br />\ntest<br />\ntest", filter_newlines($c, true));
+        filter_newlines($c, $config);
+        $this->assertEquals("test  test test test test test", $c);
+
+        $config['convertnewline'] = true;
+
+        $c = "test\n";
+        filter_newlines($c, $config);
+        $this->assertEquals("test<br />\n", $c);
+
+        $c = "test\n\n";
+        filter_newlines($c, $config);
+        $this->assertEquals("test<br />\n", $c);
+
+        $c = "test\r";
+        filter_newlines($c, $config);
+        $this->assertEquals("test<br />\n", $c);
+
+        $c = "test\r\n";
+        filter_newlines($c, $config);
+        $this->assertEquals("test<br />\n", $c);
+
+        $c = "test\r\n\r\n";
+        filter_newlines($c, $config);
+        $this->assertEquals("test<br />\n<br />\n", $c);
+
+        $c = "test\r\n\r\ntest\n\ntest\rtest\r\ntest\ntest";
+        filter_newlines($c, $config);
+        $this->assertEquals("test<br />\n<br />\ntest<br />\ntest<br />\ntest<br />\ntest<br />\ntest", $c);
     }
 
     public function testGetNameFromEmail() {
@@ -327,15 +365,43 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testremove_signature() {
-        $this->assertEquals("", filter_RemoveSignature("", array()));
-        $this->assertEquals("test", filter_RemoveSignature("test", array()));
-        $this->assertEquals("\n", filter_RemoveSignature("", array("--", "- --")));
-        $this->assertEquals("test\n", filter_RemoveSignature("test", array("--", "- --")));
-        $this->assertEquals("line 1\nline 2\n", filter_RemoveSignature("line 1\nline 2\n--\nsig line 1\nsig line 2", array("--", "- --")));
-        $this->assertEquals("line 1\nline 2\n", filter_RemoveSignature("line 1\nline 2\n- --\nsig line 1\nsig line 2", array("--", "- --")));
-        $this->assertEquals("line 1\nline 2\n", filter_RemoveSignature("line 1\nline 2\n-- \nsig line 1\nsig line 2", array("--", "- --")));
-        $this->assertEquals("line 1\nline 2\n", filter_RemoveSignature("line 1\nline 2\n --\nsig line 1\nsig line 2", array("--", "- --")));
-        $this->assertEquals("line 1\nline 2\n", filter_RemoveSignature("line 1\nline 2\n--", array("--", "- --")));
+        $config = config_GetDefaults();
+
+        $c = "";
+        filter_RemoveSignature($c, $config);
+        $this->assertEquals("\n", $c);
+
+        $c = "test";
+        filter_RemoveSignature($c, $config);
+        $this->assertEquals("test\n", $c);
+
+        $c = "";
+        filter_RemoveSignature($c, $config);
+        $this->assertEquals("\n", $c);
+
+        $c = "test";
+        filter_RemoveSignature($c, $config);
+        $this->assertEquals("test\n", $c);
+
+        $c = "line 1\nline 2\n--\nsig line 1\nsig line 2";
+        filter_RemoveSignature($c, $config);
+        $this->assertEquals("line 1\nline 2\n", $c);
+
+        $c = "line 1\nline 2\n---\nsig line 1\nsig line 2";
+        filter_RemoveSignature($c, $config);
+        $this->assertEquals("line 1\nline 2\n", $c);
+
+        $c = "line 1\nline 2\n-- \nsig line 1\nsig line 2";
+        filter_RemoveSignature($c, $config);
+        $this->assertEquals("line 1\nline 2\n", $c);
+
+        $c = "line 1\nline 2\n --\nsig line 1\nsig line 2";
+        filter_RemoveSignature($c, $config);
+        $this->assertEquals("line 1\nline 2\n", $c);
+
+        $c = "line 1\nline 2\n--";
+        filter_RemoveSignature($c, $config);
+        $this->assertEquals("line 1\nline 2\n", $c);
     }
 
     public function testmore_reccurences() {
@@ -487,11 +553,10 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $c = "date: 12/31/2013\nstuff";
         $this->assertEquals("2013-12-31", tag_Date($c, null));
         $this->assertEquals("stuff", $c);
-        
+
         $c = "date: Dec 31, 2013 14:22";
         $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null));
         $this->assertEquals("", $c);
-        
     }
 
 }

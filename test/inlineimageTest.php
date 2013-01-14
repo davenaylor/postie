@@ -6,68 +6,13 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
     function process_file($test_file, $config) {
 
-        $post = new stdClass();
-
         $message = file_get_contents($test_file);
         $email = unserialize($message);
+
+        $isreply = false;
         $mimeDecodedEmail = DecodeMIMEMail($email);
+        $post = CreatePost('wayne', $mimeDecodedEmail, 1, $isreply, $config);
 
-        extract($config);
-
-        $attachments = array(
-            "html" => array(), //holds the html for each image
-            "cids" => array(), //holds the cids for HTML email
-            "image_files" => array() //holds the files for each image
-        );
-
-        filter_PreferedText($mimeDecodedEmail, "plain");
-        $content = GetContent($mimeDecodedEmail, $attachments, 1, "wayne", $config);
-        $post->subject = GetSubject($mimeDecodedEmail, $content, $config);
-        DebugEcho("post subject: $content");
-
-        $post->customImages = SpecialMessageParsing($content, $attachments, $config);
-        DebugEcho("post images: $content");
-
-        $post->post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
-        DebugEcho("post exerpt: $content");
-
-        $post->postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
-        DebugEcho("post author: $content");
-
-        $message_date = null;
-        list($post->post_date, $post->post_date_gmt, $post->delay) = DeterminePostDate($content, $message_date, $time_offset);
-        $post->message_date = tag_Date($content, $message_date);
-        DebugEcho("post comment: $content");
-        DebugEcho("post date: $content");
-
-        filter_ubb2HTML($content);
-        DebugEcho("post ubb: $content");
-
-        $post->post_categories = tag_categories($subject, $default_post_category);
-        DebugEcho("post categories: $content");
-
-        $post->post_tags = tag_Tags($content, $default_post_tags);
-        DebugEcho("post tags: $content");
-
-        $post->comment_status = tag_AllowCommentsOnPost($content);
-        DebugEcho("post comment: $content");
-
-        if ($filternewlines) {
-            $content = filter_newlines($content, $convertnewline);
-            DebugEcho("post filter newlines: $content");
-        }
-        $post->post_type = tag_PostType($subject);
-        DebugEcho("post type: $content");
-
-        if ($converturls) {
-            $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
-            DebugEcho("post video: $content");
-
-            $content = filter_linkify($content);
-            DebugEcho("post linkify: $content");
-        }
-
-        $post->content = $content;
         return $post;
     }
 
@@ -91,8 +36,26 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config['prefer_text_type'] = 'html';
 
         $post = $this->process_file("data/inline.var", $config);
-        $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>   ', $post->content);
-        $this->assertEquals('inline', $post->subject);
+        $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>     ', $post['post_content']);
+        $this->assertEquals('inline', $post['post_title']);
+    }
+
+    function testjapaneseAttachment() {
+
+        $config = config_GetDefaults();
+
+        $post = $this->process_file("data/japanese-attachment.var", $config);
+        $this->assertEquals('Postie用テストメール', $post['post_title']);
+        $this->assertEquals('', $post['post_content']);
+    }
+
+    function testIcsAttachement() {
+
+        $config = config_GetDefaults();
+        $config['prefer_text_type'] = 'html';
+
+        $post = $this->process_file("data/ics-attachment.var", $config);
+        $this->assertEquals("<div dir='ltr'>sample text<div><br></div></div>     <a href='http://example.net/wp-content/uploads/filename'><img src='localhost/postie/icons/silver/default-32.png' alt='default icon' />sample.ics</a> ", $post['post_content']);
     }
 
     function testTagsImg() {
@@ -102,72 +65,23 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config['imagetemplate'] = '<a href="{FILELINK}">{FILENAME}</a>';
 
         $post = $this->process_file("data/only-tags-img.var", $config);
-        $this->assertEquals('tags test', $post->subject);
-        $this->assertEquals(2, count($post->post_tags));
-        $this->assertEquals('test', $post->post_tags[0]);
-        $this->assertEquals('tag2', $post->post_tags[1]);
-        $this->assertEquals(' <a href="http://example.net/wp-content/uploads/filename">7b0d965d-b8b0-4654-ac9e-eeef1d8cf571</a><br />  ', $post->content);
-    }
-
-    function testMultipleImagesWithSig() {
-
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
-
-
-        $message = file_get_contents("data/multiple images with signature.var");
-        $email = unserialize($message);
-        $decoded = DecodeMIMEMail($email);
-
-        $partcnt = count($decoded->parts);
-        $this->assertEquals(3, $partcnt);
-
-        FilterTextParts($decoded, "plain");
-
-        $attachments = array(
-            "html" => array(), //holds the html for each image
-            "cids" => array(), //holds the cids for HTML email
-            "image_files" => array() //holds the files for each image
-        );
-
-        $config = config_GetDefaults();
-        $content = GetContent($decoded, $attachments, 1, "wayne", $config);
+        $this->assertEquals('tags test', $post['post_title']);
+        $this->assertEquals(2, count($post['tags_input']));
+        $this->assertEquals('test', $post['tags_input'][0]);
+        $this->assertEquals('tag2', $post['tags_input'][1]);
+        $this->assertEquals(' <a href="http://example.net/wp-content/uploads/filename">close_account.png</a><br />    ', $post['post_content']);
     }
 
     function testSig() {
-
-        $message = file_get_contents("data/signature.var");
-        $email = unserialize($message);
-        $decoded = DecodeMIMEMail($email);
-
-        $partcnt = count($decoded->parts);
-        $this->assertEquals(2, $partcnt);
-
-        filter_PreferedText($decoded, "plain");
-
-        $attachments = array(
-            "html" => array(), //holds the html for each image
-            "cids" => array(), //holds the cids for HTML email
-            "image_files" => array() //holds the files for each image
-        );
-
         $config = config_GetDefaults();
-        $filternewlines = $config['filternewlines'];
-        $convertnewline = $config['convertnewline'];
+        $config['prefer_text_type'] = 'plain';
 
-        $content = GetContent($decoded, $attachments, 1, "wayne", $config);
+        $post = $this->process_file("data/signature.var", $config);
+        $this->assertEquals('test content   ', $post['post_content']);
 
-        $subject = GetSubject($decoded, $content, $config);
-        $this->assertEquals('signature', $subject);
-
-        $customImages = SpecialMessageParsing($content, $attachments, $config);
-        $this->assertEquals(null, $customImages);
-        $this->assertEquals("test content\n\n", $content);
-
-        $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
-
-        $postAuthorDetails = getPostAuthorDetails($subject, $content, $decoded);
+        $config['prefer_text_type'] = 'html';
+        $post = $this->process_file("data/signature.var", $config);
+        $this->assertEquals('test content  ', $post['post_content']);
     }
 
     function testQuotedPrintable() {
