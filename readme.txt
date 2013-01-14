@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.23
+Stable tag: 1.4.24
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -398,10 +398,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.4.23 (2013.01.13) =
-* Fixed a bug with embedded CID referenced images.
+= 1.4.24 (2013.01.13) =
 * Fixed a bug where the original attachment name wasn't being used.
 * Fixed a bug where the #eimg# tags in the excerpt were not getting expanded.
+
+= 1.4.23 (2013.01.10) =
+* Fixed a bug with embedded CID referenced images.
 
 = 1.4.22 (2013.01.10) =
 * Fixed a bug where the subject was not being properly decoded when Q-encoding was used.
