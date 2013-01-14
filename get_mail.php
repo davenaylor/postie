@@ -37,6 +37,8 @@ EchoInfo(sprintf(__("There are %d messages to process", "postie"), count($emails
 if (function_exists('memory_get_usage'))
     EchoInfo(__("memory at start of e-mail processing:") . memory_get_usage());
 
+DebugDump($config);
+
 //loop through messages
 foreach ($emails as $email) {
     DebugEcho("------------------------------------");

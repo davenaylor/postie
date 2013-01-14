@@ -175,7 +175,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     filter_RemoveSignature($content, $config);
 
     $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
-
+    
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
 
     $message_date = NULL;
@@ -209,7 +209,10 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     filter_VodafoneHandler($content, $attachments, $config);
     filter_ReplaceImageCIDs($content, $attachments, $config);
     filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config);
-
+    
+    filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config);
+    DebugEcho("post image excerpt: $post_excerpt");
+    
     $customImages = tag_CustomImageField($content, $attachments, $config);
     $post_type = tag_PostType($subject);
 
@@ -259,6 +262,8 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
 
     //DebugEcho("pre-insert content: $content");
 
+    DebugEcho("excerpt: $post_excerpt" );
+    
     $details = array(
         'post_author' => $poster,
         'comment_author' => $postAuthorDetails['author'],
@@ -290,7 +295,6 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     postie_disable_revisions();
     postie_increase_memory();
     extract($config);
-    DebugDump($config);
 
     /* in order to do attachments correctly, we need to associate the
       attachments with a post. So we add the post here, then update it */
@@ -1144,15 +1148,13 @@ function filter_RemoveSignature(&$content, $config) {
         if (empty($config['sig_pattern_list']))
             return;
 
-        DebugEcho("remove echo");
         $arrcontent = explode("\n", $content);
         $strcontent = '';
         $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')/';
-        DebugEcho("pattern: $pattern");
         for ($i = 0; $i < count($arrcontent); $i++) {
             $line = trim($arrcontent[$i]);
-            DebugEcho($line);
             if (preg_match($pattern, trim($line))) {
+                DebugEcho("signature found: removing");
                 break;
             }
             $strcontent .= $line . "\n";
@@ -2123,6 +2125,7 @@ function tag_Excerpt(&$content, $filterNewLines, $convertNewLines) {
     if (preg_match('/:excerptstart ?(.*):excerptend/s', $content, $matches)) {
         $content = str_replace($matches[0], "", $content);
         $post_excerpt = $matches[1];
+        DebugEcho("excerpt found: $post_excerpt");
         if ($filterNewLines)
             $post_excerpt = filter_newlines($post_excerpt, $convertNewLines);
     }

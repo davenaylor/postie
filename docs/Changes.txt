@@ -10,8 +10,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.4.23 (2013.01.10) =
-* Fixed a bug with embedded CID referenced images
+= 1.4.23 (2013.01.13) =
+* Fixed a bug with embedded CID referenced images.
+* Fixed a bug where the original attachment name wasn't being used.
+* Fixed a bug where the #eimg# tags in the excerpt were not getting expanded.
 
 = 1.4.22 (2013.01.10) =
 * Fixed a bug where the subject was not being properly decoded when Q-encoding was used.

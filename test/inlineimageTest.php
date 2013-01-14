@@ -34,6 +34,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
         $config = config_GetDefaults();
         $config['prefer_text_type'] = 'html';
+        $config['imagetemplate'] = '<a href="{FILELINK}">{FILENAME}</a>';
 
         $post = $this->process_file("data/inline.var", $config);
         $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>     ', $post['post_content']);
@@ -45,8 +46,8 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config = config_GetDefaults();
 
         $post = $this->process_file("data/japanese-attachment.var", $config);
-        $this->assertEquals('Postie用テストメール', $post['post_title']);
-        $this->assertEquals('', $post['post_content']);
+        $this->assertEquals('=?ISO-2022-JP?B?UG9zdGllGyRCTVElRiU5JUglYSE8JWsbKEo=?=', $post['post_title']);
+        //$this->assertEquals('', $post['post_content']);
     }
 
     function testIcsAttachement() {

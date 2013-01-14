@@ -559,6 +559,28 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("", $c);
     }
 
+    function testtag_Excerpt() {
+        $c = "";
+        $e = tag_Excerpt($c, false, false);
+        $this->assertEquals("", $c);
+        $this->assertEquals("", $e);
+
+        $c = ":excerptstart stuff";
+        $e = tag_Excerpt($c, false, false);
+        $this->assertEquals(":excerptstart stuff", $c);
+        $this->assertEquals("", $e);
+
+        $c = "stuff :excerptend";
+        $e = tag_Excerpt($c, false, false);
+        $this->assertEquals("stuff :excerptend", $c);
+        $this->assertEquals("", $e);
+
+        $c = ":excerptstart stuff :excerptend";
+        $e = tag_Excerpt($c, false, false);
+        $this->assertEquals("", $c);
+        $this->assertEquals("stuff ", $e);
+    }
+
 }
 
 ?>
