@@ -15,7 +15,7 @@ if (!current_user_can('manage_options')) {
     echo "<h2> Sorry only admin can run this file</h2>";
     exit();
 }
-
+DebugEcho("Error log: " . ini_get('error_log'));
 $images = array("Test.png", "Test.jpg", "Test.gif");
 ?>
 <div class="wrap"> 
