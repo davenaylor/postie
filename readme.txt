@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.24
+Stable tag: 1.4.25
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -398,6 +398,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.25 (2013.01.15) =
+* Fixed a bug where newlines were being removed erroneously.
+
 = 1.4.24 (2013.01.13) =
 * Fixed a bug where the original attachment name wasn't being used.
 * Fixed a bug where the #eimg# tags in the excerpt were not getting expanded.

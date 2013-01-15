@@ -501,6 +501,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testfilter_Videos() {
+        $this->assertEquals("video\ntest", filter_Videos("video\ntest"));
         $this->assertEquals("A youtube link <embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src='http://www.youtube.com/v/oAguHwl9Vzq&hl=en&fs=1' />", filter_Videos("A youtube link https://www.youtube.com/watch?v=oAguHwl9Vzq", false));
         $this->assertEquals("A youtube link [youtube oAguHwl9Vzq]", filter_Videos("A youtube link https://www.youtube.com/watch?v=oAguHwl9Vzq", true));
     }

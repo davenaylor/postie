@@ -103,7 +103,7 @@ function EchoInfo($v) {
         echo "$v\n";
     } else {
         if (headers_sent()) {
-            echo "<p>" . htmlspecialchars($v) . "</p>\n";
+            echo "<pre>" . htmlspecialchars($v) . "</pre>\n";
         }
     }
     LogInfo($v);
@@ -152,6 +152,8 @@ function tag_Date(&$content, $message_date) {
 
 function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
 
+    $fulldebug = true;
+
     extract($config);
 
     $attachments = array(
@@ -160,23 +162,38 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
         "image_files" => array() //holds the files for each image
     );
     EchoInfo("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
-    //DebugDump($mimeDecodedEmail);
+    if ($fulldebug)
+        DebugDump($mimeDecodedEmail);
 
     filter_PreferedText($mimeDecodedEmail, $prefer_text_type);
-    //DebugDump($mimeDecodedEmail);
+    if ($fulldebug)
+        DebugDump($mimeDecodedEmail);
 
     $content = GetContent($mimeDecodedEmail, $attachments, $post_id, $poster, $config);
-    //DebugEcho("the content is $content");
+    if ($fulldebug)
+        DebugEcho("the content is $content");
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
 
     filter_Start($content, $config);
+    if ($fulldebug)
+        DebugEcho("post start: $content");
+
     filter_End($content, $config);
+    if ($fulldebug)
+        DebugEcho("post end: $content");
+
     filter_RemoveSignature($content, $config);
+    if ($fulldebug)
+        DebugEcho("post sig: $content");
 
     $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
-    
+    if ($fulldebug)
+        DebugEcho("post excerpt: $content");
+
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
+    if ($fulldebug)
+        DebugEcho("post author: $content");
 
     $message_date = NULL;
     if (array_key_exists("date", $mimeDecodedEmail->headers) && !empty($mimeDecodedEmail->headers["date"])) {
@@ -193,28 +210,59 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     $message_date = tag_Date($content, $message_date);
 
     list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
+    if ($fulldebug)
+        DebugEcho("post date: $content");
 
     filter_ubb2HTML($content);
+    if ($fulldebug)
+        DebugEcho("post ubb: $content");
 
     $post_categories = tag_categories($subject, $default_post_category);
+    if ($fulldebug)
+        DebugEcho("post category: $content");
+
     $post_tags = tag_Tags($content, $default_post_tags);
+    if ($fulldebug)
+        DebugEcho("post tag: $content");
 
     $comment_status = tag_AllowCommentsOnPost($content);
+    if ($fulldebug)
+        DebugEcho("post comment: $content");
 
     if ($converturls) {
         $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
+        if ($fulldebug)
+            DebugEcho("post video: $content");
+
         $content = filter_linkify($content);
+        if ($fulldebug)
+            DebugEcho("post linkify: $content");
     }
 
     filter_VodafoneHandler($content, $attachments, $config);
+    if ($fulldebug)
+        DebugEcho("post vodafone: $content");
+
     filter_ReplaceImageCIDs($content, $attachments, $config);
+    if ($fulldebug)
+        DebugEcho("post cid: $content");
+
     filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config);
-    
+    if ($fulldebug)
+        DebugEcho("post body img: $content");
+
     filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config);
-    DebugEcho("post image excerpt: $post_excerpt");
-    
+    if ($fulldebug)
+        DebugEcho("post excerpt img: $content");
+
+
     $customImages = tag_CustomImageField($content, $attachments, $config);
+    if ($fulldebug)
+        DebugEcho("post custom: $content");
+
     $post_type = tag_PostType($subject);
+    if ($fulldebug)
+        DebugEcho("post type: $content");
 
     $id = GetParentPostForReply($subject);
     if (empty($id)) {
@@ -262,8 +310,8 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
 
     //DebugEcho("pre-insert content: $content");
 
-    DebugEcho("excerpt: $post_excerpt" );
-    
+    DebugEcho("excerpt: $post_excerpt");
+
     $details = array(
         'post_author' => $poster,
         'comment_author' => $postAuthorDetails['author'],
@@ -372,7 +420,7 @@ function filter_linkify($text) {
     # It turns urls into links, and video urls into embedded players
     //DebugEcho("begin: filter_linkify");
 
-    $html = str_get_html($text);
+    $html = str_get_html($text, true, true, DEFAULT_TARGET_CHARSET, false);
     if ($html) {
         //DebugEcho("filter_linkify: " . $html->save());
         foreach ($html->find('text') as $element) {
@@ -392,7 +440,7 @@ function filter_Videos($text, $shortcode = false) {
     # It turns urls into links, and video urls into embedded players
     //DebugEcho("begin: filter_Videos");
 
-    $html = str_get_html($text);
+    $html = str_get_html($text, true, true, DEFAULT_TARGET_CHARSET, false);
     if ($html) {
         foreach ($html->find('text') as $element) {
             $element->innertext = linkifyVideo($element->innertext, $shortcode);
@@ -869,6 +917,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         $meta_return .= htmlentities($part->body);
                     }
                     $meta_return = filter_StripPGP($meta_return);
+                    DebugEcho("meta return: $meta_return");
                 }
 
                 break;
@@ -1256,9 +1305,9 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     DebugEcho("after HandleMessageEncoding");
     if (!empty($charset) && strtolower($charset) != 'default') {
         DebugEcho("converting from $charset to $blogEncoding");
-        //DebugEcho("before: $body");
+        DebugEcho("before: $body");
         $body = iconv($charset, $blogEncoding . '//TRANSLIT', $body);
-        //DebugEcho("after: $body");
+        DebugEcho("after: $body");
     }
     return $body;
 }
