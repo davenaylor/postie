@@ -152,7 +152,7 @@ function tag_Date(&$content, $message_date) {
 
 function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
 
-    $fulldebug = true;
+    $fulldebug = false;
 
     extract($config);
 
@@ -188,8 +188,9 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
         DebugEcho("post sig: $content");
 
     $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
-    if ($fulldebug)
-        DebugEcho("post excerpt: $content");
+    //if ($fulldebug)
+    DebugEcho("post excerpt: $content");
+    DebugEcho("post excerpt excerpt: $post_excerpt");
 
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
     if ($fulldebug)
@@ -251,10 +252,11 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     if ($fulldebug)
         DebugEcho("post body img: $content");
 
-    filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config);
-    if ($fulldebug)
-        DebugEcho("post excerpt img: $content");
-
+    if ($post_excerpt) {
+        filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config);
+        if ($fulldebug)
+            DebugEcho("post excerpt img: $content");
+    }
 
     $customImages = tag_CustomImageField($content, $attachments, $config);
     if ($fulldebug)
@@ -910,7 +912,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     //strip excess HTML
                     DebugEcho("html");
                     $meta_return .= filter_CleanHtml($part->body) . "\n";
-                } else {
+                } elseif ($part->ctype_secondary == 'plain') {
                     DebugEcho("plain text");
                     if ($allow_html_in_body) {
                         DebugEcho("html allowed");
@@ -922,6 +924,12 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     }
                     $meta_return = filter_StripPGP($meta_return);
                     DebugEcho("meta return: $meta_return");
+                } else {
+                    DebugEcho("text Attachement: $filename");
+                    $file_id = postie_media_handle_upload($part, $post_id, $poster);
+                    $file = wp_get_attachment_url($file_id);
+                    $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                    $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
                 }
 
                 break;
@@ -1346,9 +1354,9 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     DebugEcho("after HandleMessageEncoding");
     if (!empty($charset) && strtolower($charset) != 'default') {
         DebugEcho("converting from $charset to $blogEncoding");
-        DebugEcho("before: $body");
+        //DebugEcho("before: $body");
         $body = iconv($charset, $blogEncoding . '//TRANSLIT', $body);
-        DebugEcho("after: $body");
+        //DebugEcho("after: $body");
     }
     return $body;
 }
@@ -1705,7 +1713,12 @@ function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
         DebugEcho("part: $i " . $mimeDecodedEmail->parts[$i]->ctype_primary);
 
         if ($mimeDecodedEmail->parts[$i]->ctype_primary == "text") {
-            if ($mimeDecodedEmail->parts[$i]->ctype_secondary == $preferTextType) {
+            $ctype = $mimeDecodedEmail->parts[$i]->ctype_secondary;
+            if ($ctype == 'html' || $ctype == 'plain') {
+                if ($ctype == $preferTextType) {
+                    $newParts[] = $mimeDecodedEmail->parts[$i];
+                }
+            } else {
                 $newParts[] = $mimeDecodedEmail->parts[$i];
             }
         } else {

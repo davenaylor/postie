@@ -11,7 +11,8 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.4.26 (2013.01.15) =
-* Fixed a bug where signatures were not removed in html emails
+* Fixed a bug where signatures were not removed in html emails.
+* Added support for text attachments such as text/calendar.
 
 = 1.4.25 (2013.01.15) =
 * Fixed a bug where newlines were being removed erroneously.
