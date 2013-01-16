@@ -420,7 +420,7 @@ function filter_linkify($text) {
     # It turns urls into links, and video urls into embedded players
     //DebugEcho("begin: filter_linkify");
 
-    $html = str_get_html($text, true, true, DEFAULT_TARGET_CHARSET, false);
+    $html = LoadDOM($text);
     if ($html) {
         //DebugEcho("filter_linkify: " . $html->save());
         foreach ($html->find('text') as $element) {
@@ -436,11 +436,15 @@ function filter_linkify($text) {
     return $ret;
 }
 
+function LoadDOM($text) {
+    return str_get_html($text, true, true, DEFAULT_TARGET_CHARSET, false);
+}
+
 function filter_Videos($text, $shortcode = false) {
     # It turns urls into links, and video urls into embedded players
     //DebugEcho("begin: filter_Videos");
 
-    $html = str_get_html($text, true, true, DEFAULT_TARGET_CHARSET, false);
+    $html = LoadDOM($text);
     if ($html) {
         foreach ($html->find('text') as $element) {
             $element->innertext = linkifyVideo($element->innertext, $shortcode);
@@ -1196,20 +1200,57 @@ function filter_RemoveSignature(&$content, $config) {
     if ($config['drop_signature']) {
         if (empty($config['sig_pattern_list']))
             return;
+        DebugEcho("looking for signature in: $content");
 
-        $arrcontent = explode("\n", $content);
-        $strcontent = '';
-        $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')/';
-        for ($i = 0; $i < count($arrcontent); $i++) {
-            $line = trim($arrcontent[$i]);
-            if (preg_match($pattern, trim($line))) {
-                DebugEcho("signature found: removing");
-                break;
+        $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')/m';
+
+        $html = LoadDOM($content);
+        if ($html !== false) {
+            filter_RemoveSignatureWorker($html->root, $pattern);
+            $content = $html->save();
+        } else {
+            DebugEcho("sig non-html");
+            $arrcontent = explode("\n", $content);
+            $strcontent = '';
+
+            for ($i = 0; $i < count($arrcontent); $i++) {
+                $line = trim($arrcontent[$i]);
+                if (preg_match($pattern, trim($line))) {
+                    DebugEcho("signature found: removing");
+                    break;
+                }
+                $strcontent .= $line;
             }
-            $strcontent .= $line . "\n";
+            $content = $strcontent;
         }
-        $content = $strcontent;
     }
+}
+
+function filter_RemoveSignatureWorker(&$html, $pattern) {
+    $found = false;
+    DebugEcho("sig count children: " . count($html->children()));
+    if (preg_match($pattern, trim($html->plaintext), $matches)) {
+        DebugEcho("signature found in base: removing");
+        $found = true;
+        $i = stripos($html->innertext, $matches[1]);
+        $presig = substr($html->innertext, 0, $i);
+        DebugEcho("sig new text: '$presig'");
+        $html->innertext = $presig;
+    }
+
+    foreach ($html->children() as $e) {
+        DebugEcho("sig: " . $e->plaintext);
+        if (!$found && preg_match($pattern, trim($e->plaintext))) {
+            DebugEcho("signature found: removing");
+            $found = true;
+        }
+        if ($found) {
+            $e->outertext = '';
+        } else {
+            $found = filter_RemoveSignatureWorker($e, $pattern);
+        }
+    }
+    return $found;
 }
 
 /**

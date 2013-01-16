@@ -10,6 +10,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.26 (2013.01.15) =
+* Fixed a bug where signatures were not removed in html emails
+
 = 1.4.25 (2013.01.15) =
 * Fixed a bug where newlines were being removed erroneously.
 

@@ -369,19 +369,19 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
         $c = "";
         filter_RemoveSignature($c, $config);
-        $this->assertEquals("\n", $c);
+        $this->assertEquals("", $c);
 
         $c = "test";
         filter_RemoveSignature($c, $config);
-        $this->assertEquals("test\n", $c);
+        $this->assertEquals("test", $c);
 
         $c = "";
         filter_RemoveSignature($c, $config);
-        $this->assertEquals("\n", $c);
+        $this->assertEquals("", $c);
 
         $c = "test";
         filter_RemoveSignature($c, $config);
-        $this->assertEquals("test\n", $c);
+        $this->assertEquals("test", $c);
 
         $c = "line 1\nline 2\n--\nsig line 1\nsig line 2";
         filter_RemoveSignature($c, $config);
@@ -395,7 +395,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         filter_RemoveSignature($c, $config);
         $this->assertEquals("line 1\nline 2\n", $c);
 
-        $c = "line 1\nline 2\n --\nsig line 1\nsig line 2";
+        $c = "line 1\nline 2\n--\nsig line 1\nsig line 2";
         filter_RemoveSignature($c, $config);
         $this->assertEquals("line 1\nline 2\n", $c);
 
