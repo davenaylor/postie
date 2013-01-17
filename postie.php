@@ -28,32 +28,6 @@
 
 /*
   $Id$
- * -= Requests Pending =-
- * Problem with some mail server
- * Multiple emails should tie to a single account
- * Each user should be able to have a default category
- * WP Switcher not compatible
- * Setup poll
-  - web server
-  - mail clients
-  - plain/html
-  - phone/computer
-  - os of server
-  - os of client
-  - number of users posting
- * Test for calling from the command line
- * Support userid/domain  as a valid username
- * WP-switcher not compatiable http://www.alexking.org/index.php?content=software/wordpress/content.php#wp_120
- * Test out a remote cron system
- * Add support for http://unknowngenius.com/wp-plugins/faq.html#one-click
- *    www.cdavies.org/code/3gp-thumb.php.txt
- *    www.cdavies.org/permalink/watchingbrowserembeddedgpvideosinlinux.php
- * Support private posts
- * Make it possible to post without a script at all
- * TODO - fix corruption of rtf attachments
- * TODO - add port checking in tests
- * TODO - non-image uploads get ignored in content when using autogallery - see replaceimageplaceholders
- * TODO - code to set featured image
  */
 
 define("POSTIE_ROOT", dirname(__FILE__));

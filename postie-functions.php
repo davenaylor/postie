@@ -4,17 +4,6 @@
   $Id$
  */
 
-/* TODO 
- * html purify
- * USE built-in php message decoding to improve speed
- * Add custom fields
- * support for flexible upload plugin
- * iso 8859-2 support
- * add private post function
-  http://forum.robfelty.com/topic/how-to-private-posts-from-postie?replies=2#post-1515
- * category per e-mail address
- */
-
 //to turn on debug output add the following line to wp-config.php
 //define('POSTIE_DEBUG', true);
 

@@ -112,6 +112,9 @@ Simply upload the icons you want to the postie/icons/custom directory. You
 must name the icons according to the following scheme:
 `{filetype}-{size}.png`
 
+NOTE THAT ANY CUSTOM FILES ADDED TO THE POSTIE DIRECTORY WILL BE DELETED IF YOU 
+USE THE NORMAL WORDPRESS UPGRADE PROCESS.
+
 For example, for word documents, you could use:
 
 `doc-32.png`
