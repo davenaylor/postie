@@ -10,6 +10,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.27 (future) =
+* Updated sample plugin for extending Postie.
+* Updated documentation for template variables.
+* Fixed a bug where text/plain attachments were not being treated as attachments.
+* Look for and include filterPostie.php in wp-content if it exists. (used for custom filters so they don't get deleted on upgrades)
+
 = 1.4.26 (2013.01.15) =
 * Fixed a bug where signatures were not removed in html emails.
 * Added support for text attachments such as text/calendar.

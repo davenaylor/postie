@@ -8,6 +8,14 @@ if (file_exists($wp_config_path . DIRECTORY_SEPARATOR . "wp-config.php")) {
     include_once (dirname($wp_config_path)) . DIRECTORY_SEPARATOR . "wp-config.php";
 }
 
+$wp_content_path = dirname(dirname(dirname(__FILE__)));
+
+DebugEcho("wp_content_path: $wp_content_path");
+if (file_exists($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php")) {
+    DebugEcho("found filterPostie.php in wp-content");
+    include_once ($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php");
+}
+
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mimedecode.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
 if (!function_exists('file_get_html'))

@@ -169,15 +169,30 @@ Then use the Task Scheduler control panel to call wget or cron.
   class="attachment" /></a><div
   class='imagecaption'>{CAPTION}</div></div>`
      
-    * {THUMBNAIL} gets replaced with the url to the thumbnail image
-    * {MEDIUM} gets replaced with the url to the medium-sized image
-    * {LARGE} gets replaced with the url to the large-sized image
-    * {FULL} gets replaced with the url to the full-sized image
-    * {FILENAME} gets replaced with the absolute path to the full-size image
-    * {RELFILENAME} gets replaced with the relative path to the full-size image
     * {CAPTION} gets replaced with the caption you specified (if any)
-    * {WIDTH} gets replaced with width of the photo
+    * {FILELINK} gets replaced with the url to the media
+    * {FILENAME} gets replaced with the name of the attachment from the email
+    * {FULL} same as {FILELINK}
     * {HEIGHT} gets replaced with the height of the photo
+    * {ID} gets replaced with the post id
+    * {IMAGE} same as {FILELINK}
+    * {LARGEHEIGHT} gets replaced with the height of a large image
+    * {LARGEWIDTH} gets replaced with the width of a large image
+    * {LARGE} gets replaced with the url to the large-sized image
+    * {MEDIUMHEIGHT} gets replaced with the height of a medium image
+    * {MEDIUMWIDTH} gets replaced with the width of a medium image
+    * {MEDIUM} gets replaced with the url to the medium-sized image
+    * {PAGELINK} gets replaced with the URL of the file in WordPress
+    * {POSTTITLE} gets replaced with the post title (subject)
+    * {RELFILENAME} gets replaced with the relative path to the full-size image
+    * {THUMBHEIGHT} gets replaced with the height of a thumbnail image
+    * {THUMB} gets replaced with the url to the thumbnail image
+    * {THUMBNAIL} same as {THUMB}
+    * {THUMBWIDTH} gets replaced with the width of a thumbnail image
+    * {TITLE} same as {POSTTITLE}
+    * {URL} same as {FILELINK}
+    * {WIDTH} gets replaced with width of the photo
+
 
 = Interoperability =
 * If your mail client doesn't support setting the subject (nokia) you
@@ -398,9 +413,14 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.27 (future) =
+* Updated sample plugin for extending Postie.
+* Updated documentation for template variables.
+* Fixed a bug where text/plain attachments were not being treated as attachments.
+
 = 1.4.26 (2013.01.15) =
-* Fixed a bug where signatures were not removed in html emails
-* Added support for text attachments such as text/calendar
+* Fixed a bug where signatures were not removed in html emails.
+* Added support for text attachments such as text/calendar.
 
 = 1.4.25 (2013.01.15) =
 * Fixed a bug where newlines were being removed erroneously.

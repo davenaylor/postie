@@ -188,9 +188,8 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
         DebugEcho("post sig: $content");
 
     $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
-    //if ($fulldebug)
-    DebugEcho("post excerpt: $content");
-    DebugEcho("post excerpt excerpt: $post_excerpt");
+    if ($fulldebug)
+        DebugEcho("post excerpt: $content");
 
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
     if ($fulldebug)
@@ -820,7 +819,7 @@ function isBannedFileName($filename, $bannedFiles) {
 function GetContent($part, &$attachments, $post_id, $poster, $config) {
     extract($config);
     //global $charset, $encoding;
-
+    DebugEcho('----');
     $meta_return = '';
     DebugEcho("primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
 
@@ -902,36 +901,46 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     }
                     //DebugDump($part);
                 }
-
-                //go through each sub-section
-                if ($part->ctype_secondary == 'enriched') {
-                    //convert enriched text to HTML
-                    DebugEcho("enriched");
-                    $meta_return .= filter_etf2HTML($part->body) . "\n";
-                } elseif ($part->ctype_secondary == 'html') {
-                    //strip excess HTML
-                    DebugEcho("html");
-                    $meta_return .= filter_CleanHtml($part->body) . "\n";
-                } elseif ($part->ctype_secondary == 'plain') {
-                    DebugEcho("plain text");
-                    if ($allow_html_in_body) {
-                        DebugEcho("html allowed");
-                        $meta_return .= $part->body;
-                        //$meta_return = "<div>$meta_return</div>\n";
-                    } else {
-                        DebugEcho("html not allowed (htmlentities)");
-                        $meta_return .= htmlentities($part->body);
-                    }
-                    $meta_return = filter_StripPGP($meta_return);
-                    DebugEcho("meta return: $meta_return");
-                } else {
+                if (array_key_exists('disposition', $part) && $part->disposition == 'attachment') {
                     DebugEcho("text Attachement: $filename");
                     $file_id = postie_media_handle_upload($part, $post_id, $poster);
                     $file = wp_get_attachment_url($file_id);
                     $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
                     $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
-                }
+                } else {
 
+                    //go through each sub-section
+                    if ($part->ctype_secondary == 'enriched') {
+                        //convert enriched text to HTML
+                        DebugEcho("enriched");
+                        $meta_return .= filter_etf2HTML($part->body) . "\n";
+                    } elseif ($part->ctype_secondary == 'html') {
+                        //strip excess HTML
+                        DebugEcho("html");
+                        $meta_return .= filter_CleanHtml($part->body) . "\n";
+                    } elseif ($part->ctype_secondary == 'plain') {
+                        DebugEcho("plain text");
+                        //DebugDump($part);
+
+                        DebugEcho("body text");
+                        if ($allow_html_in_body) {
+                            DebugEcho("html allowed");
+                            $meta_return .= $part->body;
+                            //$meta_return = "<div>$meta_return</div>\n";
+                        } else {
+                            DebugEcho("html not allowed (htmlentities)");
+                            $meta_return .= htmlentities($part->body);
+                        }
+                        $meta_return = filter_StripPGP($meta_return);
+                        //DebugEcho("meta return: $meta_return");
+                    } else {
+                        DebugEcho("text Attachement wo disposition: $filename");
+                        $file_id = postie_media_handle_upload($part, $post_id, $poster);
+                        $file = wp_get_attachment_url($file_id);
+                        $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                        $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
+                    }
+                }
                 break;
 
             case 'image':
@@ -1017,8 +1026,8 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 break;
         }
     }
-    //DebugEcho("text: $meta_return");
-    DebugEcho("----");
+    DebugEcho("meta_return: " . substr($meta_return, 0, 500));
+    DebugEcho("====");
     return $meta_return;
 }
 
@@ -1208,9 +1217,10 @@ function filter_RemoveSignature(&$content, $config) {
     if ($config['drop_signature']) {
         if (empty($config['sig_pattern_list']))
             return;
-        DebugEcho("looking for signature in: $content");
+        //DebugEcho("looking for signature in: $content");
 
-        $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')/m';
+        $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')\s?$.*\Z/m';
+        DebugEcho("sig pattern: $pattern");
 
         $html = LoadDOM($content);
         if ($html !== false) {
@@ -1239,6 +1249,7 @@ function filter_RemoveSignatureWorker(&$html, $pattern) {
     DebugEcho("sig count children: " . count($html->children()));
     if (preg_match($pattern, trim($html->plaintext), $matches)) {
         DebugEcho("signature found in base: removing");
+        DebugDump($matches);
         $found = true;
         $i = stripos($html->innertext, $matches[1]);
         $presig = substr($html->innertext, 0, $i);
@@ -1247,7 +1258,7 @@ function filter_RemoveSignatureWorker(&$html, $pattern) {
     }
 
     foreach ($html->children() as $e) {
-        DebugEcho("sig: " . $e->plaintext);
+        //DebugEcho("sig: " . $e->plaintext);
         if (!$found && preg_match($pattern, trim($e->plaintext))) {
             DebugEcho("signature found: removing");
             $found = true;
@@ -1352,7 +1363,7 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     }
 
     DebugEcho("after HandleMessageEncoding");
-    if (!empty($charset) && strtolower($charset) != 'default') {
+    if (!empty($charset) && strtolower($charset) != 'default' && strtolower($charset) != strtolower($blogEncoding)) {
         DebugEcho("converting from $charset to $blogEncoding");
         //DebugEcho("before: $body");
         $body = iconv($charset, $blogEncoding . '//TRANSLIT', $body);
@@ -1710,30 +1721,31 @@ function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
     $found = false;
 
     for ($i = 0; $i < count($mimeDecodedEmail->parts); $i++) {
-        DebugEcho("part: $i " . $mimeDecodedEmail->parts[$i]->ctype_primary);
-
-        if ($mimeDecodedEmail->parts[$i]->ctype_primary == "text") {
-            $ctype = $mimeDecodedEmail->parts[$i]->ctype_secondary;
-            if ($ctype == 'html' || $ctype == 'plain') {
-                if ($ctype == $preferTextType) {
+        DebugEcho("part: $i " . $mimeDecodedEmail->parts[$i]->ctype_primary . "/" . $mimeDecodedEmail->parts[$i]->ctype_secondary);
+        if (array_key_exists('disposition', $mimeDecodedEmail->parts[$i]) && $mimeDecodedEmail->parts[$i]->disposition == 'attachment') {
+            DebugEcho("attachment");
+            $newParts[] = $mimeDecodedEmail->parts[$i];
+        } else {
+            if ($mimeDecodedEmail->parts[$i]->ctype_primary == "text") {
+                $ctype = $mimeDecodedEmail->parts[$i]->ctype_secondary;
+                if ($ctype == 'html' || $ctype == 'plain') {
+                    DebugEcho("checking prefered type");
+                    if ($ctype == $preferTextType) {
+                        DebugEcho("keeping: $ctype");
+                        DebugEcho(substr($mimeDecodedEmail->parts[$i]->body, 500));
+                        $newParts[] = $mimeDecodedEmail->parts[$i];
+                    } else {
+                        DebugEcho("removing: $ctype");
+                    }
+                } else {
+                    DebugEcho("keeping: {$mimeDecodedEmail->parts[$i]->ctype_primary}");
                     $newParts[] = $mimeDecodedEmail->parts[$i];
                 }
             } else {
+                DebugEcho("keeping: {$mimeDecodedEmail->parts[$i]->ctype_primary}");
                 $newParts[] = $mimeDecodedEmail->parts[$i];
             }
-        } else {
-            $newParts[] = $mimeDecodedEmail->parts[$i];
         }
-
-//        if (in_array($mimeDecodedEmail->parts[$i]->ctype_primary, array("text", "multipart"))) {
-//            if (SearchForMIMEType($mimeDecodedEmail->parts[$i], "text", $preferTextType)) {
-//                $newParts[] = $mimeDecodedEmail->parts[$i];
-//                $found = true;
-//                DebugEcho("found");
-//            }
-//        } else {
-//            $newParts[] = $mimeDecodedEmail->parts[$i];
-//        }
     }
     if ($newParts) {
         //This is now the filtered list of just the preferred type.
