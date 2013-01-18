@@ -2229,8 +2229,10 @@ function tag_Excerpt(&$content, $filterNewLines, $convertNewLines) {
         $content = str_replace($matches[0], "", $content);
         $post_excerpt = $matches[1];
         DebugEcho("excerpt found: $post_excerpt");
-        if ($filterNewLines)
-            $post_excerpt = filter_newlines($post_excerpt, $convertNewLines);
+        if ($filterNewLines){
+            DebugEcho("filtering newlines from excerpt");
+            filter_newlines($post_excerpt, $convertNewLines);
+        }
     }
     return $post_excerpt;
 }
@@ -2360,7 +2362,7 @@ function BuildTextArea($label, $id, $current_value, $recommendation = NULL) {
     }
     $html.="</th>";
 
-    $html .="<td><textarea cols=40 rows=3 name='$id' id='$id'>";
+    $html .="<td><br /><textarea cols=40 rows=3 name='$id' id='$id'>";
     $current_value = preg_split("/[,\r\n]+/", trim($current_value));
     if (is_array($current_value)) {
         foreach ($current_value as $item) {
@@ -2377,7 +2379,7 @@ function BuildTextArea($label, $id, $current_value, $recommendation = NULL) {
 function config_ResetToDefault() {
     $newconfig = config_GetDefaults();
     $config = get_option('postie-settings');
-    $save_keys = array('mail_password', 'mail_server', 'mail_server_port', 'mail_userid', 'iinput_protocol');
+    $save_keys = array('mail_password', 'mail_server', 'mail_server_port', 'mail_userid', 'input_protocol');
     foreach ($save_keys as $key)
         $newconfig[$key] = $config[$key];
     update_option('postie-settings', $newconfig);
@@ -2460,7 +2462,7 @@ function config_GetDefaults() {
         'sig_pattern_list' => array('--', '---'),
         'smtp' => array(),
         'start_image_count_at_zero' => false,
-        'supported_file_types' => array('video', 'application'),
+        'supported_file_types' => array( 'application'),
         'turn_authorization_off' => false,
         'time_offset' => get_option('gmt_offset'),
         'video1template' => $simple_link,
@@ -2564,7 +2566,7 @@ function config_UpgradeOld() {
     if (!isset($config["BANNED_FILES_LIST"]))
         $config["BANNED_FILES_LIST"] = array();
     if (!isset($config["SUPPORTED_FILE_TYPES"]))
-        $config["SUPPORTED_FILE_TYPES"] = array("video", "application");
+        $config["SUPPORTED_FILE_TYPES"] = array( "application");
     if (!isset($config["AUTHORIZED_ADDRESSES"]))
         $config["AUTHORIZED_ADDRESSES"] = array();
     if (!isset($config["MAIL_SERVER"]))

@@ -1,5 +1,6 @@
 provide a location for custom icons. update docs about location.
 reply logic not adding to comments
+hide/disable config options that don't apply
 
 replace native imap with flourish
 replace MIME parser

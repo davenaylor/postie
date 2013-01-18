@@ -41,7 +41,7 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
     <p><i><?php _e('Only required for international character set support', 'postie') ?></i></p>
     <?php
     EchoInfo("iconv: " . ((HasIconvInstalled()) ? __('yes', 'postie') : __('no', 'postie')));
-    EchoInfo("imap <small>(required for subjects)</small>: " . ((function_exists('imap_mime_header_decode')) ? __('yes', 'postie') : __('no', 'postie')));
+    EchoInfo("imap (required for subjects): " . ((function_exists('imap_mime_header_decode')) ? __('yes', 'postie') : __('no', 'postie')));
     ?>
 
     <h2>Clock Tests</h2>
@@ -72,7 +72,8 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
                     EchoInfo("Unable to connect. The server said:");
                     EchoInfo($mail_server->error());
                 } else {
-                    EchoInfo("Sucessful " . strtoupper($config['input_protocol']) . " connection on port {$config["mail_server_port"]}");
+                    EchoInfo("Successful " . strtoupper($config['input_protocol']) . " connection on port {$config["mail_server_port"]}");
+                    EchoInfo("# of waiting messages: " .$mail_server->getNumberOfMessages());
                 }
             }
             break;

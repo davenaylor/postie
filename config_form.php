@@ -76,12 +76,6 @@
         <div class="updated"><p><?php _e($messages[$_GET['message']], 'postie'); ?></p></div>
     <?php endif; ?>
 
-
-
-    <form name="postie-options" method="post"> 
-        <input type="hidden" name="action" value="reset" />
-        <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie') ?> &raquo;" type="submit" class='button'>
-    </form>
     <form name="postie-options" method='post'> 
         <input type="hidden" name="action" value="runpostie" />
         <input name="Submit" value="<?php _e("Run Postie", 'postie'); ?> &raquo;" type="submit" class='button'>
@@ -139,8 +133,8 @@
                                 <?php _e("POP3-SSL", 'postie'); ?> - 995 <br />
                             </span>
                         </th>
-                        <td>
-                            <input name='postie-settings[mail_server_port]' type="text" id='postie-settings-mail_server_port' value="<?php echo $mail_server_port; ?>" size="6" />
+                        <td valign="top">
+                            <br/><input name='postie-settings[mail_server_port]' type="text" id='postie-settings-mail_server_port' value="<?php echo $mail_server_port; ?>" size="6" />
                         </td>
                     </tr>
                     <tr>
@@ -230,22 +224,31 @@
 
                     <?php echo BuildBooleanSelect(__("Allow Anyone To Post Via Email"), "postie-settings[turn_authorization_off]", $turn_authorization_off, "Changing this to yes is NOT RECOMMEDED - anything that gets sent in will automatically be posted. This could make it easier to compromise your server - YOU HAVE BEEN WARNED."); ?>
                     <tr>
-                        <th scope="row"><?php _e('Roles That Can Post:', 'postie') ?>
-                            <br />
-                            <span class='recommendation'><?php _e("This allows you to grant access to other users to post if they have the proper access level", 'postie'); ?></span></th>
+                        <th scope="row">
+                            <?php _e('Roles That Can Post:', 'postie') ?><br />
+                            <span class='recommendation'><?php _e("This allows you to grant access to other users to post if they have the proper access level. Administrators can always post.", 'postie'); ?></span>
+                        </th>
                         <td>
-                            <table>
-                                <tr><th>Administrator role can always post.</th>
-                                    <?php
-                                    foreach ($wp_roles->role_names as $roleId => $name) {
-                                        $name = translate_user_role($name);
-                                        $role = $wp_roles->get_role($roleId);
-                                        if ($roleId != "administrator") {
-                                            ?>
+                            <br />
+                            <table class="checkbox-table">
+                                <?php
+                                foreach ($wp_roles->role_names as $roleId => $name) {
+                                    $name = translate_user_role($name);
+                                    $role = $wp_roles->get_role($roleId);
+                                    if ($roleId != "administrator") {
+                                        ?>
                                         <tr>
                                             <td>
                                                 <input type='checkbox' value='1' name='postie-settings[role_access][<?php echo $roleId; ?>]' <?php echo ($role->has_cap("post_via_postie")) ? 'checked="checked"' : "" ?>  >
                                                 <?php echo $name; ?>
+                                            </td>
+                                        </tr>
+                                        <?php
+                                    } else {
+                                        ?>
+                                        <tr>
+                                            <td>
+                                                <input type='checkbox' value='1' disabled='disabled' checked='checked' > <?php echo $name; ?>
                                             </td>
                                         </tr>
                                         <?php
@@ -320,7 +323,6 @@
                         <th width="33%" valign="top" scope="row"><?php _e('Default Title:', 'postie') ?> </th> 
                         <td>
                             <input name='postie-settings[default_title]' type="text" id='postie-settings-default_title' value="<?php echo $default_title; ?>" size="50" /><br />
-                            <br />
                         </td> 
                     </tr> 
                     <tr> 
@@ -351,12 +353,12 @@
                         </td> 
                     </tr> 
                 </table>
-                <a style='cursor:pointer;' onclick='showAdvanced("message-advanced", "message-advanced-arrow");'><span id="message-advanced-arrow">&#9654;</span> Advanced options</a>
-                <div id="message-advanced" style='display:none;'>
+                <a style='cursor:pointer;' onclick='showAdvanced("message-advanced", "message-advanced-arrow");'><span id="message-advanced-arrow">&#9660;</span> Advanced options</a>
+                <div id="message-advanced" >
                     <table class='form-table'>
                         <?php
                         echo BuildBooleanSelect("Wrap content in pre tags", "postie-settings[wrap_pre]", $wrap_pre);
-                        echo BuildBooleanSelect("Filter newlines", "postie-settings[filternewlines]", $filternewlines, "Set to no if using markdown or textitle syntax");
+                        echo BuildBooleanSelect("Filter newlines", "postie-settings[filternewlines]", $filternewlines, "Retain newlines from plain text. Set to no if using markdown or textitle syntax");
                         echo BuildBooleanSelect("Replace newline characters with html line breaks (&lt;br /&gt;)", "postie-settings[convertnewline]", $convertnewline);
                         echo BuildBooleanSelect("Return rejected mail to sender", "postie-settings[return_to_sender]", $return_to_sender);
                         ?>
@@ -386,7 +388,7 @@
                             </td> 
                         </tr> 
                         <?php echo BuildBooleanSelect("Decode Quoted Printable Data", "postie-settings[message_dequote]", $message_dequote); ?>
-                        <?php echo BuildTextArea("Supported File Types", "postie-settings[supported_file_types]", $supported_file_types, "Put each type on a single line."); ?>
+                        <?php echo BuildTextArea("Supported MIME Types", "postie-settings[supported_file_types]", $supported_file_types, "Add just the type (not the subtype). Text, Video, Audio, Image and Multipart are always supported. Put each type on a single line."); ?>
                         <?php echo BuildTextArea("Banned File Names", "postie-settings[banned_files_list]", $banned_files_list, "Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files"); ?>
                         <?php echo BuildBooleanSelect("Drop The Signature From Mail", "postie-settings[drop_signature]", $drop_signature); ?>
                         <?php echo BuildTextArea("Signature Patterns", "postie-settings[sig_pattern_list]", $sig_pattern_list, "Put each pattern on a separate line and make sure to escape any special characters."); ?>
@@ -502,8 +504,9 @@
                             <?php _e('Video 1 file types:') ?><br /><span class='recommendation'>
                                 <?php _e('Use the video template 1 for these files types (separated by commas)', 'postie') ?></span> </th> 
                         <td>
-                            <input name='postie-settings[video1types]' type="text" id='postie-settings-video1types'
-                                   value="<?php if ($video1types != '') echo $video1types; ?>" size="40" />                </td> 
+                            <br/><input name='postie-settings[video1types]' type="text" id='postie-settings-video1types'
+                                        value="<?php if ($video1types != '') echo $video1types; ?>" size="40" />                
+                        </td> 
                     </tr> 
                     <tr><td colspan="2"><hr /></td></tr>
                     <tr>
@@ -551,8 +554,8 @@
                                 <?php _e('Use the video template 2 for these files types (separated by commas)', 'postie') ?></span> <br />
                         </th> 
                         <td>
-                            <input name='postie-settings[video2types]' type="text" id='postie-settings-video2types'
-                                   value="<?php if ($video2types != '') echo $video2types; ?>" size="40" />                
+                            <br/><input name='postie-settings[video2types]' type="text" id='postie-settings-video2types'
+                                        value="<?php if ($video2types != '') echo $video2types; ?>" size="40" />                
                         </td> 
                     </tr> 
                     <tr><td colspan="2"><hr /></td></tr>
@@ -601,7 +604,7 @@
 
                         </th> 
                         <td>
-                            <input name='postie-settings[audiotypes]' type="text" id='postie-settings-audiotypes' value="<?php if ($audiotypes != '') echo $audiotypes; ?>" size="40" />
+                            <br/><input name='postie-settings[audiotypes]' type="text" id='postie-settings-audiotypes' value="<?php if ($audiotypes != '') echo $audiotypes; ?>" size="40" />
                         </td> 
                     </tr> 
                 </table> 
@@ -686,6 +689,10 @@
 
             </p>
     </form> 
+    <form name="postie-options" method="post"> 
+        <input type="hidden" name="action" value="reset" />
+        <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie') ?>" type="submit" class='button'> (Your Mail server settings will be retained)
+    </form>
 </div>
 
 <?php $iconDir = get_option('siteurl') . '/' . PLUGINDIR . '/postie/icons'; ?>

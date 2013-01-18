@@ -14,8 +14,7 @@ table.form-table  {
 table.form-table td {
     line-height:1em;
     margin:0;
-    padding:0;
-/*    font-size:1em; */
+    padding:10px;
 }
 table.form-table th {
     width:40%;
@@ -38,4 +37,7 @@ div.simpleTabs-content li li {
 }
 div.simpleTabs-content li li li {
     list-style-type:circle;
+}
+table.checkbox-table td {
+    padding:0px;
 }
