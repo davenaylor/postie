@@ -21,12 +21,6 @@ require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
 if (!function_exists('file_get_html'))
     require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'simple_html_dom.php');
 
-if (!ini_get('safe_mode')) {
-    $original_mem_limit = ini_get('memory_limit');
-    ini_set('memory_limit', -1);
-    ini_set('max_execution_time', 300);
-}
-
 EchoInfo("Starting mail fetch");
 EchoInfo("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
 include('Revision');
@@ -79,7 +73,4 @@ foreach ($emails as $email) {
 if (function_exists('memory_get_usage'))
     EchoInfo("memory at end of e-mail processing:" . memory_get_usage());
 
-if (!ini_get('safe_mode')) {
-    ini_set('memory_limit', $original_mem_limit);
-}
 ?>

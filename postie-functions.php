@@ -49,27 +49,6 @@ function postie_disable_revisions($restore = false) {
     }
 }
 
-function postie_increase_memory($restore = false) {
-    global $_postie_original_memory_limit, $_postie_original_max_execution_time;
-
-    if (!ini_get('safe_mode')) {
-        if (!$restore) {
-
-            $_postie_original_memory_limit = ini_get('memory_limit');
-            $_postie_original_max_execution_time = ini_get('max_execution_time');
-            ini_set('memory_limit', -1);
-            ini_set('max_execution_time', 300);
-        } else {
-            if (isset($_postie_original_memory_limit)) {
-                ini_set('memory_limit', $_postie_original_memory_limit);
-            }
-            if (isset($_postie_original_max_execution_time)) {
-                ini_set('max_execution_time', $_postie_original_max_execution_time);
-            }
-        }
-    }
-}
-
 /* this function is necessary for wildcard matching on non-posix systems */
 if (!function_exists('fnmatch')) {
 
@@ -331,7 +310,6 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
  */
 function PostEmail($poster, $mimeDecodedEmail, $config) {
     postie_disable_revisions();
-    postie_increase_memory();
     extract($config);
 
     /* in order to do attachments correctly, we need to associate the
@@ -368,7 +346,6 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         }
     }
     postie_disable_revisions(true);
-    postie_increase_memory(true);
     DebugEcho("Done");
 }
 
