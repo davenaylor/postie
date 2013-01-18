@@ -141,7 +141,7 @@ function tag_Date(&$content, $message_date) {
 
 function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
 
-    $fulldebug = false;
+    $fulldebug = true;
 
     extract($config);
 
@@ -1208,7 +1208,7 @@ function filter_RemoveSignature(&$content, $config) {
             return;
         //DebugEcho("looking for signature in: $content");
 
-        $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')\s?$.*\Z/m';
+        $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')\s?$/m';
         DebugEcho("sig pattern: $pattern");
 
         $html = LoadDOM($content);
@@ -1246,7 +1246,7 @@ function filter_RemoveSignatureWorker(&$html, $pattern) {
     }
 
     foreach ($html->children() as $e) {
-        //DebugEcho("sig: " . $e->plaintext);
+        DebugEcho("sig: " . $e->plaintext);
         if (!$found && preg_match($pattern, trim($e->plaintext))) {
             DebugEcho("signature found: removing");
             $found = true;

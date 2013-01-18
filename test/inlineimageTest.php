@@ -57,7 +57,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config['convertnewline'] = true;
 
         $post = $this->process_file("data/linebreaks.var", $config);
-        $this->assertEquals("Test<br />\nEen stuck TekstEen stuck TekstEen stuck TekstEen stuck Tekst<br />\nEen stuck TekstEen stuck Tekst<br />\n<br />\nEen stuck TekstEen stuck Tekst<br />\n<br />", $post['post_content']);
+        $this->assertEquals("Test<br />\nEen stuck TekstEen stuck TekstEen stuck TekstEen stuck Tekst<br />\nEen stuck TekstEen stuck Tekst<br />\n<br />\nEen stuck TekstEen stuck Tekst<br />\n", $post['post_content']);
     }
 
     function testjapaneseAttachment() {

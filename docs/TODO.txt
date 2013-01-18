@@ -1,4 +1,6 @@
 provide a location for custom icons. update docs about location.
+reply logic not adding to comments
+
 replace native imap with flourish
 replace MIME parser
 debug assistance

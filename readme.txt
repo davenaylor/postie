@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.26
+Stable tag: 1.4.27
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -317,6 +317,9 @@ Simply upload the icons you want to the postie/icons/custom directory. You
 must name the icons according to the following scheme:
 `{filetype}-{size}.png`
 
+NOTE THAT ANY CUSTOM FILES ADDED TO THE POSTIE DIRECTORY WILL BE DELETED IF YOU 
+USE THE NORMAL WORDPRESS UPGRADE PROCESS.
+
 For example, for word documents, you could use:
 
 `doc-32.png`
@@ -413,10 +416,13 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.4.27 (future) =
+= 1.4.27 (2013.01.17) =
 * Updated sample plugin for extending Postie.
 * Updated documentation for template variables.
 * Fixed a bug where text/plain attachments were not being treated as attachments.
+* Look for and include filterPostie.php in wp-content if it exists. (used for custom filters so they don't get deleted on upgrades)
+* Cleanup of settings screen layout.
+* Added additional error logging for mail connections.
 
 = 1.4.26 (2013.01.15) =
 * Fixed a bug where signatures were not removed in html emails.

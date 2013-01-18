@@ -581,7 +581,6 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("", $c);
         $this->assertEquals("stuff ", $e);
     }
-
 }
 
 ?>
