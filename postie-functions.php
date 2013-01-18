@@ -2333,14 +2333,16 @@ function DisplayEmailPost($details) {
  */
 function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL) {
     $html = "<tr>
-	<th scope='row'>" . $label . ":</th>
+	<th scope='row'>" . $label . ":";
+    if (!empty($recommendation)) {
+        $html.='<br /><span class = "recommendation">' . $recommendation . '</span>';
+    }
+    $html.="</th>
 	<td><select name='$id' id='$id'>
             <option value='1'>" . __("Yes", 'postie') . "</option>
             <option value='0' " . (!$current_value ? "selected='selected'" : "") . ">" . __("No", 'postie') . '</option>
     </select>';
-    if (!empty($recommendation)) {
-        $html.='<span class = "recommendation">' . $recommendation . '</span>';
-    }
+
     $html.="</td>\n</tr>";
     return $html;
 }

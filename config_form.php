@@ -284,10 +284,12 @@
                     <?php echo BuildTextArea("Authorized Addresses", "postie-settings[authorized_addresses]", $authorized_addresses, "Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level."); ?>
                     <tr> 
                         <th width="33%" valign="top" scope="row">
-                            <?php _e('Admin username:') ?> </th> 
+                            <?php _e('Admin username:') ?> <br />
+                            <span class='recommendation'><?php _e("This must be a valid WordPress user in the Administrator role. This will be the default poster in some cases.", 'postie'); ?></span>
+                        </th> 
                         <td>
-                            <input name='postie-settings[admin_username]' type="text" id='postie-settings-admin_username'
-                                   value="<?php echo $admin_username; ?>" size="50" />                </td> 
+                            <input name='postie-settings[admin_username]' type="text" id='postie-settings-admin_username' value="<?php echo $admin_username; ?>" size="50" />
+                        </td> 
                     </tr> 
                 </table> 
             </div>

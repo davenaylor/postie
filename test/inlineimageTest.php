@@ -97,11 +97,11 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config['prefer_text_type'] = 'html';
 
         $post = $this->process_file("data/signature.var", $config);
-        $this->assertEquals('test content<div><br></div><div> ', $post['post_content']);
+        $this->assertEquals('test content<div><br></div>  ', $post['post_content']);
 
         $config['prefer_text_type'] = 'html';
         $post = $this->process_file("data/signature.var", $config);
-        $this->assertEquals('test content<div><br></div><div> ', $post['post_content']);
+        $this->assertEquals('test content<div><br></div>  ', $post['post_content']);
     }
 
     function testQuotedPrintable() {
