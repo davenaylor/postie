@@ -411,6 +411,7 @@
                     <tr>
                         <th width="33%" valign="top" scope="row"><?php _e('Image Template', 'postie') ?><br />
                             <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie'); ?></span><br /><br />
+                            <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br /><br />
                             <span class='recommendation'><?php _e('Sizes for thumbnail, medium, and large images can be chosen in the <a href="options-media.php">Media Settings</a>. The samples here use the default sizes, and will not reflect the sizes you have chosen.', 'postie'); ?></span>
                         </th>
                         <td>
@@ -458,8 +459,11 @@
             <div id="simpleTabs-content-5" class="simpleTabs-content">
                 <table class='form-table'>
 
-                    <tr><th scope='row'><?php _e('Video template 1', 'postie') ?><br />
-                            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
+                    <tr>
+                        <th scope='row'><?php _e('Video template 1', 'postie') ?><br />
+                            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span><br />
+                            <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br />
+                        </th>
                         <?php $templateDir = get_option('siteurl') . '/' . PLUGINDIR . '/postie/templates'; ?>
                         <td>
                             <input type='hidden' id='postie-settings-selected_video1template' name='postie-settings[selected_video1template]'
@@ -501,8 +505,12 @@
                             <input name='postie-settings[video1types]' type="text" id='postie-settings-video1types'
                                    value="<?php if ($video1types != '') echo $video1types; ?>" size="40" />                </td> 
                     </tr> 
-                    <tr><th scope='row'><?php _e('Video template 2', 'postie') ?><br />
-                            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
+                    <tr><td colspan="2"><hr /></td></tr>
+                    <tr>
+                        <th scope='row'><?php _e('Video template 2', 'postie') ?><br />
+                            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span><br/>
+                            <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br />
+                        </th>
                         <td>
                             <input type='hidden' id='postie-settings-selected_video2template' name='postie-settings[selected_video2template]'
                                    value="<?php echo esc_attr($selected_video2template) ?>" />
@@ -540,13 +548,19 @@
                     <tr> 
                         <th width="33%" valign="top" scope="row">
                             <?php _e('Video 2 file types:') ?><br /><span class='recommendation'>
-                                <?php _e('Use the video template 2 for these files types (separated by commas)', 'postie') ?></span> </th> 
+                                <?php _e('Use the video template 2 for these files types (separated by commas)', 'postie') ?></span> <br />
+                        </th> 
                         <td>
                             <input name='postie-settings[video2types]' type="text" id='postie-settings-video2types'
-                                   value="<?php if ($video2types != '') echo $video2types; ?>" size="40" />                </td> 
+                                   value="<?php if ($video2types != '') echo $video2types; ?>" size="40" />                
+                        </td> 
                     </tr> 
+                    <tr><td colspan="2"><hr /></td></tr>
                     <tr><th scope='row'><?php _e('Audio template', 'postie') ?><br />
-                            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span></th>
+                            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span>
+                            <br />
+                            <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br />
+                        </th>
                         <td>
                             <input type='hidden' id='postie-settings-selected_audiotemplate' name='postie-settings[selected_audiotemplate]'
                                    value="<?php echo esc_attr($selected_audiotemplate) ?>" />
@@ -583,9 +597,8 @@
                     <tr> 
                         <th width="33%" valign="top" scope="row">
                             <?php _e('Audio file types:') ?><br />
-                            <span class='recommendation'>
-                                <?php _e('Use the audio template for these files types (separated by commas)', 'postie') ?>
-                            </span> 
+                            <span class='recommendation'><?php _e('Use the audio template for these files types (separated by commas)', 'postie') ?></span> <br />
+
                         </th> 
                         <td>
                             <input name='postie-settings[audiotypes]' type="text" id='postie-settings-audiotypes' value="<?php if ($audiotypes != '') echo $audiotypes; ?>" size="40" />

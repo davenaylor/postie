@@ -1235,7 +1235,6 @@ function filter_RemoveSignature(&$content, $config) {
 
 function filter_RemoveSignatureWorker(&$html, $pattern) {
     $found = false;
-    DebugEcho("sig count children: " . count($html->children()));
     if (preg_match($pattern, trim($html->plaintext), $matches)) {
         DebugEcho("signature found in base: removing");
         DebugDump($matches);
@@ -1273,7 +1272,7 @@ function filter_End(&$content, $config) {
         $pos = strpos($content, $end);
         if ($pos === false)
             return $content;
-        DebugEcho("end filter $end");
+        DebugEcho("end filter: $end");
         $content = substr($content, 0, $pos);
     }
 }
@@ -1721,7 +1720,7 @@ function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
                     DebugEcho("checking prefered type");
                     if ($ctype == $preferTextType) {
                         DebugEcho("keeping: $ctype");
-                        DebugEcho(substr($mimeDecodedEmail->parts[$i]->body, 500));
+                        DebugEcho(substr($mimeDecodedEmail->parts[$i]->body, 0, 500));
                         $newParts[] = $mimeDecodedEmail->parts[$i];
                     } else {
                         DebugEcho("removing: $ctype");

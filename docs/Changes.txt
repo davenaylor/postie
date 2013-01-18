@@ -15,7 +15,7 @@ Attachments are now processed in the order they were attached.
 * Updated documentation for template variables.
 * Fixed a bug where text/plain attachments were not being treated as attachments.
 * Look for and include filterPostie.php in wp-content if it exists. (used for custom filters so they don't get deleted on upgrades)
-* Minor cleanup of settings screen layout
+* Cleanup of settings screen layout
 
 = 1.4.26 (2013.01.15) =
 * Fixed a bug where signatures were not removed in html emails.

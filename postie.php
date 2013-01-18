@@ -75,7 +75,7 @@ if (is_admin()) {
 }
 
 function activate_postie() {
-    LogInfo("activiated");
+    LogInfo("activated");
 
     static $init = false;
     $options = get_option('postie-settings');
