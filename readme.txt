@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5
-Stable tag: 1.4.27
+Stable tag: 1.4.28
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -416,6 +416,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.28 (2013.01.18) =
+* Fixed bug in "reset settings to default" where the protocol wasn't being retained.
+* More cleanup and clarification on settings screen.
+* Fixed bug where excerpts weren't getting set if "Filter newlines" was set to "Yes"
+* Removed logic to increase memory size.
+
 = 1.4.27 (2013.01.17) =
 * Updated sample plugin for extending Postie.
 * Updated documentation for template variables.

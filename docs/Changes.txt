@@ -10,7 +10,7 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.4.28 (future) =
+= 1.4.28 (2013.01.18) =
 * Fixed bug in "reset settings to default" where the protocol wasn't being retained.
 * More cleanup and clarification on settings screen.
 * Fixed bug where excerpts weren't getting set if "Filter newlines" was set to "Yes"
