@@ -12,6 +12,8 @@ Attachments are now processed in the order they were attached.
 == CHANGELOG ==
 = 1.4.29 (2013.01.19) =
 * Fixed bug where manually running Postie worked, but calling get_mail.php directly did not.
+* Fixed bug where WP media upload rejects a file.
+* Added a check for mbstring.
 
 = 1.4.28 (2013.01.18) =
 * Fixed bug in "reset settings to default" where the protocol wasn't being retained.

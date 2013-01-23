@@ -42,6 +42,11 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
     <?php
     EchoInfo("iconv: " . ((HasIconvInstalled()) ? __('yes', 'postie') : __('no', 'postie')));
     EchoInfo("imap (required for subjects): " . ((function_exists('imap_mime_header_decode')) ? __('yes', 'postie') : __('no', 'postie')));
+    if (HasMbStringInstalled()) {
+        EchoInfo("mbstring: yes");
+    } else {
+        EchoInfo("<b>Warning!</b> Postie requires that mbstring be enabled.");
+    }
     ?>
 
     <h2>Clock Tests</h2>
@@ -73,7 +78,7 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
                     EchoInfo($mail_server->error());
                 } else {
                     EchoInfo("Successful " . strtoupper($config['input_protocol']) . " connection on port {$config["mail_server_port"]}");
-                    EchoInfo("# of waiting messages: " .$mail_server->getNumberOfMessages());
+                    EchoInfo("# of waiting messages: " . $mail_server->getNumberOfMessages());
                 }
             }
             break;
