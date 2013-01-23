@@ -120,7 +120,7 @@ function tag_Date(&$content, $message_date) {
 
 function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
 
-    $fulldebug = false;
+    $fulldebug = true;
 
     extract($config);
 
@@ -276,8 +276,8 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     }
 
     filter_newlines($content, $config);
-
-    //DebugEcho("pre-insert content: $content");
+    if ($fulldebug)
+        DebugEcho("post newline: $content");
 
     DebugEcho("excerpt: $post_excerpt");
 
@@ -829,8 +829,11 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             // fix filename (remove non-standard characters)
             //$filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $part->ctype_parameters['name']);
             $filename = $part->ctype_parameters['name'];
-            DebugEcho("Filename: $filename");
+        } elseif (property_exists($part, 'd_parameters') && is_array($part->d_parameters) && array_key_exists('filename', $part->d_parameters)) {
+            $filename = $part->d_parameters['filename'];
         }
+
+        DebugEcho("Filename: $filename");
         switch (strtolower($part->ctype_primary)) {
             case 'multipart':
                 DebugEcho("multipart: " . count($part->parts));
@@ -918,6 +921,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 break;
 
             case 'image':
+                DebugEcho("image Attachement: $filename");
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 if (!is_wp_error($file_id)) {
                     $file = wp_get_attachment_url($file_id);
@@ -928,19 +932,19 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     }
 
                     $the_post = get_post($file_id);
-                    DebugEcho("image Attachement: $filename");
                     $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $imagetemplate, $filename);
                     if ($cid) {
                         $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
                         DebugEcho("CID Attachement: $cid");
                     }
                 } else {
-                    LogInfo($file_id->get_error_message());
+                    LogInfo("image error: " . $file_id->get_error_message());
                 }
                 break;
 
             case 'audio':
                 //DebugDump($part->headers);
+                DebugEcho("audio Attachement: $filename");
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 if (!is_wp_error($file_id)) {
                     $file = wp_get_attachment_url($file_id);
@@ -956,11 +960,12 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     }
                     $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $audioTemplate, $filename);
                 } else {
-                    LogInfo($file_id->get_error_message());
+                    LogInfo("audio error: " . $file_id->get_error_message());
                 }
                 break;
 
             case 'video':
+                DebugEcho("video Attachement: $filename");
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 if (!is_wp_error($file_id)) {
                     $file = wp_get_attachment_url($file_id);

@@ -4,7 +4,7 @@
   Plugin Name: Postie
   Plugin URI: http://PostiePlugin.com/
   Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href='options-general.php?page=postie/postie.php'>Settings and options</a>) to configure your e-mail settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://wordpress.org/support/plugin/postie'>postie forum</a> for support.
-  Version: 1.4.29
+  Version: 1.4.30
   Author: Wayne Allen
   Author URI: http://allens-home.com/
   License: GPL2
@@ -74,9 +74,12 @@ if (is_admin()) {
     postie_warnings();
 }
 
+/*
+ * called by WP when activating the plugin
+ * Note that you can't do any output during this funtion or activation
+ * will fail on some systems. This means no DebugEcho, EchoInfo or DebugDump.
+ */
 function activate_postie() {
-    LogInfo("activated");
-
     static $init = false;
     $options = get_option('postie-settings');
 
@@ -103,8 +106,6 @@ function activate_postie() {
     $options = config_ValidateSettings($options);
     update_option('postie-settings', $options);
     $init = true;
-    DebugEcho("activate completed");
-    return $options;
 }
 
 register_activation_hook(__FILE__, 'activate_postie');
