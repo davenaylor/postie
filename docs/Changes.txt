@@ -10,6 +10,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.31 (future) =
+* Enhanced category detection to be compatible with Polylang plugin.
+* Enhanced prerequisite detection.
+
 = 1.4.30 (2013.01.22) =
 * Fixed a bug that caused activation to fail or show a blank page.
 * Fixed bug where WP media upload rejects a file.

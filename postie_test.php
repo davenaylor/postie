@@ -38,12 +38,21 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
 
     <br/>
     <h2>International support</h2>
-    <p><i><?php _e('Only required for international character set support', 'postie') ?></i></p>
     <?php
-    EchoInfo("iconv: " . ((HasIconvInstalled()) ? __('yes', 'postie') : __('no', 'postie')));
-    EchoInfo("imap (required for subjects): " . ((function_exists('imap_mime_header_decode')) ? __('yes', 'postie') : __('no', 'postie')));
+    if (HasIconvInstalled()) {
+        EchoInfo("iconv: installed");
+    } else {
+        EchoInfo("<b>Warning!</b> Postie requires that iconv be enabled.");
+    }
+    
+    if (function_exists('imap_mime_header_decode')) {
+        EchoInfo("imap: installed");
+    } else {
+        EchoInfo("<b>Warning!</b> Postie requires that imap be enabled.");
+    }
+
     if (HasMbStringInstalled()) {
-        EchoInfo("mbstring: yes");
+        EchoInfo("mbstring: installed");
     } else {
         EchoInfo("<b>Warning!</b> Postie requires that mbstring be enabled.");
     }

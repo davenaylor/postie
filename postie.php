@@ -79,6 +79,7 @@ if (is_admin()) {
  * Note that you can't do any output during this funtion or activation
  * will fail on some systems. This means no DebugEcho, EchoInfo or DebugDump.
  */
+
 function activate_postie() {
     static $init = false;
     $options = get_option('postie-settings');
@@ -133,18 +134,27 @@ function postie_warnings() {
         add_action('admin_notices', 'postie_enter_info');
     }
 
-    if (!function_exists('imap_mime_header_decode') && array_key_exists('activate', $_GET) && $_GET['activate'] == true) {
+    $p = strtolower($config['input_protocol']);
+    if (!function_exists('imap_mime_header_decode') && ($p == 'imap' || $p == 'imap-ssl' || $p = 'pop-ssl')) {
 
         function postie_imap_warning() {
             echo "<div id='postie-imap-warning' class='error'><p><strong>";
-            echo __('Warning: the IMAP php extension is not installed.', 'postie');
-            echo __('Postie may not function correctly without this extension (especially for non-English messages).', 'postie');
-            echo "</strong> ";
-            //echo __('Warning: the IMAP php extension is not installed. Postie may not function correctly without this extension (especially for non-English messages) .', 'postie')."</strong> ".
-            echo sprintf(__('Please see the <a href="%1$s">FAQ </a> for more information.'), "options-general.php?page=postie/postie.php", 'postie') . "</p></div> ";
+            echo __('Warning: the IMAP php extension is not installed. Postie can not use IMAP, IMAP-SSL or POP-SSL without this extension.', 'postie');
+            echo "</strong></p></div>";
         }
 
         add_action('admin_notices', 'postie_imap_warning');
+    }
+
+    if (!function_exists('mb_detect_encoding')) {
+
+        function postie_mbstring_warning() {
+            echo "<div id='postie-mbstring-warning' class='error'><p><strong>";
+            echo __('Warning: the Multibyte String php extension (mbstring) is not installed. Postie will not function without this extension.', 'postie');
+            echo "</strong></p></div>";
+        }
+
+        add_action('admin_notices', 'postie_mbstring_warning');
     }
 }
 

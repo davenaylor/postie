@@ -323,6 +323,9 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
 
     $details = apply_filters('postie_post', $details);
 
+    DebugEcho(("Post postie_post filter"));
+    DebugDump($details);
+
     if (empty($details)) {
         // It is possible that the filter has removed the post, in which case, it should not be posted.
         // And if we created a placeholder post (because this was not a reply to an existing post),
@@ -2303,7 +2306,7 @@ function lookup_category($trial_category) {
     } elseif ($found_category = $wpdb->get_var($sql_sub_name)) {
         //then cateogry is a start of a name and found
     }
-    return $found_category;
+    return intval($found_category); //force to integer
 }
 
 /**
