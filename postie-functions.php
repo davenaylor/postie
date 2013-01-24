@@ -120,7 +120,7 @@ function tag_Date(&$content, $message_date) {
 
 function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
 
-    $fulldebug = true;
+    $fulldebug = false;
 
     extract($config);
 
@@ -1752,16 +1752,18 @@ function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
  * It accepts an object containing the entire message
  */
 function MailToRecipients(&$mail_content, $testEmail = false, $recipients = array(), $returnToSender, $reject = true) {
+    DebugEcho("send mail");
     if ($testEmail) {
-        return;
+        return false;
     }
     $user = get_userdata('1');
     $myname = $user->user_nicename;
     $myemailadd = get_option("admin_email");
     $blogname = get_option("blogname");
     $blogurl = get_option("siteurl");
-//array_push($recipients, $myemailadd);
+
     if (count($recipients) == 0) {
+        DebugEcho("send mail: no recipients");
         return false;
     }
 
@@ -1780,6 +1782,7 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
     }
     // Set email subject
     if ($reject) {
+        DebugEcho("send mail: sending reject mail");
         $alert_subject = $blogname . ": Unauthorized Post Attempt from $from";
         if ($mail_content->ctype_parameters['boundary']) {
             $boundary = $mail_content->ctype_parameters["boundary"];
@@ -1787,18 +1790,7 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
             $boundary = uniqid("B_");
         }
         // Set sender details
-        /*
-          if (isset($mail_content->headers["mime-version"])) {
-          $headers .= "Mime-Version: ". $mail_content->headers["mime-version"] . "\r\n";
-          }
-          if (isset($mail_content->headers["content-type"])) {
-          $headers .= "Content-Type: ". $mail_content->headers["content-type"] . "\r\n";
-          }
-         */
-
         $headers.="Content-Type:multipart/alternative; boundary=\"$boundary\"\r\n";
-        // SDM 20041123
-        // construct mail message
         $message = "An unauthorized message has been sent to $blogname.\n";
         $message .= "Sender: $from\n";
         $message .= "Subject: $subject\n";
@@ -1830,13 +1822,12 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
                 $mailtext .= $part->body;
         }
     } else {
+        DebugEcho("send mail: sending success mail");
         $alert_subject = "Successfully posted to $blogname";
         $mailtext = "Your post '$subject' has been successfully published to $blogname <$blogurl>.\n";
     }
 
-
-// Send message
-    mail($myemailadd, $alert_subject, $mailtext, $headers);
+    wp_mail($myemailadd, $alert_subject, $mailtext, $headers);
 
     return true;
 }
@@ -2242,7 +2233,7 @@ function tag_Excerpt(&$content, $filterNewLines, $convertNewLines) {
 }
 
 /**
- * This function determines categories for the post
+ * This function determines the categories ids for the post
  * @return array
  */
 function tag_categories(&$subject, $defaultCategory) {

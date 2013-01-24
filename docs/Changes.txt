@@ -13,6 +13,7 @@ Attachments are now processed in the order they were attached.
 = 1.4.31 (future) =
 * Enhanced category detection to be compatible with Polylang plugin.
 * Enhanced prerequisite detection.
+* Now using wp_mail() instead of mail()
 
 = 1.4.30 (2013.01.22) =
 * Fixed a bug that caused activation to fail or show a blank page.

@@ -312,22 +312,22 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("-not a category- test", $s);
 
-        $wpdb->t_get_var = "general";
+        $wpdb->t_get_var = 1;
         $s = "general: test";
         $c = tag_categories($s, "default");
-        $this->assertEquals("general", $c[0]);
+        $this->assertEquals(1, $c[0]);
         $this->assertEquals("test", $s);
 
-        $wpdb->t_get_var = "general";
+        $wpdb->t_get_var = 1;
         $s = "[general] test";
         $c = tag_categories($s, "default");
-        $this->assertEquals("general", $c[0]);
+        $this->assertEquals(1, $c[0]);
         $this->assertEquals("test", $s);
 
-        $wpdb->t_get_var = "general";
+        $wpdb->t_get_var = 1;
         $s = "-general- test";
         $c = tag_categories($s, "default");
-        $this->assertEquals("general", $c[0]);
+        $this->assertEquals(1, $c[0]);
         $this->assertEquals("test", $s);
 
         $wpdb->t_get_var = "";
@@ -336,7 +336,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("specific: test", $s);
 
-        $wpdb->t_get_var = array("1", "1");
+        $wpdb->t_get_var = array(1, 1);
         $s = "[1] [1] test";
         $c = tag_categories($s, "default");
         $this->assertEquals(2, count($c));
@@ -344,10 +344,10 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("1", $c[1]);
         $this->assertEquals("test", $s);
 
-        $wpdb->t_get_var = array(null, null, null, "general");
+        $wpdb->t_get_var = array(null, null, null, 1);
         $s = "[general] test: with colon";
         $c = tag_categories($s, "default");
-        $this->assertEquals("general", $c[0]);
+        $this->assertEquals(1, $c[0]);
         $this->assertEquals("test: with colon", $s);
     }
 

@@ -140,4 +140,8 @@ function is_wp_error() {
 function sanitize_title($title){
     return $title;
 }
+
+function get_temp_dir(){
+    return sys_get_temp_dir();
+}
 ?>
