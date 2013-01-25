@@ -134,7 +134,7 @@
                             </span>
                         </th>
                         <td valign="top">
-                            <br/><input name='postie-settings[mail_server_port]' type="text" id='postie-settings-mail_server_port' value="<?php echo $mail_server_port; ?>" size="6" />
+                            <br/><input name='postie-settings[mail_server_port]' type="text" id='postie-settings-mail_server_port' value="<?php echo esc_attr($mail_server_port); ?>" size="6" />
                         </td>
                     </tr>
                     <tr>
@@ -142,24 +142,24 @@
                             <br />
                             <span class='recommendation'><?php _e("Should be the same as your normal offset - but this lets you adjust it in cases where that doesn't work.", 'postie'); ?></span>
                         </th>
-                        <td><input name='postie-settings[time_offset]' type="text" id='postie-settings-time_offset' size="2" value="<?php echo $time_offset; ?>" /> 
+                        <td><input name='postie-settings[time_offset]' type="text" id='postie-settings-time_offset' size="2" value="<?php echo esc_attr($time_offset); ?>" /> 
                             <?php _e('hours', 'postie') ?> 
 
                         </td>
                     </tr>
                     <tr valign="top">
                         <th scope="row"><?php _e('Mail Server:', 'postie') ?></th>
-                        <td><input name='postie-settings[mail_server]' type="text" id='postie-settings-mail_server' value="<?php echo $mail_server; ?>" size="40" />
+                        <td><input name='postie-settings[mail_server]' type="text" id='postie-settings-mail_server' value="<?php echo esc_attr($mail_server); ?>" size="40" />
                         </td>
                     </tr>
                     <tr valign="top">
                         <th width="33%" scope="row"><?php _e('Mail Userid:', 'postie') ?></th>
-                        <td><input name='postie-settings[mail_userid]' type="text" id='postie-settings-mail_userid' value="<?php echo $mail_userid; ?>" size="40" /></td>
+                        <td><input name='postie-settings[mail_userid]' type="text" id='postie-settings-mail_userid' value="<?php echo esc_attr($mail_userid); ?>" size="40" /></td>
                     </tr>
                     <tr valign="top">
                         <th scope="row"><?php _e('Mail Password:', 'postie') ?></th>
                         <td>
-                            <input name='postie-settings[mail_password]' type="password" id='postie-settings-mail_password' value="<?php echo $mail_password; ?>" size="40" />
+                            <input name='postie-settings[mail_password]' type="password" id='postie-settings-mail_password' value="<?php echo esc_attr($mail_password); ?>" size="40" />
                         </td>
                     </tr>
                     <tr>
@@ -291,7 +291,7 @@
                             <span class='recommendation'><?php _e("This must be a valid WordPress user in the Administrator role. This will be the default poster in some cases.", 'postie'); ?></span>
                         </th> 
                         <td>
-                            <input name='postie-settings[admin_username]' type="text" id='postie-settings-admin_username' value="<?php echo $admin_username; ?>" size="50" />
+                            <input name='postie-settings[admin_username]' type="text" id='postie-settings-admin_username' value="<?php echo esc_attr($admin_username); ?>" size="50" />
                         </td> 
                     </tr> 
                 </table> 
@@ -316,13 +316,13 @@
                             </span>
                         </th>
                         <td>
-                            <input type='text' name='postie-settings[default_post_tags]' id='postie-settings-default_post_tags' value='<?php echo $default_post_tags ?>' />
+                            <input type='text' name='postie-settings[default_post_tags]' id='postie-settings-default_post_tags' value='<?php echo esc_attr($default_post_tags) ?>' />
                         </td>
                     </tr>
                     <tr> 
                         <th width="33%" valign="top" scope="row"><?php _e('Default Title:', 'postie') ?> </th> 
                         <td>
-                            <input name='postie-settings[default_title]' type="text" id='postie-settings-default_title' value="<?php echo $default_title; ?>" size="50" /><br />
+                            <input name='postie-settings[default_title]' type="text" id='postie-settings-default_title' value="<?php echo esc_attr($default_title); ?>" size="50" /><br />
                         </td> 
                     </tr> 
                     <tr> 
@@ -342,16 +342,16 @@
                         <th width="33%" valign="top" scope="row"><?php _e('Tag Of Message Start:', 'postie') ?> <br />
                             <span class='recommendation'><?php _e('Use to remove any text from a message that the email provider puts at the top of the message', 'postie') ?></span></th>
                         <td>
-                            <input name='postie-settings[message_start]' type="text" id='postie-settings-message_start' value="<?php echo $message_start; ?>" size="20" /><br />
+                            <input name='postie-settings[message_start]' type="text" id='postie-settings-message_start' value="<?php echo esc_attr($message_start); ?>" size="50" /><br />
                         </td> 
-                    </tr> 
-                    <tr> 
+                    </tr>
+                    <tr>
                         <th width="33%" valign="top" scope="row"><?php _e('Tag Of Message End:', 'postie') ?> <br />
                             <span class='recommendation'><?php _e('Use to remove any text from a message that the email provider puts at the end of the message', 'postie') ?></span></th>
                         <td>
-                            <input name='postie-settings[message_end]' type="text" id='postie-settings-message_end' value="<?php echo $message_end; ?>" size="20" /><br />
-                        </td> 
-                    </tr> 
+                            <input name='postie-settings[message_end]' type="text" id='postie-settings-message_end' value="<?php echo esc_attr($message_end); ?>" size="50" /><br />
+                        </td>
+                    </tr>
                 </table>
                 <a style='cursor:pointer;' onclick='showAdvanced("message-advanced", "message-advanced-arrow");'><span id="message-advanced-arrow">&#9660;</span> Advanced options</a>
                 <div id="message-advanced" >
@@ -383,7 +383,7 @@
                         <tr> 
                             <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> </th> 
                             <td>
-                                <input name='postie-settings[message_encoding]' type="text" id='postie-settings-message_encoding' value="<?php echo $message_encoding; ?>" size="10" />
+                                <input name='postie-settings[message_encoding]' type="text" id='postie-settings-message_encoding' value="<?php echo esc_attr($message_encoding); ?>" size="10" />
                                 <span class='recommendation'>UTF-8 <?php _e("should handle ISO-8859-1 as well", 'postie'); ?></span>
                             </td> 
                         </tr> 
@@ -407,7 +407,7 @@
                     <tr> 
                         <th width="33%" valign="top" scope="row"><?php _e('Image Place Holder Tag:', 'postie') ?> </th> 
                         <td>
-                            <input name='postie-settings[image_placeholder]' type="text" id='postie-settings-image_placeholder' value="<?php echo $image_placeholder; ?>" size="50" /><br />
+                            <input name='postie-settings[image_placeholder]' type="text" id='postie-settings-image_placeholder' value="<?php echo esc_attr($image_placeholder); ?>" size="50" /><br />
                         </td> 
                     </tr> 
                     <tr>
@@ -505,7 +505,7 @@
                                 <?php _e('Use the video template 1 for these files types (separated by commas)', 'postie') ?></span> </th> 
                         <td>
                             <br/><input name='postie-settings[video1types]' type="text" id='postie-settings-video1types'
-                                        value="<?php if ($video1types != '') echo $video1types; ?>" size="40" />                
+                                        value="<?php if ($video1types != '') echo esc_attr($video1types); ?>" size="40" />                
                         </td> 
                     </tr> 
                     <tr><td colspan="2"><hr /></td></tr>
@@ -555,7 +555,7 @@
                         </th> 
                         <td>
                             <br/><input name='postie-settings[video2types]' type="text" id='postie-settings-video2types'
-                                        value="<?php if ($video2types != '') echo $video2types; ?>" size="40" />                
+                                        value="<?php if ($video2types != '') echo esc_attr($video2types); ?>" size="40" />                
                         </td> 
                     </tr> 
                     <tr><td colspan="2"><hr /></td></tr>
@@ -604,7 +604,7 @@
 
                         </th> 
                         <td>
-                            <br/><input name='postie-settings[audiotypes]' type="text" id='postie-settings-audiotypes' value="<?php if ($audiotypes != '') echo $audiotypes; ?>" size="40" />
+                            <br/><input name='postie-settings[audiotypes]' type="text" id='postie-settings-audiotypes' value="<?php echo esc_attr($audiotypes); ?>" size="40" />
                         </td> 
                     </tr> 
                 </table> 

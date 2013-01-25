@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
-Tested up to: 3.5
-Stable tag: 1.4.30
+Tested up to: 3.5.1
+Stable tag: 1.4.31
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -416,11 +416,17 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.31 (2013.01.25) =
+* Enhanced category detection to be compatible with Polylang plugin.
+* Enhanced prerequisite detection.
+* Now using wp_mail() instead of mail()
+* WordPress 3.5.1 compatibility
+
 = 1.4.30 (2013.01.22) =
-* Fixed a bug that caused activation to fail or show a blank page.
+* Fixed bug that caused activation to fail or show a blank page.
 * Fixed bug where WP media upload rejects a file.
 * Added a check for mbstring.
-* Fixed bug when attachment names were only supplied via d_parameters
+* Fixed bug when attachment names were only supplied via d_parameters.
 
 = 1.4.29 (2013.01.19) =
 * Fixed bug where manually running Postie worked, but calling get_mail.php directly did not.

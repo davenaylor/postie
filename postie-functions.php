@@ -1784,7 +1784,7 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
     if ($reject) {
         DebugEcho("send mail: sending reject mail");
         $alert_subject = $blogname . ": Unauthorized Post Attempt from $from";
-        if ($mail_content->ctype_parameters['boundary']) {
+        if (is_array($mail_content->ctype_parameters) && array_key_exists('boundary', $mail_content->ctype_parameters) && $mail_content->ctype_parameters['boundary']) {
             $boundary = $mail_content->ctype_parameters["boundary"];
         } else {
             $boundary = uniqid("B_");
@@ -2358,7 +2358,7 @@ function BuildTextArea($label, $id, $current_value, $recommendation = NULL) {
     $html.="</th>";
 
     $html .="<td><br /><textarea cols=40 rows=3 name='$id' id='$id'>";
-    $current_value = preg_split("/[,\r\n]+/", trim($current_value));
+    $current_value = preg_split("/[,\r\n]+/", esc_attr(trim($current_value)));
     if (is_array($current_value)) {
         foreach ($current_value as $item) {
             $html .= "$item\n";
