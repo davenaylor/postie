@@ -30,7 +30,7 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
     }
 
     if (!isPostieInCorrectDirectory()) {
-        EchoInfo("<b>Warning!</b> Postie expects to be in its own directory named postie.");
+        EchoInfo("Warning! Postie expects to be in its own directory named postie.");
     } else {
         EchoInfo("Postie is in " . dirname(__FILE__));
     }
@@ -42,19 +42,19 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
     if (HasIconvInstalled()) {
         EchoInfo("iconv: installed");
     } else {
-        EchoInfo("<b>Warning!</b> Postie requires that iconv be enabled.");
+        EchoInfo("Warning! Postie requires that iconv be enabled.");
     }
     
     if (function_exists('imap_mime_header_decode')) {
         EchoInfo("imap: installed");
     } else {
-        EchoInfo("<b>Warning!</b> Postie requires that imap be enabled.");
+        EchoInfo("Warning! Postie requires that imap be enabled.");
     }
 
     if (HasMbStringInstalled()) {
         EchoInfo("mbstring: installed");
     } else {
-        EchoInfo("<b>Warning!</b> Postie requires that mbstring be enabled.");
+        EchoInfo("Warning! Postie requires that mbstring be enabled.");
     }
     ?>
 

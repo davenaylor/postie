@@ -135,7 +135,7 @@ function postie_warnings() {
     }
 
     $p = strtolower($config['input_protocol']);
-    if (!function_exists('imap_mime_header_decode') && ($p == 'imap' || $p == 'imap-ssl' || $p = 'pop-ssl')) {
+    if (!function_exists('imap_mime_header_decode') && ($p == 'imap' || $p == 'imap-ssl' || $p == 'pop-ssl')) {
 
         function postie_imap_warning() {
             echo "<div id='postie-imap-warning' class='error'><p><strong>";
