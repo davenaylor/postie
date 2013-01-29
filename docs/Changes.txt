@@ -12,6 +12,8 @@ Attachments are now processed in the order they were attached.
 == CHANGELOG ==
 = 1.4.32 (future) =
 * Fixed bug in detecting need for imap extension.
+* Added additional selections for "Maximum number of emails to process"
+* Added logic to skip text attachments named "ATT00001.txt" which are added by MS Exchange virus scanning.
 
 = 1.4.31 (2013.01.25) =
 * Enhanced category detection to be compatible with Polylang plugin.

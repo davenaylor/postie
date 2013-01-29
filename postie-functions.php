@@ -875,13 +875,17 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 }
                 if (array_key_exists('disposition', $part) && $part->disposition == 'attachment') {
                     DebugEcho("text Attachement: $filename");
-                    $file_id = postie_media_handle_upload($part, $post_id, $poster);
-                    if (!is_wp_error($file_id)) {
-                        $file = wp_get_attachment_url($file_id);
-                        $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
-                        $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
+                    if (strtolower($filename) != strtolower('ATT00001.txt')) {
+                        $file_id = postie_media_handle_upload($part, $post_id, $poster);
+                        if (!is_wp_error($file_id)) {
+                            $file = wp_get_attachment_url($file_id);
+                            $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                            $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
+                        } else {
+                            LogInfo($file_id->get_error_message());
+                        }
                     } else {
-                        LogInfo($file_id->get_error_message());
+                        DebugEcho("text attachment: skipping");
                     }
                 } else {
 

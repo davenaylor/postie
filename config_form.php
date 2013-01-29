@@ -203,11 +203,13 @@
                     </tr>
                     <tr>
                         <th>
-                            <?php _e('Maximum number of emails to process', 'postie'); ?>
+                            <?php _e('Maximum number of emails to process:', 'postie'); ?>
                         </th>
                         <td>
                             <select name='postie-settings[maxemails]' id='postie-settings-maxemails'>
                                 <option value="0" <?php if ($maxemails == '0') echo "selected='selected'" ?>>All</option>
+                                <option value="1" <?php if ($maxemails == '1') echo "selected='selected'" ?>>1</option>
+                                <option value="2" <?php if ($maxemails == '2') echo "selected='selected'" ?>>2</option>
                                 <option value="5" <?php if ($maxemails == '5') echo "selected='selected'" ?>>5</option>
                                 <option value="10" <?php if ($maxemails == '10') echo "selected='selected'" ?>>10</option>
                                 <option value="25" <?php if ($maxemails == '25') echo "selected='selected'" ?>>25</option>
