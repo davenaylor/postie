@@ -69,6 +69,7 @@ enable mail checking using cron.</p>
 
 <p>You will need to install <a href="http://gnuwin32.sourceforge.net/packages/wget.htm">wget</a> or <a href="http://curl.haxx.se/dlwiz/">curl</a>
 Then use the Task Scheduler control panel to call wget or cron.</p>	<hr />
+		
 		<h3>Upgrade Notice</h3>
 	<dl>
 		<dt>1.4.18</dt>
@@ -80,9 +81,16 @@ Then use the Task Scheduler control panel to call wget or cron.</p>	<hr />
 	</dl>
 
 	<h3 id='Usage'>Usage</h3>
+<h4>Specifying Beginning and Ending of Post</h4>
+
 <ul>
 <li>If you put in :start - the message processing won't start until it sees that string.</li>
 <li>If you put in :end - the message processing will stop once it sees that string.</li>
+</ul>
+
+<h4>Post Date</h4>
+
+<ul>
 <li>Posts can have a specific publication date. Relative dates like "tomorrow", "monday", "first day of next month" are supported.
 
 <ul>
@@ -97,6 +105,11 @@ Then use the Task Scheduler control panel to call wget or cron.</p>	<hr />
 <li>delay:1m - 1 minute</li>
 <li>delay:1d2h4m - 1 day 2 hours 4m</li>
 </ul></li>
+</ul>
+
+<h4>Comment Control</h4>
+
+<ul>
 <li>By putting comments:X in your message you can control if comments are allowed
 
 <ul>
@@ -113,6 +126,11 @@ get posted as a comment to the "foo" post. This works by the subject
 line, so if you have two posts with titles "foo", then the comment
 will get placed in the more recent post.</li>
 </ul></li>
+</ul>
+
+<h4>Post Excerpt</h4>
+
+<ul>
 <li>Custom excerpt
 
 <ul>
@@ -128,7 +146,7 @@ will get placed in the more recent post.</li>
 <p>You can specify the post type by including it as the first part of the subject
   E.g. post type//real subject</p>
 
-<h4>Category and tag handling</h4>
+<h4>Categories</h4>
 
 <ul>
 <li>If you put a category name in the subject with a : it will be used
@@ -163,6 +181,8 @@ tags: foo, bar</li>
 </ul>
 
 <h4>Image Handling</h4>
+
+<p>Note you can only use this feature if your "Preferred Text Type" is set to "plain"</p>
 
 <ul>
 <li>Allows you to attach images to your email and automatically post
@@ -234,229 +254,5 @@ if you send an HTML and plain text message</li>
 </ul>
 
 <h4>Extending</h4>
-
-<p>== Frequently Asked Questions ==</p>
-
-<h4>Postie won't connect to my mailserver. Why Not?</h4>
-
-<p>Make sure the port you are using is open. For example, bluehost seems to block
-ports 993 and 995 (for pop3-ssl and imap-ssl) by default. I have heard that
-you can request that they open them for you ( you might have to pay extra).</p>
-
-<p>You can check for open ports with the following command on your server:</p>
-
-<pre><code>netstat -ln|grep -E &#039;:::(993|995|143)&#039;</code></pre>
-
-<p>If nothing shows up, then the ports are not open.</p>
-
-<h4>How can I get postie to display inline images?</h4>
-
-<p>Make sure that you send e-mail formatted as html (richtext), and set postie to
-prefer html messages (in the message tab of the postie settings)</p>
-
-<h4>Mail is not showing up right when I send html (rich formatted) e-mail!</h4>
-
-<p>Make sure you set the preferred text type to html</p>
-
-<h4>Do I need to any code to my theme for postie to work?</h4>
-
-<p>No.</p>
-
-<h4>I read somewhere to add an iframe to my footer. Should I do this?</h4>
-
-<p>No. Do not add an iframe in your footer to get postie to check mail
-periodically. To check e-mail periodically, either set-up a cron job, or use
-cronless postie. See installation instructions</p>
-
-<h4>My mail host requires SSL, but postie will not allow me to select pop3-ssl or imap-ssl</h4>
-
-<p>You must have php-imap installed on your server for this to work. Ask your
-hosting provider about this.</p>
-
-<h4>Can I use postie to check a gmail account?</h4>
-
-<p>Yes. You can use either pop3-ssl or imap-ssl with a gmail account. Before
-attempting to use with postie, make sure that you enable pop or imap in your
-gmail preferences.</p>
-
-<ul>
-<li>Pop3 settings:
-
-<ul>
-<li>protocol - pop3-ssl</li>
-<li>server - pop.gmail.com</li>
-<li>port - 995</li>
-<li>userid - your username (e.g. if your e-mail address is foo@gmail.com,
-this would be just foo)</li>
-<li>password - your password </li>
-</ul></li>
-<li>IMAP settings:
-
-<ul>
-<li>protocol - imap-ssl</li>
-<li>server - imap.gmail.com</li>
-<li>port - 993</li>
-<li>userid - your username (e.g. if your e-mail address is foo@gmail.com,
-this would be just foo)</li>
-<li>password - your password </li>
-</ul></li>
-</ul>
-
-<h4>Can I use postie with GoDaddy hosting?</h4>
-
-<p>Yes, but you must use an email set up using the GoDaddy email service and the following settings:</p>
-
-<ul>
-<li>protocol - pop3</li>
-<li>server - pop.secureserver.net</li>
-<li>port - 110</li>
-<li>userid - xxxxx@yourdomain</li>
-<li>password - your password </li>
-</ul>
-
-<p>GoDaddy hosting does not allow you to connect to non-GoDaddy mail servers like Gmail.</p>
-
-<h4>My posts show up as being posted by 'admin' instead of me. Why?</h4>
-
-<p>If your admin account is linked to bar@gmail.com, and you send mail from
-bar@gmail.com, it will show up as being posted by admin. If you have a
-wordpress user named "John Doe", which is linked to johndoe@gmail.com, make
-sure that you send e-mails from johndoe@gmail.com. It doesn't matter which
-e-mail address postie is checking. That is, if you send mail from
-johndoe@gmail.com to foo@gmail.com, it gets posted as "John Doe".</p>
-
-<p>If you send an e-mail to your postie address from an e-mail address that is no
-t linked to a wordpress user, it will get posted as admin.</p>
-
-<h4>Images aren't showing up at all?</h4>
-
-<p>There are a couple possible reasons for this. First, check to see if you can
-add an image through wordpress's normal posting mechanism. If not, then there
-is probably 1 or 2 problems:
-1. Your server does not have the php-gd library installed. Ask your hosting
-provider about this.</p>
-
-<ol>
-<li>Your wp-content/uploads directory is not writable by the webserver. Make
-sure that it is</li>
-</ol>
-
-<h4>Can I delete the wp-files directory needed by postie version &lt;1.3.0?</h4>
-
-<p>If you have posts published already by older versions of postie, getting rid
-of those directories will delete any files you might have had associated with
-those old posts. If you don't have any such posts, then you can safely delete
-them.</p>
-
-<h4>How can I get rid of stupid stuff my e-mail provider adds to my messages?</h4>
-
-<p>To strip off stuff that they add at the beginning of a message, start your
-post with :start</p>
-
-<p>To strip off stuff that they add at the end of a message, end your
-post with :end</p>
-
-<h4>How can I add custom attachment icons?</h4>
-
-<p>Simply upload the icons you want to the postie/icons/custom directory. You
-must name the icons according to the following scheme:</p>
-
-<pre><code>{filetype}-{size}.png</code></pre>
-
-<p>NOTE THAT ANY CUSTOM FILES ADDED TO THE POSTIE DIRECTORY WILL BE DELETED IF YOU 
-USE THE NORMAL WORDPRESS UPGRADE PROCESS.</p>
-
-<p>For example, for word documents, you could use:</p>
-
-<pre><code>doc-32.png</code></pre>
-
-<p>for a 32x32 pixel icon. (You can actually create any size icon you want, but
-if you name it 32, then it will only be used if you select to use size 32
-icons)</p>
-
-<p>See the other directories in icons for more examples.</p>
-
-<p>Currently the following filetypes are supported:</p>
-
-<ul>
-<li>doc - microsoft word (including docx)</li>
-<li>ppt - microsoft powerpoint (including pptx)</li>
-<li>xls - microsoft excel (including xlsx)</li>
-<li>numbers - iWork numbres spreadsheet</li>
-<li>pages - iWork pages document</li>
-<li>key - iWork keynote presentation</li>
-<li>pdf - portable document format</li>
-<li>rtf - rich text format</li>
-<li>txt - plain text document</li>
-</ul>
-
-<h4>Can I add special text to the body of the post when using postie?</h4>
-
-<p>Yes. You can create your own function, and use the postie_post filter.
-Two short examples are included in the filterPostie.php.sample file</p>
-
-<h4>Can I add special text to the title of the post when using postie?</h4>
-
-<p>Yes. You can create your own function, and use the postie_post filter.
-Two short examples are included in the filterPostie.php.sample file</p>
-
-<h4>Can I select tags or categories based on the content of the e-mail?</h4>
-
-<p>Yes. You can create your own function, and use the postie_post filter.
-See the filterPostie.php.sample file for examples.</p>
-
-<h4>Is the IMAP extension required for postie?</h4>
-
-<p>The IMAP extension is not required, but it is strongly recommended, especially
-is you are using non-English text. There is more information on php.net about
-installing the IMAP extension. If you have control over your server, it is
-often not hard to install.</p>
-
-<p>On Ubuntu, try</p>
-
-<pre><code>sudo apt-get install php5-imap</code></pre>
-
-<p>On Fedora, try</p>
-
-<pre><code>sudo yuminstall php-imap</code></pre>
-
-<p>The IMAP extension is known to be installed on the following popular webhosts:
-* Dreamhost</p>
-
-<h4>How can I embed youtube or vimeo videos?</h4>
-
-<p>Simply put the url in the body of your e-mail. (Make sure that you have the
-option to convert url into links turned on)</p>
-
-<h4>Something is going wrong, how do I see what is happening?</h4>
-
-<p>Add the following lines to your wp-config.php file</p>
-
-<pre><code>define(&#039;WP_DEBUG&#039;, true);
-define(&#039;WP_DEBUG_LOG&#039;, true);
-define(&#039;POSTIE_DEBUG&#039;, true);</code></pre>
-
-<p>Various errors, warning and informational will be written to the wp-content\debug.log
-file. There may also be all sorts of warnings and messages in your site as well
-depending on how well behaved your other plugins and themes are, so you will not
-want to leave these settings set to true all the time.</p>
-
-<h4>Why doesn't Postie automatically publish my emails when running manually works</h4>
-
-<p>WordPress cron (which Postie relies on) doesn't run unless a page is accessed on the 
-site. So if you send an email, but nobody accesses the site for 3 days Postie won't 
-be given the chance to fetch the email and publish the post.</p>
-
-<p>To ensure that Postie runs smoothly on a low or no volume site you need to ensure that 
-a page gets hit (any page is fine). Use something like cron + curl on Linux or install 
-curl on Windows and use the Scheduled Tasks control panel. If you are using a hosting company
-that doesn't allow you access to cron you can use a service like 
-<a href="https://www.setcronjob.com/">SetCronJob</a>.</p>
-
-<p>It is also possible to turn the WordPress cron off. Please make sure something like</p>
-
-<pre><code>define(&#039;DISABLE_WP_CRON&#039;, true);</code></pre>
-
-<p>is not in your wp-config.php file.</p>
 <hr />
 

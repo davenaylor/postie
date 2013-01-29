@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.4.31
+Stable tag: 1.4.32
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,8 +80,11 @@ You will need to install [wget](http://gnuwin32.sourceforge.net/packages/wget.ht
 Then use the Task Scheduler control panel to call wget or cron.
 
 == Usage ==
+= Specifying Beginning and Ending of Post =
 * If you put in :start - the message processing won't start until it sees that string.
 * If you put in :end - the message processing will stop once it sees that string.
+
+= Post Date =
 * Posts can have a specific publication date. Relative dates like "tomorrow", "monday", "first day of next month" are supported.
   *    date: date
   *    date: date time
@@ -90,6 +93,8 @@ Then use the Task Scheduler control panel to call wget or cron.
   *    delay:1h - 1 hour
   *    delay:1m - 1 minute
   *    delay:1d2h4m - 1 day 2 hours 4m
+
+= Comment Control =
 * By putting comments:X in your message you can control if comments are allowed
    *   comments:0 - means closed
    *   comments:1 - means open
@@ -100,6 +105,8 @@ Then use the Task Scheduler control panel to call wget or cron.
     get posted as a comment to the "foo" post. This works by the subject
     line, so if you have two posts with titles "foo", then the comment
     will get placed in the more recent post.
+
+= Post Excerpt =
 * Custom excerpt
   * You can include a custom excerpt of an e-mail by putting it between
     :excerptstart and :excerptend
@@ -110,7 +117,7 @@ Then use the Task Scheduler control panel to call wget or cron.
   You can specify the post type by including it as the first part of the subject
   E.g. post type//real subject
 
-= Category and tag handling =
+= Categories =
 * If you put a category name in the subject with a : it will be used
   as the category for the post
 * If you put a category id number in the subject with a : it will
@@ -141,6 +148,8 @@ Then use the Task Scheduler control panel to call wget or cron.
 * You can also set a default tag to be applied if no tags are included.
 
 = Image Handling =
+Note you can only use this feature if your "Preferred Text Type" is set to "plain"
+
 * Allows you to attach images to your email and automatically post
   them to your blog
 * You can publish images in the text of your message by using #img1#
@@ -203,7 +212,8 @@ Then use the Task Scheduler control panel to call wget or cron.
   if you send an HTML and plain text message
 * Automatically confirms that you are installed correctly
 
-= Extending === Frequently Asked Questions ==
+= Extending =
+== Frequently Asked Questions ==
 
 = Postie won't connect to my mailserver. Why Not? =
 
@@ -416,6 +426,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.32 (2013.01.29) =
+* Fixed bug in detecting need for imap extension.
+* Added additional selections for "Maximum number of emails to process"
+* Added logic to skip text attachments named "ATT00001.txt" which are added by MS Exchange virus scanning.
+* Added option to check for email every 5 minutes.
+
 = 1.4.31 (2013.01.25) =
 * Enhanced category detection to be compatible with Polylang plugin.
 * Enhanced prerequisite detection.

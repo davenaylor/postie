@@ -193,6 +193,11 @@
                                             echo "selected='selected'";
                                         }
                             ?>><?php _e('every ten minutes', 'postie') ?></option>
+                                <option value="fiveminutes" <?php
+                                        if ($interval == "fiveminutes") {
+                                            echo "selected='selected'";
+                                        }
+                            ?>><?php _e('every five minutes', 'postie') ?></option>
                                 <option value="manual" <?php
                                         if ($interval == "manual") {
                                             echo "selected='selected'";
