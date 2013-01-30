@@ -3,10 +3,11 @@ reply logic not adding to comments
 hide/disable config options that don't apply
 code to set featured image. Global setting (first picture is featured). Featured tag to enable per email. Enhance #img#
 handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
-
 replace native imap with flourish
 replace MIME parser
 debug assistance
+automatically create category if it doesn't exist. new option to allow this feature?
+
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/
 
