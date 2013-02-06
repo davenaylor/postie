@@ -62,7 +62,7 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
     <p>This shows what time it would be if you posted right now</p>
     <?php
     $content = "";
-    $data = DeterminePostDate($content);
+    $data = filter_Delay($content);
     EchoInfo("GMT: $data[1]");
     EchoInfo("Current: $data[0]");
     ?>

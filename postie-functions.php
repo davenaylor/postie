@@ -177,7 +177,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     }
     $message_date = tag_Date($content, $message_date);
 
-    list($post_date, $post_date_gmt, $delay) = DeterminePostDate($content, $message_date, $time_offset);
+    list($post_date, $post_date_gmt, $delay) = filter_Delay($content, $message_date, $time_offset);
     if ($fulldebug)
         DebugEcho("post date: $content");
 
@@ -854,7 +854,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 //DebugDump($part);
 
                 $charset = "";
-                if (array_key_exists('charset', $part->ctype_parameters) && !empty($part->ctype_parameters['charset'])) {
+                if (property_exists($part, 'ctype_parameters') && array_key_exists('charset', $part->ctype_parameters) && !empty($part->ctype_parameters['charset'])) {
                     $charset = $part->ctype_parameters['charset'];
                     DebugEcho("charset: $charset");
                 }
@@ -1425,10 +1425,11 @@ function tag_AllowCommentsOnPost(&$content) {
  * 
  * todo split delay tag from date logic
  */
-function DeterminePostDate(&$content, $message_date = NULL, $offset = 0) {
+function filter_Delay(&$content, $message_date = NULL, $offset = 0) {
     $delay = 0;
 
     if (preg_match("/delay:(-?[0-9dhm]+)/i", $content, $matches) && trim($matches[1])) {
+        DebugEcho("found delay: " . $matches[1]);
         $days = 0;
         $hours = 0;
         $minutes = 0;
@@ -1442,6 +1443,7 @@ function DeterminePostDate(&$content, $message_date = NULL, $offset = 0) {
             $minutes = $minuteMatches[1];
         }
         $delay = (($days * 24 + $hours) * 60 + $minutes) * 60;
+        DebugEcho("calculated delay: $delay");
         $content = preg_replace("/delay:$matches[1]/i", "", $content);
     }
     if (empty($message_date)) {
@@ -1453,13 +1455,8 @@ function DeterminePostDate(&$content, $message_date = NULL, $offset = 0) {
 
     $post_date = gmdate('Y-m-d H:i:s', $dateInSeconds + ($offset * 3600));
     $post_date_gmt = gmdate('Y-m-d H:i:s', $dateInSeconds);
+    DebugEcho("post date: $post_date / $post_date_gmt");
 
-    /*
-      echo "--------------------DELAY------------\n";
-      echo "delay=$delay, dateInSeconds = $dateInSeconds\n";
-      echo "post_date=$post_date\n";
-      echo "--------------------DELAY------------\n";
-     */
     return array($post_date, $post_date_gmt, $delay);
 }
 
