@@ -64,6 +64,9 @@
         DebugEcho("New setting: maxemails");
         $maxemails = 0;
     }
+    if (!isset($category_match)) {
+        $category_match = true;
+    }
 
     if ($interval == 'manual') {
         wp_clear_scheduled_hook('check_postie_hook');
@@ -307,17 +310,16 @@
             <div id = "simpleTabs-content-3" class = "simpleTabs-content">
                 <table class = 'form-table'>
                     <tr valign = "top">
-                        <th scope = "row"><?php _e('Default post by mail category:', 'postie')
-                            ?></th>
+                        <th scope = "row"><?php _e('Default post by mail category:', 'postie') ?></th>
                         <td>
                             <?php
                             $defaultCat = $default_post_category;
                             $args = array('name' => 'postie-settings[default_post_category]', 'hierarchical' => 1, 'selected' => $defaultCat, 'hide_empty' => 0);
-                            //wp_dropdown_categories("name=postie-settings[default_post_category]&hierarchical=1&selected=$defaultCat&hide_empty=0");
                             wp_dropdown_categories($args);
-                            //wp_dropdown_categories();
                             ?>
                     </tr>
+                    <?php echo BuildBooleanSelect("Match short category", "postie-settings[category_match]", $category_match,"Try to match categories using 'starts with logic' otherwise only do exact matches"); ?>
+
                     <tr valign="top">
                         <th scope="row">
                             <?php _e('Default post by mail tag(s)', 'postie') ?><br />

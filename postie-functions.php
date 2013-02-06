@@ -185,7 +185,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     if ($fulldebug)
         DebugEcho("post ubb: $content");
 
-    $post_categories = tag_categories($subject, $default_post_category);
+    $post_categories = tag_categories($subject, $default_post_category, $category_match);
     if ($fulldebug)
         DebugEcho("post category: $content");
 
@@ -875,7 +875,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 }
                 if (array_key_exists('disposition', $part) && $part->disposition == 'attachment') {
                     DebugEcho("text Attachement: $filename");
-                    if (strtolower($filename) != strtolower('ATT00001.txt')) {
+                    if (!preg_match('/ATT\d\d\d\d\d.txt/i', $filename)) {
                         $file_id = postie_media_handle_upload($part, $post_id, $poster);
                         if (!is_wp_error($file_id)) {
                             $file = wp_get_attachment_url($file_id);
@@ -2237,13 +2237,11 @@ function tag_Excerpt(&$content, $filterNewLines, $convertNewLines) {
  * This function determines the categories ids for the post
  * @return array
  */
-function tag_categories(&$subject, $defaultCategory) {
-    global $wpdb;
+function tag_categories(&$subject, $defaultCategory, $category_match) {
     $original_subject = $subject;
     $post_categories = array();
     $matchtypes = array();
     $matches = array();
-    //try and determine category
 
     if (preg_match_all('/\[(.[^\[]*)\]/', $subject, $matches)) { // [<category1>] [<category2>] <Subject>
         preg_match("/]([^\[]*)$/", $subject, $subject_matches);
@@ -2257,8 +2255,9 @@ function tag_categories(&$subject, $defaultCategory) {
         $matchtypes[] = $matches;
     }
     if (preg_match('/(.+): (.*)/', $subject, $matches)) { // <category>:<Subject>
-        $category = lookup_category($matches[1]);
+        $category = lookup_category($matches[1], $category_match);
         if (!empty($category)) {
+            DebugEcho("colon category: $category");
             $subject = trim($matches[2]);
             $post_categories[] = $category;
         }
@@ -2267,7 +2266,7 @@ function tag_categories(&$subject, $defaultCategory) {
     foreach ($matchtypes as $matches) {
         if (count($matches)) {
             foreach ($matches[1] as $match) {
-                $category = lookup_category($match);
+                $category = lookup_category($match, $category_match);
                 if (!empty($category)) {
                     $post_categories[] = $category;
                 }
@@ -2281,23 +2280,29 @@ function tag_categories(&$subject, $defaultCategory) {
     return $post_categories;
 }
 
-function lookup_category($trial_category) {
+function lookup_category($trial_category, $category_match) {
     global $wpdb;
     $trial_category = trim($trial_category);
     $found_category = NULL;
-    EchoInfo("Categories - Working on $trial_category");
+    EchoInfo("lookup_category: $trial_category");
 
-    $sql_name = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE name=\'' . addslashes($trial_category) . '\'';
-    $sql_id = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE term_id=\'' . addslashes($trial_category) . '\'';
-    $sql_sub_name = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE name LIKE \'' . addslashes($trial_category) . '%\' limit 1';
-
-    if ($found_category = $wpdb->get_var($sql_name)) {
+    $term = get_term_by('name', $trial_category, 'category');
+    if ($term !== false) {
         //then category is a named and found 
-    } elseif ($found_category = $wpdb->get_var($sql_id)) {
-        //then cateogry was an ID and found 
-    } elseif ($found_category = $wpdb->get_var($sql_sub_name)) {
-        //then cateogry is a start of a name and found
+        return $term['term_id'];
     }
+    $term = get_term_by('id', $trial_category, 'category');
+    if ($term !== false) {
+        //then cateogry was an ID and found 
+        return $term['term_id'];
+    }
+    if (empty($found_category) && $category_match) {
+        DebugEcho("category wildcard lookup: $trial_category");
+        $sql_sub_name = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE name LIKE \'' . addslashes($trial_category) . '%\' limit 1';
+        $found_category = $wpdb->get_var($sql_sub_name);
+        DebugEcho("category wildcard found: $found_category");
+    }
+
     return intval($found_category); //force to integer
 }
 
@@ -2421,6 +2426,7 @@ function config_GetDefaults() {
         'converturls' => true,
         'custom_image_field' => false,
         'default_post_category' => NULL,
+        'category_match' => true,
         'default_post_tags' => array(),
         'default_title' => "Live From The Field",
         'delete_mail_after_processing' => true,

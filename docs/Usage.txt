@@ -46,7 +46,8 @@
 
   Gen: New News
 
-  The system will post that in General.
+  The system will post that in General. Note you must turn on the "Match short category"
+  setting for this to work.
 
 * All of the above also applies if you put the category in brackets []
 * Using [] or you can post to multiple categories at once

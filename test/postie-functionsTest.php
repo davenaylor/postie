@@ -77,66 +77,66 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("Код Обмена Информацией, 8 бит", ConvertToUTF_8('koi8-r', iconv("UTF-8", "koi8-r", "Код Обмена Информацией, 8 бит")));
     }
 
-    public function testDeterminePostDate() {
+    public function testfilter_Delay() {
         $content = "test";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertTrue(is_array($r));
         $this->assertEquals(3, count($r));
         $this->assertEquals(0, $r[2]);
         $this->assertEquals("test", $content);
 
         $content = "test delay:";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertEquals(0, $r[2]);
         $this->assertEquals("test delay:", $content);
 
         $content = "test delay:1h";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertEquals(3600, $r[2]);
         $this->assertEquals("test ", $content);
 
         $content = "test delay:1d";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertEquals(86400, $r[2]);
         $this->assertEquals("test ", $content);
 
         $content = "test delay:1m";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertEquals(60, $r[2]);
         $this->assertEquals("test ", $content);
 
         $content = "test delay:m";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertEquals(0, $r[2]);
         $this->assertEquals("test ", $content);
 
         $content = "test delay:dhm";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertEquals(0, $r[2]);
         $this->assertEquals("test ", $content);
 
         $content = "test delay:x";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertEquals(0, $r[2]);
         $this->assertEquals("test delay:x", $content);
 
         $content = "test delay:-1m";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertEquals(-60, $r[2]);
         $this->assertEquals("test ", $content);
 
         $content = "test delay:1d1h1m";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertEquals(90060, $r[2]);
         $this->assertEquals("test ", $content);
 
         $content = "test delay:d1hm";
-        $r = DeterminePostDate($content);
+        $r = filter_Delay($content);
         $this->assertEquals(3600, $r[2]);
         $this->assertEquals("test ", $content);
 
         $content = "test";
-        $r = DeterminePostDate($content, '2012-11-20 08:00', 1);
+        $r = filter_Delay($content, '2012-11-20 08:00', 1);
         $this->assertEquals('2012-11-20 17:00:00', $r[0]);
         $this->assertEquals(0, $r[2]);
         $this->assertEquals("test", $content);
@@ -279,76 +279,70 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
     public function testGetPostCategories() {
         global $wpdb;
+        global $g_get_term_by;
 
         $s = "test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("test", $s);
 
         $s = ":test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals("default", $c[0]);
         $this->assertEquals(":test", $s);
 
-        $wpdb->t_get_var = "1";
+        $g_get_term_by = array('term_id' => 1);
         $s = "1: test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals("1", $c[0]);
         $this->assertEquals("test", $s);
 
-        $wpdb->t_get_var = null;
+        $g_get_term_by = false;
         $s = "not a category: test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("not a category: test", $s);
 
         $s = "[not a category] test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("[not a category] test", $s);
 
         $s = "-not a category- test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("-not a category- test", $s);
 
-        $wpdb->t_get_var = 1;
+        $g_get_term_by = array('term_id' => 1);
         $s = "general: test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals(1, $c[0]);
         $this->assertEquals("test", $s);
 
-        $wpdb->t_get_var = 1;
         $s = "[general] test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals(1, $c[0]);
         $this->assertEquals("test", $s);
 
-        $wpdb->t_get_var = 1;
         $s = "-general- test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals(1, $c[0]);
         $this->assertEquals("test", $s);
 
-        $wpdb->t_get_var = "";
+        $g_get_term_by = false;
         $s = "specific: test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("specific: test", $s);
 
-        $wpdb->t_get_var = array(1, 1);
+        $g_get_term_by = array('term_id' => 1);
         $s = "[1] [1] test";
-        $c = tag_categories($s, "default");
+        $c = tag_categories($s, "default", false);
         $this->assertEquals(2, count($c));
         $this->assertEquals("1", $c[0]);
         $this->assertEquals("1", $c[1]);
         $this->assertEquals("test", $s);
 
-        $wpdb->t_get_var = array(null, null, null, 1);
-        $s = "[general] test: with colon";
-        $c = tag_categories($s, "default");
-        $this->assertEquals(1, $c[0]);
-        $this->assertEquals("test: with colon", $s);
     }
 
     public function testHTML2HTML() {
@@ -407,7 +401,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     public function testmore_reccurences() {
         $sched = array();
         $newsched = postie_more_reccurences($sched);
-        $this->assertEquals(3, count($newsched));
+        $this->assertEquals(4, count($newsched));
     }
 
     public function testpostie_get_tags() {
@@ -581,6 +575,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("", $c);
         $this->assertEquals("stuff ", $e);
     }
+
 }
 
 ?>

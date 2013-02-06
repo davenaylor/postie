@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.4.32
+Stable tag: 1.4.33
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -127,7 +127,8 @@ Then use the Task Scheduler control panel to call wget or cron.
 
   Gen: New News
 
-  The system will post that in General.
+  The system will post that in General. Note you must turn on the "Match short category"
+  setting for this to work.
 
 * All of the above also applies if you put the category in brackets []
 * Using [] or you can post to multiple categories at once
@@ -426,6 +427,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.33 (2013.02.05) =
+* Fixed bug where non-category taxonomy was being selected as the post category.
+* Added option to force categories to match exactly.
+* Added logic to skip text attachments named "ATT00001.txt" where the numbers can be any sequence. This
+  improves the previous fix by detecting all attachments added, not just the first one.
+
 = 1.4.32 (2013.01.29) =
 * Fixed bug in detecting need for imap extension.
 * Added additional selections for "Maximum number of emails to process"

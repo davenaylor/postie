@@ -10,6 +10,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.33 (2013.02.05) =
+* Fixed bug where non-category taxonomy was being selected as the post category.
+* Added option to force categories to match exactly.
+* Added logic to skip text attachments named "ATT00001.txt" where the numbers can be any sequence. This
+  improves the previous fix by detecting all attachments added, not just the first one.
+
 = 1.4.32 (2013.01.29) =
 * Fixed bug in detecting need for imap extension.
 * Added additional selections for "Maximum number of emails to process"

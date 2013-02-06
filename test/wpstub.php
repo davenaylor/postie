@@ -54,7 +54,7 @@ function get_post() {
     $r->post_parent = 0;
     $r->guid = '7b0d965d-b8b0-4654-ac9e-eeef1d8cf571';
     $r->post_title = '';
-    $r->post_excerpt='';
+    $r->post_excerpt = '';
     return $r;
 }
 
@@ -137,11 +137,23 @@ function is_wp_error() {
     return false;
 }
 
-function sanitize_title($title){
+function sanitize_title($title) {
     return $title;
 }
 
-function get_temp_dir(){
+function get_temp_dir() {
     return sys_get_temp_dir();
 }
+
+function sanitize_term($s) {
+    return trim($s);
+}
+
+$g_get_term_by = array('term_id' => 1);
+
+function get_term_by() {
+    global $g_get_term_by;
+    return $g_get_term_by;
+}
+
 ?>
