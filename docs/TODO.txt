@@ -6,6 +6,7 @@ handle condition where only one of text/plain & text/html is supplied, but Prefe
 replace native imap with flourish
 replace MIME parser
 debug assistance
+setting for default post type
 automatically create category if it doesn't exist. new option to allow this feature?
 
 standardize tags
