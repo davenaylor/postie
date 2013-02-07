@@ -2288,13 +2288,14 @@ function lookup_category($trial_category, $category_match) {
 
     $term = get_term_by('name', $trial_category, 'category');
     if ($term !== false) {
+        DebugDump($term);
         //then category is a named and found 
-        return $term['term_id'];
+        return $term->term_id;
     }
     $term = get_term_by('id', $trial_category, 'category');
     if ($term !== false) {
         //then cateogry was an ID and found 
-        return $term['term_id'];
+        return $term->term_id;
     }
     if (empty($found_category) && $category_match) {
         DebugEcho("category wildcard lookup: $trial_category");

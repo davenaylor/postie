@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.4.33
+Stable tag: 1.4.34
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -427,6 +427,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.34 (2013.02.07) =
+* Fixed bug in new category logic
+
 = 1.4.33 (2013.02.05) =
 * Fixed bug where non-category taxonomy was being selected as the post category.
 * Added option to force categories to match exactly.
