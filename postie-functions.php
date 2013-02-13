@@ -2395,7 +2395,7 @@ function config_ResetToDefault() {
  */
 function config_Update($data) {
     UpdatePostiePermissions($data["role_access"]);
-// We also update the cron settings
+    // We also update the cron settings
     if ($data['interval'] != '') {
         postie_decron();
         if ($data['interval'] != 'manual') {
@@ -2487,6 +2487,11 @@ function config_GetListOfArrayConfig() {
     return(array('SUPPORTED_FILE_TYPES', 'AUTHORIZED_ADDRESSES',
         'SIG_PATTERN_LIST', 'BANNED_FILES_LIST', 'VIDEO1TYPES',
         'VIDEO2TYPES', 'AUDIOTYPES', 'SMTP'));
+}
+
+function config_Read() {
+    $config = get_option('postie-settings');
+    return config_ValidateSettings($config);
 }
 
 /**
@@ -2683,21 +2688,6 @@ function config_GetOld() {
  */
 
 /**
- * This function returns the current config
- * @return array
- */
-function get_postie_config() {
-    $config = get_option('postie-settings');
-    if (file_exists(POSTIE_ROOT . '/postie_test_variables.php')) {
-        include(POSTIE_ROOT . '/postie_test_variables.php');
-    }
-// These are computed
-    $config["time_offset"] = get_option('gmt_offset');
-    $config["postie_root"] = POSTIE_ROOT;
-    return $config;
-}
-
-/**
  * Returns a list of config keys that should be arrays
  * @return array
  */
@@ -2774,7 +2764,7 @@ function isMarkdownInstalled() {
  * and ensures that arrayed items are stored as such
  */
 function config_ValidateSettings($in) {
-//DebugDump($in);
+    //DebugDump($in);
     $out = array();
 
 // use the default as a template: 
@@ -2822,22 +2812,24 @@ function postie_admin_settings() {
  */
 function UpdatePostiePermissions($role_access) {
     global $wp_roles;
-    $admin = $wp_roles->get_role("administrator");
-    $admin->add_cap("config_postie");
-    $admin->add_cap("post_via_postie");
+    if (is_object($wp_roles)) {
+        $admin = $wp_roles->get_role("administrator");
+        $admin->add_cap("config_postie");
+        $admin->add_cap("post_via_postie");
 
-    if (!is_array($role_access)) {
-        $role_access = array();
-    }
-    foreach ($wp_roles->role_names as $roleId => $name) {
-        $role = $wp_roles->get_role($roleId);
-        if ($roleId != "administrator") {
-            if (array_key_exists($roleId, $role_access)) {
-                $role->add_cap("post_via_postie");
-                //DebugEcho("added $roleId");
-            } else {
-                $role->remove_cap("post_via_postie");
-                //DebugEcho("removed $roleId");
+        if (!is_array($role_access)) {
+            $role_access = array();
+        }
+        foreach ($wp_roles->role_names as $roleId => $name) {
+            $role = $wp_roles->get_role($roleId);
+            if ($roleId != "administrator") {
+                if (array_key_exists($roleId, $role_access)) {
+                    $role->add_cap("post_via_postie");
+                    //DebugEcho("added $roleId");
+                } else {
+                    $role->remove_cap("post_via_postie");
+                    //DebugEcho("removed $roleId");
+                }
             }
         }
     }

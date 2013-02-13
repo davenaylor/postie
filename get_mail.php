@@ -24,7 +24,7 @@ if (file_exists($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php")) {
 }
 
 $test_email = null;
-$config = get_option('postie-settings');
+$config = config_Read();
 extract($config);
 if (!isset($maxemails))
     $maxemails = 0;

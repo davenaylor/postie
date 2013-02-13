@@ -82,7 +82,7 @@ if (is_admin()) {
 
 function activate_postie() {
     static $init = false;
-    $options = get_option('postie-settings');
+    $options = config_Read();
 
     if ($init) {
         return;
@@ -117,7 +117,7 @@ register_activation_hook(__FILE__, 'activate_postie');
  */
 function postie_warnings() {
 
-    $config = get_option('postie-settings');
+    $config = config_Read();
 
     if ((empty($config['mail_server']) ||
             empty($config['mail_server_port']) ||
@@ -200,7 +200,7 @@ function check_postie() {
 
 function postie_cron($interval = false) {
     if (!$interval) {
-        $config = get_option('postie-settings');
+        $config = config_Read();
         $interval = $config['interval'];
     }
     if (!$interval || $interval == '')

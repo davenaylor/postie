@@ -291,7 +291,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("default", $c[0]);
         $this->assertEquals(":test", $s);
 
-        $g_get_term_by = array('term_id' => 1);
+        $g_get_term_by->term_id = 1;
         $s = "1: test";
         $c = tag_categories($s, "default", false);
         $this->assertEquals("1", $c[0]);
@@ -313,7 +313,8 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("-not a category- test", $s);
 
-        $g_get_term_by = array('term_id' => 1);
+        $g_get_term_by = new stdClass();
+        $g_get_term_by->term_id = 1;
         $s = "general: test";
         $c = tag_categories($s, "default", false);
         $this->assertEquals(1, $c[0]);
@@ -335,14 +336,14 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("default", $c[0]);
         $this->assertEquals("specific: test", $s);
 
-        $g_get_term_by = array('term_id' => 1);
+        $g_get_term_by = new stdClass();
+        $g_get_term_by->term_id = 1;
         $s = "[1] [1] test";
         $c = tag_categories($s, "default", false);
         $this->assertEquals(2, count($c));
         $this->assertEquals("1", $c[0]);
         $this->assertEquals("1", $c[1]);
         $this->assertEquals("test", $s);
-
     }
 
     public function testHTML2HTML() {

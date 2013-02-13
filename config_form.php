@@ -47,7 +47,7 @@
 
     $title = __('Postie Options', 'postie');
     $parent_file = 'options-general.php';
-    $config = get_option('postie-settings');
+    $config = config_Read();
     if (empty($config))
         $config = config_ResetToDefault();
 
@@ -318,7 +318,7 @@
                             wp_dropdown_categories($args);
                             ?>
                     </tr>
-                    <?php echo BuildBooleanSelect("Match short category", "postie-settings[category_match]", $category_match,"Try to match categories using 'starts with logic' otherwise only do exact matches"); ?>
+                    <?php echo BuildBooleanSelect("Match short category", "postie-settings[category_match]", $category_match, "Try to match categories using 'starts with logic' otherwise only do exact matches"); ?>
 
                     <tr valign="top">
                         <th scope="row">

@@ -10,6 +10,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.35 (future) =
+* Consolidated logic for load configuration settings. Fixes bug where new settings were not having their defaults set properly.
+
 = 1.4.34 (2013.02.07) =
 * Fixed bug in new category logic
 

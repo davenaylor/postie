@@ -149,7 +149,8 @@ function sanitize_term($s) {
     return trim($s);
 }
 
-$g_get_term_by = array('term_id' => 1);
+$g_get_term_by = new stdClass();
+$g_get_term_by->term_id = 1;
 
 function get_term_by() {
     global $g_get_term_by;

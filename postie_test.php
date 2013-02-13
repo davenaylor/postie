@@ -4,7 +4,7 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "postie-functions.php");
 include_once (dirname(dirname(dirname(dirname(__FILE__)))) . DIRECTORY_SEPARATOR . "wp-config.php");
 require_once("postie-functions.php");
 
-$config = get_postie_config();
+$config = config_Read();
 extract($config);
 $title = __("Postie Diagnosis");
 $parent_file = 'options-general.php?page=postie/postie.php';
