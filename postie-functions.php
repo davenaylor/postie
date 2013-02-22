@@ -1514,16 +1514,19 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     }
 
     $name = 'postie-media.' . $part->ctype_secondary;
-    if (property_exists($part, 'ctype_parameters')) {
-        if (!is_array($part->ctype_parameters) || $part->ctype_parameters['name'] == '') {
-            if ($part->d_parameters['filename'] != '') {
-                $name = $part->d_parameters['filename'];
-            }
-        } else {
+    if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters)) {
+        if (array_key_exists('name', $part->ctype_parameters) && $part->ctype_parameters['name'] != '') {
             $name = $part->ctype_parameters['name'];
         }
+        if (array_key_exists('filename', $part->ctype_parameters) && $part->ctype_parameters['filename'] != '') {
+            $name = $part->ctype_parameters['filename'];
+        }
+    }
+    if (property_exists($part, 'd_parameters') && is_array($part->d_parameters) && array_key_exists('filename', $part->d_parameters) && $part->d_parameters['filename'] != '') {
+        $name = $part->d_parameters['filename'];
     }
     DebugEcho("name: $name, size: " . filesize($tmpFile));
+    //DebugDump($part);
 
     $the_file = array('name' => $name,
         'tmp_name' => $tmpFile,
