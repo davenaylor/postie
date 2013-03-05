@@ -208,11 +208,9 @@ function postie_cron($interval = false) {
     if ($interval == 'manual') {
         wp_clear_scheduled_hook('check_postie_hook');
     } else {
-        DebugEcho("Setting $interval cron schedule");
         if (false === wp_schedule_event(time(), $interval, 'check_postie_hook')) {
-            EchoInfo("Failed to set up cron task.");
-        } else {
-            EchoInfo("Succeeded in setting up cron task.");
+            //Do not echo output in filters, it seems to break some installs
+            error_log("Postie: Failed to set up cron task.");
         }
     }
 }
