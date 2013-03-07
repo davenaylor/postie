@@ -8,6 +8,7 @@ replace MIME parser
 debug assistance
 setting for default post type
 automatically create category if it doesn't exist. new option to allow this feature?
+new command to set post status: published, draft, pending review, private
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/
