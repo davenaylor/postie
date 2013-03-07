@@ -72,7 +72,10 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
     <?php
     if (!$mail_server || !$mail_server_port || !$mail_userid) {
         EchoInfo("NO - check server settings");
+    } else {
+        DebugEcho("checking");
     }
+    
     switch (strtolower($config["input_protocol"])) {
         case 'imap':
         case 'imap-ssl':

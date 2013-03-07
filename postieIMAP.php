@@ -158,6 +158,7 @@ class PostieIMAP {
      * @return string
      */
     function error() {
+        //echo(print_r(imap_errors(), true));
         return(imap_last_error());
     }
 

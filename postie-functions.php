@@ -99,8 +99,8 @@ function DebugEcho($v) {
 }
 
 function tag_Date(&$content, $message_date) {
-
-    if (preg_match("/^date:\s?(.*)$/im", $content, $matches)) {
+    DebugEcho("tag_Date\n---\n$content\n---");
+    if (1 === preg_match("/^date:\s?(.*)$/im", $content, $matches)) {
         $newdate = strtotime($matches[1]);
         if (false !== $newdate) {
             $t = date("H:i:s", $newdate);
@@ -113,6 +113,8 @@ function tag_Date(&$content, $message_date) {
             $message_date = date($format, $newdate);
             $content = trim(str_replace($matches[0], '', $content));
         }
+    } else {
+        DebugEcho("No date found");
     }
 
     return $message_date;
@@ -129,9 +131,11 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
         "cids" => array(), //holds the cids for HTML email
         "image_files" => array() //holds the files for each image
     );
-    EchoInfo("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
-    if ($fulldebug)
-        DebugDump($mimeDecodedEmail);
+    if (array_key_exists('message-id', $mimeDecodedEmail->headers)) {
+        EchoInfo("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
+        if ($fulldebug)
+            DebugDump($mimeDecodedEmail);
+    }
 
     filter_PreferedText($mimeDecodedEmail, $prefer_text_type);
     if ($fulldebug)
@@ -167,10 +171,10 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     if (array_key_exists("date", $mimeDecodedEmail->headers) && !empty($mimeDecodedEmail->headers["date"])) {
         $cte = "";
         $cs = "";
-        if (array_key_exists('content-transfer-encoding', $mimeDecodedEmail->headers)) {
+        if (property_exists($mimeDecodedEmail, 'content-transfer-encoding') && array_key_exists('content-transfer-encoding', $mimeDecodedEmail->headers)) {
             $cte = $mimeDecodedEmail->headers["content-transfer-encoding"];
         }
-        if (array_key_exists('charset', $mimeDecodedEmail->ctype_parameters)) {
+        if (property_exists($mimeDecodedEmail, 'ctype_parameters') && array_key_exists('charset', $mimeDecodedEmail->ctype_parameters)) {
             $cs = $mimeDecodedEmail->ctype_parameters["charset"];
         }
         $message_date = HandleMessageEncoding($cte, $cs, $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
@@ -509,6 +513,7 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
 
     // see if subject starts with Fwd:
     if (preg_match("/(^Fwd:) (.*)/", $subject, $matches)) {
+        DebugEcho("Fwd: detected");
         $subject = trim($matches[2]);
         if (preg_match("/\nfrom:(.*?)\n/i", $content, $matches)) {
             $theAuthor = GetNameFromEmail($matches[1]);
@@ -516,19 +521,20 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
         }
         if (preg_match("/\ndate:(.*?)\n/i", $content, $matches)) {
             $theDate = $matches[1];
+            DebugEcho("date in Fwd: $theDate");
             $mimeDecodedEmail->headers['date'] = $theDate;
         }
-    }
 
-    // now get rid of forwarding info in the content
-    $lines = preg_split("/\r\n/", $content);
-    $newContents = '';
-    foreach ($lines as $line) {
-        if (preg_match("/^(from|subject|to|date):.*?/i", $line, $matches) == 0 && preg_match("/^-+\s*forwarded\s*message\s*-+/i", $line, $matches) == 0) {
-            $newContents.=preg_replace("/\r/", "", $line) . "\n";
+        // now get rid of forwarding info in the content
+        $lines = preg_split("/\r\n/", $content);
+        $newContents = '';
+        foreach ($lines as $line) {
+            if (preg_match("/^(from|subject|to|date):.*?/i", $line, $matches) == 0 && preg_match("/^-+\s*forwarded\s*message\s*-+/i", $line, $matches) == 0) {
+                $newContents.=preg_replace("/\r/", "", $line) . "\n";
+            }
         }
+        $content = $newContents;
     }
-    $content = $newContents;
     $theDetails = array(
         'content' => "<div class='postmetadata alt'>On $theDate, $theAuthor" .
         " posted:</div>",
@@ -538,7 +544,7 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
         'user_ID' => $theID,
         'email' => $theEmail
     );
-    return($theDetails);
+    return $theDetails;
 }
 
 /* we check whether or not the e-mail is a reply to a previously
@@ -1135,7 +1141,14 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     extract($config);
     global $wpdb;
     $poster = NULL;
-    $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
+    $from = "";
+    if (array_key_exists('from', $mimeDecodedEmail->headers)) {
+        $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
+    } else {
+        DebugEcho("No 'from' header found");
+        DebugDump($mimeDecodedEmail->headers);
+    }
+
 
     $resentFrom = "";
     if (array_key_exists('resent-from', $mimeDecodedEmail->headers)) {
@@ -1143,9 +1156,13 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     }
 
     //See if the email address is one of the special authorized ones
-    EchoInfo("Confirming Access For $from ");
-    $sql = 'SELECT id FROM ' . $wpdb->users . ' WHERE user_email=\'' . addslashes($from) . "' LIMIT 1;";
-    $user_ID = $wpdb->get_var($sql);
+    if (!empty($from)) {
+        EchoInfo("Confirming Access For $from ");
+        $sql = 'SELECT id FROM ' . $wpdb->users . ' WHERE user_email=\'' . addslashes($from) . "' LIMIT 1;";
+        $user_ID = $wpdb->get_var($sql);
+    } else {
+        $user_ID = "";
+    }
     if (!empty($user_ID)) {
         $user = new WP_User($user_ID);
         if ($user->has_cap("post_via_postie")) {
