@@ -132,4 +132,3 @@ Note you can only use this feature if your "Preferred Text Type" is set to "plai
   if you send an HTML and plain text message
 * Automatically confirms that you are installed correctly
 
-= Extending =

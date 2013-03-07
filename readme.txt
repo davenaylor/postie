@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.4.35
+Stable tag: 1.4.36
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -213,7 +213,6 @@ Note you can only use this feature if your "Preferred Text Type" is set to "plai
   if you send an HTML and plain text message
 * Automatically confirms that you are installed correctly
 
-= Extending =
 == Frequently Asked Questions ==
 
 = Postie won't connect to my mailserver. Why Not? =
@@ -427,6 +426,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.36 (2013.03.07) =
+* Removed some debugging code from filters and hooks
+* Fixed bug where the date command was being ignored
+* Added 'quicktime' as a default type for the video1 template
+
 = 1.4.35 (2013.02.22) =
 * Consolidated logic for load configuration settings. Fixes bug where new settings were not having their defaults set properly.
 * Fixed bug where attachment file name was not being correctly detected.

@@ -964,10 +964,13 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $cid = "";
                     if (array_key_exists('content-id', $part->headers)) {
                         $cid = trim($part->headers["content-id"], "<>");
+                        DebugEcho("audio Attachement cid: $cid");
                     }
                     if (in_array($part->ctype_secondary, $audiotypes)) {
+                        DebugEcho("using audio template: $part->ctype_secondary");
                         $audioTemplate = $audiotemplate;
                     } else {
+                        DebugEcho("using default audio template: $part->ctype_secondary");
                         $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
                         $audioTemplate = '<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
                     }
@@ -985,12 +988,17 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     $cid = "";
                     if (array_key_exists('content-id', $part->headers)) {
                         $cid = trim($part->headers["content-id"], "<>");
+                        DebugEcho("video Attachement cid: $cid");
                     }
+                    //DebugDump($part);
                     if (in_array(strtolower($part->ctype_secondary), $video1types)) {
+                        DebugEcho("using video1 template: $part->ctype_secondary");
                         $videoTemplate = $video1template;
                     } elseif (in_array(strtolower($part->ctype_secondary), $video2types)) {
+                        DebugEcho("using video2 template: $part->ctype_secondary");
                         $videoTemplate = $video2template;
                     } else {
+                        DebugEcho("using default template: $part->ctype_secondary");
                         $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
                         $videoTemplate = '<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
                     }
@@ -1611,8 +1619,13 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
 
     // Save the data
     $id = wp_insert_attachment($attachment, $file, $post_id);
+    DebugEcho("attachement id: $id");
     if (!is_wp_error($id)) {
-        wp_update_attachment_metadata($id, wp_generate_attachment_metadata($id, $file));
+        $amd = wp_generate_attachment_metadata($id, $file);
+        DebugEcho("wp_generate_attachment_metadata");
+        DebugDump($amd);
+        wp_update_attachment_metadata($id, $amd);
+        DebugEcho("wp_update_attachment_metadata complete");
     } else {
         EchoInfo("There was an error adding the attachement: " . $id->get_error_message());
     }
@@ -1699,6 +1712,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     // fix filename (remove non-standard characters)
     $file['name'] = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $file['name']);
     $filename = wp_unique_filename($uploads['path'], $file['name'], $unique_filename_callback);
+    DebugEcho("wp_unique_filename: $filename");
 
     // Move the file to the uploads dir
     $new_file = $uploads['path'] . "/$filename";
@@ -2489,7 +2503,7 @@ function config_GetDefaults() {
         'turn_authorization_off' => false,
         'time_offset' => get_option('gmt_offset'),
         'video1template' => $simple_link,
-        'video1types' => array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', '3gp2', 'mov', 'mpeg'),
+        'video1types' => array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', '3gp2', 'mov', 'mpeg', 'quicktime'),
         'video2template' => $simple_link,
         'video2types' => array('x-flv'),
         'video1templates' => $video1Templates,
@@ -2639,7 +2653,7 @@ function config_UpgradeOld() {
 
 //video1
     if (!isset($config["VIDEO1TYPES"]))
-        $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', '3gp2', 'mov', 'mpeg');
+        $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', '3gp2', 'mov', 'mpeg', 'quicktime');
     if (!isset($config["AUDIOTYPES"]))
         $config['AUDIOTYPES'] = array('m4a', 'mp3', 'ogg', 'wav', 'mpeg');
     if (!isset($config["SELECTED_VIDEO2TEMPLATE"]))
