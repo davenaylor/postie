@@ -199,23 +199,29 @@ function check_postie() {
 }
 
 function postie_cron($interval = false) {
+    error_log("Postie: setting up cron task: $interval");
     if (!$interval) {
         $config = config_Read();
         $interval = $config['interval'];
+        error_log("Postie: setting up cron task from config: $interval");
     }
-    if (!$interval || $interval == '')
+    if (!$interval || $interval == ''){
         $interval = 'hourly';
+        error_log("Postie: setting up cron task: defaulting to hourly");
+    }
     if ($interval == 'manual') {
-        wp_clear_scheduled_hook('check_postie_hook');
+        postie_decron();
+        error_log("Postie: clearing cron (manual)");
     } else {
         if (false === wp_schedule_event(time(), $interval, 'check_postie_hook')) {
             //Do not echo output in filters, it seems to break some installs
-            error_log("Postie: Failed to set up cron task.");
+            error_log("Postie: Failed to set up cron task: $interval");
         }
     }
 }
 
 function postie_decron() {
+    error_log("Postie: clearing cron");
     wp_clear_scheduled_hook('check_postie_hook');
 }
 

@@ -2801,13 +2801,13 @@ function config_ValidateSettings($in) {
     //DebugDump($in);
     $out = array();
 
-// use the default as a template: 
-// if a field is present in the defaults, we want to store it; otherwise we discard it
+    // use the default as a template: 
+    // if a field is present in the defaults, we want to store it; otherwise we discard it
     $allowed_keys = config_GetDefaults();
     foreach ($allowed_keys as $key => $default)
         $out[$key] = array_key_exists($key, $in) ? $in[$key] : $default;
 
-// some fields are always forced to lower case:
+    // some fields are always forced to lower case:
     $lowercase = array('authorized_addresses', 'smtp', 'supported_file_types', 'video1types', 'video2types', 'audiotypes');
     foreach ($lowercase as $field) {
         $out[$field] = ( is_array($out[$field]) ) ? array_map("strtolower", $out[$field]) : strtolower($out[$field]);
