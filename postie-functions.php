@@ -367,19 +367,21 @@ function tag_PostType(&$subject) {
 
     $custom_post_type_delim = "//";
     if (strpos($subject, $custom_post_type_delim) !== FALSE) {
-
         // Captures the custom post type in the subject before $custom_post_type_delim
         $separated_subject = explode($custom_post_type_delim, $subject);
         $custom_post_type = $separated_subject[0];
         $subject = trim($separated_subject[1]);
+        DebugEcho("post type: found possible type '$custom_post_type'");
 
         $custom_post_type = trim(strtolower($custom_post_type));
 
         // Check if custom post type exists, if not, set default post type of 'post'
         $known_post_types = get_post_types();
+        DebugDump($known_post_types);
 
         if (in_array($custom_post_type, array_map('strtolower', $known_post_types))) {
             $post_type = $custom_post_type;
+            DebugEcho("post type: found type '$post_type'");
         } else {
             $post_type = 'post';
         }
@@ -469,24 +471,24 @@ function linkifyVideo($text, $shortcode = false) {
 
 function make_links($text) {
     return preg_replace(
-                    array(
-                '/(?(?=<a[^>]*>.+<\/a>)
+            array(
+        '/(?(?=<a[^>]*>.+<\/a>)
              (?:<a[^>]*>.+<\/a>)
              |
              ([^="\']?)((?:https?|ftp|bf2|):\/\/[^<> \n\r]+)
          )/iex',
-                '/<a([^>]*)target="?[^"\']+"?/i',
-                '/<a([^>]+)>/i',
-                '/(^|\s)(www.[^<> \n\r]+)/iex',
-                '/(([_A-Za-z0-9-]+)(\\.[_A-Za-z0-9-]+)*@([A-Za-z0-9-]+)
+        '/<a([^>]*)target="?[^"\']+"?/i',
+        '/<a([^>]+)>/i',
+        '/(^|\s)(www.[^<> \n\r]+)/iex',
+        '/(([_A-Za-z0-9-]+)(\\.[_A-Za-z0-9-]+)*@([A-Za-z0-9-]+)
        (\\.[A-Za-z0-9-]+)*)/iex'
-                    ), array(
-                "stripslashes((strlen('\\2')>0?'\\1<a href=\"\\2\">\\2</a>\\3':'\\0'))",
-                '<a\\1',
-                '<a\\1 >',
-                "stripslashes((strlen('\\2')>0?'\\1<a href=\"http://\\2\">\\2</a>\\3':'\\0'))",
-                "stripslashes((strlen('\\2')>0?'<a href=\"mailto:\\0\">\\0</a>':'\\0'))"
-                    ), $text
+            ), array(
+        "stripslashes((strlen('\\2')>0?'\\1<a href=\"\\2\">\\2</a>\\3':'\\0'))",
+        '<a\\1',
+        '<a\\1 >',
+        "stripslashes((strlen('\\2')>0?'\\1<a href=\"http://\\2\">\\2</a>\\3':'\\0'))",
+        "stripslashes((strlen('\\2')>0?'<a href=\"mailto:\\0\">\\0</a>':'\\0'))"
+            ), $text
     );
 }
 
@@ -1646,9 +1648,6 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     // You may define your own function and pass the name in $overrides['upload_error_handler']
     $upload_error_handler = 'wp_handle_upload_error';
 
-    // You may define your own function and pass the name in $overrides['unique_filename_callback']
-    $unique_filename_callback = null;
-
     // $_POST['action'] must be set and its value must equal $overrides['action'] or this:
     $action = 'wp_handle_upload';
 
@@ -1709,9 +1708,9 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     if (!( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] ))
         return $upload_error_handler($file, $uploads['error']);
 
-    // fix filename (remove non-standard characters)
-    $file['name'] = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $file['name']);
-    $filename = wp_unique_filename($uploads['path'], $file['name'], $unique_filename_callback);
+    // fix filename (encode non-standard characters)
+    $file['name'] = filename_fix($file['name']);
+    $filename = wp_unique_filename($uploads['path'], $file['name']);
     DebugEcho("wp_unique_filename: $filename");
 
     // Move the file to the uploads dir
@@ -1735,6 +1734,10 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     $return = apply_filters('wp_handle_upload', array('file' => $new_file, 'url' => $url, 'type' => $type));
 
     return $return;
+}
+
+function filename_fix($filename) {
+    return str_replace ('%','',urlencode($filename));
 }
 
 /**
@@ -2239,7 +2242,7 @@ function tag_Tags(&$content, $defaultTags) {
         if (!empty($matches[1])) {
             DebugEcho("Found tags: $matches[1]");
             $content = str_replace($matches[0], "", $content);
-            $post_tags = preg_split("/,\s*/", $matches[1]);
+            $post_tags = preg_split("/,\s*/", trim($matches[1]));
             //DebugDump($post_tags);
         }
     }
@@ -2327,9 +2330,11 @@ function lookup_category($trial_category, $category_match) {
         return $term->term_id;
     }
     $term = get_term_by('id', $trial_category, 'category');
-    if ($term !== false) {
+    if (is_array($term)) {
+        DebugEcho("category: found by id $trial_category");
+        DebugDump($term);
         //then cateogry was an ID and found 
-        return $term->term_id;
+        return $term['term_id'];
     }
     if (empty($found_category) && $category_match) {
         DebugEcho("category wildcard lookup: $trial_category");

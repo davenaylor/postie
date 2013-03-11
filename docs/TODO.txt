@@ -10,6 +10,7 @@ setting for default post type
 automatically create category if it doesn't exist. new option to allow this feature?
 WP MU support
 new command to set post status: published, draft, pending review, private
+support setting "post format"
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/

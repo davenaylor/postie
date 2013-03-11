@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.4.36
+Stable tag: 1.4.37
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -426,6 +426,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.37 (2013.03.11) =
+* Fixed bug in tag handling
+* Fixed bug in category detection
+* Worked around a bug in WordPress that was mangling filenames that are not in ASCII, i.e. Arabic, Hebrew, Cyrillic, etc.
+
 = 1.4.36 (2013.03.07) =
 * Removed some debugging code from filters and hooks
 * Fixed bug where the date command was being ignored

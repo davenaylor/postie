@@ -47,7 +47,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config['imagetemplate'] = '<a href="{FILELINK}">{FILENAME}</a>';
 
         $post = $this->process_file("data/inline.var", $config);
-        $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>  ', $post['post_content']);
+        $this->assertEquals('test<div><br></div><div><img src="http://example.net/wp-content/uploads/filename" alt="Inline image 1"><br></div><div><br></div><div>test</div>   ', $post['post_content']);
         $this->assertEquals('inline', $post['post_title']);
     }
 
@@ -57,6 +57,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config['convertnewline'] = true;
 
         $post = $this->process_file("data/linebreaks.var", $config);
+        echo $post['post_content'];
         $this->assertEquals("Test<br />\nEen stuck TekstEen stuck TekstEen stuck TekstEen stuck Tekst<br />\nEen stuck TekstEen stuck Tekst<br />\n<br />\nEen stuck TekstEen stuck Tekst<br />\n", $post['post_content']);
     }
 
@@ -75,7 +76,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config['prefer_text_type'] = 'html';
 
         $post = $this->process_file("data/ics-attachment.var", $config);
-        $this->assertEquals("<div dir='ltr'>sample text<div><br></div></div>  <a href='http://example.net/wp-content/uploads/filename'><img src='localhost/postie/icons/silver/default-32.png' alt='default icon' />sample.ics</a> ", $post['post_content']);
+        $this->assertEquals("<div dir='ltr'>sample text<div><br></div></div>   <a href='http://example.net/wp-content/uploads/filename'><img src='localhost/postie/icons/silver/default-32.png' alt='default icon' />sample.ics</a> ", $post['post_content']);
     }
 
     function testTagsImg() {
@@ -97,11 +98,11 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config['prefer_text_type'] = 'html';
 
         $post = $this->process_file("data/signature.var", $config);
-        $this->assertEquals('test content<div><br></div>  ', $post['post_content']);
+        $this->assertEquals('test content<div><br></div>   ', $post['post_content']);
 
         $config['prefer_text_type'] = 'html';
         $post = $this->process_file("data/signature.var", $config);
-        $this->assertEquals('test content<div><br></div>  ', $post['post_content']);
+        $this->assertEquals('test content<div><br></div>   ', $post['post_content']);
     }
 
     function testQuotedPrintable() {

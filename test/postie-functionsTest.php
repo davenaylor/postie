@@ -581,6 +581,19 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("stuff ", $e);
     }
 
+    function test_filename_fix() {
+        $f = "simple.png";
+        $this->assertEquals($f, filename_fix($f));
+
+        $f = "moiré-pättern.png";
+        $this->assertEquals("moireCC81-paCC88ttern.png", filename_fix($f));
+        
+        $f = "וְאָהַבְתָּ.png";
+        $this->assertEquals("D795D6B0D790D6B8D794D6B7D791D6B0D7AAD6BCD6B8.png", filename_fix($f));
+        
+        $this->assertEquals("D09AD0BED0B3D0B0D182D0BE.png",filename_fix("Когато.png"));
+    }
+
 }
 
 ?>
