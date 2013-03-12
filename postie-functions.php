@@ -710,14 +710,20 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
     }
 
     // loop through messages 
+    
     for ($i = 1; $i <= $msg_count; $i++) {
-        $emails[$i] = implode('', $pop3->get($i));
-        if ($deleteMessages) {
-            if (!$pop3->delete($i)) {
-                EchoInfo('pop3 cannot delete message ' . $pop3->ERROR);
-                $pop3->reset();
-                exit;
+        $m = $pop3->get($i);
+        if (is_array($m)) {
+            $emails[$i] = implode('', $m);
+            if ($deleteMessages) {
+                if (!$pop3->delete($i)) {
+                    EchoInfo('pop3 cannot delete message ' . $pop3->ERROR);
+                    $pop3->reset();
+                    exit;
+                }
             }
+        } else {
+            DebugEcho("POP3MessageFetch: invalid response received from GET $i");
         }
         if ($maxemails != 0 && $i >= $maxemails) {
             DebugEcho("Max emails ($maxemails)");
@@ -1642,7 +1648,6 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         function wp_handle_upload_error(&$file, $message) {
             return array('error' => $message);
         }
-
     }
 
     // You may define your own function and pass the name in $overrides['upload_error_handler']
@@ -1661,48 +1666,37 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         __("Missing a temporary folder."),
         __("Failed to write file to disk."));
 
-    // All tests are on by default. Most can be turned off by $override[{test_name}] = false;
-    $test_form = true;
-    $test_size = true;
-
-    // If you override this, you must provide $ext and $type!!!!
-    $test_type = true;
-    $mimes = false;
-
     // Install user overrides. Did we mention that this voids your warranty?
     if (is_array($overrides))
         extract($overrides, EXTR_OVERWRITE);
-
-    // A correct form post will pass this test.
-    if ($test_form && (!isset($_POST['action']) || ($_POST['action'] != $action ) ))
-        return $upload_error_handler($file, __('Invalid form submission.'));
 
     // A successful upload will pass this test. It makes no sense to override this one.
     if ($file['error'] > 0)
         return $upload_error_handler($file, $upload_error_strings[$file['error']]);
 
     // A non-empty file will pass this test.
-    if ($test_size && !($file['size'] > 0 ))
+    if (!($file['size'] > 0 ))
         return $upload_error_handler($file, __('File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini.'));
 
     // A properly uploaded file will pass this test. There should be no reason to override this one.
     if (!file_exists($file['tmp_name']))
         return $upload_error_handler($file, __('Specified file failed upload test.'));
     // A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
-    if ($test_type) {
-        $wp_filetype = wp_check_filetype($file['name'], $mimes);
 
-        extract($wp_filetype);
+    $wp_filetype = wp_check_filetype($file['name']);
+    DebugEcho("postie_handle_upload: detected file type for ".$file['name']);
+    DebugDump($wp_filetype);
+    
+    extract($wp_filetype);
 
-        if ((!$type || !$ext ) && !current_user_can('unfiltered_upload'))
-            return $upload_error_handler($file, __('File type does not meet security guidelines. Try another.'));
+    if ((!$type || !$ext ) && !current_user_can('unfiltered_upload'))
+        return $upload_error_handler($file, __('File type does not meet security guidelines. Try another.'));
 
-        if (!$ext)
-            $ext = ltrim(strrchr($file['name'], '.'), '.');
+    if (!$ext)
+        $ext = ltrim(strrchr($file['name'], '.'), '.');
 
-        if (!$type)
-            $type = $file['type'];
-    }
+    if (!$type)
+        $type = $file['type'];
 
     // A writable uploads dir will pass this test. Again, there's no point overriding this one.
     if (!( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] ))
@@ -1737,7 +1731,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
 }
 
 function filename_fix($filename) {
-    return str_replace ('%','',urlencode($filename));
+    return str_replace('%', '', urlencode($filename));
 }
 
 /**

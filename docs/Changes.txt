@@ -10,6 +10,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.38 (future) =
+* 
+
 = 1.4.37 (2013.03.11) =
 * Fixed bug in tag handling
 * Fixed bug in category detection
