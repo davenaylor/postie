@@ -97,8 +97,7 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
         case 'pop3':
         default:
             require_once(ABSPATH . WPINC . DIRECTORY_SEPARATOR . 'class-pop3.php');
-            $pop3 = &new POP3();
-            $pop3->DEBUG = true;
+            $pop3 = new POP3();
             if (!$pop3->connect($config["mail_server"], $config["mail_server_port"])) {
                 EchoInfo("Unable to connect. The server said:");
                 EchoInfo($pop3->ERROR);
