@@ -147,14 +147,6 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
 
-    filter_Start($content, $config);
-    if ($fulldebug)
-        DebugEcho("post start: $content");
-
-    filter_End($content, $config);
-    if ($fulldebug)
-        DebugEcho("post end: $content");
-
     filter_RemoveSignature($content, $config);
     if ($fulldebug)
         DebugEcho("post sig: $content");
@@ -282,6 +274,15 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     filter_newlines($content, $config);
     if ($fulldebug)
         DebugEcho("post newline: $content");
+
+    filter_Start($content, $config);
+    if ($fulldebug)
+        DebugEcho("post start: $content");
+
+    filter_End($content, $config);
+    if ($fulldebug)
+        DebugEcho("post end: $content");
+
 
     DebugEcho("excerpt: $post_excerpt");
 
@@ -694,7 +695,7 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
     $emails = array();
     $pop3 = new POP3();
 
-    EchoInfo("Connecting to $server:$port ($protocol))");
+    EchoInfo("Connecting to $server:$port ($protocol)");
 
     if ($pop3->connect($server, $port)) {
         $msg_count = $pop3->login($email, $password);
@@ -708,22 +709,30 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
         EchoInfo("The Server said: $pop3->ERROR");
         $msg_count = 0;
     }
+    DebugEcho("message count: $msg_count");
 
     // loop through messages 
-    
+    //$msgs = $pop3->pop_list();
+    //DebugEcho("POP3MessageFetch: messages");
+    //DebugDump($msgs);
+
     for ($i = 1; $i <= $msg_count; $i++) {
         $m = $pop3->get($i);
-        if (is_array($m)) {
-            $emails[$i] = implode('', $m);
-            if ($deleteMessages) {
-                if (!$pop3->delete($i)) {
-                    EchoInfo('pop3 cannot delete message ' . $pop3->ERROR);
-                    $pop3->reset();
-                    exit;
+        if ($m !== false) {
+            if (is_array($m)) {
+                $emails[$i] = implode('', $m);
+                if ($deleteMessages) {
+                    if (!$pop3->delete($i)) {
+                        EchoInfo('POP3MessageFetch: cannot delete message $i ' . $pop3->ERROR);
+                        $pop3->reset();
+                        exit;
+                    }
                 }
+            } else {
+                DebugEcho("POP3MessageFetch: message $i not an array");
             }
         } else {
-            DebugEcho("POP3MessageFetch: invalid response received from GET $i");
+            EchoInfo("POP3MessageFetch: message $i $pop3->ERROR");
         }
         if ($maxemails != 0 && $i >= $maxemails) {
             DebugEcho("Max emails ($maxemails)");
@@ -1648,6 +1657,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         function wp_handle_upload_error(&$file, $message) {
             return array('error' => $message);
         }
+
     }
 
     // You may define your own function and pass the name in $overrides['upload_error_handler']
@@ -1684,9 +1694,9 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     // A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
 
     $wp_filetype = wp_check_filetype($file['name']);
-    DebugEcho("postie_handle_upload: detected file type for ".$file['name']);
+    DebugEcho("postie_handle_upload: detected file type for " . $file['name']);
     DebugDump($wp_filetype);
-    
+
     extract($wp_filetype);
 
     if ((!$type || !$ext ) && !current_user_can('unfiltered_upload'))

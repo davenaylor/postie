@@ -44,7 +44,7 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
     } else {
         EchoInfo("Warning! Postie requires that iconv be enabled.");
     }
-    
+
     if (function_exists('imap_mime_header_decode')) {
         EchoInfo("imap: installed");
     } else {
@@ -75,7 +75,7 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
     } else {
         DebugEcho("checking");
     }
-    
+
     switch (strtolower($config["input_protocol"])) {
         case 'imap':
         case 'imap-ssl':
@@ -98,11 +98,20 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
         default:
             require_once(ABSPATH . WPINC . DIRECTORY_SEPARATOR . 'class-pop3.php');
             $pop3 = &new POP3();
+            $pop3->DEBUG = true;
             if (!$pop3->connect($config["mail_server"], $config["mail_server_port"])) {
                 EchoInfo("Unable to connect. The server said:");
                 EchoInfo($pop3->ERROR);
             } else {
                 EchoInfo("Sucessful " . strtoupper($config['input_protocol']) . " connection on port {$config["mail_server_port"]}");
+                $msgs = $pop3->login($config["mail_userid"], $config["mail_password"]);
+                if ($msgs === false) {
+                    EchoInfo("Unable to authenticate. The server said:");
+                    EchoInfo($pop3->ERROR);
+                } else {
+                    EchoInfo("# of waiting messages: $msgs");
+                }
+                $pop3->quit();
             }
             break;
     }
