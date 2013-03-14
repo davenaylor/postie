@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.4.38
+Stable tag: 1.4.39
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -426,6 +426,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.39 (future) =
+* Fixed bug where Postie supplied schedules were not always being correctly added to the cron
+
 = 1.4.38 (2013.03.12) =
 * Improved POP3 configuration test
 * Fixed bug where :start and :end were removing commands like tags: and date: before they got a chance to be processed

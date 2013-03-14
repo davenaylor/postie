@@ -2445,7 +2445,7 @@ function config_Update($data) {
     if ($data['interval'] != '') {
         postie_decron();
         if ($data['interval'] != 'manual') {
-            postie_cron($interval = $data['interval']);
+            postie_cron($data['interval']);
         }
     }
 }
