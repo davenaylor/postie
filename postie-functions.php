@@ -2128,15 +2128,16 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config) {
             $content = html_entity_decode($content, ENT_QUOTES);
         }
 
-        $startIndex = $config ['start_image_count_at_zero'] ? 0 : 1;
-        if (!empty($attachments) && $config ['auto_gallery']) {
+        $startIndex = $config['start_image_count_at_zero'] ? 0 : 1;
+        if (!empty($attachments) && $config['auto_gallery']) {
             $imageTemplate = '[gallery]';
-            if ($config ['images_append']) {
-                $content .= $imageTemplate;
+            if ($config['images_append']) {
+                $content .= "\n$imageTemplate";
+                DebugEcho("Auto gallery: append");
             } else {
                 $content = "$imageTemplate\n" . $content;
+                DebugEcho("Auto gallery: prepend");
             }
-            DebugEcho("Auto gallery");
             return;
         }
 
@@ -2185,6 +2186,8 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config) {
                 /* if using the gallery shortcode, don't add pictures at all */
                 if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
                     $pics .= $imageTemplate;
+                } else {
+                    DebugEcho("gallery detected, not inserting images");
                 }
             }
             $i++;
