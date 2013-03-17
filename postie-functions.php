@@ -2332,9 +2332,10 @@ function lookup_category($trial_category, $category_match) {
 
     $term = get_term_by('name', $trial_category, 'category');
     if ($term !== false) {
+        DebugEcho("category: found by name $trial_category");
         DebugDump($term);
         //then category is a named and found 
-        return $term->term_id;
+        return $term['term_id'];
     }
     $term = get_term_by('id', $trial_category, 'category');
     if (is_array($term)) {

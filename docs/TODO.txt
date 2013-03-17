@@ -11,6 +11,10 @@ automatically create category if it doesn't exist. new option to allow this feat
 WP MU support
 new command to set post status: published, draft, pending review, private
 support setting "post format"
+rework attachment logic. video files can come through as application/octect-stream. Mail parsing should separate attachments 
+  into buckets? i.e. video, image, other. Each gets processed differently. I.e. when gallery in turned on images don't get embedded
+  but videos do.
+Maybe look at file extensions to supplement mime types
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/

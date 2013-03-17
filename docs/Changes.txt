@@ -10,7 +10,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.4.39 (future) =
+= 1.4.40 (future) =
+* 
+
+= 1.4.39 (2013.03.14) =
 * Fixed bug where Postie supplied schedules were not always being correctly added to the cron
 
 = 1.4.38 (2013.03.12) =
