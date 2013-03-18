@@ -48,7 +48,7 @@ $images = array("Test.png", "Test.jpg", "Test.gif");
     if (function_exists('imap_mime_header_decode')) {
         EchoInfo("imap: installed");
     } else {
-        EchoInfo("Warning! Postie requires that imap be enabled.");
+        EchoInfo("Warning! Postie requires that imap be enabled if you are using IMAP, IMAP-SSL or POP3-SSL.");
     }
 
     if (HasMbStringInstalled()) {
