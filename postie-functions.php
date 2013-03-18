@@ -2333,18 +2333,20 @@ function lookup_category($trial_category, $category_match) {
     $term = get_term_by('name', $trial_category, 'category');
     if ($term !== false) {
         DebugEcho("category: found by name $trial_category");
-        DebugDump($term);
+        //DebugDump($term);
         //then category is a named and found 
-        return $term['term_id'];
+        return $term->term_id;
     }
-    $term = get_term_by('id', $trial_category, 'category');
-    if (is_array($term)) {
+    
+    $term = get_term_by('id', intval($trial_category), 'category');
+    if ($term !== false) {
         DebugEcho("category: found by id $trial_category");
-        DebugDump($term);
+        //DebugDump($term);
         //then cateogry was an ID and found 
-        return $term['term_id'];
+        return $term->term_id;
     }
-    if (empty($found_category) && $category_match) {
+    
+    if ($category_match) {
         DebugEcho("category wildcard lookup: $trial_category");
         $sql_sub_name = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE name LIKE \'' . addslashes($trial_category) . '%\' limit 1';
         $found_category = $wpdb->get_var($sql_sub_name);
