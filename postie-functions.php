@@ -181,11 +181,11 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     if ($fulldebug)
         DebugEcho("post date: $content");
 
-    filter_ubb2HTML($content);
+    filter_Ubb2HTML($content);
     if ($fulldebug)
         DebugEcho("post ubb: $content");
 
-    $post_categories = tag_categories($subject, $default_post_category, $category_match);
+    $post_categories = tag_Categories($subject, $default_post_category, $category_match);
     if ($fulldebug)
         DebugEcho("post category: $content");
 
@@ -202,7 +202,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
         if ($fulldebug)
             DebugEcho("post video: $content");
 
-        $content = filter_linkify($content);
+        $content = filter_Linkify($content);
         if ($fulldebug)
             DebugEcho("post linkify: $content");
     }
@@ -275,7 +275,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
         $post_status = $post_status;
     }
 
-    filter_newlines($content, $config);
+    filter_Newlines($content, $config);
     if ($fulldebug)
         DebugEcho("post newline: $content");
 
@@ -397,7 +397,7 @@ function tag_PostType(&$subject) {
     return $post_type;
 }
 
-function filter_linkify($text) {
+function filter_Linkify($text) {
     # It turns urls into links, and video urls into embedded players
     //DebugEcho("begin: filter_linkify");
 
@@ -920,7 +920,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     if ($part->ctype_secondary == 'enriched') {
                         //convert enriched text to HTML
                         DebugEcho("enriched");
-                        $meta_return .= filter_etf2HTML($part->body) . "\n";
+                        $meta_return .= filter_Etf2HTML($part->body) . "\n";
                     } elseif ($part->ctype_secondary == 'html') {
                         //strip excess HTML
                         DebugEcho("html");
@@ -1068,7 +1068,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     return $meta_return;
 }
 
-function filter_ubb2HTML(&$text) {
+function filter_Ubb2HTML(&$text) {
 // Array of tags with opening and closing
     $tagArray['img'] = array('open' => '<img src="', 'close' => '">');
     $tagArray['b'] = array('open' => '<b>', 'close' => '</b>');
@@ -1098,7 +1098,7 @@ function filter_ubb2HTML(&$text) {
 // This function turns Enriched Text into something similar to HTML
 // Very basic at the moment, only supports some functionality and dumps the rest
 // FIXME: fix colours: <color><param>FFFF,C2FE,0374</param>some text </color>
-function filter_etf2HTML($content) {
+function filter_Etf2HTML($content) {
 
     $search = array(
         '/<bold>/',
@@ -1337,7 +1337,7 @@ function filter_End(&$content, $config) {
 }
 
 //filter content for new lines
-function filter_newlines(&$content, $config) {
+function filter_Newlines(&$content, $config) {
     if ($config['filternewlines']) {
 
         $search = array(
@@ -1509,7 +1509,7 @@ function filter_Delay(&$content, $message_date = NULL, $offset = 0) {
 /**
  * This function takes the content of the message - looks for a subject at the begining surrounded by # and then removes that from the content
  */
-function tag_subject($content, $defaultTitle) {
+function tag_Subject($content, $defaultTitle) {
     DebugEcho("Looking for subject in email body");
     if (substr($content, 0, 1) != "#") {
         DebugEcho("No subject found, using default [1]");
@@ -2215,7 +2215,7 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
     if (!array_key_exists('subject', $mimeDecodedEmail->headers) || empty($mimeDecodedEmail->headers['subject'])) {
         DebugEcho("No subject in email");
         if ($allow_subject_in_mail) {
-            list($subject, $content) = tag_subject($content, $default_title);
+            list($subject, $content) = tag_Subject($content, $default_title);
         } else {
             DebugEcho("Using default subject");
             $subject = $default_title;
@@ -2275,7 +2275,7 @@ function tag_Excerpt(&$content, $filterNewLines, $convertNewLines) {
         DebugEcho("excerpt found: $post_excerpt");
         if ($filterNewLines) {
             DebugEcho("filtering newlines from excerpt");
-            filter_newlines($post_excerpt, $convertNewLines);
+            filter_Newlines($post_excerpt, $convertNewLines);
         }
     }
     return $post_excerpt;
@@ -2285,7 +2285,7 @@ function tag_Excerpt(&$content, $filterNewLines, $convertNewLines) {
  * This function determines the categories ids for the post
  * @return array
  */
-function tag_categories(&$subject, $defaultCategory, $category_match) {
+function tag_Categories(&$subject, $defaultCategory, $category_match) {
     $original_subject = $subject;
     $post_categories = array();
     $matchtypes = array();
