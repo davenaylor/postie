@@ -503,59 +503,59 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
     public function testtag_Date() {
         $c = "";
-        $this->assertEquals(null, tag_Date($c, null));
+        $this->assertEquals(null, tag_Date($c, null, 0));
         $this->assertEquals("", $c);
 
         $c = "date:";
-        $this->assertEquals(null, tag_Date($c, null));
+        $this->assertEquals(null, tag_Date($c, null, 0));
         $this->assertEquals("date:", $c);
 
         $c = "date: nothing";
-        $this->assertEquals(null, tag_Date($c, null));
+        $this->assertEquals(null, tag_Date($c, null, 0));
         $this->assertEquals("date: nothing", $c);
 
         $c = "date: 1";
-        $this->assertEquals(null, tag_Date($c, null));
+        $this->assertEquals(null, tag_Date($c, null, 0));
         $this->assertEquals("date: 1", $c);
 
         $c = "date: 12/31/2013";
-        $this->assertEquals("2013-12-31", tag_Date($c, null));
+        $this->assertEquals("2013-12-31", tag_Date($c, null, 0));
         $this->assertEquals("", $c);
 
         $c = "date:12/31/2013";
-        $this->assertEquals("2013-12-31", tag_Date($c, null));
+        $this->assertEquals("2013-12-31", tag_Date($c, null, 0));
         $this->assertEquals("", $c);
 
         $c = "Date: 12/31/2013";
-        $this->assertEquals("2013-12-31", tag_Date($c, null));
+        $this->assertEquals("2013-12-31", tag_Date($c, null, 0));
         $this->assertEquals("", $c);
 
         $c = "DATE: 12/31/2013";
-        $this->assertEquals("2013-12-31", tag_Date($c, null));
+        $this->assertEquals("2013-12-31", tag_Date($c, null, 0));
         $this->assertEquals("", $c);
 
         $c = "date: 31-12-2013";
-        $this->assertEquals("2013-12-31", tag_Date($c, null));
+        $this->assertEquals("2013-12-31", tag_Date($c, null, 0));
         $this->assertEquals("", $c);
 
         $c = "date: 31.12.2013";
-        $this->assertEquals("2013-12-31", tag_Date($c, null));
+        $this->assertEquals("2013-12-31", tag_Date($c, null, 0));
         $this->assertEquals("", $c);
 
         $c = "date: Dec 31, 2013";
-        $this->assertEquals("2013-12-31", tag_Date($c, null));
+        $this->assertEquals("2013-12-31", tag_Date($c, null, 0));
         $this->assertEquals("", $c);
 
         $c = "date: 12/31/2013\nstuff";
-        $this->assertEquals("2013-12-31", tag_Date($c, null));
+        $this->assertEquals("2013-12-31", tag_Date($c, null, 0));
         $this->assertEquals("stuff", $c);
 
         $c = "date: Dec 31, 2013 14:22";
-        $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null));
+        $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null, 0));
         $this->assertEquals("", $c);
 
         $c = "stuff\n\ndate: Dec 31, 2013 14:22\n\nmorestuff";
-        $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null));
+        $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null, 0));
         $this->assertEquals("stuff\n\n\n\nmorestuff", $c);
     }
 
@@ -587,11 +587,11 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
         $f = "moiré-pättern.png";
         $this->assertEquals("moireCC81-paCC88ttern.png", filename_fix($f));
-        
+
         $f = "וְאָהַבְתָּ.png";
         $this->assertEquals("D795D6B0D790D6B8D794D6B7D791D6B0D7AAD6BCD6B8.png", filename_fix($f));
-        
-        $this->assertEquals("D09AD0BED0B3D0B0D182D0BE.png",filename_fix("Когато.png"));
+
+        $this->assertEquals("D09AD0BED0B3D0B0D182D0BE.png", filename_fix("Когато.png"));
     }
 
 }

@@ -214,12 +214,12 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         $config['images_append'] = true;
         $c = "test";
         filter_ReplaceImagePlaceHolders($c, $attachements, $config);
-        $this->assertEquals("test[gallery]", $c);
+        $this->assertEquals("test\n[gallery]", $c);
 
         $config['images_append'] = true;
         $c = "test";
         filter_ReplaceImagePlaceHolders($c, $attachements, $config);
-        $this->assertEquals("test[gallery]", $c);
+        $this->assertEquals("test\n[gallery]", $c);
 
         $c = "test";
         filter_ReplaceImagePlaceHolders($c, array(), $config);

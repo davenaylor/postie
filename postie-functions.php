@@ -98,13 +98,17 @@ function DebugEcho($v) {
     }
 }
 
-function tag_Date(&$content, $message_date) {
-    DebugEcho("tag_Date\n---\n$content\n---");
+function tag_Date(&$content, $message_date, $time_offset) {
     if (1 === preg_match("/^date:\s?(.*)$/im", $content, $matches)) {
+        DebugEcho("tag_Date: found date tag $matches[1]");
         $newdate = strtotime($matches[1]);
         if (false !== $newdate) {
             $t = date("H:i:s", $newdate);
-            DebugEcho("time: $t");
+            DebugEcho("tag_Date: original time: $t");
+            
+            $newdate = $newdate + $time_offset * 3600;
+            $t = date("H:i:s", $newdate);
+            DebugEcho("tag_Date: adjusted time: $t");
 
             $format = "Y-m-d";
             if ($t != '00:00:00') {
@@ -114,7 +118,7 @@ function tag_Date(&$content, $message_date) {
             $content = trim(str_replace($matches[0], '', $content));
         }
     } else {
-        DebugEcho("No date found");
+        DebugEcho("tag_Date: No date found");
     }
 
     return $message_date;
@@ -171,7 +175,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
         }
         $message_date = HandleMessageEncoding($cte, $cs, $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
     }
-    $message_date = tag_Date($content, $message_date);
+    $message_date = tag_Date($content, $message_date, $time_offset);
 
     list($post_date, $post_date_gmt, $delay) = filter_Delay($content, $message_date, $time_offset);
     if ($fulldebug)
@@ -2337,7 +2341,7 @@ function lookup_category($trial_category, $category_match) {
         //then category is a named and found 
         return $term->term_id;
     }
-    
+
     $term = get_term_by('id', intval($trial_category), 'category');
     if ($term !== false) {
         DebugEcho("category: found by id $trial_category");
@@ -2345,7 +2349,7 @@ function lookup_category($trial_category, $category_match) {
         //then cateogry was an ID and found 
         return $term->term_id;
     }
-    
+
     if ($category_match) {
         DebugEcho("category wildcard lookup: $trial_category");
         $sql_sub_name = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE name LIKE \'' . addslashes($trial_category) . '%\' limit 1';

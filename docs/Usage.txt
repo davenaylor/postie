@@ -33,7 +33,9 @@
       #eimg2# etc.
 
 = Post type =
-  You can specify the post type by including it as the first part of the subject
+  You can specify the post type by including it as the first part of the subject.
+  Remember that "Post type" and "Post format" are different. Currently there is
+  No support for specifying "Post format"
   E.g. post type//real subject
 
 = Categories =
@@ -47,7 +49,7 @@
   Gen: New News
 
   The system will post that in General. Note you must turn on the "Match short category"
-  setting for this to work.
+  setting for this to work (on by default).
 
 * All of the above also applies if you put the category in brackets []
 * Using [] or you can post to multiple categories at once
