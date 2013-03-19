@@ -165,12 +165,26 @@ function postie_warnings() {
 
         add_action('admin_notices', 'postie_mbstring_warning');
     }
+
+    if (!function_exists('get_user_by')){
+        include ABSPATH . 'wp-includes/pluggable.php';
+    }
+    $adminuser = get_user_by( 'login', $config['admin_username']);
+    if ($adminuser === false) {
+
+        function postie_adminuser_warning() {
+            echo "<div id='postie-mbstring-warning' class='error'><p><strong>";
+            echo __('Warning: the Admin username is not a valid WordPress login. Postie may reject emails if this is not corrected.', 'postie');
+            echo "</strong></p></div>";
+        }
+
+        add_action('admin_notices', 'postie_adminuser_warning');
+    }
 }
 
 function disable_kses_content() {
     remove_filter('content_save_pre', 'wp_filter_post_kses');
 }
-
 
 function postie_whitelist($options) {
     $added = array('postie-settings' => array('postie-settings'));
@@ -207,10 +221,10 @@ function check_postie() {
 function postie_cron($interval = false) {
     //Do not echo output in filters, it seems to break some installs
     error_log("postie_cron: setting up cron task: $interval");
-    
+
     $schedules = wp_get_schedules();
-    error_log("postie_cron\n".print_r($schedules, true));
-    
+    error_log("postie_cron\n" . print_r($schedules, true));
+
     if (!$interval) {
         $config = config_Read();
         $interval = $config['interval'];
@@ -238,6 +252,7 @@ function postie_decron() {
 }
 
 /* here we add some more cron options for how often to check for e-mail */
+
 function postie_more_reccurences($schedules) {
     //Do not echo output in filters, it seems to break some installs
     error_log("postie_more_reccurences: setting cron schedules");

@@ -9,7 +9,6 @@ debug assistance
 setting for default post type
 automatically create category if it doesn't exist. new option to allow this feature?
 WP MU support
-new command to set post status: published, draft, pending review, private
 rework attachment logic. video files can come through as application/octect-stream. Mail parsing should separate attachments 
   into buckets? i.e. video, image, other. Each gets processed differently. I.e. when gallery in turned on images don't get embedded
   but videos do.

@@ -1206,7 +1206,6 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         DebugDump($mimeDecodedEmail->headers);
     }
 
-
     $resentFrom = "";
     if (array_key_exists('resent-from', $mimeDecodedEmail->headers)) {
         $resentFrom = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["resent-from"]));
@@ -1229,7 +1228,15 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
             $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
         }
     } elseif ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses)) {
+        DebugEcho("ValidatePoster: looking up default user $admin_username");
+        
+        //TODO: change select to get_user_by()
+        
         $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
+        DebugEcho("ValidatePoster: found user '$poster'");
+        if (empty($poster)){
+            EchoInfo("Your 'Admin username' setting '$admin_username' is not a valid WordPress user");
+        }
     }
 
     $validSMTP = isValidSmtpServer($mimeDecodedEmail, $smtp);
