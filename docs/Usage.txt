@@ -32,11 +32,9 @@
     * You can include images in the excerpt by using the shortcode #eimg1#,
       #eimg2# etc.
 
-= Post type =
-  You can specify the post type by including it as the first part of the subject.
-  Remember that "Post type" and "Post format" are different. Currently there is
-  No support for specifying "Post format"
-  E.g. post type//real subject
+= Post type/format =
+  You can specify the post type or format by including it as the first part of the subject.
+  E.g. aside//real subject
 
 = Categories =
 * If you put a category name in the subject with a : it will be used

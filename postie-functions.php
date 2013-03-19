@@ -7,6 +7,19 @@
 //to turn on debug output add the following line to wp-config.php
 //define('POSTIE_DEBUG', true);
 
+class PostiePostModifiers {
+
+    var $PostFormat = 'standard';
+
+    function apply($postid, $postdetails) {
+        
+        if ($this->PostFormat!='standard'){
+            set_post_format($postid, $this->PostFormat);
+        }
+    }
+
+}
+
 if (!function_exists('mb_str_replace')) {
 
     function mb_str_replace($search, $replace, $subject, &$count = 0) {
@@ -105,7 +118,7 @@ function tag_Date(&$content, $message_date, $time_offset) {
         if (false !== $newdate) {
             $t = date("H:i:s", $newdate);
             DebugEcho("tag_Date: original time: $t");
-            
+
             $newdate = $newdate + $time_offset * 3600;
             $t = date("H:i:s", $newdate);
             DebugEcho("tag_Date: adjusted time: $t");
@@ -124,7 +137,7 @@ function tag_Date(&$content, $message_date, $time_offset) {
     return $message_date;
 }
 
-function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
+function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $postmodifiers) {
 
     $fulldebug = false;
 
@@ -135,6 +148,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
         "cids" => array(), //holds the cids for HTML email
         "image_files" => array() //holds the files for each image
     );
+
     if (array_key_exists('message-id', $mimeDecodedEmail->headers)) {
         EchoInfo("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
         if ($fulldebug)
@@ -229,7 +243,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     if ($fulldebug)
         DebugEcho("post custom: $content");
 
-    $post_type = tag_PostType($subject);
+    $post_type = tag_PostType($subject, $postmodifiers);
     if ($fulldebug)
         DebugEcho("post type: $content");
 
@@ -287,7 +301,6 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config) {
     if ($fulldebug)
         DebugEcho("post end: $content");
 
-
     DebugEcho("excerpt: $post_excerpt");
 
     $details = array(
@@ -328,12 +341,17 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     EchoInfo("new post id is $post_id");
 
     $is_reply = false;
-    $details = CreatePost($poster, $mimeDecodedEmail, $post_id, $is_reply, $config);
+    $postmodifiers = new PostiePostModifiers();
+
+    $details = CreatePost($poster, $mimeDecodedEmail, $post_id, $is_reply, $config, $postmodifiers);
 
     $details = apply_filters('postie_post', $details);
 
     DebugEcho(("Post postie_post filter"));
     DebugDump($details);
+
+    DebugEcho("Post modifiers");
+    DebugDump($postmodifiers);
 
     if (empty($details)) {
         // It is possible that the filter has removed the post, in which case, it should not be posted.
@@ -344,7 +362,9 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         }
     } else {
         DisplayEmailPost($details);
-        PostToDB($details, $is_reply, true, $custom_image_field);
+
+        PostToDB($details, $is_reply, $custom_image_field, $postmodifiers);
+
         if ($confirmation_email != '') {
             if ($confirmation_email == 'sender') {
                 $recipients = array($postAuthorDetails['email']);
@@ -367,9 +387,11 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
  * Adds support for handling Custom Post Types by adding the
  * Custom Post Type name to the email subject separated by
  * $custom_post_type_delim, e.g. "Movies // My Favorite Movie"
+ * Also supports setting the Post Format.
  */
-function tag_PostType(&$subject) {
+function tag_PostType(&$subject, $postmodifiers) {
 
+    $post_type = 'post';
     $custom_post_type_delim = "//";
     if (strpos($subject, $custom_post_type_delim) !== FALSE) {
         // Captures the custom post type in the subject before $custom_post_type_delim
@@ -382,16 +404,15 @@ function tag_PostType(&$subject) {
 
         // Check if custom post type exists, if not, set default post type of 'post'
         $known_post_types = get_post_types();
-        DebugDump($known_post_types);
+        //DebugDump($known_post_types);
 
         if (in_array($custom_post_type, array_map('strtolower', $known_post_types))) {
-            $post_type = $custom_post_type;
             DebugEcho("post type: found type '$post_type'");
-        } else {
-            $post_type = 'post';
+            $post_type = $custom_post_type;
+        } elseif (in_array($custom_post_type, array_keys(get_post_format_slugs()))) {
+            DebugEcho("post type: found format '$custom_post_type'");
+            $postmodifiers->PostFormat = $custom_post_type;
         }
-    } else {
-        $post_type = 'post';
     }
 
     return $post_type;
@@ -753,34 +774,36 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
  * @param array - categories to be posted to
  * @param array - details of the post
  */
-function PostToDB($details, $isReply, $postToDb = true, $customImageField = false) {
-    if ($postToDb) {
-        if (!$isReply) {
-            $post_ID = wp_insert_post($details, true);
-            if (is_wp_error($post_ID)) {
-                EchoInfo("Error: " . $post_ID->get_error_message());
-                wp_delete_post($details['ID']);
-            }
-        } else {
-            $comment = array(
-                'comment_author' => $details['comment_author'],
-                'comment_post_ID' => $details['ID'],
-                'comment_author_email' => $details['email_author'],
-                'comment_date' => $details['post_date'],
-                'comment_date_gmt' => $details['post_date_gmt'],
-                'comment_content' => $details['post_content'],
-                'comment_author_url' => $details['comment_author_url'],
-                'comment_author_IP' => '',
-                'comment_approved' => 1,
-                'comment_agent' => '',
-                'comment_type' => '',
-                'comment_parent' => 0,
-                'user_id' => $details['user_ID']
-            );
+function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
 
-            $post_ID = wp_insert_comment($comment);
+    if (!$isReply) {
+        $post_ID = wp_insert_post($details, true);
+        if (is_wp_error($post_ID)) {
+            EchoInfo("Error: " . $post_ID->get_error_message());
+            wp_delete_post($details['ID']);
         }
-        if ($customImageField && $post_ID) {
+    } else {
+        $comment = array(
+            'comment_author' => $details['comment_author'],
+            'comment_post_ID' => $details['ID'],
+            'comment_author_email' => $details['email_author'],
+            'comment_date' => $details['post_date'],
+            'comment_date_gmt' => $details['post_date_gmt'],
+            'comment_content' => $details['post_content'],
+            'comment_author_url' => $details['comment_author_url'],
+            'comment_author_IP' => '',
+            'comment_approved' => 1,
+            'comment_agent' => '',
+            'comment_type' => '',
+            'comment_parent' => 0,
+            'user_id' => $details['user_ID']
+        );
+
+        $post_ID = wp_insert_comment($comment);
+    }
+
+    if ($post_ID) {
+        if ($customImageField) {
             DebugEcho("Saving custom image fields");
             //DebugDump($details['customImages']);
 
@@ -792,6 +815,8 @@ function PostToDB($details, $isReply, $postToDb = true, $customImageField = fals
                 }
             }
         }
+
+        $postmodifiers->apply($post_ID, $details);
     }
 }
 

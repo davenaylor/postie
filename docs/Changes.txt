@@ -1,5 +1,8 @@
 == Upgrade Notice ==
 
+= 1.4.41 =
+Post format is now supported. You can specify any of the WordPress supported post formats using the Post type syntax.
+
 = 1.4.18 =
 Many method names have been changed. Any custom filters may need to be updated.
 
@@ -12,6 +15,7 @@ Attachments are now processed in the order they were attached.
 == CHANGELOG ==
 = 1.4.41 (future) =
 * Apply Postie Time Correction to date: command
+* Add support for Post Formats 
 
 = 1.4.40 (2013.03.18) =
 * Fixed bug where categories specified by ID were not being correctly identified
