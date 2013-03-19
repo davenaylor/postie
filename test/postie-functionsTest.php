@@ -142,7 +142,27 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("test", $content);
     }
 
-    public function testEndFilter() {
+    public function testfilter_Start() {
+        $config = config_GetDefaults();
+        
+        $c = "test";
+        filter_Start($c, $config);
+        $this->assertEquals("test", $c);
+        
+        $c = ":start\ntest";
+        filter_Start($c, $config);
+        $this->assertEquals("\ntest", $c);
+        
+        $c = "test/n:start\nsomething";
+        filter_Start($c, $config);
+        $this->assertEquals("\nsomething", $c);
+        
+        $c = "<p>test</p><p>:start</p><p>something</p>";
+        filter_Start($c, $config);
+        $this->assertEquals("</p><p>something</p>", $c);
+    }
+
+    public function testfilter_End() {
         $config = config_GetDefaults();
         $c = "test";
         filter_End($c, $config);
@@ -163,67 +183,71 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $c = "This is a test :end";
         filter_End($c, $config);
         $this->assertEquals("This is a test ", $c);
+
+        $c = "<p>This is a test</p><p>:end</p><div>some footer</div>";
+        filter_End($c, $config);
+        $this->assertEquals("<p>This is a test</p><p>", $c);
     }
 
-    public function testFilterNewLines() {
+    public function testfilter_Newlines() {
         $config = config_GetDefaults();
 
         $c = "test";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test", $c);
 
         $c = "test";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test", $c);
 
         $c = "test\n";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test ", $c);
 
         $c = "test\r\n";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test ", $c);
 
         $c = "test\r";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test ", $c);
 
         $c = "test\n\n";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test ", $c);
 
         $c = "test\r\n\r\n";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test  ", $c);
 
         $c = "test\r\n\r\ntest\n\ntest\rtest\r\ntest\ntest";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test  test test test test test", $c);
 
         $config['convertnewline'] = true;
 
         $c = "test\n";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test<br />\n", $c);
 
         $c = "test\n\n";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test<br />\n", $c);
 
         $c = "test\r";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test<br />\n", $c);
 
         $c = "test\r\n";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test<br />\n", $c);
 
         $c = "test\r\n\r\n";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test<br />\n<br />\n", $c);
 
         $c = "test\r\n\r\ntest\n\ntest\rtest\r\ntest\ntest";
-        filter_newlines($c, $config);
+        filter_Newlines($c, $config);
         $this->assertEquals("test<br />\n<br />\ntest<br />\ntest<br />\ntest<br />\ntest<br />\ntest", $c);
     }
 
@@ -559,8 +583,8 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $c = "stuff\n\ndate: Dec 31, 2013 14:22\n\nmorestuff";
         $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null, 0));
         $this->assertEquals("stuff\n\n\n\nmorestuff", $c);
-        
-         $c = "<p>stuff</p><p>date: Dec 31, 2013 14:22</p><p>morestuff</p>";
+
+        $c = "<p>stuff</p><p>date: Dec 31, 2013 14:22</p><p>morestuff</p>";
         $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null, 0));
         $this->assertEquals("<p>stuff</p><p></p><p>morestuff</p>", $c);
     }
