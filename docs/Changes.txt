@@ -20,6 +20,7 @@ Attachments are now processed in the order they were attached.
 * Add support for Post Formats
 * Add support for Post Status
 * Add warning if Admin username is invalid
+* Fixed bug where date: was not always being detected in html emails
 
 = 1.4.40 (2013.03.18) =
 * Fixed bug where categories specified by ID were not being correctly identified

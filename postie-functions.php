@@ -112,28 +112,36 @@ function DebugEcho($v) {
 }
 
 function tag_Date(&$content, $message_date, $time_offset) {
-    if (1 === preg_match("/^date:\s?(.*)$/im", $content, $matches)) {
-        DebugEcho("tag_Date: found date tag $matches[1]");
-        $newdate = strtotime($matches[1]);
-        if (false !== $newdate) {
-            $t = date("H:i:s", $newdate);
-            DebugEcho("tag_Date: original time: $t");
+    $html = LoadDOM($content);
+    if ($html !== false) {
+        $es = $html->find('text');
+        DebugEcho("tag_Date: html " . count($es));
+        foreach ($es as $e) {
+            DebugEcho(trim($e->plaintext));
+            if (1 === preg_match("/^date:\s?(.*)$/im", trim($e->plaintext), $matches)) {
+                DebugEcho("tag_Date: found date tag $matches[1]");
+                $newdate = strtotime($matches[1]);
+                if (false !== $newdate) {
+                    $t = date("H:i:s", $newdate);
+                    DebugEcho("tag_Date: original time: $t");
 
-            $newdate = $newdate + $time_offset * 3600;
-            $t = date("H:i:s", $newdate);
-            DebugEcho("tag_Date: adjusted time: $t");
+                    $newdate = $newdate + $time_offset * 3600;
+                    $t = date("H:i:s", $newdate);
+                    DebugEcho("tag_Date: adjusted time: $t");
 
-            $format = "Y-m-d";
-            if ($t != '00:00:00') {
-                $format.= " H:i:s";
+                    $format = "Y-m-d";
+                    if ($t != '00:00:00') {
+                        $format.= " H:i:s";
+                    }
+                    $message_date = date($format, $newdate);
+                    $content = str_replace($matches[0], '', $content);
+                    break;
+                }
             }
-            $message_date = date($format, $newdate);
-            $content = trim(str_replace($matches[0], '', $content));
         }
     } else {
-        DebugEcho("tag_Date: No date found");
+        DebugEcho("tag_Date: not html");
     }
-
     return $message_date;
 }
 
@@ -1229,12 +1237,12 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         }
     } elseif ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses)) {
         DebugEcho("ValidatePoster: looking up default user $admin_username");
-        
+
         //TODO: change select to get_user_by()
-        
+
         $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
         DebugEcho("ValidatePoster: found user '$poster'");
-        if (empty($poster)){
+        if (empty($poster)) {
             EchoInfo("Your 'Admin username' setting '$admin_username' is not a valid WordPress user");
         }
     }

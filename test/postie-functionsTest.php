@@ -550,7 +550,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
         $c = "date: 12/31/2013\nstuff";
         $this->assertEquals("2013-12-31", tag_Date($c, null, 0));
-        $this->assertEquals("stuff", $c);
+        $this->assertEquals("\nstuff", $c);
 
         $c = "date: Dec 31, 2013 14:22";
         $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null, 0));
@@ -559,6 +559,10 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $c = "stuff\n\ndate: Dec 31, 2013 14:22\n\nmorestuff";
         $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null, 0));
         $this->assertEquals("stuff\n\n\n\nmorestuff", $c);
+        
+         $c = "<p>stuff</p><p>date: Dec 31, 2013 14:22</p><p>morestuff</p>";
+        $this->assertEquals("2013-12-31 14:22:00", tag_Date($c, null, 0));
+        $this->assertEquals("<p>stuff</p><p></p><p>morestuff</p>", $c);
     }
 
     function testtag_Excerpt() {
