@@ -11,7 +11,8 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
         $isreply = false;
         $mimeDecodedEmail = DecodeMIMEMail($email);
-        $post = CreatePost('wayne', $mimeDecodedEmail, 1, $isreply, $config);
+        $pm = new PostiePostModifiers();
+        $post = CreatePost('wayne', $mimeDecodedEmail, 1, $isreply, $config, $pm);
 
         return $post;
     }

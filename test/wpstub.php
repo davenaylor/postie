@@ -37,7 +37,7 @@ function get_option($option, $default = false) {
 }
 
 function get_post_types() {
-    return array("post", "page", "custom", "image", "Video");
+    return array("post", "page", "custom", "custom1", "Custom2");
 }
 
 function current_time() {
@@ -155,6 +155,10 @@ $g_get_term_by->term_id = 1;
 function get_term_by() {
     global $g_get_term_by;
     return $g_get_term_by;
+}
+
+function get_post_format_slugs() {
+    return array('standard' => 'standard', 'video' => 'video', 'image' => 'image', 'aside' => 'aside');
 }
 
 ?>

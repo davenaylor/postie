@@ -12,8 +12,8 @@ class PostiePostModifiers {
     var $PostFormat = 'standard';
 
     function apply($postid, $postdetails) {
-        
-        if ($this->PostFormat!='standard'){
+
+        if ($this->PostFormat != 'standard') {
             set_post_format($postid, $this->PostFormat);
         }
     }
@@ -211,6 +211,10 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     if ($fulldebug)
         DebugEcho("post comment: $content");
 
+    $post_status = tag_Status($content, $post_status);
+    if ($fulldebug)
+        DebugEcho("post status: $content");
+
     if ($converturls) {
         $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
         if ($fulldebug)
@@ -285,8 +289,6 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
 
     if ($delay != 0 && $post_status == 'publish') {
         $post_status = 'future';
-    } else {
-        $post_status = $post_status;
     }
 
     filter_Newlines($content, $config);
@@ -398,13 +400,14 @@ function tag_PostType(&$subject, $postmodifiers) {
         $separated_subject = explode($custom_post_type_delim, $subject);
         $custom_post_type = $separated_subject[0];
         $subject = trim($separated_subject[1]);
-        DebugEcho("post type: found possible type '$custom_post_type'");
 
         $custom_post_type = trim(strtolower($custom_post_type));
+        DebugEcho("post type: found possible type '$custom_post_type'");
 
         // Check if custom post type exists, if not, set default post type of 'post'
         $known_post_types = get_post_types();
-        //DebugDump($known_post_types);
+        DebugDump($known_post_types);
+        DebugDump(get_post_format_slugs());
 
         if (in_array($custom_post_type, array_map('strtolower', $known_post_types))) {
             DebugEcho("post type: found type '$post_type'");
@@ -1489,6 +1492,17 @@ function tag_AllowCommentsOnPost(&$content) {
         }
     }
     return $comments_allowed;
+}
+
+function tag_Status(&$content, $currentstatus) {
+    $poststatus = $currentstatus;
+    if (preg_match("/status:\s*(draft|publish|pending|private)/i", $content, $matches)) {
+        DebugEcho("tag_Status: found status $matches[1]");
+        DebugDump($matches);
+        $content = preg_replace("/$matches[0]/i", "", $content);
+        $poststatus = $matches[1];
+    }
+    return $poststatus;
 }
 
 /**

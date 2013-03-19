@@ -84,6 +84,11 @@ Then use the Task Scheduler control panel to call wget or cron.
 * If you put in :start - the message processing won't start until it sees that string.
 * If you put in :end - the message processing will stop once it sees that string.
 
+= Post Status =
+* Posts can have their status set to draft, publish, pending or private. This will override the Default Post Status set in the settings screen.
+  *    status: private
+  *    status: draft
+
 = Post Date =
 * Posts can have a specific publication date. Relative dates like "tomorrow", "monday", "first day of next month" are supported.
   *    date: date
@@ -113,9 +118,9 @@ Then use the Task Scheduler control panel to call wget or cron.
     * You can include images in the excerpt by using the shortcode #eimg1#,
       #eimg2# etc.
 
-= Post type =
-  You can specify the post type by including it as the first part of the subject
-  E.g. post type//real subject
+= Post type/format =
+  You can specify the post type or format by including it as the first part of the subject.
+  E.g. aside//real subject
 
 = Categories =
 * If you put a category name in the subject with a : it will be used
@@ -128,7 +133,7 @@ Then use the Task Scheduler control panel to call wget or cron.
   Gen: New News
 
   The system will post that in General. Note you must turn on the "Match short category"
-  setting for this to work.
+  setting for this to work (on by default).
 
 * All of the above also applies if you put the category in brackets []
 * Using [] or you can post to multiple categories at once
@@ -416,6 +421,11 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 `define('DISABLE_WP_CRON', true);` is not in your wp-config.php file.
 == Upgrade Notice ==
 
+= 1.4.41 =
+Post format is now supported. You can specify any of the WordPress supported post formats using the Post type syntax.
+Post status can now be specified using the status: tag.
+Post status setting was renamed to Default Post Status and moved to the Message tab.
+
 = 1.4.18 =
 Many method names have been changed. Any custom filters may need to be updated.
 
@@ -426,6 +436,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.4.41 (future) =
+* Apply Postie Time Correction to date: command
+* Add support for Post Formats 
+
 = 1.4.40 (2013.03.18) =
 * Fixed bug where categories specified by ID were not being correctly identified
 

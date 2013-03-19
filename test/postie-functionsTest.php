@@ -234,33 +234,35 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetPostType() {
+        $pm = new PostiePostModifiers();
         $subject = "test";
-        $this->assertEquals("post", tag_PostType($subject));
+        $this->assertEquals("post", tag_PostType($subject, $pm));
         $this->assertEquals("test", $subject);
 
         $subject = "custom//test";
-        $this->assertEquals("custom", tag_PostType($subject));
+        $this->assertEquals("custom", tag_PostType($subject, $pm));
         $this->assertEquals("test", $subject);
 
         $subject = "//test";
-        $this->assertEquals("post", tag_PostType($subject));
+        $this->assertEquals("post", tag_PostType($subject, $pm));
         $this->assertEquals("test", $subject);
 
         $subject = "//";
-        $this->assertEquals("post", tag_PostType($subject));
+        $this->assertEquals("post", tag_PostType($subject, $pm));
         $this->assertEquals("", $subject);
 
-        $subject = "Image//test";
-        $this->assertEquals("image", tag_PostType($subject));
+        $subject = "custom2//test";
+        $this->assertEquals("custom2", tag_PostType($subject, $pm));
         $this->assertEquals("test", $subject);
 
-        $subject = "Image // test";
-        $this->assertEquals("image", tag_PostType($subject));
+        $subject = "Custom1 // test";
+        $this->assertEquals("custom1", tag_PostType($subject, $pm));
         $this->assertEquals("test", $subject);
 
         $subject = "video//test";
-        $this->assertEquals("video", tag_PostType($subject));
+        $this->assertEquals("post", tag_PostType($subject, $pm));
         $this->assertEquals("test", $subject);
+        $this->assertEquals('video', $pm->PostFormat);
     }
 
     public function testGetPostExcerpt() {
@@ -592,6 +594,34 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("D795D6B0D790D6B8D794D6B7D791D6B0D7AAD6BCD6B8.png", filename_fix($f));
 
         $this->assertEquals("D09AD0BED0B3D0B0D182D0BE.png", filename_fix("Когато.png"));
+    }
+
+    function testtag_Status() {
+
+        $c = "";
+        $s = tag_Status($c, 'publish');
+        $this->assertEquals("", $c);
+        $this->assertEquals("publish", $s);
+
+        $c = "status:private";
+        $s = tag_Status($c, 'publish');
+        $this->assertEquals("", $c);
+        $this->assertEquals("private", $s);
+
+        $c = "status: private";
+        $s = tag_Status($c, 'publish');
+        $this->assertEquals("", $c);
+        $this->assertEquals("private", $s);
+
+        $c = "status:blah";
+        $s = tag_Status($c, 'publish');
+        $this->assertEquals("status:blah", $c);
+        $this->assertEquals("publish", $s);
+
+        $c = "multi\nstatus: private\nline";
+        $s = tag_Status($c, 'publish');
+        $this->assertEquals("multi\n\nline", $c);
+        $this->assertEquals("private", $s);
     }
 
 }
