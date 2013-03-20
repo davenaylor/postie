@@ -223,31 +223,31 @@ function postie_cron($interval = false) {
     error_log("postie_cron: setting up cron task: $interval");
 
     $schedules = wp_get_schedules();
-    error_log("postie_cron\n" . print_r($schedules, true));
+    //error_log("postie_cron\n" . print_r($schedules, true));
 
     if (!$interval) {
         $config = config_Read();
         $interval = $config['interval'];
-        error_log("postie_cron: setting up cron task from config: $interval");
+        //error_log("postie_cron: setting up cron task from config: $interval");
     }
     if (!$interval || $interval == '') {
         $interval = 'hourly';
-        error_log("Postie: setting up cron task: defaulting to hourly");
+        //error_log("Postie: setting up cron task: defaulting to hourly");
     }
     if ($interval == 'manual') {
         postie_decron();
-        error_log("postie_cron: clearing cron (manual)");
+        //error_log("postie_cron: clearing cron (manual)");
     } else {
         if (false === wp_schedule_event(time(), $interval, 'check_postie_hook')) {
-            error_log("postie_cron: Failed to set up cron task: $interval");
+            //error_log("postie_cron: Failed to set up cron task: $interval");
         } else {
-            error_log("postie_cron: Set up cron task: $interval");
+            //error_log("postie_cron: Set up cron task: $interval");
         }
     }
 }
 
 function postie_decron() {
-    error_log("postie_decron: clearing cron");
+    //error_log("postie_decron: clearing cron");
     wp_clear_scheduled_hook('check_postie_hook');
 }
 
@@ -255,7 +255,7 @@ function postie_decron() {
 
 function postie_more_reccurences($schedules) {
     //Do not echo output in filters, it seems to break some installs
-    error_log("postie_more_reccurences: setting cron schedules");
+    //error_log("postie_more_reccurences: setting cron schedules");
     $schedules['weekly'] = array('interval' => (60 * 60 * 24 * 7), 'display' => __('Once Weekly'));
     $schedules['twiceperhour'] = array('interval' => 60 * 30, 'display' => __('Twice per hour'));
     $schedules['tenminutes'] = array('interval' => 60 * 10, 'display' => __('Every 10 minutes'));
