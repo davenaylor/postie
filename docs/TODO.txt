@@ -15,7 +15,8 @@ rework attachment logic. video files can come through as application/octect-stre
 Maybe look at file extensions to supplement mime types.
 Add setting for category detection. I.e. checkboxes for [], -- and : styles. Default to all on.
 Allow all emails from a domain to publish. I.e. *@plug.google.com or *@devzing.com
-Save email address in custom field so theme can display
+Save email address in custom field so theme can display.
+New filter postie_lookupuser. Used to map "from" to WP user. Allows custom user mapping.
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/
