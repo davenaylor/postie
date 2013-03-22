@@ -22,6 +22,7 @@ Attachments are now processed in the order they were attached.
 * Add warning if Admin username is invalid
 * Fixed bug where date: was not always being detected in html emails
 * Improved handling of attachments and mapping to file extensions for template selection
+* Video templates now include scale="tofit"
 
 = 1.4.40 (2013.03.18) =
 * Fixed bug where categories specified by ID were not being correctly identified
