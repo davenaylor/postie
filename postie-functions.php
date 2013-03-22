@@ -898,9 +898,40 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
         } elseif (property_exists($part, 'd_parameters') && is_array($part->d_parameters) && array_key_exists('filename', $part->d_parameters)) {
             $filename = $part->d_parameters['filename'];
         }
+        $fileext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-        DebugEcho("Filename: $filename");
-        switch (strtolower($part->ctype_primary)) {
+        DebugEcho("GetContent: file name '$filename'");
+        DebugEcho("GetContent: extension '$fileext'");
+
+        $mimetype_primary = strtolower($part->ctype_primary);
+        $mimetype_secondary = strtolower($part->ctype_secondary);
+        if ($mimetype_primary == 'application') {
+            DebugEcho("GetContent: mimetype 'application' detected doing secondary lookup");
+            $typeinfo = wp_check_filetype($filename);
+            DebugDump($typeinfo);
+            if (!empty($typeinfo['type'])) {
+                DebugEcho("GetContent: secondary lookup found " . $typeinfo['type']);
+                $mimeparts = explode('/', strtolower($typeinfo['type']));
+                $mimetype_primary = $mimeparts[0];
+                $mimetype_secondary = $mimeparts[1];
+            } else {
+                DebugEcho("GetContent: secondary lookup failed, checking configured extensions");
+                if (in_array($fileext, $audiotypes)) {
+                    DebugEcho("GetContent: found audio extension");
+                    $mimetype_primary = 'audio';
+                    $mimetype_secondary = $fileext;
+                } elseif (in_array($fileext, array_merge($video1types, $video2types))) {
+                    DebugEcho("GetContent: found video extension");
+                    $mimetype_primary = 'video';
+                    $mimetype_secondary = $fileext;
+                } else {
+                    DebugEcho("GetContent: found no extension");
+                }
+            }
+        }
+        DebugEcho("GetContent: mimetype $mimetype_primary/$mimetype_secondary");
+
+        switch ($mimetype_primary) {
             case 'multipart':
                 DebugEcho("multipart: " . count($part->parts));
                 //DebugDump($part);
@@ -942,7 +973,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         $file_id = postie_media_handle_upload($part, $post_id, $poster);
                         if (!is_wp_error($file_id)) {
                             $file = wp_get_attachment_url($file_id);
-                            $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                            $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
                             $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
                         } else {
                             LogInfo($file_id->get_error_message());
@@ -953,15 +984,15 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 } else {
 
                     //go through each sub-section
-                    if ($part->ctype_secondary == 'enriched') {
+                    if ($mimetype_secondary == 'enriched') {
                         //convert enriched text to HTML
                         DebugEcho("enriched");
                         $meta_return .= filter_Etf2HTML($part->body) . "\n";
-                    } elseif ($part->ctype_secondary == 'html') {
+                    } elseif ($mimetype_secondary == 'html') {
                         //strip excess HTML
                         DebugEcho("html");
                         $meta_return .= filter_CleanHtml($part->body) . "\n";
-                    } elseif ($part->ctype_secondary == 'plain') {
+                    } elseif ($mimetype_secondary == 'plain') {
                         DebugEcho("plain text");
                         //DebugDump($part);
 
@@ -981,7 +1012,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         $file_id = postie_media_handle_upload($part, $post_id, $poster);
                         if (!is_wp_error($file_id)) {
                             $file = wp_get_attachment_url($file_id);
-                            $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                            $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
                             $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
                         } else {
                             LogInfo($file_id->get_error_message());
@@ -1002,7 +1033,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     }
 
                     $the_post = get_post($file_id);
-                    $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $imagetemplate, $filename);
+                    $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $imagetemplate, $filename);
                     if ($cid) {
                         $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
                         DebugEcho("CID Attachement: $cid");
@@ -1023,15 +1054,15 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         $cid = trim($part->headers["content-id"], "<>");
                         DebugEcho("audio Attachement cid: $cid");
                     }
-                    if (in_array($part->ctype_secondary, $audiotypes)) {
-                        DebugEcho("using audio template: $part->ctype_secondary");
+                    if (in_array($fileext, $audiotypes)) {
+                        DebugEcho("using audio template: $mimetype_secondary");
                         $audioTemplate = $audiotemplate;
                     } else {
-                        DebugEcho("using default audio template: $part->ctype_secondary");
-                        $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                        DebugEcho("using default audio template: $mimetype_secondary");
+                        $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
                         $audioTemplate = '<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
                     }
-                    $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $audioTemplate, $filename);
+                    $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $audioTemplate, $filename);
                 } else {
                     LogInfo("audio error: " . $file_id->get_error_message());
                 }
@@ -1048,18 +1079,18 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         DebugEcho("video Attachement cid: $cid");
                     }
                     //DebugDump($part);
-                    if (in_array(strtolower($part->ctype_secondary), $video1types)) {
-                        DebugEcho("using video1 template: $part->ctype_secondary");
+                    if (in_array($fileext, $video1types)) {
+                        DebugEcho("using video1 template: $fileext");
                         $videoTemplate = $video1template;
-                    } elseif (in_array(strtolower($part->ctype_secondary), $video2types)) {
-                        DebugEcho("using video2 template: $part->ctype_secondary");
+                    } elseif (in_array($fileext, $video2types)) {
+                        DebugEcho("using video2 template: $fileext");
                         $videoTemplate = $video2template;
                     } else {
-                        DebugEcho("using default template: $part->ctype_secondary");
-                        $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                        DebugEcho("using default template: $fileext");
+                        $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
                         $videoTemplate = '<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
                     }
-                    $attachments["html"][$filename] = parseTemplate($file_id, $part->ctype_primary, $videoTemplate, $filename);
+                    $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $videoTemplate, $filename);
                     //echo "videoTemplate = $videoTemplate\n";
                 } else {
                     LogInfo($file_id->get_error_message());
@@ -1067,10 +1098,10 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 break;
 
             default:
-                DebugEcho("found file type: " . $part->ctype_primary);
-                if (in_array(strtolower($part->ctype_primary), $supported_file_types)) {
+                DebugEcho("found file type: " . $mimetype_primary);
+                if (in_array($mimetype_primary, $supported_file_types)) {
                     //pgp signature - then forget it
-                    if ($part->ctype_secondary == 'pgp-signature') {
+                    if ($mimetype_secondary == 'pgp-signature') {
                         DebugEcho("found pgp-signature - done");
                         break;
                     }
@@ -1078,7 +1109,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     if (!is_wp_error($file_id)) {
                         $file = wp_get_attachment_url($file_id);
                         DebugEcho("uploaded $file_id ($file)");
-                        $icon = chooseAttachmentIcon($file, $part->ctype_primary, $part->ctype_secondary, $icon_set, $icon_size);
+                        $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
                         DebugEcho("default: $icon $filename");
                         $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
                         if (array_key_exists('content-id', $part->headers)) {
@@ -1698,7 +1729,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     if (!is_wp_error($id)) {
         $amd = wp_generate_attachment_metadata($id, $file);
         DebugEcho("wp_generate_attachment_metadata");
-        DebugDump($amd);
+        //DebugDump($amd);
         wp_update_attachment_metadata($id, $amd);
         DebugEcho("wp_update_attachment_metadata complete");
     } else {
@@ -1752,8 +1783,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     // A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
 
     $wp_filetype = wp_check_filetype($file['name']);
-    DebugEcho("postie_handle_upload: detected file type for " . $file['name']);
-    DebugDump($wp_filetype);
+    DebugEcho("postie_handle_upload: detected file type for " . $file['name'] . " is " . $wp_filetype['type']);
 
     extract($wp_filetype);
 
