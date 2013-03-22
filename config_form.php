@@ -517,8 +517,8 @@
                     </tr>
                     <tr> 
                         <th width="33%" valign="top" scope="row">
-                            <?php _e('Video 1 file types:') ?><br /><span class='recommendation'>
-                                <?php _e('Use the video template 1 for these files types (separated by commas)', 'postie') ?></span> </th> 
+                            <?php _e('Video 1 file extensions:') ?><br /><span class='recommendation'>
+                                <?php _e('Use video template 1 for files with these extensions (separated by commas)', 'postie') ?></span> </th> 
                         <td>
                             <br/><input name='postie-settings[video1types]' type="text" id='postie-settings-video1types'
                                         value="<?php if ($video1types != '') echo esc_attr($video1types); ?>" size="40" />                
@@ -566,8 +566,8 @@
                     </tr>
                     <tr> 
                         <th width="33%" valign="top" scope="row">
-                            <?php _e('Video 2 file types:') ?><br /><span class='recommendation'>
-                                <?php _e('Use the video template 2 for these files types (separated by commas)', 'postie') ?></span> <br />
+                            <?php _e('Video 2 file extensions:') ?><br /><span class='recommendation'>
+                                <?php _e('Use video template 2 for files with these extensions (separated by commas)', 'postie') ?></span> <br />
                         </th> 
                         <td>
                             <br/><input name='postie-settings[video2types]' type="text" id='postie-settings-video2types'
@@ -615,8 +615,8 @@
                     </tr>
                     <tr> 
                         <th width="33%" valign="top" scope="row">
-                            <?php _e('Audio file types:') ?><br />
-                            <span class='recommendation'><?php _e('Use the audio template for these files types (separated by commas)', 'postie') ?></span> <br />
+                            <?php _e('Audio file extensions:') ?><br />
+                            <span class='recommendation'><?php _e('Use the audio template for files with these extensions (separated by commas)', 'postie') ?></span> <br />
 
                         </th> 
                         <td>
