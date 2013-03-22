@@ -853,7 +853,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     //global $charset, $encoding;
     DebugEcho('----');
     $meta_return = '';
-    DebugEcho("primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
+    DebugEcho("GetContent: primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
 
     DecodeBase64Part($part);
 
@@ -864,15 +864,9 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
     if ($part->ctype_primary == "application" && $part->ctype_secondary == "octet-stream") {
         if (property_exists($part, 'disposition') && $part->disposition == "attachment") {
-            $image_endings = array("jpg", "png", "gif", "jpeg", "pjpeg");
-            foreach ($image_endings as $type) {
-                if (preg_match("/.$type\$/i", $part->d_parameters["filename"])) {
-                    $part->ctype_primary = "image";
-                    $part->ctype_secondary = $type;
-                    break;
-                }
-            }
+            //nothing 
         } else {
+            DebugEcho("GetContent: decoding application/octet-stream");
             $mimeDecodedEmail = DecodeMIMEMail($part->body);
             filter_PreferedText($mimeDecodedEmail, $prefer_text_type);
             foreach ($mimeDecodedEmail->parts as $section) {
@@ -905,30 +899,29 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
         $mimetype_primary = strtolower($part->ctype_primary);
         $mimetype_secondary = strtolower($part->ctype_secondary);
-        if ($mimetype_primary == 'application') {
-            DebugEcho("GetContent: mimetype 'application' detected doing secondary lookup");
-            $typeinfo = wp_check_filetype($filename);
-            DebugDump($typeinfo);
-            if (!empty($typeinfo['type'])) {
-                DebugEcho("GetContent: secondary lookup found " . $typeinfo['type']);
-                $mimeparts = explode('/', strtolower($typeinfo['type']));
-                $mimetype_primary = $mimeparts[0];
-                $mimetype_secondary = $mimeparts[1];
+
+        $typeinfo = wp_check_filetype($filename);
+        DebugDump($typeinfo);
+        if (!empty($typeinfo['type'])) {
+            DebugEcho("GetContent: secondary lookup found " . $typeinfo['type']);
+            $mimeparts = explode('/', strtolower($typeinfo['type']));
+            $mimetype_primary = $mimeparts[0];
+            $mimetype_secondary = $mimeparts[1];
+        } else {
+            DebugEcho("GetContent: secondary lookup failed, checking configured extensions");
+            if (in_array($fileext, $audiotypes)) {
+                DebugEcho("GetContent: found audio extension");
+                $mimetype_primary = 'audio';
+                $mimetype_secondary = $fileext;
+            } elseif (in_array($fileext, array_merge($video1types, $video2types))) {
+                DebugEcho("GetContent: found video extension");
+                $mimetype_primary = 'video';
+                $mimetype_secondary = $fileext;
             } else {
-                DebugEcho("GetContent: secondary lookup failed, checking configured extensions");
-                if (in_array($fileext, $audiotypes)) {
-                    DebugEcho("GetContent: found audio extension");
-                    $mimetype_primary = 'audio';
-                    $mimetype_secondary = $fileext;
-                } elseif (in_array($fileext, array_merge($video1types, $video2types))) {
-                    DebugEcho("GetContent: found video extension");
-                    $mimetype_primary = 'video';
-                    $mimetype_secondary = $fileext;
-                } else {
-                    DebugEcho("GetContent: found no extension");
-                }
+                DebugEcho("GetContent: found no extension");
             }
         }
+
         DebugEcho("GetContent: mimetype $mimetype_primary/$mimetype_secondary");
 
         switch ($mimetype_primary) {
@@ -975,11 +968,12 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                             $file = wp_get_attachment_url($file_id);
                             $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
                             $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
+                            DebugEcho("text attachment: adding '$filename'");
                         } else {
                             LogInfo($file_id->get_error_message());
                         }
                     } else {
-                        DebugEcho("text attachment: skipping");
+                        DebugEcho("text attachment: skipping '$filename'");
                     }
                 } else {
 
