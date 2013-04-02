@@ -232,7 +232,7 @@
             <div id="simpleTabs-content-2" class="simpleTabs-content">
                 <table class='form-table'>
 
-                    <?php echo BuildBooleanSelect(__("Allow Anyone To Post Via Email"), "postie-settings[turn_authorization_off]", $turn_authorization_off, "Changing this to yes is NOT RECOMMENEDED - anything that gets sent in will automatically be posted. This could make it easier to compromise your server - YOU HAVE BEEN WARNED."); ?>
+                    <?php echo BuildBooleanSelect(__("Allow Anyone To Post Via Email"), "postie-settings[turn_authorization_off]", $turn_authorization_off, "Changing this to yes <b style='color: red'>is not recommended</b> - anything that gets sent in will automatically be posted."); ?>
                     <tr>
                         <th scope="row">
                             <?php _e('Roles That Can Post:', 'postie') ?><br />

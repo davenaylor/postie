@@ -369,6 +369,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
         // then it should be removed
         if (!$is_reply) {
             wp_delete_post($post_id);
+            EchoInfo("postie_post filter cleared the post, not saving.");
         }
     } else {
         DisplayEmailPost($details);
