@@ -80,7 +80,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
     }
 
     function testTagsImg() {
-
+        echo "testTagsImg";
         $config = config_GetDefaults();
         $config['start_image_count_at_zero'] = true;
         $config['imagetemplate'] = '<a href="{FILELINK}">{FILENAME}</a>';
@@ -94,6 +94,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
     }
 
     function testSig() {
+        echo "testSig";
         $config = config_GetDefaults();
         $config['prefer_text_type'] = 'html';
 

@@ -220,7 +220,7 @@ function check_postie() {
 
 function postie_cron($interval = false) {
     //Do not echo output in filters, it seems to break some installs
-    error_log("postie_cron: setting up cron task: $interval");
+    //error_log("postie_cron: setting up cron task: $interval");
 
     $schedules = wp_get_schedules();
     //error_log("postie_cron\n" . print_r($schedules, true));

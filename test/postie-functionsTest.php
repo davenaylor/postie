@@ -423,6 +423,10 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $c = "line 1\nline 2\n--";
         filter_RemoveSignature($c, $config);
         $this->assertEquals("line 1\nline 2\n", $c);
+        
+        $c = "test content<div><br></div><div>--</div><div>signature</div>";
+        filter_RemoveSignature($c, $config);
+        $this->assertEquals("test content<div><br></div>", $c);
     }
 
     public function testmore_reccurences() {

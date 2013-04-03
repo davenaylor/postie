@@ -1332,28 +1332,31 @@ function filter_Start(&$content, $config) {
  */
 function filter_RemoveSignature(&$content, $config) {
     if ($config['drop_signature']) {
-        if (empty($config['sig_pattern_list']))
+        if (empty($config['sig_pattern_list'])){
+            DebugEcho("filter_RemoveSignature: no sig_pattern_list");
             return;
+        }
         //DebugEcho("looking for signature in: $content");
 
         $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')\s?$/m';
-        DebugEcho("sig pattern: $pattern");
+        DebugEcho("filter_RemoveSignature: pattern: $pattern");
 
         $html = LoadDOM($content);
         if ($html !== false) {
             filter_RemoveSignatureWorker($html->root, $pattern);
             $content = $html->save();
         } else {
-            DebugEcho("sig non-html");
+            DebugEcho("filter_RemoveSignature: non-html");
             $arrcontent = explode("\n", $content);
             $strcontent = '';
 
             for ($i = 0; $i < count($arrcontent); $i++) {
                 $line = trim($arrcontent[$i]);
                 if (preg_match($pattern, trim($line))) {
-                    DebugEcho("signature found: removing");
+                    DebugEcho("filter_RemoveSignature: signature found: removing");
                     break;
                 }
+                    
                 $strcontent .= $line;
             }
             $content = $strcontent;
@@ -1503,7 +1506,7 @@ function DecodeBase64Part(&$part) {
             //DebugDump($part);
             if (isset($part->disposition) && $part->disposition == 'attachment') {
                 $part->body = base64_decode($part->body);
-            } else if (is_array($part->ctype_parameters) && array_key_exists('charset', $part->ctype_parameters)) {
+            } else if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters) && array_key_exists('charset', $part->ctype_parameters)) {
                 $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8//TRANSLIT', base64_decode($part->body));
                 DebugEcho("convertef from: " . $part->ctype_parameters['charset']);
                 $part->ctype_parameters['charset'] = 'default'; //so we don't double decode
@@ -1639,6 +1642,12 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
         EchoInfo("could not write to temp file: '$tmpFile' ");
     }
 
+    //special case to deal with older png implementations
+    if (strtolower($part->ctype_secondary = 'x-png')) {
+        DebugEcho("postie_media_handle_upload: x-png found, renamed to png");
+        $part->ctype_secondary = 'png';
+    }
+    
     $name = 'postie-media.' . $part->ctype_secondary;
     if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters)) {
         if (array_key_exists('name', $part->ctype_parameters) && $part->ctype_parameters['name'] != '') {
@@ -2896,14 +2905,21 @@ function isMarkdownInstalled() {
  * and ensures that arrayed items are stored as such
  */
 function config_ValidateSettings($in) {
-    //DebugDump($in);
+    //DebugEcho("config_ValidateSettings");
+
     $out = array();
 
+    //DebugDump($in);
     // use the default as a template: 
     // if a field is present in the defaults, we want to store it; otherwise we discard it
     $allowed_keys = config_GetDefaults();
-    foreach ($allowed_keys as $key => $default)
-        $out[$key] = array_key_exists($key, $in) ? $in[$key] : $default;
+    foreach ($allowed_keys as $key => $default) {
+        if (is_array($in)) {
+            $out[$key] = array_key_exists($key, $in) ? $in[$key] : $default;
+        } else {
+            $out[$key] = $default;
+        }
+    }
 
     // some fields are always forced to lower case:
     $lowercase = array('authorized_addresses', 'smtp', 'supported_file_types', 'video1types', 'video2types', 'audiotypes');

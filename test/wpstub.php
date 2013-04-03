@@ -62,7 +62,18 @@ function __($t) {
     return $t;
 }
 
-function wp_check_filetype() {
+function endsWith($haystack, $needle)
+{
+    return substr($haystack, -strlen($needle)) == $needle;
+}
+
+function wp_check_filetype($filename) {
+    if (empty($filename))
+        return null;
+    if (endsWith($filename, ".png"))
+            return array('ext' => 'png', 'type' => 'image/png');
+    if (endsWith($filename, ".ics"))
+            return array('ext' => 'ics', 'type' => 'text/calendar');
     return array('ext' => 'xxx', 'type' => 'xxx/xxx');
 }
 

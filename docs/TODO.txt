@@ -14,6 +14,9 @@ rework attachment logic. video files can come through as application/octect-stre
   but videos do.
 Add setting for category detection. I.e. checkboxes for [], -- and : styles. Default to all on.
 New filter postie_lookupuser. Used to map "from" to WP user. Allows custom user mapping.
+Make sure all failures are sent to admin (option?) failed attachments, etc.
+Comment not being created when subject contains category command []. I.e. listserv subject lines
+WebP support
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/
