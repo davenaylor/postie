@@ -415,8 +415,8 @@ function tag_PostType(&$subject, $postmodifiers) {
 
         // Check if custom post type exists, if not, set default post type of 'post'
         $known_post_types = get_post_types();
-        DebugDump($known_post_types);
-        DebugDump(get_post_format_slugs());
+        //DebugDump($known_post_types);
+        //DebugDump(get_post_format_slugs());
 
         if (in_array($custom_post_type, array_map('strtolower', $known_post_types))) {
             DebugEcho("post type: found type '$post_type'");
@@ -536,17 +536,20 @@ function make_links($text) {
  */
 
 function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
-    global $wpdb;
 
     $theDate = $mimeDecodedEmail->headers['date'];
     $theEmail = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
+
+    $theEmail = apply_filters("postie_filter_email", $theEmail);
+    DebugEcho("getPostAuthorDetails: post email filter $theEmail");
+
     $regAuthor = get_user_by('email', $theEmail);
     if ($regAuthor) {
         $theAuthor = $regAuthor->user_login;
         $theUrl = $regAuthor->user_url;
         $theID = $regAuthor->ID;
     } else {
-        $theAuthor = GetNameFromEmail($mimeDecodedEmail->headers['from']);
+        $theAuthor = GetNameFromEmail($theEmail);
         $theUrl = '';
         $theID = '';
     }
@@ -576,8 +579,7 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
         $content = $newContents;
     }
     $theDetails = array(
-        'content' => "<div class='postmetadata alt'>On $theDate, $theAuthor" .
-        " posted:</div>",
+        'content' => "<div class='postmetadata alt'>On $theDate, $theAuthor" . " posted:</div>",
         'emaildate' => $theDate,
         'author' => $theAuthor,
         'comment_author_url' => $theUrl,
@@ -902,7 +904,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
         $mimetype_secondary = strtolower($part->ctype_secondary);
 
         $typeinfo = wp_check_filetype($filename);
-        DebugDump($typeinfo);
+        //DebugDump($typeinfo);
         if (!empty($typeinfo['type'])) {
             DebugEcho("GetContent: secondary lookup found " . $typeinfo['type']);
             $mimeparts = explode('/', strtolower($typeinfo['type']));
@@ -1235,6 +1237,8 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     $from = "";
     if (array_key_exists('from', $mimeDecodedEmail->headers)) {
         $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
+        $from = apply_filters("postie_filter_email", $from);
+        DebugEcho("ValidatePoster: post email filter $from");
     } else {
         DebugEcho("No 'from' header found");
         DebugDump($mimeDecodedEmail->headers);
@@ -1263,8 +1267,6 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         }
     } elseif ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses)) {
         DebugEcho("ValidatePoster: looking up default user $admin_username");
-
-        //TODO: change select to get_user_by()
 
         $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
         DebugEcho("ValidatePoster: found user '$poster'");
@@ -1332,7 +1334,7 @@ function filter_Start(&$content, $config) {
  */
 function filter_RemoveSignature(&$content, $config) {
     if ($config['drop_signature']) {
-        if (empty($config['sig_pattern_list'])){
+        if (empty($config['sig_pattern_list'])) {
             DebugEcho("filter_RemoveSignature: no sig_pattern_list");
             return;
         }
@@ -1356,7 +1358,7 @@ function filter_RemoveSignature(&$content, $config) {
                     DebugEcho("filter_RemoveSignature: signature found: removing");
                     break;
                 }
-                    
+
                 $strcontent .= $line;
             }
             $content = $strcontent;
@@ -1643,11 +1645,11 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     }
 
     //special case to deal with older png implementations
-    if (strtolower($part->ctype_secondary = 'x-png')) {
+    if (strtolower($part->ctype_secondary == 'x-png')) {
         DebugEcho("postie_media_handle_upload: x-png found, renamed to png");
         $part->ctype_secondary = 'png';
     }
-    
+
     $name = 'postie-media.' . $part->ctype_secondary;
     if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters)) {
         if (array_key_exists('name', $part->ctype_parameters) && $part->ctype_parameters['name'] != '') {

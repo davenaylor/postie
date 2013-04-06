@@ -44,6 +44,8 @@ add_filter('postie_post', 'filter_content');
 add_filter('postie_post', 'add_custom_field');
 add_filter('postie_post', 'auto_tag');
 
+add_filter('postie_filter_email', 'change_email');
+
 function filter_content($post) {
     //this function prepends a link to bookmark the category of the post
     $this_cat = get_the_category($post['ID']);
@@ -71,9 +73,15 @@ function auto_tag($post) {
 }
 
 function add_custom_field($post) {
-    //this function appends "(via postie)" to the title (subject)
     add_post_meta($post['ID'], 'postie', 'postie');
     return $post;
+}
+
+//changes the email to the admin email if the sender was from the example.com domain
+function change_email($email) {
+    if (stristr($email, '@example.com'))
+        return get_option("admin_email");
+    return $email;
 }
 
 ?>

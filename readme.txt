@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.4.40
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -436,9 +436,17 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.4.41 (future) =
+= 1.5.0 (2013.04.05) =
 * Apply Postie Time Correction to date: command
-* Add support for Post Formats 
+* Add support for Post Formats
+* Add support for Post Status
+* Add warning if Admin username is invalid
+* Fixed bug where date: was not always being detected in html emails
+* Improved handling of attachments and mapping to file extensions for template selection
+* Video templates now include scale="tofit"
+* Add support for older png mime type
+* New filter postie_filter_email. Used to map "from" to any other email. Allows custom user mapping.
+
 
 = 1.4.40 (2013.03.18) =
 * Fixed bug where categories specified by ID were not being correctly identified

@@ -144,19 +144,19 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
     public function testfilter_Start() {
         $config = config_GetDefaults();
-        
+
         $c = "test";
         filter_Start($c, $config);
         $this->assertEquals("test", $c);
-        
+
         $c = ":start\ntest";
         filter_Start($c, $config);
         $this->assertEquals("\ntest", $c);
-        
+
         $c = "test/n:start\nsomething";
         filter_Start($c, $config);
         $this->assertEquals("\nsomething", $c);
-        
+
         $c = "<p>test</p><p>:start</p><p>something</p>";
         filter_Start($c, $config);
         $this->assertEquals("</p><p>something</p>", $c);
@@ -423,7 +423,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $c = "line 1\nline 2\n--";
         filter_RemoveSignature($c, $config);
         $this->assertEquals("line 1\nline 2\n", $c);
-        
+
         $c = "test content<div><br></div><div>--</div><div>signature</div>";
         filter_RemoveSignature($c, $config);
         $this->assertEquals("test content<div><br></div>", $c);
@@ -654,6 +654,23 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $s = tag_Status($c, 'publish');
         $this->assertEquals("multi\n\nline", $c);
         $this->assertEquals("private", $s);
+    }
+
+    function testgetPostAuthorDetails() {
+        $s = "subject";
+        $c = "content";
+        $e = new stdClass();
+        $e->headers = array();
+        $e->headers['date'] = "Jan 1, 2013";
+        $e->headers['from'] = "wayne@postieplugin.com";
+        
+        $r = getPostAuthorDetails($s, $c, $e);
+        
+        $this->assertEquals($s, "subject");
+        $this->assertEquals($c, "content");
+        $this->assertEquals($r['author'], "wayne");
+        $this->assertEquals($r['email'], "wayne@postieplugin.com");
+        $this->assertEquals($r['emaildate'], "Jan 1, 2013");
     }
 
 }
