@@ -15,6 +15,7 @@ Add setting for category detection. I.e. checkboxes for [], -- and : styles. Def
 Make sure all failures are sent to admin (option?) failed attachments, etc.
 Comment not being created when subject contains category command []. I.e. listserv subject lines
 code to set featured image. Global setting (first picture is featured). Featured tag to enable per email. Enhance #img# http://codex.wordpress.org/Function_Reference/set_post_thumbnail
+Allow Anyone To Post Via Email - doesn't
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/

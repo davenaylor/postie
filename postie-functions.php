@@ -733,6 +733,9 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
 
     $emails = array();
     $pop3 = new POP3();
+    if (defined('POSTIE_DEBUG')) {
+        $pop3->DEBUG = POSTIE_DEBUG;
+    }
 
     EchoInfo("Connecting to $server:$port ($protocol)");
 
@@ -3012,8 +3015,6 @@ function DebugEmailOutput($email, $mimeDecodedEmail) {
             $file = fopen($fname . ".php ", "w");
             fwrite($file, serialize($email));
             fclose($file);
-        } else {
-            DebugEcho("The directory $dname does not exist, creating this optional directory will allow saving copies of emails for debugging purposes.");
         }
     }
 }
