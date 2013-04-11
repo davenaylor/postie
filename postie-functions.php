@@ -378,12 +378,11 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
 
         if ($confirmation_email != '') {
             if ($confirmation_email == 'sender') {
-                $recipients = array($postAuthorDetails['email']);
+                $recipients = array($details['email_author']);
             } elseif ($confirmation_email == 'admin') {
                 $recipients = array(get_option("admin_email"));
             } elseif ($confirmation_email == 'both') {
-                $recipients = array($postAuthorDetails['email'],
-                    get_option("admin_email"));
+                $recipients = array($details['email_author'], get_option("admin_email"));
             }
             MailToRecipients($mimeDecodedEmail, false, $recipients, false, false);
         }
@@ -1891,7 +1890,7 @@ function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
  * It accepts an object containing the entire message
  */
 function MailToRecipients(&$mail_content, $testEmail = false, $recipients = array(), $returnToSender, $reject = true) {
-    DebugEcho("send mail");
+    DebugEcho("MailToRecipients: send mail");
     if ($testEmail) {
         return false;
     }
@@ -1902,13 +1901,14 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
     $blogurl = get_option("siteurl");
 
     if (count($recipients) == 0) {
-        DebugEcho("send mail: no recipients");
+        DebugEcho("MailToRecipients: no recipients");
         return false;
     }
 
     $from = trim($mail_content->headers["from"]);
     $subject = $mail_content->headers['subject'];
     if ($returnToSender) {
+        DebugEcho("MailToRecipients: return to sender $returnToSender");
         array_push($recipients, $from);
     }
 
@@ -1919,9 +1919,10 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
             $headers .= "Cc: " . $recipient . "\r\n";
         }
     }
+    DebugEcho($headers);
     // Set email subject
     if ($reject) {
-        DebugEcho("send mail: sending reject mail");
+        DebugEcho("MailToRecipients: sending reject mail");
         $alert_subject = $blogname . ": Unauthorized Post Attempt from $from";
         if (is_array($mail_content->ctype_parameters) && array_key_exists('boundary', $mail_content->ctype_parameters) && $mail_content->ctype_parameters['boundary']) {
             $boundary = $mail_content->ctype_parameters["boundary"];
@@ -1961,8 +1962,8 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
                 $mailtext .= $part->body;
         }
     } else {
-        DebugEcho("send mail: sending success mail");
         $alert_subject = "Successfully posted to $blogname";
+        DebugEcho("MailToRecipients: $alert_subject");
         $mailtext = "Your post '$subject' has been successfully published to $blogname <$blogurl>.\n";
     }
 

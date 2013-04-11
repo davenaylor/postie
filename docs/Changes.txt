@@ -18,6 +18,7 @@ Attachments are now processed in the order they were attached.
 = 1.5.1 (future)
 * Turned on POP3 debug logging if POSTIE_DEBUG is TRUE.
 * Disable autocomplete on some setup fields
+* Fixed a bug where confirmation emails were not being sent to authors
 
 = 1.5.0 (2013.04.05) =
 * Apply Postie Time Correction to date: command

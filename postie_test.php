@@ -16,7 +16,6 @@ if (!current_user_can('manage_options')) {
     exit();
 }
 DebugEcho("Error log: " . ini_get('error_log'));
-$images = array("Test.png", "Test.jpg", "Test.gif");
 ?>
 <div class="wrap"> 
     <h1>Postie Configuration Test</h1>
