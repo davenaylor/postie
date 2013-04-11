@@ -1,9 +1,9 @@
 <?php
 
-require 'wpstub.php';
-require'../postie-functions.php';
-require'../simple_html_dom.php';
-require '../postie.php';
+require_once 'wpstub.php';
+require_once '../postie-functions.php';
+require_once '../simple_html_dom.php';
+require_once '../postie.php';
 
 define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);
@@ -663,9 +663,9 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $e->headers = array();
         $e->headers['date'] = "Jan 1, 2013";
         $e->headers['from'] = "wayne@postieplugin.com";
-        
+
         $r = getPostAuthorDetails($s, $c, $e);
-        
+
         $this->assertEquals($s, "subject");
         $this->assertEquals($c, "content");
         $this->assertEquals($r['author'], "wayne");

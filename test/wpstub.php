@@ -128,8 +128,8 @@ function register_deactivation_hook() {
     
 }
 
-function apply_filters() {
-    
+function apply_filters($filter, $value) {
+    return $value;
 }
 
 function wp_insert_attachment() {

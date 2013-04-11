@@ -539,6 +539,7 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
     $theDate = $mimeDecodedEmail->headers['date'];
     $theEmail = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
 
+    DebugEcho("getPostAuthorDetails: pre email filter $theEmail");
     $theEmail = apply_filters("postie_filter_email", $theEmail);
     DebugEcho("getPostAuthorDetails: post email filter $theEmail");
 
@@ -1266,18 +1267,23 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
             EchoInfo("posting as user $poster");
         } else {
             $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
+            if (!$poster) {
+                EchoInfo("Your 'Admin username' setting '$admin_username' is not a valid WordPress user (1)");
+                $poster = 1;
+            }
         }
     } elseif ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses)) {
         DebugEcho("ValidatePoster: looking up default user $admin_username");
-
         $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
         DebugEcho("ValidatePoster: found user '$poster'");
         if (empty($poster)) {
-            EchoInfo("Your 'Admin username' setting '$admin_username' is not a valid WordPress user");
+            EchoInfo("Your 'Admin username' setting '$admin_username' is not a valid WordPress user (2)");
+            $poster = 1;
         }
     }
 
     $validSMTP = isValidSmtpServer($mimeDecodedEmail, $smtp);
+
     if (!$poster || !$validSMTP) {
         EchoInfo('Invalid sender: ' . htmlentities($from) . "! Not adding email!");
         if ($forward_rejected_mail) {
@@ -2025,8 +2031,10 @@ function RemoveExtraCharactersInEmailAddress($address) {
     $matches = array();
     if (preg_match('/^[^<>]+<([^<> ()]+)>$/', $address, $matches)) {
         $address = $matches[1];
+        DebugEcho("RemoveExtraCharactersInEmailAddress: $address (1)");
     } else if (preg_match('/<([^<> ()]+)>/', $address, $matches)) {
         $address = $matches[1];
+        DebugEcho("RemoveExtraCharactersInEmailAddress: $address (2)");
     }
 
     return $address;
