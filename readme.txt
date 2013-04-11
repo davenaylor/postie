@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -421,6 +421,9 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 `define('DISABLE_WP_CRON', true);` is not in your wp-config.php file.
 == Upgrade Notice ==
 
+= 1.5.0 =
+* New filter postie_filter_email. Used to map "from" to any other email. Allows custom user mapping.
+
 = 1.4.41 =
 Post format is now supported. You can specify any of the WordPress supported post formats using the Post type syntax.
 Post status can now be specified using the status: tag.
@@ -436,6 +439,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.1 (2013.04.10)
+* Turned on POP3 debug logging if POSTIE_DEBUG is TRUE.
+* Disable autocomplete on some setup fields
+* Fixed bug where confirmation emails were not being sent to authors
+* Fixed bug where post were not saved if the default admin user didn't exist and the from user was not a WordPress user
+
 = 1.5.0 (2013.04.05) =
 * Apply Postie Time Correction to date: command
 * Add support for Post Formats
