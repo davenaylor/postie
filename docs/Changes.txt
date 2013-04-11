@@ -18,6 +18,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.2 (future)
+* 
+
 = 1.5.1 (2013.04.10)
 * Turned on POP3 debug logging if POSTIE_DEBUG is TRUE.
 * Disable autocomplete on some setup fields

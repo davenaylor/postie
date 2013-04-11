@@ -7,4 +7,5 @@ update version number in docs\Postie.txt
 run deploy.cmd
 commit
 branch trunk to new version
-add release post on http://postieplugin.com/ & http://wordpress.org/support/plugin/postie
+add release post on http://postieplugin.com/
+add release post on http://wordpress.org/support/plugin/postie
