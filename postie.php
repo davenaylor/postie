@@ -166,10 +166,10 @@ function postie_warnings() {
         add_action('admin_notices', 'postie_mbstring_warning');
     }
 
-    if (!function_exists('get_user_by')){
+    if (!function_exists('get_user_by')) {
         include ABSPATH . 'wp-includes/pluggable.php';
     }
-    $adminuser = get_user_by( 'login', $config['admin_username']);
+    $adminuser = get_user_by('login', $config['admin_username']);
     if ($adminuser === false) {
 
         function postie_adminuser_warning() {
@@ -192,7 +192,9 @@ function postie_whitelist($options) {
     return $options;
 }
 
+//don't use DebugEcho or EchoInfo here as it is not defined when called as an action
 function check_postie() {
+    error_log("check_postie");
     $host = get_option('siteurl');
     preg_match("/https?:\/\/(.[^\/]*)(.*)/i", $host, $matches);
     $host = $matches[1];
@@ -214,7 +216,7 @@ function check_postie() {
         }
         fclose($fp);
     } else {
-        EchoInfo("Cannot connect to server on port $port. Please check to make sure that this port is open on your webhost. Additional information: $errno: $errstr");
+        error_log("Cannot connect to server on port $port. Please check to make sure that this port is open on your webhost. Additional information: $errno: $errstr");
     }
 }
 
@@ -222,7 +224,7 @@ function postie_cron($interval = false) {
     //Do not echo output in filters, it seems to break some installs
     //error_log("postie_cron: setting up cron task: $interval");
 
-    $schedules = wp_get_schedules();
+    //$schedules = wp_get_schedules();
     //error_log("postie_cron\n" . print_r($schedules, true));
 
     if (!$interval) {
@@ -238,10 +240,17 @@ function postie_cron($interval = false) {
         postie_decron();
         //error_log("postie_cron: clearing cron (manual)");
     } else {
-        if (false === wp_schedule_event(time(), $interval, 'check_postie_hook')) {
-            //error_log("postie_cron: Failed to set up cron task: $interval");
+        if ($interval != wp_get_schedule('check_postie_hook')) {
+            postie_decron(); //remove existing
+            //try to create the new schedule with the first run in 5 minutes
+            if (false === wp_schedule_event(time() + 5 * 60, $interval, 'check_postie_hook')) {
+                //error_log("postie_cron: Failed to set up cron task: $interval");
+            } else {
+                //error_log("postie_cron: Set up cron task: $interval");
+            }
         } else {
-            //error_log("postie_cron: Set up cron task: $interval");
+            //error_log("postie_cron: OK: $interval");
+            //don't need to do anything, cron already scheduled
         }
     }
 }

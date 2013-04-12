@@ -2552,12 +2552,7 @@ function config_ResetToDefault() {
 function config_Update($data) {
     UpdatePostiePermissions($data["role_access"]);
     // We also update the cron settings
-    if ($data['interval'] != '') {
-        postie_decron();
-        if ($data['interval'] != 'manual') {
-            postie_cron($data['interval']);
-        }
-    }
+    postie_cron($data['interval']);
 }
 
 /**
