@@ -407,7 +407,6 @@ function tag_PostType(&$subject, $postmodifiers) {
         // Captures the custom post type in the subject before $custom_post_type_delim
         $separated_subject = explode($custom_post_type_delim, $subject);
         $custom_post_type = $separated_subject[0];
-        $subject = trim($separated_subject[1]);
 
         $custom_post_type = trim(strtolower($custom_post_type));
         DebugEcho("post type: found possible type '$custom_post_type'");
@@ -420,9 +419,11 @@ function tag_PostType(&$subject, $postmodifiers) {
         if (in_array($custom_post_type, array_map('strtolower', $known_post_types))) {
             DebugEcho("post type: found type '$post_type'");
             $post_type = $custom_post_type;
+            $subject = trim($separated_subject[1]);
         } elseif (in_array($custom_post_type, array_keys(get_post_format_slugs()))) {
             DebugEcho("post type: found format '$custom_post_type'");
             $postmodifiers->PostFormat = $custom_post_type;
+            $subject = trim($separated_subject[1]);
         }
     }
 

@@ -269,11 +269,11 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
 
         $subject = "//test";
         $this->assertEquals("post", tag_PostType($subject, $pm));
-        $this->assertEquals("test", $subject);
+        $this->assertEquals("//test", $subject);
 
         $subject = "//";
         $this->assertEquals("post", tag_PostType($subject, $pm));
-        $this->assertEquals("", $subject);
+        $this->assertEquals("//", $subject);
 
         $subject = "custom2//test";
         $this->assertEquals("custom2", tag_PostType($subject, $pm));
@@ -286,6 +286,11 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $subject = "video//test";
         $this->assertEquals("post", tag_PostType($subject, $pm));
         $this->assertEquals("test", $subject);
+        $this->assertEquals('video', $pm->PostFormat);
+        
+        $subject = "//WL2K /Test Message";
+        $this->assertEquals("post", tag_PostType($subject, $pm));
+        $this->assertEquals("//WL2K /Test Message", $subject);
         $this->assertEquals('video', $pm->PostFormat);
     }
 

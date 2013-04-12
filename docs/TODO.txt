@@ -15,6 +15,7 @@ reply logic not adding to comments
 rework attachment logic. video files can come through as application/octect-stream. Mail parsing should separate attachments 
   into buckets? i.e. video, image, other. Each gets processed differently. I.e. when gallery in turned on images don't get embedded
   but videos do.
+date: tag is being detected in body when not wanted
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/
