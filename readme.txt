@@ -439,12 +439,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.2 (2013.04.12)
+= 1.5.2 (2013.04.12) =
 * Fixed bug in post type/format detection when no valid post type/format was found
 * Workaround for WP bug when POP3 account has no waiting messages
 * Fixed bug where cron was running postie_check on every page load
 
-= 1.5.1 (2013.04.10)
+= 1.5.1 (2013.04.10) =
 * Turned on POP3 debug logging if POSTIE_DEBUG is TRUE.
 * Disable autocomplete on some setup fields
 * Fixed bug where confirmation emails were not being sent to authors
