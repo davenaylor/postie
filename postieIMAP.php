@@ -75,9 +75,6 @@ class PostieIMAP {
         if (preg_match("/google|gmail/i", $server)) {
             //Fix from Jim Hodgson http://www.jimhodgson.com/2006/07/19/postie/
             $this->_server_string = "{" . $server . ":" . $port . $option . "}INBOX";
-//            if (IsDebugMode()) {
-//                $this->_server_string = "{" . $server . ":" . $port . $option . "}[Gmail]/All Mail";
-//            }
         } else {
             $this->_server_string = "{" . $server . ":" . $port . $option . "}";
         }

@@ -679,7 +679,7 @@ function FetchMail($server = NULL, $port = NULL, $email = NULL, $password = NULL
             if (!HasIMAPSupport()) {
                 EchoInfo("Sorry - you do not have IMAP php module installed - it is required for this mail setting.");
             } else {
-                $emails = IMAPMessageFetch($server, $port, $email, $password, $protocol, $offset, $test, $deleteMessages, $maxemails);
+                $emails = IMAPMessageFetch($server, $port, $email, $password, $protocol, $offset, $test, $deleteMessages, $maxemails, $email_tls);
             }
             break;
         case 'pop3':
@@ -693,11 +693,14 @@ function FetchMail($server = NULL, $port = NULL, $email = NULL, $password = NULL
 /**
  * Handles fetching messages from an imap server
  */
-function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true, $maxemails = 0) {
+function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true, $maxemails = 0, $tls = false) {
     require_once("postieIMAP.php");
     $emails = array();
     $mail_server = &PostieIMAP::Factory($protocol);
-    EchoInfo("Connecting to $server:$port ($protocol)");
+    if ($tls) {
+        $mail_server->TLSOn();
+    }
+    EchoInfo("Connecting to $server:$port ($protocol)" . ($tls ? " with TLS" : ""));
     if ($mail_server->connect($server, $port, $email, $password)) {
         $msg_count = $mail_server->getNumberOfMessages();
     } else {
@@ -2633,7 +2636,8 @@ function config_GetDefaults() {
         'video1templates' => $video1Templates,
         'video2templates' => $video2Templates,
         'wrap_pre' => 'no',
-        'featured_image' => false
+        'featured_image' => false,
+        'email_tls' => false
     );
 }
 

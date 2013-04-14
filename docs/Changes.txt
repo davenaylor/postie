@@ -2,6 +2,7 @@
 
 = 1.5.3 =
 * Postie can now set the first image in an email to be the "Featured" image. There is a new setting "Use First Image as Featured Image" which is off by default.
+* Postie now supports Use Transport Layer Security (TLS)
 
 = 1.5.0 =
 * New filter postie_filter_email. Used to map "from" to any other email. Allows custom user mapping.
@@ -23,6 +24,7 @@ Attachments are now processed in the order they were attached.
 == CHANGELOG ==
 = 1.5.3 (future) =
 * Added support for Featured Images
+* Added support for Use Transport Layer Security (TLS)
 
 = 1.5.2 (2013.04.12) =
 * Fixed bug in post type/format detection when no valid post type/format was found

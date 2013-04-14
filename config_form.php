@@ -127,6 +127,9 @@
                             <?php endif; ?>
                         </td>
                     </tr>
+                        
+                    <?php echo BuildBooleanSelect(__("Use Transport Layer Security (TLS)"), 'postie-settings[email_tls]', $email_tls, __("Choose Yes if your server requres TLS")); ?>
+
                     <tr>
                         <th scope="row"><?php _e('Port:', 'postie') ?><br />
                             <span class='recommendation'><?php _e("Standard Ports:", 'postie'); ?><br />

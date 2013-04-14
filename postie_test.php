@@ -87,6 +87,9 @@ DebugEcho("Error log: " . ini_get('error_log'));
             } else {
                 require_once("postieIMAP.php");
                 $mail_server = &PostieIMAP::Factory($config["input_protocol"]);
+                if ($email_tls){
+                    $mail_server->TLSOn();
+                }
                 if (!$mail_server->connect($config["mail_server"], $config["mail_server_port"], $config["mail_userid"], $config["mail_password"])) {
                     EchoInfo("Unable to connect. The server said:");
                     EchoInfo($mail_server->error());

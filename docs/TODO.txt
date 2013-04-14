@@ -15,8 +15,8 @@ rework attachment logic. video files can come through as application/octect-stre
   into buckets? i.e. video, image, other. Each gets processed differently. I.e. when gallery in turned on images don't get embedded
   but videos do.
 date: tag is being detected in body when not wanted
+Enhance #img# to specify the featured image
 add TLS support (postieIMAP.php I have to set $this->tls_on to true)
-code to set featured image. Global setting (first picture is featured). Featured tag to enable per email. Enhance #img# http://codex.wordpress.org/Function_Reference/set_post_thumbnail
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/

@@ -154,6 +154,16 @@ function postie_warnings() {
 
         add_action('admin_notices', 'postie_imap_warning');
     }
+    if ($p == 'pop3' && $config['email_tls']) {
+
+        function postie_tls_warning() {
+            echo "<div id='postie-lst-warning' class='error'><p><strong>";
+            echo __('Warning: The POP3 connector does not support TLS.', 'postie');
+            echo "</strong></p></div>";
+        }
+
+        add_action('admin_notices', 'postie_tls_warning');
+    }
 
     if (!function_exists('mb_detect_encoding')) {
 
@@ -223,7 +233,6 @@ function check_postie() {
 function postie_cron($interval = false) {
     //Do not echo output in filters, it seems to break some installs
     //error_log("postie_cron: setting up cron task: $interval");
-
     //$schedules = wp_get_schedules();
     //error_log("postie_cron\n" . print_r($schedules, true));
 
