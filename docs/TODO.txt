@@ -9,7 +9,6 @@ setting for default post type/post format
 Make sure all failures are sent to admin (option?) failed attachments, etc.
 debug assistance
 Comment not being created when subject contains category command []. I.e. listserv subject lines
-reply logic not adding to comments
 rework attachment logic. video files can come through as application/octect-stream. Mail parsing should separate attachments 
   into buckets? i.e. video, image, other. Each gets processed differently. I.e. when gallery in turned on images don't get embedded
   but videos do.
