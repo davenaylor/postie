@@ -29,7 +29,7 @@ extract($config);
 if (!isset($maxemails))
     $maxemails = 0;
 
-$emails = FetchMail($mail_server, $mail_server_port, $mail_userid, $mail_password, $input_protocol, $time_offset, $test_email, $delete_mail_after_processing, $maxemails);
+$emails = FetchMail($mail_server, $mail_server_port, $mail_userid, $mail_password, $input_protocol, $time_offset, $test_email, $delete_mail_after_processing, $maxemails, $email_tls);
 $message = 'Done.';
 
 EchoInfo(sprintf(__("There are %d messages to process", "postie"), count($emails)));

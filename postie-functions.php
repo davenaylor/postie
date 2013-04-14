@@ -538,11 +538,13 @@ function make_links($text) {
 function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
 
     $theDate = $mimeDecodedEmail->headers['date'];
-    $theEmail = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
 
+    $theEmail = $mimeDecodedEmail->headers["from"];
     DebugEcho("getPostAuthorDetails: pre email filter $theEmail");
     $theEmail = apply_filters("postie_filter_email", $theEmail);
     DebugEcho("getPostAuthorDetails: post email filter $theEmail");
+
+    $theEmail = RemoveExtraCharactersInEmailAddress($theEmail);
 
     $regAuthor = get_user_by('email', $theEmail);
     if ($regAuthor) {
@@ -654,7 +656,7 @@ function ConfigurePostie() {
  * This function handles determining the protocol and fetching the mail
  * @return array
  */
-function FetchMail($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true, $maxemails = 0) {
+function FetchMail($server = NULL, $port = NULL, $email = NULL, $password = NULL, $protocol = NULL, $offset = NULL, $test = NULL, $deleteMessages = true, $maxemails = 0, $email_tls = false) {
     $emails = array();
     if (!$server || !$port || !$email) {
         EchoInfo("Missing Configuration For Mail Server");

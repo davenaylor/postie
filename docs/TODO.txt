@@ -1,8 +1,7 @@
 provide a location for custom icons. update docs about location.
 hide/disable config options that don't apply
 handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
-replace native imap with flourish - http://flourishlib.com/docs/fMailbox
-replace MIME parser
+replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMailbox
 automatically create category if it doesn't exist. new option to allow this feature?
 WP MU support
 Add setting for category detection. I.e. checkboxes for [], -- and : styles. Default to all on.
@@ -16,7 +15,6 @@ rework attachment logic. video files can come through as application/octect-stre
   but videos do.
 date: tag is being detected in body when not wanted
 Enhance #img# to specify the featured image
-add TLS support (postieIMAP.php I have to set $this->tls_on to true)
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/
