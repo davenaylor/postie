@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.5.2
+Stable tag: 1.5.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -421,6 +421,10 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 `define('DISABLE_WP_CRON', true);` is not in your wp-config.php file.
 == Upgrade Notice ==
 
+= 1.5.3 =
+* Postie can now set the first image in an email to be the "Featured" image. There is a new setting "Use First Image as Featured Image" which is off by default.
+* Postie now supports Use Transport Layer Security (TLS)
+
 = 1.5.0 =
 * New filter postie_filter_email. Used to map "from" to any other email. Allows custom user mapping.
 
@@ -439,6 +443,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.3 (2013.04.13) =
+* Added support for Featured Images
+* Added support for Use Transport Layer Security (TLS)
+* Updated postie_filter_email filter to get unprocessed email address
+
 = 1.5.2 (2013.04.12) =
 * Fixed bug in post type/format detection when no valid post type/format was found
 * Workaround for WP bug when POP3 account has no waiting messages
