@@ -1026,6 +1026,13 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 DebugEcho("image Attachement: $filename");
                 $file_id = postie_media_handle_upload($part, $post_id, $poster);
                 if (!is_wp_error($file_id)) {
+                    //featured image logic
+                    //set the first image we come across as the featured image
+                    DebugEcho("has_post_thumbnail: " . has_post_thumbnail($post_id));
+                    if ($featured_image && !has_post_thumbnail($post_id)) {
+                        DebugEcho("featured image: $file_id");
+                        set_post_thumbnail($post_id, $file_id);
+                    }
                     $file = wp_get_attachment_url($file_id);
                     $cid = "";
                     if (array_key_exists('content-id', $part->headers)) {
@@ -2625,7 +2632,8 @@ function config_GetDefaults() {
         'video2types' => array('x-flv'),
         'video1templates' => $video1Templates,
         'video2templates' => $video2Templates,
-        'wrap_pre' => 'no'
+        'wrap_pre' => 'no',
+        'featured_image' => false
     );
 }
 

@@ -416,6 +416,7 @@
                 <table class='form-table'>
 
                     <?php
+                    echo BuildBooleanSelect("Use First Image as Featured Image", "postie-settings[featured_image]", $featured_image, "If any images are attached, the first one will be the featured image for the post");
                     echo BuildBooleanSelect("Automatically insert image gallery", "postie-settings[auto_gallery]", $auto_gallery, "If any images are attached, they will automatically be inserted as a gallery");
                     echo BuildBooleanSelect("Post Images At End", "postie-settings[images_append]", $images_append, "No means they will be put before the text of the message.");
                     echo BuildBooleanSelect("Start Image Count At 0", "postie-settings[start_image_count_at_zero]", $start_image_count_at_zero);
