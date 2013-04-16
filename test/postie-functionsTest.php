@@ -77,7 +77,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("Код Обмена Информацией, 8 бит", ConvertToUTF_8('koi8-r', iconv("UTF-8", "koi8-r", "Код Обмена Информацией, 8 бит")));
     }
 
-    public function testfilter_Delay() {
+    public function test_filter_Delay() {
         $content = "test";
         $r = filter_Delay($content);
         $this->assertTrue(is_array($r));
@@ -142,7 +142,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("test", $content);
     }
 
-    public function testfilter_Start() {
+    public function test_filter_Start() {
         $config = config_GetDefaults();
 
         $c = "test";
@@ -162,7 +162,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("</p><p>something</p>", $c);
     }
 
-    public function testfilter_End() {
+    public function test_filter_End() {
         $config = config_GetDefaults();
         $c = "test";
         filter_End($c, $config);
@@ -189,7 +189,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("<p>This is a test</p><p>", $c);
     }
 
-    public function testfilter_Newlines() {
+    public function test_filter_Newlines() {
         $config = config_GetDefaults();
 
         $c = "test";
@@ -287,7 +287,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("post", tag_PostType($subject, $pm));
         $this->assertEquals("test", $subject);
         $this->assertEquals('video', $pm->PostFormat);
-        
+
         $subject = "//WL2K /Test Message";
         $this->assertEquals("post", tag_PostType($subject, $pm));
         $this->assertEquals("//WL2K /Test Message", $subject);
@@ -390,7 +390,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("testtest", SafeFileName('test\/:*?"<>|test'));
     }
 
-    public function testremove_signature() {
+    public function test_Remove_signature() {
         $config = config_GetDefaults();
 
         $c = "";
@@ -434,13 +434,13 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("test content<div><br></div>", $c);
     }
 
-    public function testmore_reccurences() {
+    public function test_postie_more_reccurences() {
         $sched = array();
         $newsched = postie_more_reccurences($sched);
         $this->assertEquals(4, count($newsched));
     }
 
-    public function testpostie_get_tags() {
+    public function test_tag_Tags() {
         $c = "";
         $t = tag_Tags($c, "");
         $this->assertEquals(0, count($t));
@@ -515,9 +515,15 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("tag1", $t[0]);
         $this->assertEquals("tag2", $t[1]);
         $this->assertEquals("test \nmore stuff\n:end", $c);
+
+        $c = '<div><font face=Calibri>tags: sample tag</font></div>';
+        $t = tag_Tags($c, "");
+        $this->assertEquals(1, count($t));
+        $this->assertEquals("sample tag", $t[0]);
+        $this->assertEquals("<div><font face=Calibri></font></div>", $c);
     }
 
-    public function testfilter_linkify() {
+    public function test_filter_linkify() {
         $this->assertEquals("", filter_linkify(""));
         $this->assertEquals("test", filter_linkify("test"));
         $this->assertEquals('<a href="http://www.example.com" >http://www.example.com</a>', filter_linkify("http://www.example.com"));
@@ -530,13 +536,13 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("<img src='http://www.example.com'/>", filter_linkify("<img src='http://www.example.com'/>"));
     }
 
-    public function testfilter_Videos() {
+    public function test_filter_Videos() {
         $this->assertEquals("video\ntest", filter_Videos("video\ntest"));
         $this->assertEquals("A youtube link <embed width='425' height='344' allowfullscreen='true' allowscriptaccess='always' type='application/x-shockwave-flash' src='http://www.youtube.com/v/oAguHwl9Vzq&hl=en&fs=1' />", filter_Videos("A youtube link https://www.youtube.com/watch?v=oAguHwl9Vzq", false));
         $this->assertEquals("A youtube link [youtube oAguHwl9Vzq]", filter_Videos("A youtube link https://www.youtube.com/watch?v=oAguHwl9Vzq", true));
     }
 
-    public function testtag_Date() {
+    public function test_tag_Date() {
         $c = "";
         $this->assertEquals(null, tag_Date($c, null, 0));
         $this->assertEquals("", $c);
@@ -598,7 +604,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("<p>stuff</p><p></p><p>morestuff</p>", $c);
     }
 
-    function testtag_Excerpt() {
+    function test_tag_Excerpt() {
         $c = "";
         $e = tag_Excerpt($c, false, false);
         $this->assertEquals("", $c);
@@ -633,7 +639,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("D09AD0BED0B3D0B0D182D0BE.png", filename_fix("Когато.png"));
     }
 
-    function testtag_Status() {
+    function test_tag_Status() {
 
         $c = "";
         $s = tag_Status($c, 'publish');
@@ -661,7 +667,7 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("private", $s);
     }
 
-    function testgetPostAuthorDetails() {
+    function test_getPostAuthorDetails() {
         $s = "subject";
         $c = "content";
         $e = new stdClass();

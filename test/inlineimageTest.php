@@ -227,7 +227,6 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         filter_ReplaceImagePlaceHolders($c, array(), $config);
         $this->assertEquals("test", $c);
     }
-
 }
 
 ?>

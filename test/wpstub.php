@@ -172,4 +172,7 @@ function get_post_format_slugs() {
     return array('standard' => 'standard', 'video' => 'video', 'image' => 'image', 'aside' => 'aside');
 }
 
+function has_post_thumbnail(){
+    return false;
+}
 ?>

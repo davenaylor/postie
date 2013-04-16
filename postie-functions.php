@@ -2363,6 +2363,41 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
  */
 function tag_Tags(&$content, $defaultTags) {
     $post_tags = array();
+
+    $html = LoadDOM($content);
+    if ($html !== false) {
+        DebugEcho("tag_Tags: html detected");
+        foreach ($html->find('text') as $element) {
+            $e = $element->innertext;
+            DebugEcho("tag_Tags: $e");
+            $post_tags = array_merge($post_tags, tag_TagsWorker($e));
+            $element->innertext = $e;
+        }
+        $content = $html->save();
+    } else {
+        $post_tags = tag_TagsWorker($content);
+    }
+
+    if (count($post_tags) == 0 && is_array($defaultTags)) {
+        $post_tags = $defaultTags;
+    }
+    return $post_tags;
+}
+
+function tag_TagsWorker(&$content) {
+    $post_tags = array();
+    if (preg_match('/tags: ?(.*)$/im', $content, $matches)) {
+        if (!empty($matches[1])) {
+            DebugEcho("Found tags: $matches[1]");
+            $content = str_replace($matches[0], "", $content);
+            $post_tags = preg_split("/,\s*/", trim($matches[1]));
+        }
+    }
+    return $post_tags;
+}
+
+function tag_Tags2(&$content, $defaultTags) {
+    $post_tags = array();
     //try and determine tags
     if (preg_match('/tags: ?(.*)$/im', $content, $matches)) {
         if (!empty($matches[1])) {
