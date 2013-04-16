@@ -2369,7 +2369,6 @@ function tag_Tags(&$content, $defaultTags) {
         DebugEcho("tag_Tags: html detected");
         foreach ($html->find('text') as $element) {
             $e = $element->innertext;
-            DebugEcho("tag_Tags: $e");
             $post_tags = array_merge($post_tags, tag_TagsWorker($e));
             $element->innertext = $e;
         }
