@@ -1473,19 +1473,6 @@ function filter_StripPGP($content) {
     return preg_replace($search, $replace, $content);
 }
 
-function ConvertUTF8ToISO_8859_1($contenttransferencoding, $currentcharset, $body) {
-    if ((strtolower($currentcharset) != 'iso-8859-1')) {
-        $contenttransferencoding = strtolower($contenttransferencoding);
-        if ($contenttransferencoding == 'base64') {
-            $body = utf8_decode($body);
-        }
-        if ($contenttransferencoding == 'quoted-printable') {
-            $body = iconv($currentcharset, "UTF-8//TRANSLIT", quoted_printable_decode($body));
-        }
-    }
-    return $body;
-}
-
 function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogEncoding = 'utf-8', $dequote = true) {
     $charset = strtolower($charset);
     $contenttransferencoding = strtolower($contenttransferencoding);
@@ -1512,11 +1499,6 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
         //DebugEcho("after: $body");
     }
     return $body;
-}
-
-function ConvertToUTF_8($charset, $body) {
-    DebugEcho("convert to utf-8");
-    return iconv($charset, "UTF-8//TRANSLIT", $body);
 }
 
 /**

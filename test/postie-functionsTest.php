@@ -63,20 +63,6 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(isEmailAddressAuthorized("bob", array("jane", "bob")));
     }
 
-    public function testConvertUTF8ToISO_8859_1() {
-        $this->assertEquals("test", ConvertUTF8ToISO_8859_1("random", "stuff", "test"));
-        $this->assertEquals("Phasa Thai", ConvertUTF8ToISO_8859_1('quoted-printable', 'iso-8859-1', "Phasa Thai"));
-        $this->assertEquals("ภาษาไทย Phasa Thai", ConvertUTF8ToISO_8859_1('quoted-printable', 'tis-620', "=C0=D2=C9=D2=E4=B7=C2 Phasa Thai"));
-        $this->assertEquals("??????? Phasa Thai", ConvertUTF8ToISO_8859_1('base64', 'utf-8', "ภาษาไทย Phasa Thai"));
-        $this->assertEquals("ภาษาไทย Phasa Thai", ConvertUTF8ToISO_8859_1('something', 'utf-8', "ภาษาไทย Phasa Thai"));
-        $this->assertEquals("ภาษาไทย Phasa Thai", ConvertUTF8ToISO_8859_1('base64', 'iso-8859-1', "ภาษาไทย Phasa Thai"));
-    }
-
-    public function testConvertToUTF_8() {
-        $this->assertEquals("に投稿できる", ConvertToUTF_8('iso-2022-jp', iconv("UTF-8", "ISO-2022-JP", "に投稿できる")));
-        $this->assertEquals("Код Обмена Информацией, 8 бит", ConvertToUTF_8('koi8-r', iconv("UTF-8", "koi8-r", "Код Обмена Информацией, 8 бит")));
-    }
-
     public function test_filter_Delay() {
         $content = "test";
         $r = filter_Delay($content);

@@ -127,7 +127,7 @@
                             <?php endif; ?>
                         </td>
                     </tr>
-                        
+
                     <?php echo BuildBooleanSelect(__("Use Transport Layer Security (TLS)"), 'postie-settings[email_tls]', $email_tls, __("Choose Yes if your server requres TLS")); ?>
 
                     <tr>
@@ -371,49 +371,45 @@
                             <input name='postie-settings[message_end]' type="text" id='postie-settings-message_end' value="<?php echo esc_attr($message_end); ?>" size="50" /><br />
                         </td>
                     </tr>
-                </table>
-                <a style='cursor:pointer;' onclick='showAdvanced("message-advanced", "message-advanced-arrow");'><span id="message-advanced-arrow">&#9660;</span> Advanced options</a>
-                <div id="message-advanced" >
-                    <table class='form-table'>
-                        <?php
-                        echo BuildBooleanSelect("Wrap content in pre tags", "postie-settings[wrap_pre]", $wrap_pre);
-                        echo BuildBooleanSelect("Filter newlines", "postie-settings[filternewlines]", $filternewlines, "Retain newlines from plain text. Set to no if using markdown or textitle syntax");
-                        echo BuildBooleanSelect("Replace newline characters with html line breaks (&lt;br /&gt;)", "postie-settings[convertnewline]", $convertnewline);
-                        echo BuildBooleanSelect("Return rejected mail to sender", "postie-settings[return_to_sender]", $return_to_sender);
-                        ?>
-                        <tr>
-                            <th>
-                                <?php _e("Send post confirmation e-mail to", 'postie') ?>
-                            </th>
-                            <td>
-                                <select name='postie-settings[confirmation_email]' id='postie-settings-confirmation_email'>
-                                    <option value="sender" <?php echo($confirmation_email == "sender") ? "selected" : "" ?>><?php _e('sender', 'postie') ?></option>
-                                    <option value="admin" <?php echo ($confirmation_email == "admin") ? "selected" : "" ?>><?php _e('administrator', 'postie') ?></option>
-                                    <option value="both" <?php echo ($confirmation_email == "both") ? "selected" : "" ?>><?php _e('sender and administrator', 'postie') ?></option>
-                                    <option value="" <?php echo ($confirmation_email == "") ? "selected" : "" ?>><?php _e('none', 'postie') ?></option>
-                                </select>
-                            </td>
-                        </tr>
 
-                        <?php
-                        echo BuildBooleanSelect("Automatically convert urls to links", "postie-settings[converturls]", $converturls);
-                        echo BuildBooleanSelect("Use shortcode for embedding video (youtube and others)", "postie-settings[shortcode]", $shortcode);
-                        ?>
-                        <tr> 
-                            <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> </th> 
-                            <td>
-                                <input name='postie-settings[message_encoding]' type="text" id='postie-settings-message_encoding' value="<?php echo esc_attr($message_encoding); ?>" size="10" />
-                                <span class='recommendation'>UTF-8 <?php _e("should handle ISO-8859-1 as well", 'postie'); ?></span>
-                            </td> 
-                        </tr> 
-                        <?php echo BuildBooleanSelect("Decode Quoted Printable Data", "postie-settings[message_dequote]", $message_dequote); ?>
-                        <?php echo BuildTextArea("Supported MIME Types", "postie-settings[supported_file_types]", $supported_file_types, "Add just the type (not the subtype). Text, Video, Audio, Image and Multipart are always supported. Put each type on a single line."); ?>
-                        <?php echo BuildTextArea("Banned File Names", "postie-settings[banned_files_list]", $banned_files_list, "Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files"); ?>
-                        <?php echo BuildBooleanSelect("Drop The Signature From Mail", "postie-settings[drop_signature]", $drop_signature); ?>
-                        <?php echo BuildTextArea("Signature Patterns", "postie-settings[sig_pattern_list]", $sig_pattern_list, "Put each pattern on a separate line and make sure to escape any special characters."); ?>
-                        <?php echo BuildTextArea("Allowed SMTP servers", "postie-settings[smtp]", $smtp, "Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check smtp servers."); ?>
-                    </table> 
-                </div> <!-- advanced options -->
+                    <?php
+                    echo BuildBooleanSelect("Wrap content in pre tags", "postie-settings[wrap_pre]", $wrap_pre);
+                    echo BuildBooleanSelect("Filter newlines", "postie-settings[filternewlines]", $filternewlines, "Retain newlines from plain text. Set to no if using markdown or textitle syntax");
+                    echo BuildBooleanSelect("Replace newline characters with html line breaks (&lt;br /&gt;)", "postie-settings[convertnewline]", $convertnewline, "Filter newlines must be turned on for this option to take effect.");
+                    echo BuildBooleanSelect("Return rejected mail to sender", "postie-settings[return_to_sender]", $return_to_sender);
+                    ?>
+                    <tr>
+                        <th>
+                            <?php _e("Send post confirmation e-mail to", 'postie') ?>
+                        </th>
+                        <td>
+                            <select name='postie-settings[confirmation_email]' id='postie-settings-confirmation_email'>
+                                <option value="sender" <?php echo($confirmation_email == "sender") ? "selected" : "" ?>><?php _e('sender', 'postie') ?></option>
+                                <option value="admin" <?php echo ($confirmation_email == "admin") ? "selected" : "" ?>><?php _e('administrator', 'postie') ?></option>
+                                <option value="both" <?php echo ($confirmation_email == "both") ? "selected" : "" ?>><?php _e('sender and administrator', 'postie') ?></option>
+                                <option value="" <?php echo ($confirmation_email == "") ? "selected" : "" ?>><?php _e('none', 'postie') ?></option>
+                            </select>
+                        </td>
+                    </tr>
+
+                    <?php
+                    echo BuildBooleanSelect("Automatically convert urls to links", "postie-settings[converturls]", $converturls);
+                    echo BuildBooleanSelect("Use shortcode for embedding video (youtube and others)", "postie-settings[shortcode]", $shortcode);
+                    ?>
+                    <tr> 
+                        <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> </th> 
+                        <td>
+                            <input name='postie-settings[message_encoding]' type="text" id='postie-settings-message_encoding' value="<?php echo esc_attr($message_encoding); ?>" size="10" />
+                            <span class='recommendation'>UTF-8 <?php _e("should handle ISO-8859-1 as well", 'postie'); ?></span>
+                        </td> 
+                    </tr> 
+                    <?php echo BuildBooleanSelect("Decode Quoted Printable Data", "postie-settings[message_dequote]", $message_dequote); ?>
+                    <?php echo BuildTextArea("Supported MIME Types", "postie-settings[supported_file_types]", $supported_file_types, "Add just the type (not the subtype). Text, Video, Audio, Image and Multipart are always supported. Put each type on a single line."); ?>
+                    <?php echo BuildTextArea("Banned File Names", "postie-settings[banned_files_list]", $banned_files_list, "Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files"); ?>
+                    <?php echo BuildBooleanSelect("Drop The Signature From Mail", "postie-settings[drop_signature]", $drop_signature); ?>
+                    <?php echo BuildTextArea("Signature Patterns", "postie-settings[sig_pattern_list]", $sig_pattern_list, "Put each pattern on a separate line and make sure to escape any special characters."); ?>
+                    <?php echo BuildTextArea("Allowed SMTP servers", "postie-settings[smtp]", $smtp, "Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check smtp servers."); ?>
+                </table> 
             </div>
             <div id="simpleTabs-content-4" class="simpleTabs-content">
                 <table class='form-table'>
@@ -441,7 +437,7 @@
                                    value="<?php echo esc_attr($selected_imagetemplate) ?>" />
                             <select name='imagetemplateselect' id='imagetemplateselect' 
                                     onchange="changeStyle('imageTemplatePreview', 'postie-settings-imagetemplate',
-                                'imagetemplateselect', 'postie-settings-selected_imagetemplate', 'smiling.jpg');" >
+                                                    'imagetemplateselect', 'postie-settings-selected_imagetemplate', 'smiling.jpg');" >
                                         <?php
                                         include('templates/image_templates.php');
                                         $styleOptions = $imageTemplates;
@@ -465,7 +461,7 @@
                             <?php _e('Preview', 'postie'); ?>
                             <div id='imageTemplatePreview'></div>
                             <textarea onchange='changeStyle("imageTemplatePreview", "postie-settings-imagetemplate", "imagetemplateselect",
-                                "postie-settings-selected_imagetemplate", "smiling.jpg", true);' cols='70' rows='7' id='postie-settings-imagetemplate' name='postie-settings[imagetemplate]'>
+                                                    "postie-settings-selected_imagetemplate", "smiling.jpg", true);' cols='70' rows='7' id='postie-settings-imagetemplate' name='postie-settings[imagetemplate]'>
                                       <?php echo esc_attr($imagetemplate) ?>
                             </textarea>
                         </td>
@@ -515,7 +511,7 @@
                             <?php _e('Preview', 'postie'); ?>
                             <div id='video1TemplatePreview'></div>
                             <textarea onchange="changeStyle('video1TemplatePreview', 'postie-settings-video1template',
-                                'video1templateselect', 'postie-settings-selected_video1template', 'hi.mp4', true);" cols='70' rows='7' id='postie-settings-video1template'
+                                                    'video1templateselect', 'postie-settings-selected_video1template', 'hi.mp4', true);" cols='70' rows='7' id='postie-settings-video1template'
                                       name='postie-settings[video1template]'><?php echo esc_attr($video1template) ?></textarea>
                         </td>
                     </tr>
@@ -539,7 +535,7 @@
                                    value="<?php echo esc_attr($selected_video2template) ?>" />
                             <select name='video2templateselect' id='video2templateselect' 
                                     onchange="changeStyle('video2TemplatePreview', 'postie-settings-video2template',
-                                'video2templateselect', 'postie-settings-selected_video2template', 'hi.flv');" >
+                                                    'video2templateselect', 'postie-settings-selected_video2template', 'hi.flv');" >
                                         <?php
                                         include('templates/video2_templates.php');
                                         $styleOptions = $video2Templates;
@@ -562,7 +558,7 @@
                             <?php _e('Preview', 'postie'); ?>
                             <div id='video2TemplatePreview'></div>
                             <textarea onchange="changeStyle('video2TemplatePreview', 'postie-settings-video2template',
-                                'video2templateselect', 'postie-settings-selected_video2template', 'hi.flv', true);" cols='70' rows='7' id='postie-settings-video2template'
+                                                    'video2templateselect', 'postie-settings-selected_video2template', 'hi.flv', true);" cols='70' rows='7' id='postie-settings-video2template'
                                       name='postie-settings[video2template]'>
                                           <?php echo esc_attr($video2template) ?>
                             </textarea>
@@ -589,7 +585,7 @@
                                    value="<?php echo esc_attr($selected_audiotemplate) ?>" />
                             <select name='audiotemplateselect' id='audiotemplateselect' 
                                     onchange="changeStyle('audioTemplatePreview', 'postie-settings-audiotemplate',
-                                'audiotemplateselect', 'postie-settings-selected_audiotemplate', 'funky.mp3', false);" >
+                                                    'audiotemplateselect', 'postie-settings-selected_audiotemplate', 'funky.mp3', false);" >
                                         <?php
                                         include('templates/audio_templates.php');
                                         $styleOptions = $audioTemplates;
@@ -613,7 +609,7 @@
                             <?php _e('Preview', 'postie'); ?>
                             <div id='audioTemplatePreview'></div>
                             <textarea onchange="changeStyle('audioTemplatePreview', 'postie-settings-audiotemplate',
-                                'audiotemplateselect', 'postie-settings-selected_audiotemplate', 'funky.mp3', true);" cols='70' rows='7' id='postie-settings-audiotemplate'
+                                                    'audiotemplateselect', 'postie-settings-selected_audiotemplate', 'funky.mp3', true);" cols='70' rows='7' id='postie-settings-audiotemplate'
                                       name='postie-settings[audiotemplate]'><?php echo esc_attr($audiotemplate) ?></textarea>
                         </td>
                     </tr>
@@ -717,96 +713,96 @@
 
 <?php $iconDir = get_option('siteurl') . '/' . PLUGINDIR . '/postie/icons'; ?>
 <script type="text/javascript">
-                    jQuery(document).ready(function() {
-                        jQuery("#simpleTabs").simpleTabs({
-                            fadeSpeed: "medium", // @param : low, medium, fast
-                            defautContent: 1, // @param : number ( simpleTabs-nav-number)
-                            autoNav: "false", // @param : true or false
-                            closeTabs: "false"   // @param : true or false;
-                        });
+                                        jQuery(document).ready(function() {
+                                            jQuery("#simpleTabs").simpleTabs({
+                                                fadeSpeed: "medium", // @param : low, medium, fast
+                                                defautContent: 1, // @param : number ( simpleTabs-nav-number)
+                                                autoNav: "false", // @param : true or false
+                                                closeTabs: "false"   // @param : true or false;
+                                            });
 
-                    });
+                                        });
 
-                    function changeIconSet(selectBox, size) {
-                        var iconSet = document.getElementById('postie-settings-icon_set');
-                        var iconSize = document.getElementById('postie-settings-icon_size');
-                        var preview = document.getElementById('postie-settings-attachment_preview');
-                        var iconDir = '<?php echo $iconDir ?>/';
-                        if (size == true) {
-                            var hiddenInput = iconSize
-                        } else {
-                            var hiddenInput = iconSet;
-                        }
-                        for (i = 0; i < selectBox.options.length; i++) {
-                            if (selectBox.options[i].selected == true) {
-                                hiddenInput.value = selectBox.options[i].value;
-                            }
-                        }
-                        var fileTypes = new Array('doc', 'pdf', 'xls', 'ppt');
-                        preview.innerHTML = '';
-                        for (j = 0; j < fileTypes.length; j++) {
-                            preview.innerHTML += "<img src='" + iconDir + iconSet.value + '/' +
-                                    fileTypes[j] + '-' + iconSize.value + ".png' />";
-                        }
-                        preview.innerHTML += '<br />Here is some sample text with a link to a ' +
-                                'word document that I think you might find interesting<br />' +
-                                "<a href='#'><img style='text-decoration:none' src='" +
-                                iconDir + iconSet.value + '/doc' +
-                                '-' + iconSize.value + ".png' />Interesting document</a>";
-                    }
+                                        function changeIconSet(selectBox, size) {
+                                            var iconSet = document.getElementById('postie-settings-icon_set');
+                                            var iconSize = document.getElementById('postie-settings-icon_size');
+                                            var preview = document.getElementById('postie-settings-attachment_preview');
+                                            var iconDir = '<?php echo $iconDir ?>/';
+                                            if (size == true) {
+                                                var hiddenInput = iconSize
+                                            } else {
+                                                var hiddenInput = iconSet;
+                                            }
+                                            for (i = 0; i < selectBox.options.length; i++) {
+                                                if (selectBox.options[i].selected == true) {
+                                                    hiddenInput.value = selectBox.options[i].value;
+                                                }
+                                            }
+                                            var fileTypes = new Array('doc', 'pdf', 'xls', 'ppt');
+                                            preview.innerHTML = '';
+                                            for (j = 0; j < fileTypes.length; j++) {
+                                                preview.innerHTML += "<img src='" + iconDir + iconSet.value + '/' +
+                                                        fileTypes[j] + '-' + iconSize.value + ".png' />";
+                                            }
+                                            preview.innerHTML += '<br />Here is some sample text with a link to a ' +
+                                                    'word document that I think you might find interesting<br />' +
+                                                    "<a href='#'><img style='text-decoration:none' src='" +
+                                                    iconDir + iconSet.value + '/doc' +
+                                                    '-' + iconSize.value + ".png' />Interesting document</a>";
+                                        }
 
-                    function changeStyle(preview, template, select, selected, sample, custom) {
-                        var preview = document.getElementById(preview);
-                        var pageStyles = document.getElementById(select);
-                        var selectedStyle;
-                        var hiddenStyle = document.getElementById(selected);
-                        var pageStyle = document.getElementById(template);
-                        if (custom == true) {
-                            selectedStyle = pageStyles.options[pageStyles.options.length - 1];
-                            selectedStyle.value = pageStyle.value;
-                            selectedStyle.selected = true;
-                        } else {
-                            for (i = 0; i < pageStyles.options.length; i++) {
-                                if (pageStyles.options[i].selected == true) {
-                                    selectedStyle = pageStyles.options[i];
-                                }
-                            }
-                        }
-                        hiddenStyle.value = selectedStyle.innerHTML
-                        var previewHTML = selectedStyle.value;
-                        var fileLink = '<?php echo $templateDir ?>/' + sample;
-                        var thumb = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
-                                '-150x150.jpg');
-                        var medium = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
-                                '-300x200.jpg');
-                        var large = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
-                                '-1024x682.jpg');
-                        previewHTML = previewHTML.replace(/{FILELINK}/g, fileLink);
-                        previewHTML = previewHTML.replace(/{IMAGE}/g, fileLink);
-                        previewHTML = previewHTML.replace(/{FILENAME}/, sample);
-                        previewHTML = previewHTML.replace(/{THUMB(NAIL|)}/, thumb);
-                        previewHTML = previewHTML.replace(/{MEDIUM}/, medium);
-                        previewHTML = previewHTML.replace(/{LARGE}/, large);
-                        previewHTML = previewHTML.replace(/{CAPTION}/g, 'Spencer smiling');
-                        preview.innerHTML = previewHTML;
-                        pageStyle.value = selectedStyle.value;
-                    }
+                                        function changeStyle(preview, template, select, selected, sample, custom) {
+                                            var preview = document.getElementById(preview);
+                                            var pageStyles = document.getElementById(select);
+                                            var selectedStyle;
+                                            var hiddenStyle = document.getElementById(selected);
+                                            var pageStyle = document.getElementById(template);
+                                            if (custom == true) {
+                                                selectedStyle = pageStyles.options[pageStyles.options.length - 1];
+                                                selectedStyle.value = pageStyle.value;
+                                                selectedStyle.selected = true;
+                                            } else {
+                                                for (i = 0; i < pageStyles.options.length; i++) {
+                                                    if (pageStyles.options[i].selected == true) {
+                                                        selectedStyle = pageStyles.options[i];
+                                                    }
+                                                }
+                                            }
+                                            hiddenStyle.value = selectedStyle.innerHTML
+                                            var previewHTML = selectedStyle.value;
+                                            var fileLink = '<?php echo $templateDir ?>/' + sample;
+                                            var thumb = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
+                                                    '-150x150.jpg');
+                                            var medium = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
+                                                    '-300x200.jpg');
+                                            var large = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/,
+                                                    '-1024x682.jpg');
+                                            previewHTML = previewHTML.replace(/{FILELINK}/g, fileLink);
+                                            previewHTML = previewHTML.replace(/{IMAGE}/g, fileLink);
+                                            previewHTML = previewHTML.replace(/{FILENAME}/, sample);
+                                            previewHTML = previewHTML.replace(/{THUMB(NAIL|)}/, thumb);
+                                            previewHTML = previewHTML.replace(/{MEDIUM}/, medium);
+                                            previewHTML = previewHTML.replace(/{LARGE}/, large);
+                                            previewHTML = previewHTML.replace(/{CAPTION}/g, 'Spencer smiling');
+                                            preview.innerHTML = previewHTML;
+                                            pageStyle.value = selectedStyle.value;
+                                        }
 
-                    function showAdvanced(advancedId, arrowId) {
-                        var advanced = document.getElementById(advancedId);
-                        var arrow = document.getElementById(arrowId);
-                        if (advanced.style.display == 'none') {
-                            advanced.style.display = 'block';
-                            arrow.innerHTML = '&#9660;';
-                        } else {
-                            advanced.style.display = 'none';
-                            arrow.innerHTML = '&#9654;';
-                        }
-                    }
+                                        function showAdvanced(advancedId, arrowId) {
+                                            var advanced = document.getElementById(advancedId);
+                                            var arrow = document.getElementById(arrowId);
+                                            if (advanced.style.display == 'none') {
+                                                advanced.style.display = 'block';
+                                                arrow.innerHTML = '&#9660;';
+                                            } else {
+                                                advanced.style.display = 'none';
+                                                arrow.innerHTML = '&#9654;';
+                                            }
+                                        }
 
-                    changeStyle('imageTemplatePreview', 'postie-settings-imagetemplate', 'imagetemplateselect', 'postie-settings-selected_imagetemplate', 'smiling.jpg', false);
-                    changeStyle('audioTemplatePreview', 'postie-settings-audiotemplate', 'audiotemplateselect', 'postie-settings-selected_audiotemplate', 'funky.mp3', false);
-                    changeStyle('video1TemplatePreview', 'postie-settings-video1template', 'video1templateselect', 'postie-settings-selected_video1template', 'hi.mp4', false);
-                    changeStyle('video2TemplatePreview', 'postie-settings-video2template', 'video2templateselect', 'postie-settings-selected_video2template', 'hi.flv', false);
-                    changeIconSet(document.getElementById('icon_set_select'));
+                                        changeStyle('imageTemplatePreview', 'postie-settings-imagetemplate', 'imagetemplateselect', 'postie-settings-selected_imagetemplate', 'smiling.jpg', false);
+                                        changeStyle('audioTemplatePreview', 'postie-settings-audiotemplate', 'audiotemplateselect', 'postie-settings-selected_audiotemplate', 'funky.mp3', false);
+                                        changeStyle('video1TemplatePreview', 'postie-settings-video1template', 'video1templateselect', 'postie-settings-selected_video1template', 'hi.mp4', false);
+                                        changeStyle('video2TemplatePreview', 'postie-settings-video2template', 'video2templateselect', 'postie-settings-selected_video2template', 'hi.flv', false);
+                                        changeIconSet(document.getElementById('icon_set_select'));
 </script>
