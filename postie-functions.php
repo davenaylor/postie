@@ -620,8 +620,8 @@ function GetParentPostForReply(&$subject) {
             preg_match("/-(.[^-]*)$/", $tmpSubject, $tmpSubject_matches);
             $tmpSubject = trim($tmpSubject_matches[1]);
         }
-        $checkExistingPostQuery = "SELECT ID FROM $wpdb->posts WHERE '$tmpSubject' = post_title AND post_status = 'publish'";
-        if ($id = $wpdb->get_var($wpdb->prepare($checkExistingPostQuery, array()))) {
+        $checkExistingPostQuery = "SELECT ID FROM $wpdb->posts WHERE  post_title = %s AND post_status = 'publish'";
+        if ($id = $wpdb->get_var($wpdb->prepare($checkExistingPostQuery, $tmpSubject))) {
             if (is_array($id)) {
                 $id = $id[count($id) - 1];
             }
