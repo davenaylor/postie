@@ -255,7 +255,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     if ($fulldebug)
         DebugEcho("post custom: $content");
 
-    $post_type = tag_PostType($subject, $postmodifiers);
+    $post_type = tag_PostType($subject, $postmodifiers, $config);
     if ($fulldebug)
         DebugEcho("post type: $content");
 
@@ -399,9 +399,14 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
  * $custom_post_type_delim, e.g. "Movies // My Favorite Movie"
  * Also supports setting the Post Format.
  */
-function tag_PostType(&$subject, $postmodifiers) {
+function tag_PostType(&$subject, $postmodifiers, $config) {
 
-    $post_type = 'post';
+    $post_type = "post";
+    $custom_post_type = $config['post_format'];
+    $separated_subject = array();
+    $separated_subject[0] = "";
+    $separated_subject[1] = $subject;
+
     $custom_post_type_delim = "//";
     if (strpos($subject, $custom_post_type_delim) !== FALSE) {
         // Captures the custom post type in the subject before $custom_post_type_delim
@@ -410,21 +415,18 @@ function tag_PostType(&$subject, $postmodifiers) {
 
         $custom_post_type = trim(strtolower($custom_post_type));
         DebugEcho("post type: found possible type '$custom_post_type'");
+    }
+    
+    $known_post_types = get_post_types();
 
-        // Check if custom post type exists, if not, set default post type of 'post'
-        $known_post_types = get_post_types();
-        //DebugDump($known_post_types);
-        //DebugDump(get_post_format_slugs());
-
-        if (in_array($custom_post_type, array_map('strtolower', $known_post_types))) {
-            DebugEcho("post type: found type '$post_type'");
-            $post_type = $custom_post_type;
-            $subject = trim($separated_subject[1]);
-        } elseif (in_array($custom_post_type, array_keys(get_post_format_slugs()))) {
-            DebugEcho("post type: found format '$custom_post_type'");
-            $postmodifiers->PostFormat = $custom_post_type;
-            $subject = trim($separated_subject[1]);
-        }
+    if (in_array($custom_post_type, array_map('strtolower', $known_post_types))) {
+        DebugEcho("post type: found type '$post_type'");
+        $post_type = $custom_post_type;
+        $subject = trim($separated_subject[1]);
+    } elseif (in_array($custom_post_type, array_keys(get_post_format_slugs()))) {
+        DebugEcho("post type: found format '$custom_post_type'");
+        $postmodifiers->PostFormat = $custom_post_type;
+        $subject = trim($separated_subject[1]);
     }
 
     return $post_type;
@@ -2655,7 +2657,8 @@ function config_GetDefaults() {
         'video2templates' => $video2Templates,
         'wrap_pre' => 'no',
         'featured_image' => false,
-        'email_tls' => false
+        'email_tls' => false,
+        'post_format' => 'standard'
     );
 }
 

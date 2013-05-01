@@ -339,6 +339,27 @@
                     </tr> 
 
                     <tr> 
+                        <th width="33%" valign="top" scope="row"><?php _e('Default Post Format:', 'postie') ?> </th> 
+                        <td>
+                            <select name='postie-settings[post_format]' id='postie-settings-post_format'>
+                                <?php
+                                $formats = get_theme_support('post-formats');
+                                if (is_array($formats[0])) {
+                                    array_unshift($formats[0], "standard");
+                                    foreach ($formats[0] as $format) {
+                                        $selected = "";
+                                        if ($config['post_format'] == $format) {
+                                            $selected = " selected='selected'";
+                                        }
+                                        echo "<option value='$format'$selected>$format</option>";
+                                    }
+                                }
+                                ?>
+                            </select>               
+                        </td> 
+                    </tr> 
+
+                    <tr> 
                         <th width="33%" valign="top" scope="row"><?php _e('Default Title:', 'postie') ?> </th> 
                         <td>
                             <input name='postie-settings[default_title]' type="text" id='postie-settings-default_title' value="<?php echo esc_attr($default_title); ?>" size="50" /><br />

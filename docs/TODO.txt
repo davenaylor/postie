@@ -14,7 +14,6 @@ rework attachment logic. video files can come through as application/octect-stre
 date: tag is being detected in body when not wanted
 Enhance #img# to specify the featured image
 Update tag_* and filter_* to handle HTML (per tag_Tags)
-setting for default post type/post format
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/

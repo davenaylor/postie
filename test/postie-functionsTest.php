@@ -244,40 +244,49 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testGetPostType() {
+        $config = config_GetDefaults();
+
         $pm = new PostiePostModifiers();
         $subject = "test";
-        $this->assertEquals("post", tag_PostType($subject, $pm));
+        $this->assertEquals("post", tag_PostType($subject, $pm, $config));
         $this->assertEquals("test", $subject);
 
         $subject = "custom//test";
-        $this->assertEquals("custom", tag_PostType($subject, $pm));
+        $this->assertEquals("custom", tag_PostType($subject, $pm, $config));
         $this->assertEquals("test", $subject);
 
         $subject = "//test";
-        $this->assertEquals("post", tag_PostType($subject, $pm));
+        $this->assertEquals("post", tag_PostType($subject, $pm, $config));
         $this->assertEquals("//test", $subject);
 
         $subject = "//";
-        $this->assertEquals("post", tag_PostType($subject, $pm));
+        $this->assertEquals("post", tag_PostType($subject, $pm, $config));
         $this->assertEquals("//", $subject);
 
         $subject = "custom2//test";
-        $this->assertEquals("custom2", tag_PostType($subject, $pm));
+        $this->assertEquals("custom2", tag_PostType($subject, $pm, $config));
         $this->assertEquals("test", $subject);
 
         $subject = "Custom1 // test";
-        $this->assertEquals("custom1", tag_PostType($subject, $pm));
+        $this->assertEquals("custom1", tag_PostType($subject, $pm, $config));
         $this->assertEquals("test", $subject);
 
         $subject = "video//test";
-        $this->assertEquals("post", tag_PostType($subject, $pm));
+        $this->assertEquals("post", tag_PostType($subject, $pm, $config));
         $this->assertEquals("test", $subject);
         $this->assertEquals('video', $pm->PostFormat);
 
         $subject = "//WL2K /Test Message";
-        $this->assertEquals("post", tag_PostType($subject, $pm));
+        $this->assertEquals("post", tag_PostType($subject, $pm, $config));
         $this->assertEquals("//WL2K /Test Message", $subject);
         $this->assertEquals('video', $pm->PostFormat);
+
+        //test w/ non-default post format
+        $config['post_format'] = 'aside';
+        $subject = "test";
+        $this->assertEquals("post", tag_PostType($subject, $pm, $config));
+        $this->assertEquals("test", $subject);
+        $this->assertEquals('aside', $pm->PostFormat);
     }
 
     public function testGetPostExcerpt() {

@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.5.3
+Stable tag: 1.5.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,7 +90,7 @@ Then use the Task Scheduler control panel to call wget or cron.
   *    status: draft
 
 = Post Date =
-* Posts can have a specific publication date. Relative dates like "tomorrow", "monday", "first day of next month" are supported.
+* Posts can have a specific publication date such as Apr 14, 2013. Relative dates like "tomorrow", "monday", "first day of next month" are also supported.
   *    date: date
   *    date: date time
 * Posts can be delayed by adding a line with delayXdXhXm where X is a number.
@@ -443,6 +443,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.4 (2013.05.01) =
+* Added support for default post format
+* Fixed bug where replies were getting attached to the wrong post
+* Fixed bug where tags were not being detected correctly in html emails
+* Fixed bug in reply detection
+
 = 1.5.3 (2013.04.13) =
 * Added support for Featured Images
 * Added support for Use Transport Layer Security (TLS)
