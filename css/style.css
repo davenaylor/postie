@@ -41,3 +41,6 @@ div.simpleTabs-content li li li {
 table.checkbox-table td {
     padding:0px;
 }
+.updated {
+    overflow: hidden;
+}

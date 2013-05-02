@@ -401,7 +401,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
  */
 function tag_PostType(&$subject, $postmodifiers, $config) {
 
-    $post_type = "post";
+    $post_type = $config['post_type'];
     $custom_post_type = $config['post_format'];
     $separated_subject = array();
     $separated_subject[0] = "";
@@ -416,7 +416,7 @@ function tag_PostType(&$subject, $postmodifiers, $config) {
         $custom_post_type = trim(strtolower($custom_post_type));
         DebugEcho("post type: found possible type '$custom_post_type'");
     }
-    
+
     $known_post_types = get_post_types();
 
     if (in_array($custom_post_type, array_map('strtolower', $known_post_types))) {
@@ -2012,8 +2012,7 @@ function isEmailAddressAuthorized($address, $authorized) {
     if (is_array($authorized)) {
         $a = strtolower(trim($address));
         if (!empty($a)) {
-            $isAuthorized = in_array(strtolower($a), array_map('strtolower', $authorized));
-            $r = $isAuthorized;
+            $r = in_array($a, array_map('strtolower', $authorized));
         }
     }
     return $r;
@@ -2551,7 +2550,7 @@ function BuildTextArea($label, $id, $current_value, $recommendation = NULL) {
     $html.="</th>";
 
     $html .="<td><br /><textarea cols=40 rows=3 name='$id' id='$id'>";
-    $current_value = preg_split("/[,\r\n]+/", esc_attr(trim($current_value)));
+    $current_value = preg_split("/[\r\n]+/", esc_attr(trim($current_value)));
     if (is_array($current_value)) {
         foreach ($current_value as $item) {
             $html .= "$item\n";
@@ -2658,7 +2657,8 @@ function config_GetDefaults() {
         'wrap_pre' => 'no',
         'featured_image' => false,
         'email_tls' => false,
-        'post_format' => 'standard'
+        'post_format' => 'standard',
+        'post_type' => 'post'
     );
 }
 

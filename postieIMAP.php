@@ -110,9 +110,7 @@ class PostieIMAP {
      * @return string
      */
     function fetchEmail($index) {
-//        if ($index < 1 || $index > ($this->getNumberOfMessages() + 1)) {
-//            die("Invalid IMAP/POP3 message index!");
-//        }
+
         $header_info = imap_headerinfo($this->_connection, $index);
 
         if (IsDebugMode() || $header_info->Recent == 'N' || $header_info->Unseen == 'U') {

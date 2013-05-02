@@ -1,5 +1,5 @@
 <div class="wrap"> 
-    <div style="float:right; width: 220px; border: 1px solid darkgrey; padding:2px;border-radius:10px;" >
+    <div style="float:right; width: 220px; border: 1px solid darkgrey; padding:2px;border-radius:10px;margin-left: 10px;" >
         <p class="" style="text-align:center;font-weight: bolder; margin-top: 0px; margin-bottom: 2px;">Please Donate</p>
         <p style="margin-top: 0;margin-bottom: 2px;">Your generous donation allows me to continue developing Postie for the WordPress community.</p>
         <form style="" action="https://www.paypal.com/cgi-bin/webscr" method="post">
@@ -12,8 +12,9 @@
     </div>
     <h2>
         <a style='text-decoration:none' href='options-general.php?page=postie/postie.php'>
-            <img src="../wp-content/plugins/postie/images/mail.png" alt="postie" /><?php _e('Postie Options', 'postie'); ?>
+            <img src="../wp-content/plugins/postie/images/mail.png" alt="postie" /><?php _e('Postie Settings', 'postie'); ?>
         </a>
+        <span class="description">(v<?php _e(POSTIE_VERSION, 'postie'); ?>)</span>
     </h2>
 
 
@@ -35,6 +36,14 @@
                 break;
             case "runpostie":
                 EchoInfo("Checking for mail manually");
+                include('get_mail.php');
+                exit;
+                break;
+            case "runpostie-debug":
+                EchoInfo("Checking for mail manually with debug output");
+                if (!defined('POSTIE_DEBUG')) {
+                    define('POSTIE_DEBUG', true);
+                }
                 include('get_mail.php');
                 exit;
                 break;
@@ -84,10 +93,15 @@
         <input name="Submit" value="<?php _e("Run Postie", 'postie'); ?> &raquo;" type="submit" class='button'>
         <?php _e("(To run the check mail script manually)", 'postie'); ?>
     </form>
+    <form name="postie-options" method='post'> 
+        <input type="hidden" name="action" value="runpostie-debug" />
+        <input name="Submit" value="<?php _e("Run Postie (Debug)", 'postie'); ?> &raquo;" type="submit" class='button'>
+        <?php _e("(To run the check mail script manually with full debug output)", 'postie'); ?>
+    </form>
     <form name="postie-options" method="post">
         <input type="hidden" name="action" value="test" />
         <input name="Submit" value="<?php _e("Test Config", 'postie'); ?>&raquo;" type="submit" class='button'>
-        <?php _e("this will run a special script to test your configuration options", 'postie'); ?>
+        <?php _e("this will check your configuration options", 'postie'); ?>
     </form>
 
     <form name="postie-options" method="post" action='options.php' autocomplete="off">
@@ -275,11 +289,22 @@
                     <?php echo BuildTextArea("Authorized Addresses", "postie-settings[authorized_addresses]", $authorized_addresses, "Put each email address on a single line. Posts from emails in this list will be treated as if they came from the admin. If you would prefer to have users post under their own name - create a WordPress user with the correct access level."); ?>
                     <tr> 
                         <th width="33%" valign="top" scope="row">
-                            <?php _e('Admin username:') ?> <br />
-                            <span class='recommendation'><?php _e("This must be a valid WordPress user in the Administrator role. This will be the default poster in some cases.", 'postie'); ?></span>
+                            <?php _e('Default Poster:') ?> <br />
+                            <span class='recommendation'><?php _e("This will be the poster if you allow posting from emails that are not a registered blog user.", 'postie'); ?></span>
                         </th> 
                         <td>
-                            <input name='postie-settings[admin_username]' type="text" id='postie-settings-admin_username' value="<?php echo esc_attr($admin_username); ?>" size="50" />
+                            <select name='postie-settings[admin_username]' id='postie-settings[admin_username]'>
+                                <?php
+                                $adminusers = get_users('orderby=nicename&role=administrator');
+                                foreach ($adminusers as $user) {
+                                    $selected = "";
+                                    if ($user->user_nicename == $admin_username) {
+                                        $selected = " selected='selected'";
+                                    }
+                                    echo "<option value='$user->user_nicename'$selected>$user->user_nicename</option>";
+                                }
+                                ?>
+                            </select>
                         </td> 
                     </tr> 
                 </table> 
@@ -360,6 +385,25 @@
                     </tr> 
 
                     <tr> 
+                        <th width="33%" valign="top" scope="row"><?php _e('Default Post Type:', 'postie') ?> </th> 
+                        <td>
+                            <select name='postie-settings[post_type]' id='postie-settings-post_type'>
+                                <?php
+                                $types = get_post_types();
+                                //array_unshift($types, "standard");
+                                foreach ($types as $type) {
+                                    $selected = "";
+                                    if ($config['post_type'] == $type) {
+                                        $selected = " selected='selected'";
+                                    }
+                                    echo "<option value='$type'$selected>$type</option>";
+                                }
+                                ?>
+                            </select>               
+                        </td> 
+                    </tr> 
+
+                    <tr> 
                         <th width="33%" valign="top" scope="row"><?php _e('Default Title:', 'postie') ?> </th> 
                         <td>
                             <input name='postie-settings[default_title]' type="text" id='postie-settings-default_title' value="<?php echo esc_attr($default_title); ?>" size="50" /><br />
@@ -428,7 +472,7 @@
                     <?php echo BuildTextArea("Supported MIME Types", "postie-settings[supported_file_types]", $supported_file_types, "Add just the type (not the subtype). Text, Video, Audio, Image and Multipart are always supported. Put each type on a single line."); ?>
                     <?php echo BuildTextArea("Banned File Names", "postie-settings[banned_files_list]", $banned_files_list, "Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files"); ?>
                     <?php echo BuildBooleanSelect("Drop The Signature From Mail", "postie-settings[drop_signature]", $drop_signature); ?>
-                    <?php echo BuildTextArea("Signature Patterns", "postie-settings[sig_pattern_list]", $sig_pattern_list, "Put each pattern on a separate line and make sure to escape any special characters."); ?>
+                    <?php echo BuildTextArea("Signature Patterns", "postie-settings[sig_pattern_list]", $sig_pattern_list, "Put each pattern on a separate line."); ?>
                     <?php echo BuildTextArea("Allowed SMTP servers", "postie-settings[smtp]", $smtp, "Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check smtp servers."); ?>
                 </table> 
             </div>

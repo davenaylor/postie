@@ -14,8 +14,9 @@ if (!function_exists('file_get_html'))
     require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'simple_html_dom.php');
 
 EchoInfo("Starting mail fetch");
+EchoInfo("Postie Version: ". POSTIE_VERSION);
+EchoInfo("Debug mode: " . (IsDebugMode() ? "On" : "Off"));
 EchoInfo("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
-include('Revision');
 $wp_content_path = dirname(dirname(dirname(__FILE__)));
 DebugEcho("wp_content_path: $wp_content_path");
 if (file_exists($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php")) {
@@ -41,16 +42,18 @@ DebugEcho("Error log: " . ini_get('error_log'));
 DebugDump($config);
 
 //loop through messages
+$message_number = 0;
 foreach ($emails as $email) {
-    DebugEcho("------------------------------------");
+    $message_number++;
+    DebugEcho("$message_number: ------------------------------------");
     //sanity check to see if there is any info in the message
     if ($email == NULL) {
         $message = __('Dang, message is empty!', 'postie');
-        EchoInfo($message);
+        EchoInfo("$message_number: $message");
         continue;
     } else if ($email == 'already read') {
-        $message = __("There does not seem to be any new mail.", 'postie');
-        EchoInfo($message);
+        $message = __("Message is already marked 'read'.", 'postie');
+        EchoInfo("$message_number: $message");
         continue;
     }
 
@@ -70,5 +73,4 @@ foreach ($emails as $email) {
 
 if (function_exists('memory_get_usage'))
     DebugEcho("memory at end of e-mail processing:" . memory_get_usage());
-
 ?>

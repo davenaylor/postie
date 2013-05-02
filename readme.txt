@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.5.4
+Stable tag: 1.5.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -443,6 +443,14 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.5 (2013.05.02) =
+* Added ability to run a manual check with debugging output.
+* Added support for default post type.
+* Added version number to settings page.
+* Changed Admin User to Default Poster, clarified help text and changed input to combo box of valid values.
+* Fixed bug where commas (,) were not allowed in signature detection.
+* Fixed some CSS issues on admin page.
+
 = 1.5.4 (2013.05.01) =
 * Added support for default post format
 * Fixed bug where replies were getting attached to the wrong post

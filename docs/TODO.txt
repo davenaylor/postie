@@ -1,12 +1,10 @@
 provide a location for custom icons. update docs about location.
-hide/disable config options that don't apply
 handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
 replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMailbox
 automatically create category if it doesn't exist. new option to allow this feature?
 WP MU support
 Add setting for category detection. I.e. checkboxes for [], -- and : styles. Default to all on.
 Make sure all failures are sent to admin (option?) failed attachments, etc.
-debug assistance
 Comment not being created when subject contains category command []. I.e. listserv subject lines
 rework attachment logic. video files can come through as application/octect-stream. Mail parsing should separate attachments 
   into buckets? i.e. video, image, other. Each gets processed differently. I.e. when gallery in turned on images don't get embedded
