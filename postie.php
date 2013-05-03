@@ -55,10 +55,9 @@ function postie_loadjs_options_page() {
 }
 
 function postie_loadjs_admin_head() {
-    $plugindir = get_option('siteurl') . '/wp-content/plugins/' . dirname(plugin_basename(__FILE__));
-    wp_enqueue_script('loadjs', $plugindir . '/js/simpleTabs.jquery.js');
-    echo '<link type="text/css" rel="stylesheet" href="' . get_bloginfo('wpurl') . '/wp-content/plugins/postie/css/style.css" />' . "\n";
-    echo '<link type="text/css" rel="stylesheet" href="' . get_bloginfo('wpurl') . '/wp-content/plugins/postie/css/simpleTabs.css" />' . "\n";
+    wp_enqueue_script('loadjs', plugins_url('js/simpleTabs.jquery.js', __FILE__));
+    echo '<link type="text/css" rel="stylesheet" href="' . plugins_url('css/style.css', __FILE__) . "\"/>\n";
+    echo '<link type="text/css" rel="stylesheet" href="' . plugins_url('css/simpleTabs.css', __FILE__) . "\"/>\n";
 }
 
 if (isset($_GET["postie_read_me"])) {
@@ -206,15 +205,18 @@ function postie_whitelist($options) {
 //don't use DebugEcho or EchoInfo here as it is not defined when called as an action
 function check_postie() {
     error_log("check_postie");
-    $host = get_option('siteurl');
-    preg_match("/https?:\/\/(.[^\/]*)(.*)/i", $host, $matches);
+
+    $fullurl = plugins_url("get_mail.php", __FILE__);
+    preg_match("/https?:\/\/(.[^\/]*)(.*)/i", $fullurl, $matches);
     $host = $matches[1];
+
     $url = "";
     if (isset($matches[2])) {
-        $url .= $matches[2];
+        $url = $matches[2];
     }
-    $url .= "/wp-content/plugins/postie/get_mail.php";
-    $port = 80;
+
+    $port = is_ssl() ? 443 : 80;
+
     $fp = fsockopen($host, $port, $errno, $errstr);
     if ($fp) {
         fputs($fp, "GET $url HTTP/1.0\r\n");

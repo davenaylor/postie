@@ -20,7 +20,7 @@ EchoInfo("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
 $wp_content_path = dirname(dirname(dirname(__FILE__)));
 DebugEcho("wp_content_path: $wp_content_path");
 if (file_exists($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php")) {
-    DebugEcho("found filterPostie.php in wp-content");
+    DebugEcho("found filterPostie.php in $wp_content_path");
     include_once ($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php");
 }
 

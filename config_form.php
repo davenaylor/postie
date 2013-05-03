@@ -12,7 +12,10 @@
     </div>
     <h2>
         <a style='text-decoration:none' href='options-general.php?page=postie/postie.php'>
-            <img src="../wp-content/plugins/postie/images/mail.png" alt="postie" /><?php _e('Postie Settings', 'postie'); ?>
+            <?php
+            echo '<img src="' . plugins_url('images/mail.png', __FILE__) . '" alt="postie" />';
+            _e('Postie Settings', 'postie');
+            ?>
         </a>
         <span class="description">(v<?php _e(POSTIE_VERSION, 'postie'); ?>)</span>
     </h2>
@@ -370,14 +373,17 @@
                                 <?php
                                 $formats = get_theme_support('post-formats');
                                 if (is_array($formats[0])) {
-                                    array_unshift($formats[0], "standard");
-                                    foreach ($formats[0] as $format) {
-                                        $selected = "";
-                                        if ($config['post_format'] == $format) {
-                                            $selected = " selected='selected'";
-                                        }
-                                        echo "<option value='$format'$selected>$format</option>";
+                                    $formats = $formats[0];
+                                } else {
+                                    $formats = array();
+                                }
+                                array_unshift($formats, "standard");
+                                foreach ($formats as $format) {
+                                    $selected = "";
+                                    if ($config['post_format'] == $format) {
+                                        $selected = " selected='selected'";
                                     }
+                                    echo "<option value='$format'$selected>$format</option>";
                                 }
                                 ?>
                             </select>               

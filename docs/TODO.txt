@@ -1,5 +1,4 @@
 provide a location for custom icons. update docs about location.
-handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
 replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMailbox
 automatically create category if it doesn't exist. new option to allow this feature?
 WP MU support
@@ -12,6 +11,7 @@ rework attachment logic. video files can come through as application/octect-stre
 date: tag is being detected in body when not wanted
 Enhance #img# to specify the featured image
 Update tag_* and filter_* to handle HTML (per tag_Tags)
+handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
 
 standardize tags
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/
