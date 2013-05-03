@@ -2170,7 +2170,7 @@ function parseTemplate($id, $type, $template, $orig_filename) {
     } elseif (!preg_match("/$attachment->post_title/i", $fileName)) {
         $template = str_replace('{CAPTION}', $attachment->post_title, $template);
     } else {
-        
+        $template = str_replace('{CAPTION}', $orig_filename, $template);
     }
     DebugEcho("template: $template");
     return $template . '<br />';
