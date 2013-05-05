@@ -11,6 +11,7 @@ rework attachment logic. video files can come through as application/octect-stre
 date: tag is being detected in body when not wanted
 Enhance #img# to specify the featured image
 Update tag_* and filter_* to handle HTML (per tag_Tags)
+"yoast" style admin sidebar - see clicky by yoast
 handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
 
 standardize tags
