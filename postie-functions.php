@@ -1270,8 +1270,9 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     //See if the email address is one of the special authorized ones
     if (!empty($from)) {
         EchoInfo("Confirming Access For $from ");
-        $sql = 'SELECT id FROM ' . $wpdb->users . ' WHERE user_email=\'' . addslashes($from) . "' LIMIT 1;";
-        $user_ID = $wpdb->get_var($sql);
+        $user = get_user_by('email', $from);
+        if ($user !== false)
+            $user_ID = $user->ID;
     } else {
         $user_ID = "";
     }
@@ -1281,20 +1282,22 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
             $poster = $user_ID;
             EchoInfo("posting as user $poster");
         } else {
-            $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
-            if (!$poster) {
+            $user = get_user_by('login', $admin_username);
+            if ($user === false) {
                 EchoInfo("Your 'Admin username' setting '$admin_username' is not a valid WordPress user (1)");
                 $poster = 1;
             }
         }
     } elseif ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses)) {
         DebugEcho("ValidatePoster: looking up default user $admin_username");
-        $poster = $wpdb->get_var("SELECT ID FROM $wpdb->users WHERE user_login  = '$admin_username'");
-        DebugEcho("ValidatePoster: found user '$poster'");
-        if (empty($poster)) {
+        $user = get_user_by('login', $admin_username);
+        if ($user === false) {
             EchoInfo("Your 'Admin username' setting '$admin_username' is not a valid WordPress user (2)");
             $poster = 1;
+        } else {
+            $poster = $user->ID;
         }
+        DebugEcho("ValidatePoster: found user '$poster'");
     }
 
     $validSMTP = isValidSmtpServer($mimeDecodedEmail, $smtp);
