@@ -945,7 +945,6 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 filter_PreferedText($part, $prefer_text_type);
                 foreach ($part->parts as $section) {
                     //DebugDump($section->headers);
-
                     $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
                 }
                 break;
@@ -1126,7 +1125,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         DebugEcho("uploaded $file_id ($file)");
                         $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
                         DebugEcho("default: $icon $filename");
-                        $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
+                        $attachments["html"][$filename] = "<div class='postie-attachment-general'><a href='$file'>" . $icon . $filename . '</a></div>' . "\n";
                         if (array_key_exists('content-id', $part->headers)) {
                             $cid = trim($part->headers["content-id"], "<>");
                             if ($cid) {
@@ -2595,6 +2594,7 @@ function config_GetDefaults() {
     include('templates/image_templates.php');
     include('templates/video1_templates.php');
     include('templates/video2_templates.php');
+    include 'templates/general_template.php';
     return array(
         'add_meta' => 'no',
         'admin_username' => 'admin',
@@ -2661,7 +2661,10 @@ function config_GetDefaults() {
         'featured_image' => false,
         'email_tls' => false,
         'post_format' => 'standard',
-        'post_type' => 'post'
+        'post_type' => 'post',
+        'generaltemplates' => $generalTemplates,
+        'generaltemplate' => $postie_default,
+        'selected_generaltemplate' => 'postie_default'
     );
 }
 
@@ -2793,8 +2796,7 @@ function config_UpgradeOld() {
     if (!isset($config["ICON_SIZE"]))
         $config["ICON_SIZE"] = 32;
 
-
-//audio
+    //audio
     include('templates/audio_templates.php');
     if (!isset($config["SELECTED_AUDIOTEMPLATE"]))
         $config['SELECTED_AUDIOTEMPLATE'] = 'simple_link';
@@ -2804,7 +2806,7 @@ function config_UpgradeOld() {
     if (!isset($config["AUDIOTEMPLATE"]))
         $config["AUDIOTEMPLATE"] = $simple_link;
 
-//video1
+    //video1
     if (!isset($config["VIDEO1TYPES"]))
         $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', '3gp2', 'mov', 'mpeg', 'quicktime');
     if (!isset($config["AUDIOTYPES"]))
@@ -2816,7 +2818,7 @@ function config_UpgradeOld() {
     if (!isset($config["VIDEO1TEMPLATE"]))
         $config["VIDEO1TEMPLATE"] = $simple_link;
 
-//video2
+    //video2
     if (!isset($config["VIDEO2TYPES"]))
         $config['VIDEO2TYPES'] = array('x-flv');
     if (!isset($config["POST_STATUS"]))
@@ -2830,7 +2832,7 @@ function config_UpgradeOld() {
     if (!isset($config["VIDEO2TEMPLATE"]))
         $config["VIDEO2TEMPLATE"] = $simple_link;
 
-//image
+    //image
     if (!isset($config["SELECTED_IMAGETEMPLATE"]))
         $config['SELECTED_IMAGETEMPLATE'] = 'wordpress_default';
     if (!isset($config["SMTP"]))
@@ -2839,6 +2841,11 @@ function config_UpgradeOld() {
     if (!isset($config["IMAGETEMPLATE"]))
         $config["IMAGETEMPLATE"] = $wordpress_default;
     $config['IMAGETEMPLATES'] = $imageTemplates;
+
+    //general
+    include('templates/general_templates.php');
+    if (!isset($config["GENERALTEMPLATE"]))
+        $config["GENERALTEMPLATE"] = $postie_default;
 
     return($config);
 }

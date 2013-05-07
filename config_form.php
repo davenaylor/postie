@@ -528,8 +528,9 @@
                                         }
                                         ?>
                             </select>
-                            &nbsp;&nbsp;
-                            <?php _e('Preview', 'postie'); ?>
+                            <div>
+                                <?php _e('Preview', 'postie'); ?>
+                            </div>
                             <div id='imageTemplatePreview'></div>
                             <textarea onchange='changeStyle("imageTemplatePreview", "postie-settings-imagetemplate", "imagetemplateselect",
                                                     "postie-settings-selected_imagetemplate", "smiling.jpg", true);' cols='70' rows='7' id='postie-settings-imagetemplate' name='postie-settings[imagetemplate]'>
@@ -578,8 +579,9 @@
                                     }
                                     ?>
                             </select>
-                            &nbsp;&nbsp;
-                            <?php _e('Preview', 'postie'); ?>
+                            <div>
+                                <?php _e('Preview', 'postie'); ?>
+                            </div>
                             <div id='video1TemplatePreview'></div>
                             <textarea onchange="changeStyle('video1TemplatePreview', 'postie-settings-video1template',
                                                     'video1templateselect', 'postie-settings-selected_video1template', 'hi.mp4', true);" cols='70' rows='7' id='postie-settings-video1template'
@@ -625,8 +627,9 @@
                                         }
                                         ?>
                             </select>
-                            &nbsp;&nbsp;
-                            <?php _e('Preview', 'postie'); ?>
+                            <div>
+                                <?php _e('Preview', 'postie'); ?>
+                            </div>
                             <div id='video2TemplatePreview'></div>
                             <textarea onchange="changeStyle('video2TemplatePreview', 'postie-settings-video2template',
                                                     'video2templateselect', 'postie-settings-selected_video2template', 'hi.flv', true);" cols='70' rows='7' id='postie-settings-video2template'
@@ -646,7 +649,8 @@
                         </td> 
                     </tr> 
                     <tr><td colspan="2"><hr /></td></tr>
-                    <tr><th scope='row'><?php _e('Audio template', 'postie') ?><br />
+                    <tr>
+                        <th scope='row'><?php _e('Audio template', 'postie') ?><br />
                             <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span>
                             <br />
                             <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br />
@@ -676,8 +680,9 @@
                                         }
                                         ?>
                             </select>
-                            &nbsp;&nbsp;
-                            <?php _e('Preview', 'postie'); ?>
+                            <div>
+                                <?php _e('Preview', 'postie'); ?>
+                            </div>
                             <div id='audioTemplatePreview'></div>
                             <textarea onchange="changeStyle('audioTemplatePreview', 'postie-settings-audiotemplate',
                                                     'audiotemplateselect', 'postie-settings-selected_audiotemplate', 'funky.mp3', true);" cols='70' rows='7' id='postie-settings-audiotemplate'
@@ -725,9 +730,11 @@
                                 }
                                 ?>
                             </select>
+                            <div id='postie-settings-attachment_preview'></div>
                         </td>
                     </tr>
-                    <tr><th scope='row'><?php _e('Attachment icon size (in pixels)', 'postie') ?><br />
+                    <tr>
+                        <th scope='row'><?php _e('Attachment icon size (in pixels)', 'postie') ?><br /></th>
                         <td>
                             <input type='hidden' id='postie-settings-icon_size' name='postie-settings[icon_size]'
                                    value="<?php echo esc_attr($icon_size) ?>" />
@@ -750,11 +757,51 @@
                         </td>
                     </tr>
                     <tr>
+                        <th scope='row'><?php _e('Attachment template', 'postie') ?><br />
+                            <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span>
+                            <br />
+                            <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br />
+                        </th>
+                        <td>
+                            <input type='hidden' id='postie-settings-selected_generaltemplate' name='postie-settings[selected_generaltemplate]'
+                                   value="<?php echo esc_attr($selected_generaltemplate) ?>" />
+                            <select name='generaltemplateselect' id='generaltemplateselect' 
+                                    onchange="changeStyle('generalTemplatePreview', 'postie-settings-generaltemplate',
+                                                    'generaltemplateselect', 'postie-settings-selected_generaltemplate', 'interesting_document.doc', false);" >
+                                        <?php
+                                        include('templates/general_template.php');
+                                        $styleOptions = $generalTemplates;
+                                        $selected = $selected_generaltemplate;
+                                        foreach ($styleOptions as $key => $value) {
+                                            if ($key != 'selected') {
+                                                if ($key == $selected) {
+                                                    $select = ' selected="selected" ';
+                                                } else {
+                                                    $select = ' ';
+                                                }
+                                                if ($key == 'custom')
+                                                    $value = $generaltemplate;
+                                                echo '<option' . $select . 'value="' . esc_attr($value) . '" >' . $key . '</option>';
+                                            }
+                                        }
+                                        ?>
+                            </select>
+                            <div>
+                                <?php _e('Preview', 'postie'); ?>
+                            </div>
+                            <div id='generalTemplatePreview'></div>
+                            <textarea onchange="changeStyle('generalTemplatePreview', 'postie-settings-generaltemplate', 'generaltemplateselect', 'postie-settings-selected_generaltemplate', 'interesting_document.doc', true);" 
+                                      cols='70' rows='7' 
+                                      id='postie-settings-generaltemplate'
+                                      name='postie-settings[generaltemplate]'><?php echo esc_attr($generaltemplate) ?></textarea>
+                        </td>
+                    </tr>
+                    <tr>
                         <th style='height:64px'>
                             <?php _e('Preview', 'postie'); ?>
                         </th>
                         <td>
-                            <span id='postie-settings-attachment_preview'></span>
+
                         </td>
                     </tr>
                 </table> 
@@ -809,17 +856,12 @@
                                                     hiddenInput.value = selectBox.options[i].value;
                                                 }
                                             }
-                                            var fileTypes = new Array('doc', 'pdf', 'xls', 'ppt');
+                                            var fileTypes = new Array('doc', 'pdf', 'xls', 'default');
                                             preview.innerHTML = '';
                                             for (j = 0; j < fileTypes.length; j++) {
                                                 preview.innerHTML += "<img src='" + iconDir + iconSet.value + '/' +
                                                         fileTypes[j] + '-' + iconSize.value + ".png' />";
                                             }
-                                            preview.innerHTML += '<br />Here is some sample text with a link to a ' +
-                                                    'word document that I think you might find interesting<br />' +
-                                                    "<a href='#'><img style='text-decoration:none' src='" +
-                                                    iconDir + iconSet.value + '/doc' +
-                                                    '-' + iconSize.value + ".png' />Interesting document</a>";
                                         }
 
                                         function changeStyle(preview, template, select, selected, sample, custom) {
