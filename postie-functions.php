@@ -1125,7 +1125,8 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         DebugEcho("uploaded $file_id ($file)");
                         $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
                         DebugEcho("default: $icon $filename");
-                        $attachments["html"][$filename] = "<div class='postie-attachment-general'><a href='$file'>" . $icon . $filename . '</a></div>' . "\n";
+                        //$attachments["html"][$filename] = "<div class='postie-attachment-general'><a href='$file'>" . $icon . $filename . '</a></div>' . "\n";
+                        $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $generaltemplate, $filename, $icon);
                         if (array_key_exists('content-id', $part->headers)) {
                             $cid = trim($part->headers["content-id"], "<>");
                             if ($cid) {
@@ -2122,7 +2123,8 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet = 'silver', 
     return $iconHtml;
 }
 
-function parseTemplate($id, $type, $template, $orig_filename) {
+function parseTemplate($id, $type, $template, $orig_filename, $icon = "") {
+    DebugEcho("parseTemplate - before: $template");
     $size = 'medium';
     /* we check template for thumb, thumbnail, large, full and use that as
       size. If not found, we default to medium */
@@ -2167,6 +2169,7 @@ function parseTemplate($id, $type, $template, $orig_filename) {
     $template = str_replace('{URL}', $fileLink, $template);
     $template = str_replace('{RELFILENAME}', $relFileName, $template);
     $template = str_replace('{POSTTITLE}', $the_parent->post_title, $template);
+    $template = str_replace('{ICON}', $icon, $template);
     if ($attachment->post_excerpt != '') {
         $template = str_replace('{CAPTION}', $attachment->post_excerpt, $template);
     } elseif (!preg_match("/$attachment->post_title/i", $fileName)) {
@@ -2174,7 +2177,7 @@ function parseTemplate($id, $type, $template, $orig_filename) {
     } else {
         $template = str_replace('{CAPTION}', $orig_filename, $template);
     }
-    DebugEcho("template: $template");
+    DebugEcho("parseTemplate - after: $template");
     return $template . '<br />';
 }
 

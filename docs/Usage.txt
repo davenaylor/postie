@@ -126,6 +126,7 @@ Note you can only use this feature if your "Preferred Text Type" is set to "plai
     * {TITLE} same as {POSTTITLE}
     * {URL} same as {FILELINK}
     * {WIDTH} gets replaced with width of the photo
+    * {ICON} insert the icon for the attachment (for non-audio/image/video attachments only)
 
 
 = Interoperability =

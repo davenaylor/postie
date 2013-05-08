@@ -29,6 +29,7 @@ Attachments are now processed in the order they were attached.
 * Updated direct DB access to use standard methods.
 * Added attachment template for non-audio/image/video attachments.
 * Added additional checks to the test screen.
+* Added new template variable {ICON}
 
 = 1.5.5 (2013.05.02) =
 * Added ability to run a manual check with debugging output.
