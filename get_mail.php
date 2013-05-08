@@ -14,7 +14,7 @@ if (!function_exists('file_get_html'))
     require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'simple_html_dom.php');
 
 EchoInfo("Starting mail fetch");
-EchoInfo("Postie Version: ". POSTIE_VERSION);
+EchoInfo("Postie Version: " . POSTIE_VERSION);
 EchoInfo("Debug mode: " . (IsDebugMode() ? "On" : "Off"));
 EchoInfo("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
 $wp_content_path = dirname(dirname(dirname(__FILE__)));

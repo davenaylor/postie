@@ -36,6 +36,13 @@ DebugEcho("Error log: " . ini_get('error_log'));
     if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
         EchoInfo("WordPress cron is disabled. Postie will not run unless you have an external cron set up.");
     }
+
+    EchoInfo("Cron: " . (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON === true ? "Of" : "On"));
+    EchoInfo("Alternate Cron: " . (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON === true ? "On" : "Off"));
+
+    if (defined('WP_CRON_LOCK_TIMEOUT') && WP_CRON_LOCK_TIMEOUT === true) {
+        EchoInfo("Cron lock timeout is:" . WP_CRON_LOCK_TIMEOUT);
+    }
     ?>
 
     <br/>
@@ -87,7 +94,7 @@ DebugEcho("Error log: " . ini_get('error_log'));
             } else {
                 require_once("postieIMAP.php");
                 $mail_server = &PostieIMAP::Factory($config["input_protocol"]);
-                if ($email_tls){
+                if ($email_tls) {
                     $mail_server->TLSOn();
                 }
                 if (!$mail_server->connect($config["mail_server"], $config["mail_server_port"], $config["mail_userid"], $config["mail_password"])) {
