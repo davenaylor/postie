@@ -147,7 +147,7 @@ function tag_Date(&$content, $message_date, $time_offset) {
 
 function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $postmodifiers) {
 
-    $fulldebug = false;
+    $fulldebug = true;
 
     extract($config);
 
@@ -900,12 +900,11 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     } else {
         $filename = "";
         if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters)) {
-            // fix filename (remove non-standard characters)
-            //$filename = preg_replace("/[^\x9\xA\xD\x20-\x7F]/", "", $part->ctype_parameters['name']);
             $filename = $part->ctype_parameters['name'];
         } elseif (property_exists($part, 'd_parameters') && is_array($part->d_parameters) && array_key_exists('filename', $part->d_parameters)) {
             $filename = $part->d_parameters['filename'];
         }
+        $filename = sanitize_file_name($filename);
         $fileext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
         DebugEcho("GetContent: file name '$filename'");
@@ -1125,7 +1124,6 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         DebugEcho("uploaded $file_id ($file)");
                         $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
                         DebugEcho("default: $icon $filename");
-                        //$attachments["html"][$filename] = "<div class='postie-attachment-general'><a href='$file'>" . $icon . $filename . '</a></div>' . "\n";
                         $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $generaltemplate, $filename, $icon);
                         if (array_key_exists('content-id', $part->headers)) {
                             $cid = trim($part->headers["content-id"], "<>");
@@ -1286,6 +1284,9 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
             if ($user === false) {
                 EchoInfo("Your 'Admin username' setting '$admin_username' is not a valid WordPress user (1)");
                 $poster = 1;
+            } else {
+                $poster = $user->ID;
+                DebugEcho("posting as admin user $admin_username");
             }
         }
     } elseif ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses)) {
@@ -1670,7 +1671,9 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     if (property_exists($part, 'd_parameters') && is_array($part->d_parameters) && array_key_exists('filename', $part->d_parameters) && $part->d_parameters['filename'] != '') {
         $name = $part->d_parameters['filename'];
     }
-    DebugEcho("name: $name, size: " . filesize($tmpFile));
+    DebugEcho("pre-sanitize name: $name, size: " . filesize($tmpFile));
+    $name = sanitize_file_name($name);
+    DebugEcho("post sanitize name: $name");
     //DebugDump($part);
 
     $the_file = array('name' => $name,
@@ -3043,10 +3046,6 @@ function IsDebugMode() {
     return (defined('POSTIE_DEBUG') && POSTIE_DEBUG == true);
 }
 
-function SafeFileName($filename) {
-    return str_replace(array('\\', '/', ':', '*', '?', '"', '<', '>', '|'), array('', '', '', '', '', '', '', '', ''), $filename);
-}
-
 function DebugEmailOutput($email, $mimeDecodedEmail) {
     if (IsDebugMode()) {
         //DebugDump($email);
@@ -3054,7 +3053,7 @@ function DebugEmailOutput($email, $mimeDecodedEmail) {
 
         $dname = POSTIE_ROOT . DIRECTORY_SEPARATOR . "test_emails" . DIRECTORY_SEPARATOR;
         if (is_dir($dname)) {
-            $fname = $dname . SafeFileName($mimeDecodedEmail->headers["message-id"]);
+            $fname = $dname . sanitize_file_name($mimeDecodedEmail->headers["message-id"]);
             $file = fopen($fname . ".txt ", "w");
             fwrite($file, $email);
             fclose($file);
