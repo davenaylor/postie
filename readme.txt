@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.5.6
+Stable tag: 1.5.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -444,6 +444,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.7 (2013.05.09) =
+* Fixed bug where the admin user was not getting set as author in some cases.
+* Fixed bug where file names were not being sanitized.
+* Added setting to disable thumbnail generation.
+* Updated the default signature patterns and help text.
+
 = 1.5.6 (2013-05-07) =
 * Fixed bug where default post format was empty when the theme didn't support any formats.
 * Removed all hard coded references to wp-content.

@@ -22,9 +22,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.7 (future) =
+= 1.5.7 (2013.05.09) =
 * Fixed bug where the admin user was not getting set as author in some cases.
 * Fixed bug where file names were not being sanitized.
+* Added setting to disable thumbnail generation.
+* Updated the default signature patterns and help text.
 
 = 1.5.6 (2013-05-07) =
 * Fixed bug where default post format was empty when the theme didn't support any formats.

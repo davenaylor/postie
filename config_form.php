@@ -478,7 +478,7 @@
                     <?php echo BuildTextArea("Supported MIME Types", "postie-settings[supported_file_types]", $supported_file_types, "Add just the type (not the subtype). Text, Video, Audio, Image and Multipart are always supported. Put each type on a single line."); ?>
                     <?php echo BuildTextArea("Banned File Names", "postie-settings[banned_files_list]", $banned_files_list, "Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files"); ?>
                     <?php echo BuildBooleanSelect("Drop The Signature From Mail", "postie-settings[drop_signature]", $drop_signature); ?>
-                    <?php echo BuildTextArea("Signature Patterns", "postie-settings[sig_pattern_list]", $sig_pattern_list, "Put each pattern on a separate line."); ?>
+                    <?php echo BuildTextArea("Signature Patterns", "postie-settings[sig_pattern_list]", $sig_pattern_list, "Put each pattern on a separate line. Patterns are <a href='http://regex101.com/' target='_blank'>regular expressions</a>."); ?>
                     <?php echo BuildTextArea("Allowed SMTP servers", "postie-settings[smtp]", $smtp, "Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check smtp servers."); ?>
                 </table> 
             </div>
@@ -490,6 +490,7 @@
                     echo BuildBooleanSelect("Automatically insert image gallery", "postie-settings[auto_gallery]", $auto_gallery, "If any images are attached, they will automatically be inserted as a gallery");
                     echo BuildBooleanSelect("Post Images At End", "postie-settings[images_append]", $images_append, "No means they will be put before the text of the message.");
                     echo BuildBooleanSelect("Start Image Count At 0", "postie-settings[start_image_count_at_zero]", $start_image_count_at_zero);
+                    echo BuildBooleanSelect("Generate Thumbnails", "postie-settings[generate_thumbnails]", $generate_thumbnails, "Some hosts crash during thumbnail generation. Set this to 'No' if you have this issue.");
                     ?>
                     <tr> 
                         <th width="33%" valign="top" scope="row"><?php _e('Image Place Holder Tag:', 'postie') ?> </th> 

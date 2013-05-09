@@ -975,7 +975,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 if (array_key_exists('disposition', $part) && $part->disposition == 'attachment') {
                     DebugEcho("text Attachement: $filename");
                     if (!preg_match('/ATT\d\d\d\d\d.txt/i', $filename)) {
-                        $file_id = postie_media_handle_upload($part, $post_id, $poster);
+                        $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails);
                         if (!is_wp_error($file_id)) {
                             $file = wp_get_attachment_url($file_id);
                             $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
@@ -1029,7 +1029,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
             case 'image':
                 DebugEcho("image Attachement: $filename");
-                $file_id = postie_media_handle_upload($part, $post_id, $poster);
+                $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails);
                 if (!is_wp_error($file_id)) {
                     //featured image logic
                     //set the first image we come across as the featured image
@@ -1059,7 +1059,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             case 'audio':
                 //DebugDump($part->headers);
                 DebugEcho("audio Attachement: $filename");
-                $file_id = postie_media_handle_upload($part, $post_id, $poster);
+                $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails);
                 if (!is_wp_error($file_id)) {
                     $file = wp_get_attachment_url($file_id);
                     $cid = "";
@@ -1083,7 +1083,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
             case 'video':
                 DebugEcho("video Attachement: $filename");
-                $file_id = postie_media_handle_upload($part, $post_id, $poster);
+                $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails);
                 if (!is_wp_error($file_id)) {
                     $file = wp_get_attachment_url($file_id);
                     $cid = "";
@@ -1118,7 +1118,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         DebugEcho("found pgp-signature - done");
                         break;
                     }
-                    $file_id = postie_media_handle_upload($part, $post_id, $poster);
+                    $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails);
                     if (!is_wp_error($file_id)) {
                         $file = wp_get_attachment_url($file_id);
                         DebugEcho("uploaded $file_id ($file)");
@@ -1367,7 +1367,7 @@ function filter_RemoveSignature(&$content, $config) {
         }
         //DebugEcho("looking for signature in: $content");
 
-        $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')\s?$/m';
+        $pattern = '/^(' . implode('|', $config['sig_pattern_list']) . ')\s?$/mi';
         DebugEcho("filter_RemoveSignature: pattern: $pattern");
 
         $html = LoadDOM($content);
@@ -1396,19 +1396,22 @@ function filter_RemoveSignature(&$content, $config) {
 function filter_RemoveSignatureWorker(&$html, $pattern) {
     $found = false;
     if (preg_match($pattern, trim($html->plaintext), $matches)) {
-        DebugEcho("signature found in base: removing");
+        DebugEcho("filter_RemoveSignatureWorker: signature found in base, removing");
         DebugDump($matches);
         $found = true;
         $i = stripos($html->innertext, $matches[1]);
         $presig = substr($html->innertext, 0, $i);
-        DebugEcho("sig new text: '$presig'");
+        DebugEcho("filter_RemoveSignatureWorker sig new text: '$presig'");
         $html->innertext = $presig;
+    } else {
+        DebugEcho("filter_RemoveSignatureWorker: no matches {preg_last_error()} '$pattern' $html->plaintext");
+        DebugDump($matches);
     }
 
     foreach ($html->children() as $e) {
         //DebugEcho("sig: " . $e->plaintext);
         if (!$found && preg_match($pattern, trim($e->plaintext))) {
-            DebugEcho("signature found: removing");
+            DebugEcho("filter_RemoveSignatureWorker signature found: removing");
             $found = true;
         }
         if ($found) {
@@ -1640,7 +1643,8 @@ function filter_AppleFile(&$mimeDecodedEmail) {
     }
 }
 
-function postie_media_handle_upload($part, $post_id, $poster, $post_data = array()) {
+function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnails = true) {
+    $post_data = array();
     $overrides = array('test_form' => false);
 
     $tmpFile = tempnam(get_temp_dir(), 'postie');
@@ -1744,11 +1748,15 @@ function postie_media_handle_upload($part, $post_id, $poster, $post_data = array
     $id = wp_insert_attachment($attachment, $file, $post_id);
     DebugEcho("attachement id: $id");
     if (!is_wp_error($id)) {
-        $amd = wp_generate_attachment_metadata($id, $file);
-        DebugEcho("wp_generate_attachment_metadata");
-        //DebugDump($amd);
-        wp_update_attachment_metadata($id, $amd);
-        DebugEcho("wp_update_attachment_metadata complete");
+        if ($generate_thubnails) {
+            $amd = wp_generate_attachment_metadata($id, $file);
+            DebugEcho("wp_generate_attachment_metadata");
+            //DebugDump($amd);
+            wp_update_attachment_metadata($id, $amd);
+            DebugEcho("wp_update_attachment_metadata complete");
+        } else {
+            DebugEcho("thumbnail generation disabled");
+        }
     } else {
         EchoInfo("There was an error adding the attachement: " . $id->get_error_message());
     }
@@ -2651,7 +2659,7 @@ function config_GetDefaults() {
         'selected_video1template' => 'simple_link',
         'selected_video2template' => 'simple_link',
         'shortcode' => false,
-        'sig_pattern_list' => array('--', '---'),
+        'sig_pattern_list' => array('--\s?[\r\n]?', '---'),
         'smtp' => array(),
         'start_image_count_at_zero' => false,
         'supported_file_types' => array('application'),
@@ -2670,7 +2678,8 @@ function config_GetDefaults() {
         'post_type' => 'post',
         'generaltemplates' => $generalTemplates,
         'generaltemplate' => $postie_default,
-        'selected_generaltemplate' => 'postie_default'
+        'selected_generaltemplate' => 'postie_default',
+        'generate_thumbnails' => true
     );
 }
 
