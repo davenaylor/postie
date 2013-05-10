@@ -147,7 +147,7 @@ function tag_Date(&$content, $message_date, $time_offset) {
 
 function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $postmodifiers) {
 
-    $fulldebug = true;
+    $fulldebug = false;
 
     extract($config);
 
@@ -1404,8 +1404,8 @@ function filter_RemoveSignatureWorker(&$html, $pattern) {
         DebugEcho("filter_RemoveSignatureWorker sig new text: '$presig'");
         $html->innertext = $presig;
     } else {
-        DebugEcho("filter_RemoveSignatureWorker: no matches {preg_last_error()} '$pattern' $html->plaintext");
-        DebugDump($matches);
+        //DebugEcho("filter_RemoveSignatureWorker: no matches {preg_last_error()} '$pattern' $html->plaintext");
+        //DebugDump($matches);
     }
 
     foreach ($html->children() as $e) {
@@ -2659,7 +2659,7 @@ function config_GetDefaults() {
         'selected_video1template' => 'simple_link',
         'selected_video2template' => 'simple_link',
         'shortcode' => false,
-        'sig_pattern_list' => array('--\s?[\r\n]?', '---'),
+        'sig_pattern_list' => array('--\s?[\r\n]?','--\s','--', '---'),
         'smtp' => array(),
         'start_image_count_at_zero' => false,
         'supported_file_types' => array('application'),
