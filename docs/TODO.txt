@@ -3,6 +3,7 @@ replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMai
 automatically create category if it doesn't exist. new option to allow this feature?
 WP MU support
 Add setting for category detection. I.e. checkboxes for [], -- and : styles. Default to all on.
+Add setting to not remove category text from subject/title
 Make sure all failures are sent to admin (option?) failed attachments, etc.
 Comment not being created when subject contains category command []. I.e. listserv subject lines
 rework attachment logic. video files can come through as application/octect-stream. Mail parsing should separate attachments 
