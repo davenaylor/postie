@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.5.7
+Stable tag: 1.5.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -258,23 +258,23 @@ hosting provider about this.
 
 = Can I use postie to check a gmail account? =
 
-Yes. You can use either pop3-ssl or imap-ssl with a gmail account. Before
+Yes. You can use either pop3-ssl or imap-ssl with a gmail account (including Google Apps). Before
 attempting to use with postie, make sure that you enable pop or imap in your
 gmail preferences.
 
 * Pop3 settings:
     * protocol - pop3-ssl
+    * Use Transport Layer Security - no
     * server - pop.gmail.com
     * port - 995
-    * userid - your username (e.g. if your e-mail address is foo@gmail.com,
-      this would be just foo)
+    * userid - your full email address
     * password - your password 
 * IMAP settings:
     * protocol - imap-ssl
+    * Use Transport Layer Security - no
     * server - imap.gmail.com
     * port - 993
-    * userid - your username (e.g. if your e-mail address is foo@gmail.com,
-      this would be just foo)
+    * userid - your full email address
     * password - your password 
 
 = Can I use postie with GoDaddy hosting? =
@@ -282,6 +282,7 @@ gmail preferences.
 Yes, but you must use an email set up using the GoDaddy email service and the following settings:
 
 * protocol - pop3
+* Use Transport Layer Security - no
 * server - pop.secureserver.net
 * port - 110
 * userid - xxxxx@yourdomain
@@ -444,6 +445,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.8 (2013.05.14) =
+* Added additional default signature patterns.
+* Fixed a bug where attachments were not showing up if :start or :end were used.
+
 = 1.5.7 (2013.05.09) =
 * Fixed bug where the admin user was not getting set as author in some cases.
 * Fixed bug where file names were not being sanitized.

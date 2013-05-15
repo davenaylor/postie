@@ -22,8 +22,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.8 (future) =
+= 1.5.8 (2013.05.14) =
 * Added additional default signature patterns.
+* Fixed a bug where attachments were not showing up if :start or :end were used.
 
 = 1.5.7 (2013.05.09) =
 * Fixed bug where the admin user was not getting set as author in some cases.

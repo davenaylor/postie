@@ -241,16 +241,6 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     if ($fulldebug)
         DebugEcho("post cid: $content");
 
-    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config);
-    if ($fulldebug)
-        DebugEcho("post body img: $content");
-
-    if ($post_excerpt) {
-        filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config);
-        if ($fulldebug)
-            DebugEcho("post excerpt img: $content");
-    }
-
     $customImages = tag_CustomImageField($content, $attachments, $config);
     if ($fulldebug)
         DebugEcho("post custom: $content");
@@ -311,6 +301,16 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     if ($fulldebug)
         DebugEcho("post end: $content");
 
+    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config);
+    if ($fulldebug)
+        DebugEcho("post body img: $content");
+
+    if ($post_excerpt) {
+        filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config);
+        if ($fulldebug)
+            DebugEcho("post excerpt img: $content");
+    }
+    
     DebugEcho("excerpt: $post_excerpt");
 
     $details = array(
