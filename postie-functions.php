@@ -1277,19 +1277,15 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     if (!empty($user_ID)) {
         $user = new WP_User($user_ID);
         if ($user->has_cap("post_via_postie")) {
+            DebugEcho("$user_ID has 'post_via_postie' permissions");
             $poster = $user_ID;
             EchoInfo("posting as user $poster");
         } else {
-            $user = get_user_by('login', $admin_username);
-            if ($user === false) {
-                EchoInfo("Your 'Admin username' setting '$admin_username' is not a valid WordPress user (1)");
-                $poster = 1;
-            } else {
-                $poster = $user->ID;
-                DebugEcho("posting as admin user $admin_username");
-            }
+            DebugEcho("$user_ID does not have 'post_via_postie' permissions");
+            $user_ID ="";
         }
-    } elseif ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses)) {
+    }
+    if ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses)) {
         DebugEcho("ValidatePoster: looking up default user $admin_username");
         $user = get_user_by('login', $admin_username);
         if ($user === false) {
