@@ -26,6 +26,7 @@ Attachments are now processed in the order they were attached.
 * Fixed a bug where valid users can post via email even though they don't have role permissions.
 * Fixed a bug where nice_name was being used in the settings screen even though user_login was needed.
 * Fixed the error message when the default poster is not valid.
+* Fixed bug where gallery short tag was getting set when non-image attachments were found.
 
 = 1.5.8 (2013.05.14) =
 * Added additional default signature patterns.

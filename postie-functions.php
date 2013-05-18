@@ -301,16 +301,16 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     if ($fulldebug)
         DebugEcho("post end: $content");
 
-    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config);
+    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id);
     if ($fulldebug)
         DebugEcho("post body img: $content");
 
     if ($post_excerpt) {
-        filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config);
+        filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config, $id);
         if ($fulldebug)
             DebugEcho("post excerpt img: $content");
     }
-    
+
     DebugEcho("excerpt: $post_excerpt");
 
     $details = array(
@@ -1282,7 +1282,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
             EchoInfo("posting as user $poster");
         } else {
             DebugEcho("$user_ID does not have 'post_via_postie' permissions");
-            $user_ID ="";
+            $user_ID = "";
         }
     }
     if ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses)) {
@@ -2236,14 +2236,22 @@ function filter_ReplaceImageCIDs(&$content, &$attachments, $config) {
  * @param string - text of post
  * @param array - array of HTML for images for post
  */
-function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config) {
+function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post_id) {
     if (!$config['custom_image_field']) {
         if (!$config['allow_html_in_body']) {
             $content = html_entity_decode($content, ENT_QUOTES);
         }
 
         $startIndex = $config['start_image_count_at_zero'] ? 0 : 1;
-        if (!empty($attachments) && $config['auto_gallery']) {
+        
+        $images = get_posts(array(
+            'post_parent' => $post_id,
+            'post_type' => 'attachment',
+            'numberposts' => -1,
+            'post_mime_type' => 'image',));
+        DebugEcho("images in post: ". count($images));
+
+        if ((count($images) > 0) && $config['auto_gallery']) {
             $imageTemplate = '[gallery]';
             if ($config['images_append']) {
                 $content .= "\n$imageTemplate";
@@ -2655,7 +2663,7 @@ function config_GetDefaults() {
         'selected_video1template' => 'simple_link',
         'selected_video2template' => 'simple_link',
         'shortcode' => false,
-        'sig_pattern_list' => array('--\s?[\r\n]?','--\s','--', '---'),
+        'sig_pattern_list' => array('--\s?[\r\n]?', '--\s', '--', '---'),
         'smtp' => array(),
         'start_image_count_at_zero' => false,
         'supported_file_types' => array('application'),
