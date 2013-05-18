@@ -381,10 +381,6 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("<strong>test</strong>", filter_CleanHtml("<strong>test</strong>"));
     }
 
-    public function testSafeFileName() {
-        $this->assertEquals("testtest", SafeFileName('test\/:*?"<>|test'));
-    }
-
     public function test_Remove_signature() {
         $config = config_GetDefaults();
 

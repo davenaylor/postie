@@ -175,4 +175,16 @@ function get_post_format_slugs() {
 function has_post_thumbnail(){
     return false;
 }
+
+function sanitize_file_name($name){
+    return $name;
+}
+
+function get_posts(){
+    return array();
+}
+
+function SafeFileName(){
+    
+}
 ?>
