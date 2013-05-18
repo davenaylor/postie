@@ -1289,7 +1289,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         DebugEcho("ValidatePoster: looking up default user $admin_username");
         $user = get_user_by('login', $admin_username);
         if ($user === false) {
-            EchoInfo("Your 'Admin username' setting '$admin_username' is not a valid WordPress user (2)");
+            EchoInfo("Your 'Default Poster' setting '$admin_username' is not a valid WordPress user (2)");
             $poster = 1;
         } else {
             $poster = $user->ID;
