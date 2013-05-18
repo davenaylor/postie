@@ -301,10 +301,10 @@
                                 $adminusers = get_users('orderby=nicename&role=administrator');
                                 foreach ($adminusers as $user) {
                                     $selected = "";
-                                    if ($user->user_nicename == $admin_username) {
+                                    if ($user->user_login == $admin_username) {
                                         $selected = " selected='selected'";
                                     }
-                                    echo "<option value='$user->user_nicename'$selected>$user->user_nicename</option>";
+                                    echo "<option value='$user->user_login'$selected>$user->user_nicename ($user->user_login)</option>";
                                 }
                                 ?>
                             </select>
