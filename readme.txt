@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.5.8
+Stable tag: 1.5.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -445,6 +445,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.9 (2013.05.18) =
+* Fixed a bug where valid users can post via email even though they don't have role permissions.
+* Fixed a bug where nice_name was being used in the settings screen even though user_login was needed.
+* Fixed the error message when the default poster is not valid.
+* Fixed bug where gallery short tag was getting set when non-image attachments were found.
+
 = 1.5.8 (2013.05.14) =
 * Added additional default signature patterns.
 * Fixed a bug where attachments were not showing up if :start or :end were used.
