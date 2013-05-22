@@ -10,6 +10,7 @@ Enhance #img# to specify the featured image
 Update tag_* and filter_* to handle HTML (per tag_Tags)
 "yoast" style admin sidebar - see clicky by yoast
 handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
+dynamically determine video size (height/width) - https://code.google.com/p/phpvideotoolkit/
 gallery logic dosen't handle both images and non-images
 
 standardize tags
