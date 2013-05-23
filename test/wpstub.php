@@ -62,8 +62,7 @@ function __($t) {
     return $t;
 }
 
-function endsWith($haystack, $needle)
-{
+function endsWith($haystack, $needle) {
     return substr($haystack, -strlen($needle)) == $needle;
 }
 
@@ -71,9 +70,9 @@ function wp_check_filetype($filename) {
     if (empty($filename))
         return null;
     if (endsWith($filename, ".png"))
-            return array('ext' => 'png', 'type' => 'image/png');
+        return array('ext' => 'png', 'type' => 'image/png');
     if (endsWith($filename, ".ics"))
-            return array('ext' => 'ics', 'type' => 'text/calendar');
+        return array('ext' => 'ics', 'type' => 'text/calendar');
     return array('ext' => 'xxx', 'type' => 'xxx/xxx');
 }
 
@@ -172,19 +171,23 @@ function get_post_format_slugs() {
     return array('standard' => 'standard', 'video' => 'video', 'image' => 'image', 'aside' => 'aside');
 }
 
-function has_post_thumbnail(){
+function has_post_thumbnail() {
     return false;
 }
 
-function sanitize_file_name($name){
+function sanitize_file_name($name) {
     return $name;
 }
 
-function get_posts(){
-    return array();
+$g_get_posts = array();
+
+function get_posts() {
+    global $g_get_posts;
+    return $g_get_posts;
 }
 
-function SafeFileName(){
+function SafeFileName() {
     
 }
+
 ?>

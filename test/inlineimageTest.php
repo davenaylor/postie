@@ -209,6 +209,9 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
 
         $config['auto_gallery'] = true;
         $config['images_append'] = false;
+        global $g_get_posts;
+        $g_get_posts = array(1);
+        
         $c = "test";
         filter_ReplaceImagePlaceHolders($c, $attachements, $config, 1);
         $this->assertEquals("[gallery]\ntest", $c);
@@ -223,6 +226,7 @@ class postiefunctions2Test extends PHPUnit_Framework_TestCase {
         filter_ReplaceImagePlaceHolders($c, $attachements, $config, 1);
         $this->assertEquals("test\n[gallery]", $c);
 
+        $g_get_posts = array();
         $c = "test";
         filter_ReplaceImagePlaceHolders($c, array(), $config, 1);
         $this->assertEquals("test", $c);

@@ -514,6 +514,29 @@ class postiefunctionsTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("<div><font face=Calibri></font></div>", $c);
     }
 
+    public function test_filter_ReplaceImagePlaceHolders() {
+        global $g_get_posts;
+
+        $config = config_GetDefaults();
+
+        $g_get_posts = array();
+        $c = "";
+        $a = array();
+        filter_ReplaceImagePlaceHolders($c, $a, $config, 1);
+        $this->assertEquals("", $c);
+
+        $g_get_posts = array(1);
+        $c = "#img1#";
+        $a = array("template with {CAPTION}");
+        filter_ReplaceImagePlaceHolders($c, $a, $config, 1);
+        $this->assertEquals("template with ", $c);
+    
+        $c = "#img1 caption='CAPTION'#";
+        $a = array("template with {CAPTION}");
+        filter_ReplaceImagePlaceHolders($c, $a, $config, 1);
+        $this->assertEquals("template with CAPTION", $c);
+    }
+
     public function test_filter_linkify() {
         $this->assertEquals("", filter_linkify(""));
         $this->assertEquals("test", filter_linkify("test"));

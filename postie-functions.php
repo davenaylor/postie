@@ -2295,12 +2295,13 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
                 }
                 //DebugEcho("parameterize templete: " . $imageTemplate);
                 $imageTemplate = mb_str_replace('{CAPTION}', htmlspecialchars($caption, ENT_QUOTES), $imageTemplate);
-                //DebugEcho("populated templete: " . $imageTemplate);
+                DebugEcho("populated template: " . $imageTemplate);
 
                 $img_placeholder_temp.='#';
                 $eimg_placeholder_temp.='#';
 
                 $content = str_ireplace($img_placeholder_temp, $imageTemplate, $content);
+                DebugEcho("post replace: $content");
                 $content = str_ireplace($eimg_placeholder_temp, $imageTemplate, $content);
             } else {
                 DebugEcho("No $img_placeholder_temp or $eimg_placeholder_temp found");
