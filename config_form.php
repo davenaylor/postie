@@ -1,6 +1,6 @@
 <div class="wrap"> 
     <div style="float:right; width: 220px; border: 1px solid darkgrey; padding:2px;border-radius:10px;margin-left: 10px;" >
-        <p class="" style="text-align:center;font-weight: bolder; margin-top: 0px; margin-bottom: 2px;">Please Donate</p>
+        <p class="" style="text-align:center;font-weight: bolder; margin-top: 0px; margin-bottom: 2px;">Please Donate, Every $ Helps!</p>
         <p style="margin-top: 0;margin-bottom: 2px;">Your generous donation allows me to continue developing Postie for the WordPress community.</p>
         <form style="" action="https://www.paypal.com/cgi-bin/webscr" method="post">
             <input type="hidden" name="cmd" value="_s-xclick">
