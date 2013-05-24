@@ -160,16 +160,6 @@
                             <br/><input name='postie-settings[mail_server_port]' type="text" id='postie-settings-mail_server_port' value="<?php echo esc_attr($mail_server_port); ?>" size="6" />
                         </td>
                     </tr>
-                    <tr>
-                        <th scope="row"><?php _e('Postie Time Correction:', 'postie') ?>
-                            <br />
-                            <span class='recommendation'><?php _e("Should be the same as your normal offset - but this lets you adjust it in cases where that doesn't work.", 'postie'); ?></span>
-                        </th>
-                        <td><input name='postie-settings[time_offset]' type="text" id='postie-settings-time_offset' size="2" value="<?php echo esc_attr($time_offset); ?>" /> 
-                            <?php _e('hours', 'postie') ?> 
-
-                        </td>
-                    </tr>
                     <tr valign="top">
                         <th scope="row"><?php _e('Mail Server:', 'postie') ?></th>
                         <td><input name='postie-settings[mail_server]' type="text" id='postie-settings-mail_server' value="<?php echo esc_attr($mail_server); ?>" size="40" />
@@ -183,6 +173,16 @@
                         <th scope="row"><?php _e('Mail Password:', 'postie') ?></th>
                         <td>
                             <input name='postie-settings[mail_password]' type="password" id='postie-settings-mail_password' autocomplete='off' value="<?php echo esc_attr($mail_password); ?>" size="40" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Postie Time Correction:', 'postie') ?>
+                            <br />
+                            <span class='recommendation'><?php _e("Should be the same as your normal offset - but this lets you adjust it in cases where that doesn't work.", 'postie'); ?></span>
+                        </th>
+                        <td><input name='postie-settings[time_offset]' type="text" id='postie-settings-time_offset' size="2" value="<?php echo esc_attr($time_offset); ?>" /> 
+                            <?php _e('hours', 'postie') ?> 
+
                         </td>
                     </tr>
                     <tr>
@@ -537,6 +537,34 @@
                                                     "postie-settings-selected_imagetemplate", "smiling.jpg", true);' cols='70' rows='7' id='postie-settings-imagetemplate' name='postie-settings[imagetemplate]'>
                                       <?php echo esc_attr($imagetemplate) ?>
                             </textarea>
+                            <div class='recommendation'>
+                                <ul>
+                                    <li>{CAPTION} gets replaced with the caption you specified (if any)</li>
+                                    <li>{FILELINK} gets replaced with the url to the media</li>
+                                    <li>{FILENAME} gets replaced with the name of the attachment from the email</li>
+                                    <li>{FULL} same as {FILELINK}</li>
+                                    <li>{HEIGHT} gets replaced with the height of the photo</li>
+                                    <li>{ID} gets replaced with the post id</li>
+                                    <li>{IMAGE} same as {FILELINK}</li>
+                                    <li>{LARGEHEIGHT} gets replaced with the height of a large image</li>
+                                    <li>{LARGEWIDTH} gets replaced with the width of a large image</li>
+                                    <li>{LARGE} gets replaced with the url to the large-sized image</li>
+                                    <li>{MEDIUMHEIGHT} gets replaced with the height of a medium image</li>
+                                    <li>{MEDIUMWIDTH} gets replaced with the width of a medium image</li>
+                                    <li>{MEDIUM} gets replaced with the url to the medium-sized image</li>
+                                    <li>{PAGELINK} gets replaced with the URL of the file in WordPress</li>
+                                    <li>{POSTTITLE} gets replaced with the post title (subject)</li>
+                                    <li>{RELFILENAME} gets replaced with the relative path to the full-size image</li>
+                                    <li>{THUMBHEIGHT} gets replaced with the height of a thumbnail image</li>
+                                    <li>{THUMB} gets replaced with the url to the thumbnail image</li>
+                                    <li>{THUMBNAIL} same as {THUMB}</li>
+                                    <li>{THUMBWIDTH} gets replaced with the width of a thumbnail image</li>
+                                    <li>{TITLE} same as {POSTTITLE}</li>
+                                    <li>{URL} same as {FILELINK}</li>
+                                    <li>{WIDTH} gets replaced with width of the photo</li>
+                                    <li>{ICON} insert the icon for the attachment (for non-audio/image/video attachments only)</li>
+                                </ul>
+                            </div>
                         </td>
                     </tr> 
                     <?php echo BuildBooleanSelect("Use custom image field", "postie-settings[custom_image_field]", $custom_image_field, "When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'."); ?>            

@@ -868,6 +868,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     DebugEcho('----');
     $meta_return = '';
     DebugEcho("GetContent: primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
+    DebugDump($part);
 
     DecodeBase64Part($part);
 
@@ -2177,13 +2178,7 @@ function parseTemplate($id, $type, $template, $orig_filename, $icon = "") {
     $template = str_replace('{RELFILENAME}', $relFileName, $template);
     $template = str_replace('{POSTTITLE}', $the_parent->post_title, $template);
     $template = str_replace('{ICON}', $icon, $template);
-    if ($attachment->post_excerpt != '') {
-        $template = str_replace('{CAPTION}', $attachment->post_excerpt, $template);
-    } elseif (!preg_match("/$attachment->post_title/i", $fileName)) {
-        $template = str_replace('{CAPTION}', $attachment->post_title, $template);
-    } else {
-        $template = str_replace('{CAPTION}', $orig_filename, $template);
-    }
+
     DebugEcho("parseTemplate - after: $template");
     return $template . '<br />';
 }
@@ -2293,7 +2288,7 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
                 } else {
                     DebugEcho("No caption found");
                 }
-                //DebugEcho("parameterize templete: " . $imageTemplate);
+                DebugEcho("parameterize templete: " . $imageTemplate);
                 $imageTemplate = mb_str_replace('{CAPTION}', htmlspecialchars($caption, ENT_QUOTES), $imageTemplate);
                 DebugEcho("populated template: " . $imageTemplate);
 

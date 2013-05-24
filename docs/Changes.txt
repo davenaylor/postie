@@ -23,7 +23,8 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.5.10 (future) =
-* 
+* Added template field descriptions to image tab.
+* Fixed a bug where caption placeholder in templates wasn't being properly set.
 
 = 1.5.9 (2013.05.18) =
 * Fixed a bug where valid users can post via email even though they don't have role permissions.
