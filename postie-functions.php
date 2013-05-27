@@ -705,7 +705,7 @@ function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password
         $mail_server->TLSOn();
     }
     EchoInfo("Connecting to $server:$port ($protocol)" . ($tls ? " with TLS" : ""));
-    if ($mail_server->connect($server, $port, $email, $password)) {
+    if ($mail_server->connect(trim($server), $port, $email, $password)) {
         $msg_count = $mail_server->getNumberOfMessages();
     } else {
         EchoInfo("Mail Connection Time Out");
@@ -747,7 +747,7 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
 
     EchoInfo("Connecting to $server:$port ($protocol)");
 
-    if ($pop3->connect($server, $port)) {
+    if ($pop3->connect(trim($server), $port)) {
         $msg_count = $pop3->login($email, $password);
         if ($msg_count === false) {
             $msg_count = 0;

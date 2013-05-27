@@ -4,8 +4,10 @@
 $wp_config_path = dirname(dirname(dirname(dirname(__FILE__))));
 if (file_exists($wp_config_path . DIRECTORY_SEPARATOR . "wp-config.php")) {
     include_once ($wp_config_path . DIRECTORY_SEPARATOR . "wp-config.php");
-} else {
+} elseif (file_exists(dirname($wp_config_path) . DIRECTORY_SEPARATOR . "wp-config.php")) {
     include_once (dirname($wp_config_path)) . DIRECTORY_SEPARATOR . "wp-config.php";
+} else {
+    die("wp-config.php could not be found.");
 }
 
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mimedecode.php');
