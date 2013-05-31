@@ -22,7 +22,7 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.10 (future) =
+= 1.5.10 (2013.05.31) =
 * Added template field descriptions to image tab.
 * Fixed a bug where caption placeholder in templates wasn't being properly set.
 * Additional test to see if wp-config.php can be found.
