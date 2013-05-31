@@ -80,7 +80,7 @@ DebugEcho("Error log: " . ini_get('error_log'));
 
     <?php
     if (!$mail_server || !$mail_server_port || !$mail_userid) {
-        EchoInfo("NO - check server settings");
+        EchoInfo("FAIL - server settings not complete");
     } else {
         DebugEcho("checking");
     }
@@ -103,6 +103,7 @@ DebugEcho("Error log: " . ini_get('error_log'));
                 } else {
                     EchoInfo("Successful " . strtoupper($config['input_protocol']) . " connection on port {$config["mail_server_port"]}");
                     EchoInfo("# of waiting messages: " . $mail_server->getNumberOfMessages());
+                    $mail_server->disconnect();
                 }
             }
             break;

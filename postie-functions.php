@@ -1252,7 +1252,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     global $wpdb;
     $poster = NULL;
     $from = "";
-    if (array_key_exists('from', $mimeDecodedEmail->headers)) {
+    if (property_exists($mimeDecodedEmail, "headers") && array_key_exists('from', $mimeDecodedEmail->headers)) {
         $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
         $from = apply_filters("postie_filter_email", $from);
         DebugEcho("ValidatePoster: post email filter $from");
@@ -1262,7 +1262,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     }
 
     $resentFrom = "";
-    if (array_key_exists('resent-from', $mimeDecodedEmail->headers)) {
+    if (property_exists($mimeDecodedEmail, "headers")&& array_key_exists('resent-from', $mimeDecodedEmail->headers)) {
         $resentFrom = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["resent-from"]));
     }
 
