@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.5.10
+Stable tag: 1.5.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -445,6 +445,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.11 (2013.06.02) =
+* Moved test files out of main repository to decrease plugin size
+* Fixed issue with readme file (Wordpress readme validator moved)
+
 = 1.5.10 (2013.05.31) =
 * Added template field descriptions to image tab.
 * Fixed a bug where caption placeholder in templates wasn't being properly set.

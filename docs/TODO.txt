@@ -23,5 +23,22 @@ replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMai
 provide a location for custom icons. update docs about location.
 handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
 change all Postie command to use a more consistent and easy to parse syntax
-    #img img#
-    ##img ##
+  commands with multiple data
+    #custom name="field name" data="field value"  custom#
+
+  commands with single data
+    #img the caption img#
+    #tags one, two, three tags#
+    #cat one, two, three cat#
+    #date tomorrow date#
+    #excerpt the excerpt excerpt#
+    #post-type custom post type post-type#
+    #post-format image post-format#
+    #subject title subject#
+    #delay 1 day delay#
+    #content the post content# - replacement for :start/:end
+
+  tag w/o data
+    @more (new)
+    @comments-open, @comments-closed, @comments-registeredonly
+    @status-draft, @status-publish, @status-pending, @status-private

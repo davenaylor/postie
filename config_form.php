@@ -848,7 +848,7 @@
                 <input type="hidden" name="page_options"
                        value="postie-settings" />
 
-                <input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" class="button" />
+                <input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" class="button button-primary" />
 
             </p>
     </form> 
