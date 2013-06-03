@@ -22,6 +22,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.12 (future) =
+* Added full paths to includes in config_form due to some hosts having include_path set in a way that breaks Postie.
+
 = 1.5.11 (2013.06.02) =
 * Moved test files out of main repository to decrease plugin size
 * Fixed issue with readme file (Wordpress readme validator moved)

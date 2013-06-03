@@ -34,12 +34,12 @@
                 $message = 1;
                 break;
             case "test":
-                include('postie_test.php');
+                include(POSTIE_ROOT . '/postie_test.php');
                 exit;
                 break;
             case "runpostie":
                 EchoInfo("Checking for mail manually");
-                include('get_mail.php');
+                include(POSTIE_ROOT . '/get_mail.php');
                 exit;
                 break;
             case "runpostie-debug":
@@ -47,7 +47,7 @@
                 if (!defined('POSTIE_DEBUG')) {
                     define('POSTIE_DEBUG', true);
                 }
-                include('get_mail.php');
+                include(POSTIE_ROOT . '/get_mail.php');
                 exit;
                 break;
             default:
@@ -511,7 +511,7 @@
                                     onchange="changeStyle('imageTemplatePreview', 'postie-settings-imagetemplate',
                                                     'imagetemplateselect', 'postie-settings-selected_imagetemplate', 'smiling.jpg');" >
                                         <?php
-                                        include('templates/image_templates.php');
+                                        include(POSTIE_ROOT . '/templates/image_templates.php');
                                         $styleOptions = $imageTemplates;
                                         $selected = $selected_imagetemplate;
                                         foreach ($styleOptions as $key => $value) {
@@ -590,7 +590,7 @@
                             <select name='video1templateselect' id='video1templateselect' 
                                     onchange="changeStyle('video1TemplatePreview', 'postie-settings-video1template', 'video1templateselect', 'postie-settings-selected_video1template', 'hi.mp4');" />
                                     <?php
-                                    include('templates/video1_templates.php');
+                                    include(POSTIE_ROOT . '/templates/video1_templates.php');
                                     $styleOptions = $video1Templates;
                                     $selected = $selected_video1template;
                                     foreach ($styleOptions as $key => $value) {
@@ -639,7 +639,7 @@
                                     onchange="changeStyle('video2TemplatePreview', 'postie-settings-video2template',
                                                     'video2templateselect', 'postie-settings-selected_video2template', 'hi.flv');" >
                                         <?php
-                                        include('templates/video2_templates.php');
+                                        include(POSTIE_ROOT . '/templates/video2_templates.php');
                                         $styleOptions = $video2Templates;
                                         $selected = $selected_video2template;
                                         foreach ($styleOptions as $key => $value) {
@@ -691,7 +691,7 @@
                                     onchange="changeStyle('audioTemplatePreview', 'postie-settings-audiotemplate',
                                                     'audiotemplateselect', 'postie-settings-selected_audiotemplate', 'funky.mp3', false);" >
                                         <?php
-                                        include('templates/audio_templates.php');
+                                        include(POSTIE_ROOT . '/templates/audio_templates.php');
                                         $styleOptions = $audioTemplates;
                                         $selected = $selected_audiotemplate;
                                         foreach ($styleOptions as $key => $value) {
@@ -798,7 +798,7 @@
                                     onchange="changeStyle('generalTemplatePreview', 'postie-settings-generaltemplate',
                                                     'generaltemplateselect', 'postie-settings-selected_generaltemplate', 'interesting_document.doc', false);" >
                                         <?php
-                                        include('templates/general_template.php');
+                                        include(POSTIE_ROOT . '/templates/general_template.php');
                                         $styleOptions = $generalTemplates;
                                         $selected = $selected_generaltemplate;
                                         foreach ($styleOptions as $key => $value) {
@@ -836,10 +836,10 @@
                 </table> 
             </div>
             <div id="simpleTabs-content-7" class="simpleTabs-content">
-                <?php include('readme.html'); ?>
+                <?php include(POSTIE_ROOT . '/readme.html'); ?>
             </div>
             <div id="simpleTabs-content-8" class="simpleTabs-content">
-                <?php include('faq.html'); ?>
+                <?php include(POSTIE_ROOT . '/faq.html'); ?>
             </div>
 
             <p class="submit">
