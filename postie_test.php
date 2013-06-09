@@ -15,56 +15,11 @@ if (!current_user_can('manage_options')) {
     echo "<h2> Sorry only admin can run this file</h2>";
     exit();
 }
-DebugEcho("Error log: " . ini_get('error_log'));
 ?>
 <div class="wrap"> 
     <h1>Postie Configuration Test</h1>
     <?php
-    if (isMarkdownInstalled()) {
-        EchoInfo("You currently have the Markdown plugin installed. It will cause problems if you send in HTML email. Please turn it off if you intend to send email using HTML.");
-    }
-
-    if (!isPostieInCorrectDirectory()) {
-        EchoInfo("Warning! Postie expects to be in its own directory named postie.");
-    } else {
-        EchoInfo("Postie is in " . dirname(__FILE__));
-    }
-    if (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON) {
-        EchoInfo("Alternate cron is enabled");
-    }
-
-    if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
-        EchoInfo("WordPress cron is disabled. Postie will not run unless you have an external cron set up.");
-    }
-
-    EchoInfo("Cron: " . (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON === true ? "Of" : "On"));
-    EchoInfo("Alternate Cron: " . (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON === true ? "On" : "Off"));
-
-    if (defined('WP_CRON_LOCK_TIMEOUT') && WP_CRON_LOCK_TIMEOUT === true) {
-        EchoInfo("Cron lock timeout is:" . WP_CRON_LOCK_TIMEOUT);
-    }
-    ?>
-
-    <br/>
-    <h2>International support</h2>
-    <?php
-    if (HasIconvInstalled()) {
-        EchoInfo("iconv: installed");
-    } else {
-        EchoInfo("Warning! Postie requires that iconv be enabled.");
-    }
-
-    if (function_exists('imap_mime_header_decode')) {
-        EchoInfo("imap: installed");
-    } else {
-        EchoInfo("Warning! Postie requires that imap be enabled if you are using IMAP, IMAP-SSL or POP3-SSL.");
-    }
-
-    if (HasMbStringInstalled()) {
-        EchoInfo("mbstring: installed");
-    } else {
-        EchoInfo("Warning! Postie requires that mbstring be enabled.");
-    }
+    postie_environment();
     ?>
 
     <h2>Clock Tests</h2>

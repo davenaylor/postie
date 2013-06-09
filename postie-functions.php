@@ -46,6 +46,57 @@ if (!function_exists('mb_str_replace')) {
 
 }
 
+function postie_environment() {
+    EchoInfo("Postie Version: " . POSTIE_VERSION);
+    EchoInfo("WordPres Version: " . get_bloginfo('version'));
+    EchoInfo("Debug mode: " . (IsDebugMode() ? "On" : "Off"));
+    EchoInfo("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
+    DebugEcho("Error log: " . ini_get('error_log'));
+
+    if (isMarkdownInstalled()) {
+        EchoInfo("You currently have the Markdown plugin installed. It will cause problems if you send in HTML email. Please turn it off if you intend to send email using HTML.");
+    }
+
+    if (!isPostieInCorrectDirectory()) {
+        EchoInfo("Warning! Postie expects to be in its own directory named postie.");
+    } else {
+        EchoInfo("Postie is in " . dirname(__FILE__));
+    }
+
+    if (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON) {
+        EchoInfo("Alternate cron is enabled");
+    }
+
+    if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
+        EchoInfo("WordPress cron is disabled. Postie will not run unless you have an external cron set up.");
+    }
+
+    EchoInfo("Cron: " . (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON === true ? "Of" : "On"));
+    EchoInfo("Alternate Cron: " . (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON === true ? "On" : "Off"));
+
+    if (defined('WP_CRON_LOCK_TIMEOUT') && WP_CRON_LOCK_TIMEOUT === true) {
+        EchoInfo("Cron lock timeout is:" . WP_CRON_LOCK_TIMEOUT);
+    }
+
+    if (HasIconvInstalled()) {
+        EchoInfo("iconv: installed");
+    } else {
+        EchoInfo("Warning! Postie requires that iconv be enabled.");
+    }
+
+    if (function_exists('imap_mime_header_decode')) {
+        EchoInfo("imap: installed");
+    } else {
+        EchoInfo("Warning! Postie requires that imap be enabled if you are using IMAP, IMAP-SSL or POP3-SSL.");
+    }
+
+    if (HasMbStringInstalled()) {
+        EchoInfo("mbstring: installed");
+    } else {
+        EchoInfo("Warning! Postie requires that mbstring be enabled.");
+    }
+}
+
 function postie_disable_revisions($restore = false) {
     global $_wp_post_type_features, $_postie_revisions;
 
@@ -867,17 +918,20 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     //global $charset, $encoding;
     DebugEcho('----');
     $meta_return = '';
-    DebugEcho("GetContent: primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
-    DebugDump($part);
+    if (property_exists($part, "ctype_primary")) {
+        DebugEcho("GetContent: primary= " . $part->ctype_primary . ", secondary = " . $part->ctype_secondary);
+        //DebugDump($part);
+    }
 
     DecodeBase64Part($part);
 
     //look for banned file names
     if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters))
-        if (isBannedFileName($part->ctype_parameters['name'], $banned_files_list))
+        if (isBannedFileName($part->ctype_parameters['name'], $banned_files_list)) {
             return NULL;
+        }
 
-    if ($part->ctype_primary == "application" && $part->ctype_secondary == "octet-stream") {
+    if (property_exists($part, "ctype_primary") && $part->ctype_primary == "application" && $part->ctype_secondary == "octet-stream") {
         if (property_exists($part, 'disposition') && $part->disposition == "attachment") {
             //nothing 
         } else {
@@ -890,7 +944,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
         }
     }
 
-    if ($part->ctype_primary == "multipart" && $part->ctype_secondary == "appledouble") {
+    if (property_exists($part, "ctype_primary") && $part->ctype_primary == "multipart" && $part->ctype_secondary == "appledouble") {
         DebugEcho("multipart appledouble");
         $mimeDecodedEmail = DecodeMIMEMail("Content-Type: multipart/mixed; boundary=" . $part->ctype_parameters["boundary"] . "\n" . $part->body);
         filter_PreferedText($mimeDecodedEmail, $prefer_text_type);
@@ -911,8 +965,13 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
         DebugEcho("GetContent: file name '$filename'");
         DebugEcho("GetContent: extension '$fileext'");
 
-        $mimetype_primary = strtolower($part->ctype_primary);
-        $mimetype_secondary = strtolower($part->ctype_secondary);
+        $mimetype_primary = "";
+        $mimetype_secondary = "";
+
+        if (property_exists($part, "ctype_primary"))
+            $mimetype_primary = strtolower($part->ctype_primary);
+        if (property_exists($part, "ctype_secondary"))
+            $mimetype_secondary = strtolower($part->ctype_secondary);
 
         $typeinfo = wp_check_filetype($filename);
         //DebugDump($typeinfo);
@@ -1262,7 +1321,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     }
 
     $resentFrom = "";
-    if (property_exists($mimeDecodedEmail, "headers")&& array_key_exists('resent-from', $mimeDecodedEmail->headers)) {
+    if (property_exists($mimeDecodedEmail, "headers") && array_key_exists('resent-from', $mimeDecodedEmail->headers)) {
         $resentFrom = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["resent-from"]));
     }
 
@@ -1655,12 +1714,16 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
     }
 
     //special case to deal with older png implementations
-    if (strtolower($part->ctype_secondary == 'x-png')) {
-        DebugEcho("postie_media_handle_upload: x-png found, renamed to png");
-        $part->ctype_secondary = 'png';
+    $namecs = "";
+    if (property_exists($part, "ctype_secondary")) {
+        $namecs = strtolower($part->ctype_secondary);
+        if ($namecs == 'x-png') {
+            DebugEcho("postie_media_handle_upload: x-png found, renamed to png");
+            $part->ctype_secondary = 'png';
+        }
     }
 
-    $name = 'postie-media.' . $part->ctype_secondary;
+    $name = 'postie-media.' . $namecs;
     if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters)) {
         if (array_key_exists('name', $part->ctype_parameters) && $part->ctype_parameters['name'] != '') {
             $name = $part->ctype_parameters['name'];
@@ -1860,33 +1923,38 @@ function filename_fix($filename) {
  * @param object
  */
 function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
-    DebugEcho("FilterTextParts: begin " . count($mimeDecodedEmail->parts));
+    DebugEcho("filter_PreferedText: begin " . count($mimeDecodedEmail->parts));
     $newParts = array();
     $found = false;
 
     for ($i = 0; $i < count($mimeDecodedEmail->parts); $i++) {
-        DebugEcho("part: $i " . $mimeDecodedEmail->parts[$i]->ctype_primary . "/" . $mimeDecodedEmail->parts[$i]->ctype_secondary);
+        if (!property_exists($mimeDecodedEmail->parts[$i], "ctype_primary")) {
+            DebugEcho("filter_PreferedText: missing ctype_primary");
+            //DebugDump($mimeDecodedEmail->parts[$i]);
+        } else {
+            DebugEcho("filter_PreferedText: part: $i " . $mimeDecodedEmail->parts[$i]->ctype_primary . "/" . $mimeDecodedEmail->parts[$i]->ctype_secondary);
+        }
         if (array_key_exists('disposition', $mimeDecodedEmail->parts[$i]) && $mimeDecodedEmail->parts[$i]->disposition == 'attachment') {
-            DebugEcho("attachment");
+            DebugEcho("filter_PreferedText: found disposition/attachment");
             $newParts[] = $mimeDecodedEmail->parts[$i];
         } else {
             if ($mimeDecodedEmail->parts[$i]->ctype_primary == "text") {
                 $ctype = $mimeDecodedEmail->parts[$i]->ctype_secondary;
                 if ($ctype == 'html' || $ctype == 'plain') {
-                    DebugEcho("checking prefered type");
+                    DebugEcho("filter_PreferedText: checking prefered type");
                     if ($ctype == $preferTextType) {
-                        DebugEcho("keeping: $ctype");
+                        DebugEcho("filter_PreferedText: keeping: $ctype");
                         DebugEcho(substr($mimeDecodedEmail->parts[$i]->body, 0, 500));
                         $newParts[] = $mimeDecodedEmail->parts[$i];
                     } else {
-                        DebugEcho("removing: $ctype");
+                        DebugEcho("filter_PreferedText: removing: $ctype");
                     }
                 } else {
-                    DebugEcho("keeping: {$mimeDecodedEmail->parts[$i]->ctype_primary}");
+                    DebugEcho("filter_PreferedText: keeping: {$mimeDecodedEmail->parts[$i]->ctype_primary}");
                     $newParts[] = $mimeDecodedEmail->parts[$i];
                 }
             } else {
-                DebugEcho("keeping: {$mimeDecodedEmail->parts[$i]->ctype_primary}");
+                DebugEcho("filter_PreferedText: keeping: {$mimeDecodedEmail->parts[$i]->ctype_primary}");
                 $newParts[] = $mimeDecodedEmail->parts[$i];
             }
         }
@@ -1896,7 +1964,7 @@ function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
         DebugEcho(count($newParts) . " parts");
         $mimeDecodedEmail->parts = $newParts;
     }
-    DebugEcho("FilterTextParts: end");
+    DebugEcho("filter_PreferedText: end");
 }
 
 /**
@@ -2238,13 +2306,13 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
         }
 
         $startIndex = $config['start_image_count_at_zero'] ? 0 : 1;
-        
+
         $images = get_posts(array(
             'post_parent' => $post_id,
             'post_type' => 'attachment',
             'numberposts' => -1,
             'post_mime_type' => 'image',));
-        DebugEcho("images in post: ". count($images));
+        DebugEcho("images in post: " . count($images));
 
         if ((count($images) > 0) && $config['auto_gallery']) {
             $imageTemplate = '[gallery]';
