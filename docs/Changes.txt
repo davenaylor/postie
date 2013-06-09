@@ -26,6 +26,7 @@ Attachments are now processed in the order they were attached.
 * Added full paths to includes in config_form due to some hosts having include_path set in a way that breaks Postie.
 * Added some checks for emails that aren't correctly formatted (AirMail/WinLink)
 * Consolidated environmental checks
+* Added logic for Debian location of wp-config.php
 
 = 1.5.11 (2013.06.02) =
 * Moved test files out of main repository to decrease plugin size
