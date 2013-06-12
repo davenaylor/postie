@@ -164,16 +164,16 @@ class PostieIMAP {
      * @return PostieIMAP|PostieIMAPSSL|PostimePOP3SSL
      * @static
      */
-    function &Factory($protocol) {
+    static function &Factory($protocol) {
         switch (strtolower($protocol)) {
             case "imap":
-                $object = &new PostieIMAP();
+                $object = new PostieIMAP();
                 break;
             case "imap-ssl":
-                $object = &new PostieIMAPSSL();
+                $object = new PostieIMAPSSL();
                 break;
             case "pop3-ssl":
-                $object = &new PostiePOP3SSL();
+                $object = new PostiePOP3SSL();
                 break;
             default:
                 die("$protocol not supported");

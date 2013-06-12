@@ -132,10 +132,10 @@ function LogInfo($v) {
 
 function EchoInfo($v) {
     if (php_sapi_name() == "cli") {
-        echo "$v\n";
+        print( "$v\n");
     } else {
         if (headers_sent()) {
-            echo "<pre>" . htmlspecialchars($v) . "</pre>\n";
+            print( "<pre>" . htmlspecialchars($v) . "</pre>\n");
         }
     }
     LogInfo($v);
@@ -145,12 +145,12 @@ function DebugDump($v) {
     if (IsDebugMode()) {
         $o = print_r($v, true);
         if (php_sapi_name() == "cli") {
-            echo "$o\n";
+            print( "$o\n");
         } else {
             if (headers_sent()) {
-                echo "<pre>\n";
+                print( "<pre>\n");
                 EchoInfo($o);
-                echo "</pre>\n";
+                print( "</pre>\n");
             }
         }
     }
@@ -1557,11 +1557,15 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     }
 
     DebugEcho("after HandleMessageEncoding");
-    if (!empty($charset) && strtolower($charset) != 'default' && strtolower($charset) != strtolower($blogEncoding)) {
-        DebugEcho("converting from $charset to $blogEncoding");
-        //DebugEcho("before: $body");
-        $body = iconv($charset, $blogEncoding . '//TRANSLIT', $body);
-        //DebugEcho("after: $body");
+    if (strtolower($charset) != strtolower($blogEncoding)) {
+        if (!empty($charset) && strtolower($charset) != 'default' && strtolower($charset) != $blogEncoding) {
+            DebugEcho("converting from $charset to $blogEncoding");
+            //DebugEcho("before: $body");
+            $body = iconv($charset, $blogEncoding . '//IGNORE//TRANSLIT', $body);
+            //DebugEcho("after: $body");
+        } else {
+            $body = iconv($blogEncoding, $blogEncoding . '//IGNORE//TRANSLIT', $body);
+        }
     }
     return $body;
 }
@@ -2301,10 +2305,6 @@ function filter_ReplaceImageCIDs(&$content, &$attachments, $config) {
  */
 function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post_id) {
     if (!$config['custom_image_field']) {
-        if (!$config['allow_html_in_body']) {
-            $content = html_entity_decode($content, ENT_QUOTES);
-        }
-
         $startIndex = $config['start_image_count_at_zero'] ? 0 : 1;
 
         $images = get_posts(array(

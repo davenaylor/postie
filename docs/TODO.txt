@@ -13,6 +13,7 @@ standardize tags
 Postie 2.0
 
 setting to turn off individual tags
+process single email at a time and don't delete unless successful
 plugin mechanism to add new tags (and define "built-in ones")
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/
 Make sure all failures are sent to admin (option?) failed attachments, etc.
