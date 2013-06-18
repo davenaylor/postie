@@ -1351,7 +1351,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
             $user_ID = "";
         }
     }
-    if ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses)) {
+    if (empty($user_ID) && ($turn_authorization_off || isEmailAddressAuthorized($from, $authorized_addresses) || isEmailAddressAuthorized($resentFrom, $authorized_addresses))) {
         DebugEcho("ValidatePoster: looking up default user $admin_username");
         $user = get_user_by('login', $admin_username);
         if ($user === false) {
