@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.5.1
-Stable tag: 1.5.12
+Stable tag: 1.5.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -445,6 +445,14 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.13 (2013.06.18) =
+* Added more robust charset conversion to deal with malformed emails.
+* Ensure the default title is used when category etc parsing results in blank title
+* Consolidate procedure for locating wp-config.php
+* Additional debug output.
+* Fixed a bug where the default author was being used even though the email had a valid author.
+* Added feature to disable IMAP authentication with GSSAPI or NTLM to improve MS Exchange compatibility.
+
 = 1.5.12 (2013.06.08) =
 * Added full paths to includes in config_form due to some hosts having include_path set in a way that breaks Postie.
 * Added some checks for emails that aren't correctly formatted (AirMail/WinLink)
