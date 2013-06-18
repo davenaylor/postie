@@ -198,7 +198,8 @@ function tag_Date(&$content, $message_date, $time_offset) {
 
 function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $postmodifiers) {
 
-    $fulldebug = false;
+    $fulldebug = IsDebugMode();
+    $fulldebugdump = false;
 
     extract($config);
 
@@ -210,12 +211,12 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
 
     if (array_key_exists('message-id', $mimeDecodedEmail->headers)) {
         EchoInfo("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
-        if ($fulldebug)
+        if ($fulldebugdump)
             DebugDump($mimeDecodedEmail);
     }
 
     filter_PreferedText($mimeDecodedEmail, $prefer_text_type);
-    if ($fulldebug)
+    if ($fulldebugdump)
         DebugDump($mimeDecodedEmail);
 
     $content = GetContent($mimeDecodedEmail, $attachments, $post_id, $poster, $config);
