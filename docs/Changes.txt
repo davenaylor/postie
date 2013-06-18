@@ -28,6 +28,7 @@ Attachments are now processed in the order they were attached.
 * Consolidate procedure for locating wp-config.php
 * Additional debug output.
 * Fixed a bug where the default author was being used even though the email had a valid author.
+* Added feature to disable IMAP authentication with GSSAPI or NTLM to improve MS Exchange compatibility.
 
 = 1.5.12 (2013.06.08) =
 * Added full paths to includes in config_form due to some hosts having include_path set in a way that breaks Postie.

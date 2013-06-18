@@ -80,7 +80,7 @@ class PostieIMAP {
             $this->_server_string = "{" . $server . ":" . $port . $option . "}";
         }
         DebugEcho("IMAP: connection string - {$this->_server_string}");
-        $this->_connection = imap_open($this->_server_string, $login, $password);
+        $this->_connection = imap_open($this->_server_string, $login, $password, NULL, 1, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
 
         if ($this->_connection) {
             $this->_connected = true;
