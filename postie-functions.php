@@ -364,6 +364,11 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
 
     DebugEcho("excerpt: $post_excerpt");
 
+    if (trim($subject) == "") {
+        $subject = $default_title;
+        DebugEcho("post parsing subject is blank using: $default_title");
+    }
+
     $details = array(
         'post_author' => $poster,
         'comment_author' => $postAuthorDetails['author'],
