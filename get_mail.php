@@ -1,17 +1,6 @@
 <?php
 
-//support moving wp-config.php as described here http://codex.wordpress.org/Hardening_WordPress#Securing_wp-config.php
-$wp_config_path = dirname(dirname(dirname(dirname(__FILE__))));
-if (file_exists($wp_config_path . DIRECTORY_SEPARATOR . "wp-config.php")) {
-    include_once($wp_config_path . DIRECTORY_SEPARATOR . "wp-config.php");
-} elseif (file_exists(dirname($wp_config_path) . DIRECTORY_SEPARATOR . "wp-config.php")) {
-    include_once (dirname($wp_config_path)) . DIRECTORY_SEPARATOR . "wp-config.php";
-} elseif (file_exists('/usr/share/wordpress/wp-config.php')) {
-    include_once('/usr/share/wordpress/wp-config.php');
-} else {
-    die("wp-config.php could not be found.");
-}
-
+require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-wp-config.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mimedecode.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
 if (!function_exists('file_get_html'))
