@@ -6,8 +6,7 @@ date: tag is being detected in body when not wanted
 Update tag_* and filter_* to handle HTML (per tag_Tags)
 dynamically determine video size (height/width) - https://code.google.com/p/phpvideotoolkit/
 gallery logic does not handle both images and non-images
-
-standardize tags
+plugin conflict - Image Rotation Fixer
 
 =========
 Postie 2.0
@@ -24,6 +23,7 @@ replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMai
 provide a location for custom icons. update docs about location.
 handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
 change all Postie command to use a more consistent and easy to parse syntax
+
   commands with multiple data
     #custom name="field name" data="field value"  custom#
 
