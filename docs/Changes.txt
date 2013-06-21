@@ -22,8 +22,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.14 (future) =
-* 
+= 1.5.14 (2013.06.21) =
+* Added PHP version to debug output
+* Added PHP version check when disabling GSSAPI
 
 = 1.5.13 (2013.06.18) =
 * Added more robust charset conversion to deal with malformed emails.

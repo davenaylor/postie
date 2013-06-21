@@ -49,6 +49,7 @@ if (!function_exists('mb_str_replace')) {
 function postie_environment() {
     EchoInfo("Postie Version: " . POSTIE_VERSION);
     EchoInfo("WordPres Version: " . get_bloginfo('version'));
+    EchoInfo("PHP Version: " . phpversion());
     EchoInfo("Debug mode: " . (IsDebugMode() ? "On" : "Off"));
     EchoInfo("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
     DebugEcho("Error log: " . ini_get('error_log'));
