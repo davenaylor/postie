@@ -75,6 +75,7 @@ class PostieIMAP {
         }
         if (preg_match("/google|gmail/i", $server)) {
             //Fix from Jim Hodgson http://www.jimhodgson.com/2006/07/19/postie/
+            DebugEcho("IMAP: using Google INBOX");
             $this->_server_string = "{" . $server . ":" . $port . $option . "}INBOX";
         } else {
             $this->_server_string = "{" . $server . ":" . $port . $option . "}";
@@ -84,7 +85,7 @@ class PostieIMAP {
         if (version_compare(phpversion(), '5.3.2', '<')) {
             $this->_connection = imap_open($this->_server_string, $login, $password);
         } else {
-                    DebugEcho("IMAP: disabling GSSAPI");
+            DebugEcho("IMAP: disabling GSSAPI");
             $this->_connection = imap_open($this->_server_string, $login, $password, NULL, 1, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
         }
 

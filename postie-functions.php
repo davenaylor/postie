@@ -414,6 +414,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     $details = CreatePost($poster, $mimeDecodedEmail, $post_id, $is_reply, $config, $postmodifiers);
 
     $details = apply_filters('postie_post', $details);
+    $details = apply_filters('postie_post_before', $details);
 
     DebugEcho(("Post postie_post filter"));
     DebugDump($details);
@@ -900,6 +901,8 @@ function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
         }
 
         $postmodifiers->apply($post_ID, $details);
+        
+        apply_filters('postie_post_after', $details);
     }
 }
 

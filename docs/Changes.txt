@@ -25,6 +25,8 @@ Attachments are now processed in the order they were attached.
 = 1.5.14 (2013.06.21) =
 * Added PHP version to debug output
 * Added PHP version check when disabling GSSAPI
+* Added new filter "postie_post_before" to replace "postie_post"
+* Added new filter "postie_post_after"
 
 = 1.5.13 (2013.06.18) =
 * Added more robust charset conversion to deal with malformed emails.

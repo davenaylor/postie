@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
-Tested up to: 3.5.1
-Stable tag: 1.5.13
+Tested up to: 3.5.2
+Stable tag: 1.5.14
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -445,6 +445,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.14 (2013.06.21) =
+* Added PHP version to debug output
+* Added PHP version check when disabling GSSAPI
+* Added new filter "postie_post_before" to replace "postie_post"
+* Added new filter "postie_post_after"
+
 = 1.5.13 (2013.06.18) =
 * Added more robust charset conversion to deal with malformed emails.
 * Ensure the default title is used when category etc parsing results in blank title
