@@ -50,6 +50,7 @@ function postie_environment() {
     EchoInfo("Postie Version: " . POSTIE_VERSION);
     EchoInfo("WordPres Version: " . get_bloginfo('version'));
     EchoInfo("PHP Version: " . phpversion());
+    EchoInfo("OS: " . php_uname());
     EchoInfo("Debug mode: " . (IsDebugMode() ? "On" : "Off"));
     EchoInfo("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
     DebugEcho("Error log: " . ini_get('error_log'));
@@ -901,7 +902,7 @@ function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
         }
 
         $postmodifiers->apply($post_ID, $details);
-        
+
         apply_filters('postie_post_after', $details);
     }
 }
