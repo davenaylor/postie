@@ -11,6 +11,8 @@ plugin conflict - Image Rotation Fixer
 =========
 Postie 2.0
 
+http://www.yaconiello.com/blog/how-to-write-wordpress-plugin/
+
 setting to turn off individual tags
 process single email at a time and don't delete unless successful
 plugin mechanism to add new tags (and define "built-in ones")
