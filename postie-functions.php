@@ -2074,11 +2074,11 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
  * @param string
  * @return array
  */
-function DecodeMIMEMail($email, $decodeHeaders = false) {
+function DecodeMIMEMail($email) {
     $params = array();
     $params['include_bodies'] = true;
     $params['decode_bodies'] = false;
-    $params['decode_headers'] = $decodeHeaders;
+    $params['decode_headers'] = true;
     $params['input'] = $email;
     $md = new Mail_mimeDecode($email);
     $decoded = $md->decode($params);
@@ -2519,14 +2519,13 @@ function tag_Categories(&$subject, $defaultCategory, $category_match) {
     $matches = array();
 
     if (preg_match_all('/\[(.[^\[]*)\]/', $subject, $matches)) { // [<category1>] [<category2>] <Subject>
-        preg_match("/]([^\[]*)$/", $subject, $subject_matches);
-        //DebugDump($subject_matches);
-        $subject = trim($subject_matches[1]);
+        //preg_match("/]([^\[]*)$/", $subject, $subject_matches);
+        //$subject = trim($subject_matches[1]);
         $matchtypes[] = $matches;
     }
     if (preg_match_all('/-(.[^-]*)-/', $subject, $matches)) { // -<category>- -<category2>- <Subject>
-        preg_match("/-(.[^-]*)$/", $subject, $subject_matches);
-        $subject = trim($subject_matches[1]);
+        //preg_match("/-(.[^-]*)$/", $subject, $subject_matches);
+        //$subject = trim($subject_matches[1]);
         $matchtypes[] = $matches;
     }
     if (preg_match('/(.+): (.*)/', $subject, $matches)) { // <category>:<Subject>
@@ -2538,13 +2537,18 @@ function tag_Categories(&$subject, $defaultCategory, $category_match) {
         }
     }
 
+    DebugEcho("tag_Categories: found categories");
+    DebugDump($matchtypes);
     foreach ($matchtypes as $matches) {
         if (count($matches)) {
+            $i = 0;
             foreach ($matches[1] as $match) {
                 $category = lookup_category($match, $category_match);
                 if (!empty($category)) {
+                    $subject = str_replace($matches[0][$i], '', $subject);
                     $post_categories[] = $category;
                 }
+                $i++;
             }
         }
     }
@@ -2552,6 +2556,7 @@ function tag_Categories(&$subject, $defaultCategory, $category_match) {
         $post_categories[] = $defaultCategory;
         $subject = $original_subject;
     }
+    $subject = trim($subject);
     return $post_categories;
 }
 
@@ -2562,19 +2567,23 @@ function lookup_category($trial_category, $category_match) {
     EchoInfo("lookup_category: $trial_category");
 
     $term = get_term_by('name', $trial_category, 'category');
-    if ($term !== false) {
+    if (!empty($term)) {
         DebugEcho("category: found by name $trial_category");
-        //DebugDump($term);
+        DebugDump($term);
         //then category is a named and found 
         return $term->term_id;
     }
 
-    $term = get_term_by('id', intval($trial_category), 'category');
-    if ($term !== false) {
-        DebugEcho("category: found by id $trial_category");
-        //DebugDump($term);
-        //then cateogry was an ID and found 
-        return $term->term_id;
+    if (is_numeric($trial_category)) {
+        DebugEcho("category: looking for id '$trial_category'");
+        $cat_id = intval($trial_category);
+        $term = get_term_by('id', $cat_id, 'category');
+        if (!empty($term) && $term->term_id == $trial_category) {
+            DebugEcho("category: found by id '$cat_id'");
+            DebugDump($term);
+            //then cateogry was an ID and found 
+            return $term->term_id;
+        }
     }
 
     if ($category_match) {

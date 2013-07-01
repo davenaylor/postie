@@ -51,7 +51,7 @@ foreach ($emails as $email) {
         continue;
     }
 
-    $mimeDecodedEmail = DecodeMIMEMail($email, true);
+    $mimeDecodedEmail = DecodeMIMEMail($email);
 
     DebugEmailOutput($email, $mimeDecodedEmail);
 

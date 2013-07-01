@@ -25,6 +25,8 @@ Attachments are now processed in the order they were attached.
 
 = 1.5.15 (future) =
 * Added message warning that filter 'postie_post' has been deprecated.
+* Fixed bug where a category was detected if there happened to be 2 dash (-) characters and a number was the first thing after the first dash.
+* Simplified header decoding for non-ASCII languages
 
 = 1.5.14 (2013.06.21) =
 * Added PHP version to debug output
