@@ -22,6 +22,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+
+= 1.5.15 (future) =
+* Added message warning that filter 'postie_post' has been deprecated.
+
 = 1.5.14 (2013.06.21) =
 * Added PHP version to debug output
 * Added PHP version check when disabling GSSAPI

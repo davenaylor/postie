@@ -15,6 +15,10 @@ if (file_exists($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php")) {
     include_once ($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php");
 }
 
+if (has_filter('postie_post')){
+    echo "Postie: filter 'postie_post' is depricated in favor of 'postie_post_before'";
+}
+
 $test_email = null;
 $config = config_Read();
 extract($config);
