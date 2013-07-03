@@ -45,3 +45,9 @@ change all Postie command to use a more consistent and easy to parse syntax
     @more (new)
     @comments-open, @comments-closed, @comments-registeredonly
     @status-draft, @status-publish, @status-pending, @status-private
+
+  alternate syntax
+    {{@cmd data }}
+    {{@status draft}}
+    {{@category one, two, three}}
+    {{@custom name="field name" data="field value" }}

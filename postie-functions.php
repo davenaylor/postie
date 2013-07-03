@@ -627,10 +627,15 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
             $theAuthor = GetNameFromEmail($matches[1]);
             $mimeDecodedEmail->headers['from'] = $theAuthor;
         }
+        //TODO dosen't always work with HTML
         if (preg_match("/\ndate:(.*?)\n/i", $content, $matches)) {
             $theDate = $matches[1];
             DebugEcho("date in Fwd: $theDate");
-            $mimeDecodedEmail->headers['date'] = $theDate;
+            if (($timestamp = strtotime($theDate)) === false) {
+                DebugEcho("bad date found: $theDate");
+            } else {
+                $mimeDecodedEmail->headers['date'] = $theDate;
+            }
         }
 
         // now get rid of forwarding info in the content
