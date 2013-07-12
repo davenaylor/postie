@@ -9,6 +9,11 @@ gallery logic does not handle both images and non-images
 plugin conflict - Image Rotation Fixer
 
 =========
+AddOn Ideas
+(done) Google Alerts - turn each alert into a post
+HTML cleaning - use http://htmlpurifier.org/ to convert Word Html and other bad html into standard html
+
+=========
 Postie 2.0
 
 http://www.yaconiello.com/blog/how-to-write-wordpress-plugin/
