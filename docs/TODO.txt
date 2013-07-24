@@ -7,6 +7,7 @@ Update tag_* and filter_* to handle HTML (per tag_Tags)
 dynamically determine video size (height/width) - https://code.google.com/p/phpvideotoolkit/
 gallery logic does not handle both images and non-images
 plugin conflict - Image Rotation Fixer
+send email notice when attachments are rejected.
 
 =========
 AddOn Ideas

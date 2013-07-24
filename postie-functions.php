@@ -136,9 +136,11 @@ function EchoInfo($v) {
     if (php_sapi_name() == "cli") {
         print( "$v\n");
     } else {
-        if (headers_sent()) {
-            print( "<pre>" . htmlspecialchars($v) . "</pre>\n");
+        //flush the buffers
+        while (ob_get_level() > 0) {
+            ob_end_flush();
         }
+        print( "<pre>" . htmlspecialchars($v) . "</pre>\n");
     }
     LogInfo($v);
 }
@@ -149,11 +151,13 @@ function DebugDump($v) {
         if (php_sapi_name() == "cli") {
             print( "$o\n");
         } else {
-            if (headers_sent()) {
-                print( "<pre>\n");
-                EchoInfo($o);
-                print( "</pre>\n");
+            //flush the buffers
+            while (ob_get_level() > 0) {
+                ob_end_flush();
             }
+            print( "<pre>\n");
+            EchoInfo($o);
+            print( "</pre>\n");
         }
     }
 }
@@ -2127,6 +2131,7 @@ function RemoveExtraCharactersInEmailAddress($address) {
     if (preg_match('/^[^<>]+<([^<> ()]+)>$/', $address, $matches)) {
         $address = $matches[1];
         DebugEcho("RemoveExtraCharactersInEmailAddress: $address (1)");
+        DebugDump($matches);
     } else if (preg_match('/<([^<> ()]+)>/', $address, $matches)) {
         $address = $matches[1];
         DebugEcho("RemoveExtraCharactersInEmailAddress: $address (2)");
