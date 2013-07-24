@@ -64,6 +64,7 @@ foreach ($emails as $email) {
     }
     flush();
 }
+EchoInfo("Mail fetch complete, $message_number emails");
 
 if (function_exists('memory_get_usage'))
     DebugEcho("memory at end of e-mail processing:" . memory_get_usage());

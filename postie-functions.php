@@ -47,12 +47,12 @@ if (!function_exists('mb_str_replace')) {
 }
 
 function postie_environment() {
-    EchoInfo("Postie Version: " . POSTIE_VERSION);
-    EchoInfo("WordPres Version: " . get_bloginfo('version'));
-    EchoInfo("PHP Version: " . phpversion());
-    EchoInfo("OS: " . php_uname());
-    EchoInfo("Debug mode: " . (IsDebugMode() ? "On" : "Off"));
-    EchoInfo("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
+    DebugEcho("Postie Version: " . POSTIE_VERSION);
+    DebugEcho("WordPres Version: " . get_bloginfo('version'));
+    DebugEcho("PHP Version: " . phpversion());
+    DebugEcho("OS: " . php_uname());
+    DebugEcho("Debug mode: " . (IsDebugMode() ? "On" : "Off"));
+    DebugEcho("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
     DebugEcho("Error log: " . ini_get('error_log'));
 
     if (isMarkdownInstalled()) {
@@ -216,7 +216,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     );
 
     if (array_key_exists('message-id', $mimeDecodedEmail->headers)) {
-        EchoInfo("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
+        DebugEcho("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
         if ($fulldebugdump)
             DebugDump($mimeDecodedEmail);
     }
@@ -325,7 +325,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
             }
         }
     } else {
-        EchoInfo("Reply detected");
+        DebugEcho("Reply detected");
         $is_reply = true;
         // strip out quoted content
         $lines = explode("\n", $content);
@@ -411,7 +411,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
       attachments with a post. So we add the post here, then update it */
     $tmpPost = array('post_title' => 'tmptitle', 'post_content' => 'tmpPost');
     $post_id = wp_insert_post($tmpPost);
-    EchoInfo("new post id is $post_id");
+    DebugEcho("new post id is $post_id");
 
     $is_reply = false;
     $postmodifiers = new PostiePostModifiers();
@@ -773,7 +773,7 @@ function IMAPMessageFetch($server = NULL, $port = NULL, $email = NULL, $password
     if ($tls) {
         $mail_server->TLSOn();
     }
-    EchoInfo("Connecting to $server:$port ($protocol)" . ($tls ? " with TLS" : ""));
+    DebugEcho("Connecting to $server:$port ($protocol)" . ($tls ? " with TLS" : ""));
     if ($mail_server->connect(trim($server), $port, $email, $password)) {
         $msg_count = $mail_server->getNumberOfMessages();
     } else {
@@ -814,7 +814,7 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
         $pop3->DEBUG = POSTIE_DEBUG;
     }
 
-    EchoInfo("Connecting to $server:$port ($protocol)");
+    DebugEcho("Connecting to $server:$port ($protocol)");
 
     if ($pop3->connect(trim($server), $port)) {
         $msg_count = $pop3->login($email, $password);
@@ -1347,7 +1347,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
 
     //See if the email address is one of the special authorized ones
     if (!empty($from)) {
-        EchoInfo("Confirming Access For $from ");
+        DebugEcho("Confirming Access For $from ");
         $user = get_user_by('email', $from);
         if ($user !== false)
             $user_ID = $user->ID;
@@ -1359,7 +1359,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         if ($user->has_cap("post_via_postie")) {
             DebugEcho("$user_ID has 'post_via_postie' permissions");
             $poster = $user_ID;
-            EchoInfo("posting as user $poster");
+            DebugEcho("posting as user $poster");
         } else {
             DebugEcho("$user_ID does not have 'post_via_postie' permissions");
             $user_ID = "";
@@ -1401,7 +1401,7 @@ function isValidSmtpServer($mimeDecodedEmail, $smtpservers) {
     foreach ((array) $mimeDecodedEmail->headers['received'] as $received) {
         foreach ($smtpservers as $smtp) {
             if (stristr($received, $smtp) !== false) {
-                EchoInfo("Sent from valid SMTP server.");
+                DebugEcho("Sent from valid SMTP server.");
                 return true;
             }
         }
@@ -2101,7 +2101,7 @@ function DecodeMIMEMail($email) {
  */
 function DisplayMIMEPartTypes($mimeDecodedEmail) {
     foreach ($mimeDecodedEmail->parts as $part) {
-        EchoInfo($part->ctype_primary . " / " . $part->ctype_secondary . "/ " . $part->headers['content-transfer-encoding']);
+        DebugEcho($part->ctype_primary . " / " . $part->ctype_secondary . "/ " . $part->headers['content-transfer-encoding']);
     }
 }
 
@@ -2574,7 +2574,7 @@ function lookup_category($trial_category, $category_match) {
     global $wpdb;
     $trial_category = trim($trial_category);
     $found_category = NULL;
-    EchoInfo("lookup_category: $trial_category");
+    DebugEcho("lookup_category: $trial_category");
 
     $term = get_term_by('name', $trial_category, 'category');
     if (!empty($term)) {
@@ -2612,18 +2612,18 @@ function lookup_category($trial_category, $category_match) {
 function DisplayEmailPost($details) {
     //DebugDump($details);
     // Report
-    EchoInfo('Post Author: ' . $details["post_author"]);
-    EchoInfo('Date: ' . $details["post_date"]);
+    DebugEcho('Post Author: ' . $details["post_author"]);
+    DebugEcho('Date: ' . $details["post_date"]);
     foreach ($details["post_category"] as $category) {
-        EchoInfo('Category: ' . $category);
+        DebugEcho('Category: ' . $category);
     }
-    EchoInfo('Ping Status: ' . $details["ping_status"]);
-    EchoInfo('Comment Status: ' . $details["comment_status"]);
-    EchoInfo('Subject: ' . $details["post_title"]);
-    EchoInfo('Postname: ' . $details["post_name"]);
-    EchoInfo('Post Id: ' . $details["ID"]);
-    EchoInfo('Post Type: ' . $details["post_type"]); /* Added by Raam Dev <raam@raamdev.com> */
-    //EchoInfo('Posted content: '.$details["post_content"]);
+    DebugEcho('Ping Status: ' . $details["ping_status"]);
+    DebugEcho('Comment Status: ' . $details["comment_status"]);
+    DebugEcho('Subject: ' . $details["post_title"]);
+    DebugEcho('Postname: ' . $details["post_name"]);
+    DebugEcho('Post Id: ' . $details["ID"]);
+    DebugEcho('Post Type: ' . $details["post_type"]); /* Added by Raam Dev <raam@raamdev.com> */
+    //DebugEcho('Posted content: '.$details["post_content"]);
 }
 
 /**

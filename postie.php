@@ -204,7 +204,7 @@ function postie_whitelist($options) {
 
 //don't use DebugEcho or EchoInfo here as it is not defined when called as an action
 function check_postie() {
-    error_log("check_postie");
+    //error_log("check_postie");
 
     $fullurl = plugins_url("get_mail.php", __FILE__);
     preg_match("/https?:\/\/(.[^\/]*)(.*)/i", $fullurl, $matches);
