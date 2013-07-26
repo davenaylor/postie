@@ -121,7 +121,7 @@ class PostieIMAP {
     function fetchEmail($index) {
 
         $header_info = imap_headerinfo($this->_connection, $index);
-        DebugDump($header_info);
+        //DebugDump($header_info);
 
         if (IsDebugMode() || $header_info->Recent == 'N' || $header_info->Unseen == 'U') {
             $email = imap_fetchheader($this->_connection, $index);
