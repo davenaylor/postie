@@ -168,7 +168,8 @@ function DebugEcho($v) {
     }
 }
 
-function tag_Date(&$content, $message_date, $time_offset) {
+function tag_Date(&$content, $message_date) {
+    //don't apply any offset here as it is accounted for later
     $html = LoadDOM($content);
     if ($html !== false) {
         $es = $html->find('text');
@@ -181,10 +182,6 @@ function tag_Date(&$content, $message_date, $time_offset) {
                 if (false !== $newdate) {
                     $t = date("H:i:s", $newdate);
                     DebugEcho("tag_Date: original time: $t");
-
-                    $newdate = $newdate + $time_offset * 3600;
-                    $t = date("H:i:s", $newdate);
-                    DebugEcho("tag_Date: adjusted time: $t");
 
                     $format = "Y-m-d";
                     if ($t != '00:00:00') {
@@ -255,7 +252,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         }
         $message_date = HandleMessageEncoding($cte, $cs, $mimeDecodedEmail->headers["date"], $message_encoding, $message_dequote);
     }
-    $message_date = tag_Date($content, $message_date, $time_offset);
+    $message_date = tag_Date($content, $message_date);
 
     list($post_date, $post_date_gmt, $delay) = filter_Delay($content, $message_date, $time_offset);
     if ($fulldebug)
