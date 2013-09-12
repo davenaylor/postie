@@ -28,6 +28,7 @@ Attachments are now processed in the order they were attached.
 * Fixed images showing up in excerpts when not specified.
 * Fixed bug where time offset was applied twice.
 * Fixed bug where excerpts where not getting the newline settings applied.
+* Fixed bug where the attachment template was not getting set on new installs.
 
 = 1.5.15 (2013.07.01) =
 * Added message warning that filter 'postie_post' has been deprecated.

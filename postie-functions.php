@@ -2947,7 +2947,7 @@ function config_UpgradeOld() {
     $config['IMAGETEMPLATES'] = $imageTemplates;
 
     //general
-    include('templates/general_templates.php');
+    include('templates/general_template.php');
     if (!isset($config["GENERALTEMPLATE"]))
         $config["GENERALTEMPLATE"] = $postie_default;
 
