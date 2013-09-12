@@ -232,7 +232,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     if ($fulldebug)
         DebugEcho("post sig: $content");
 
-    $post_excerpt = tag_Excerpt($content, $filternewlines, $convertnewline);
+    $post_excerpt = tag_Excerpt($content, $config);
     if ($fulldebug)
         DebugEcho("post excerpt: $content");
 
@@ -2495,15 +2495,15 @@ function tag_Tags2(&$content, $defaultTags) {
  * this function determines excerpt for the post
  *
  */
-function tag_Excerpt(&$content, $filterNewLines, $convertNewLines) {
+function tag_Excerpt(&$content, $config) {
     $post_excerpt = '';
     if (preg_match('/:excerptstart ?(.*):excerptend/s', $content, $matches)) {
         $content = str_replace($matches[0], "", $content);
         $post_excerpt = $matches[1];
         DebugEcho("excerpt found: $post_excerpt");
-        if ($filterNewLines) {
+        if ($config['filternewlines']) {
             DebugEcho("filtering newlines from excerpt");
-            filter_Newlines($post_excerpt, $convertNewLines);
+            filter_Newlines($post_excerpt, $config);
         }
     }
     return $post_excerpt;

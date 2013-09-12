@@ -23,10 +23,11 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.5.16 (future) =
-* Fixed date detection bug in forwarded messages
-* Possible fix for blank screen issue (flush buffers rather than check for sent headers)
-* Fixed images showing up in excerpts when not specified
-* Fixed bug where time offset was applied twice
+* Fixed date detection bug in forwarded messages.
+* Possible fix for blank screen issue (flush buffers rather than check for sent headers).
+* Fixed images showing up in excerpts when not specified.
+* Fixed bug where time offset was applied twice.
+* Fixed bug where excerpts where not getting the newline settings applied.
 
 = 1.5.15 (2013.07.01) =
 * Added message warning that filter 'postie_post' has been deprecated.
