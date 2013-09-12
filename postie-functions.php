@@ -359,12 +359,12 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     if ($fulldebug)
         DebugEcho("post end: $content");
 
-    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id);
+    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], true);
     if ($fulldebug)
         DebugEcho("post body img: $content");
 
     if ($post_excerpt) {
-        filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config, $id);
+        filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config, $id, "#eimg%#", false);
         if ($fulldebug)
             DebugEcho("post excerpt img: $content");
     }
@@ -2324,7 +2324,7 @@ function filter_ReplaceImageCIDs(&$content, &$attachments, $config) {
  * @param string - text of post
  * @param array - array of HTML for images for post
  */
-function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post_id) {
+function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post_id, $image_pattern, $autoadd_images) {
     if (!$config['custom_image_field']) {
         $startIndex = $config['start_image_count_at_zero'] ? 0 : 1;
 
@@ -2351,16 +2351,12 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
         $i = 0;
         foreach ($attachments as $attachementName => $imageTemplate) {
             // looks for ' #img1# ' etc... and replaces with image
-            $img_placeholder_temp = str_replace("%", intval($startIndex + $i), $config['image_placeholder']);
-            $img_placeholder_temp = rtrim($img_placeholder_temp, '#');
-
-            $eimg_placeholder_temp = str_replace("%", intval($startIndex + $i), "#eimg%#");
-            $eimg_placeholder_temp = rtrim($eimg_placeholder_temp, '#');
+            $img_placeholder_temp = rtrim(str_replace("%", intval($startIndex + $i), $image_pattern), '#');
 
             DebugEcho("img_placeholder_temp: $img_placeholder_temp");
-            if (stristr($content, $img_placeholder_temp) || stristr($content, $eimg_placeholder_temp)) {
+            if (stristr($content, $img_placeholder_temp)) {
                 // look for caption
-                DebugEcho("Found $img_placeholder_temp or $eimg_placeholder_temp");
+                DebugEcho("Found $img_placeholder_temp");
                 $caption = '';
                 if (preg_match("/$img_placeholder_temp caption=(.*?)#/i", $content, $matches)) {
                     //DebugDump($matches);
@@ -2371,9 +2367,7 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
                     DebugEcho("caption: $caption");
 
                     $img_placeholder_temp = substr($matches[0], 0, -1);
-                    $eimg_placeholder_temp = substr($matches[0], 0, -1);
                     DebugEcho($img_placeholder_temp);
-                    DebugEcho($eimg_placeholder_temp);
                 } else {
                     DebugEcho("No caption found");
                 }
@@ -2382,13 +2376,11 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
                 DebugEcho("populated template: " . $imageTemplate);
 
                 $img_placeholder_temp.='#';
-                $eimg_placeholder_temp.='#';
 
                 $content = str_ireplace($img_placeholder_temp, $imageTemplate, $content);
                 DebugEcho("post replace: $content");
-                $content = str_ireplace($eimg_placeholder_temp, $imageTemplate, $content);
             } else {
-                DebugEcho("No $img_placeholder_temp or $eimg_placeholder_temp found");
+                DebugEcho("No $img_placeholder_temp found");
                 $imageTemplate = str_replace('{CAPTION}', '', $imageTemplate);
                 /* if using the gallery shortcode, don't add pictures at all */
                 if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
@@ -2399,10 +2391,12 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
             }
             $i++;
         }
-        if ($config['images_append']) {
-            $content .= $pics;
-        } else {
-            $content = $pics . $content;
+        if ($autoadd_images) {
+            if ($config['images_append']) {
+                $content .= $pics;
+            } else {
+                $content = $pics . $content;
+            }
         }
     }
 }
