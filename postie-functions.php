@@ -1802,6 +1802,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
     // use image exif/iptc data for title and caption defaults if possible
     if (file_exists(ABSPATH . '/wp-admin/includes/image.php')) {
         include_once(ABSPATH . '/wp-admin/includes/image.php');
+        include_once(ABSPATH . '/wp-admin/includes/media.php');
         if ($image_meta = @wp_read_image_metadata($file)) {
             if (trim($image_meta['title'])) {
                 $title = $image_meta['title'];
