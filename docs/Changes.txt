@@ -22,6 +22,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.17 (future) =
+*
+
 = 1.5.16 (2013.09.15) =
 * Fixed date detection bug in forwarded messages.
 * Possible fix for blank screen issue (flush buffers rather than check for sent headers).
