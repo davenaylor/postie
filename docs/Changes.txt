@@ -22,7 +22,7 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.16 (future) =
+= 1.5.16 (2013.09.15) =
 * Fixed date detection bug in forwarded messages.
 * Possible fix for blank screen issue (flush buffers rather than check for sent headers).
 * Fixed images showing up in excerpts when not specified.
@@ -30,6 +30,7 @@ Attachments are now processed in the order they were attached.
 * Fixed bug where excerpts where not getting the newline settings applied.
 * Fixed bug where the attachment template was not getting set on new installs.
 * Fixed bug where mp3 files were causing failures when getting meta-data.
+* Verified compatibility with WP 36. and 3.6.1
 
 = 1.5.15 (2013.07.01) =
 * Added message warning that filter 'postie_post' has been deprecated.

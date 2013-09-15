@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
-Tested up to: 3.5.2
-Stable tag: 1.5.15
+Tested up to: 3.6.1
+Stable tag: 1.5.16
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -154,10 +154,8 @@ Then use the Task Scheduler control panel to call wget or cron.
 * You can also set a default tag to be applied if no tags are included.
 
 = Image Handling =
-Note you can only use this feature if your "Preferred Text Type" is set to "plain"
-
 * Allows you to attach images to your email and automatically post
-  them to your blog
+  them to your blog.
 * You can publish images in the text of your message by using #img1#
   #img2# - each one will be replaced with the HTML for the image
   you attached
@@ -171,6 +169,8 @@ Note you can only use this feature if your "Preferred Text Type" is set to "plai
 
   Note that the images are processed in the order they are attached as of version
   1.4.6.
+
+  Note you can only use the #img# feature if your "Preferred Text Type" is set to "plain"
 
 * Image templates
   Postie now uses the default wordpress image template, but you can specify a
@@ -428,7 +428,6 @@ The postie_post filter has be deprecated in favor of postie_post_before.
 
 = 1.5.3 =
 Postie can now set the first image in an email to be the "Featured" image. There is a new setting "Use First Image as Featured Image" which is off by default.
-
 Postie now supports Use Transport Layer Security (TLS)
 
 = 1.5.0 =
@@ -446,6 +445,15 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.16 (2013.09.15) =
+* Fixed date detection bug in forwarded messages.
+* Possible fix for blank screen issue (flush buffers rather than check for sent headers).
+* Fixed images showing up in excerpts when not specified.
+* Fixed bug where time offset was applied twice.
+* Fixed bug where excerpts where not getting the newline settings applied.
+* Fixed bug where the attachment template was not getting set on new installs.
+* Fixed bug where mp3 files were causing failures when getting meta-data.
+* Verified compatibility with WP 36. and 3.6.1
 
 = 1.5.15 (2013.07.01) =
 * Added message warning that filter 'postie_post' has been deprecated.
