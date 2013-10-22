@@ -1111,6 +1111,8 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     //featured image logic
                     //set the first image we come across as the featured image
                     DebugEcho("has_post_thumbnail: " . has_post_thumbnail($post_id));
+                    //DebugEcho("get_the_post_thumbnail: " .get_the_post_thumbnail($post_id));
+                    
                     if ($featured_image && !has_post_thumbnail($post_id)) {
                         DebugEcho("featured image: $file_id");
                         set_post_thumbnail($post_id, $file_id);

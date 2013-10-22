@@ -8,6 +8,8 @@ dynamically determine video size (height/width) - https://code.google.com/p/phpv
 gallery logic does not handle both images and non-images
 plugin conflict - Image Rotation Fixer
 send email notice when attachments are rejected.
+review http://wp.smashingmagazine.com/2011/11/23/improve-wordpress-plugins-readme-txt/
+more info in postie.txt
 
 =========
 AddOn Ideas
