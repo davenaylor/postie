@@ -26,7 +26,7 @@ if (!current_user_can('manage_options')) {
     <p>This shows what time it would be if you posted right now</p>
     <?php
     $content = "";
-    $data = filter_Delay($content);
+    $data = filter_Delay($content, null, $config['time_offset']);
     EchoInfo("GMT: $data[1]");
     EchoInfo("Current: $data[0]");
     ?>

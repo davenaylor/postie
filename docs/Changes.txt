@@ -23,7 +23,7 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.5.17 (future) =
-*
+* Fixed date calculation in test screen
 
 = 1.5.16 (2013.09.15) =
 * Fixed date detection bug in forwarded messages.
