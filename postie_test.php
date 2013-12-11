@@ -27,8 +27,7 @@ if (!current_user_can('manage_options')) {
     <?php
     $content = "";
     $data = filter_Delay($content, null, $config['time_offset']);
-    EchoInfo("GMT: $data[1]");
-    EchoInfo("Current: $data[0]");
+    EchoInfo("Post time: $data[0]");
     ?>
 
     <h2>Connect to Mail Host</h2>
