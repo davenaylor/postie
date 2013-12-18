@@ -1,3 +1,9 @@
+.submit {
+    padding: 10px;
+}
+form#postie-options {
+    padding: 10px;
+}
 div input.button {
     margin: 3px 0px 3px 0px;
 }
@@ -7,9 +13,6 @@ div input.button {
 }
 #w3c {
     margin-top: 50px;
-}
-table.form-table  {
-    background: #E5F3FF;
 }
 table.form-table td {
     line-height:1em;

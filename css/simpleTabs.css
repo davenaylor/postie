@@ -1,6 +1,6 @@
 #simpleTabs {
     width: 98%;
-    border: 1px solid #c9efec;
+    border: 1px solid lightgrey;
     border-top: none;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -10,7 +10,7 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    background: #e1efee;
+    background: lightgrey;
 }
 .simpleTabs-nav li{
     float: left;
@@ -18,9 +18,10 @@
     color: #6d6d6d;
     cursor: pointer;
     text-align: center;
+    margin-bottom: 0px;
 }
 .simpleTabs-nav li:hover{
-    background: #c9efec;
+    background: lightgrey;
 }
 .simpleTabs-nav li.close{
     float: right;

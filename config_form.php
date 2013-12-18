@@ -178,7 +178,7 @@
                     <tr>
                         <th scope="row"><?php _e('Postie Time Correction:', 'postie') ?>
                             <br />
-                            <span class='recommendation'><?php _e("Should be the same as your normal offset - but this lets you adjust it in cases where that doesn't work.", 'postie'); ?></span>
+                            <span class='recommendation'><?php _e("Should be the same as your normal offset, but this lets you adjust it in cases where that doesn't work.", 'postie'); ?></span>
                         </th>
                         <td><input name='postie-settings[time_offset]' type="text" id='postie-settings-time_offset' size="2" value="<?php echo esc_attr($time_offset); ?>" /> 
                             <?php _e('hours', 'postie') ?> 
@@ -825,14 +825,6 @@
                                       name='postie-settings[generaltemplate]'><?php echo esc_attr($generaltemplate) ?></textarea>
                         </td>
                     </tr>
-                    <tr>
-                        <th style='height:64px'>
-                            <?php _e('Preview', 'postie'); ?>
-                        </th>
-                        <td>
-
-                        </td>
-                    </tr>
                 </table> 
             </div>
             <div id="simpleTabs-content-7" class="simpleTabs-content">
@@ -844,17 +836,14 @@
 
             <p class="submit">
                 <input type="hidden" name="action" value="update" />
-
-                <input type="hidden" name="page_options"
-                       value="postie-settings" />
-
+                <input type="hidden" name="page_options" value="postie-settings" />
                 <input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" class="button button-primary" />
-
             </p>
     </form> 
-    <form name="postie-options" method="post"> 
+    <form id="postie-options" name="postie-options" method="post"> 
         <input type="hidden" name="action" value="reset" />
-        <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie') ?>" type="submit" class='button'> (Your Mail server settings will be retained)
+        <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie') ?>" type="submit" class='button'> 
+        <span>&nbsp;(Your Mail server settings will be retained)</span>
     </form>
 </div>
 
