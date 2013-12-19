@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
-Tested up to: 3.6.1
-Stable tag: 1.5.16
+Tested up to: 3.8
+Stable tag: 1.5.17
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -445,6 +445,13 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.17 (2013.12.19) =
+* Fixed date calculation in test screen.
+* Fixed text encoding issues for systems with PHP 5.4
+* Updated CSS to better match WordPress 3.8 styles.
+* Removed reference to pluggable.php to allow other plugins to plug these functions.
+* Verified compatibility with WP 3.8
+
 = 1.5.16 (2013.09.15) =
 * Fixed date detection bug in forwarded messages.
 * Possible fix for blank screen issue (flush buffers rather than check for sent headers).
@@ -453,7 +460,7 @@ Attachments are now processed in the order they were attached.
 * Fixed bug where excerpts where not getting the newline settings applied.
 * Fixed bug where the attachment template was not getting set on new installs.
 * Fixed bug where mp3 files were causing failures when getting meta-data.
-* Verified compatibility with WP 36. and 3.6.1
+* Verified compatibility with WP 3.6 and 3.6.1
 
 = 1.5.15 (2013.07.01) =
 * Added message warning that filter 'postie_post' has been deprecated.
