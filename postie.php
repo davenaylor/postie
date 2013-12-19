@@ -175,12 +175,9 @@ function postie_warnings() {
 
         add_action('admin_notices', 'postie_mbstring_warning');
     }
-
-    if (!function_exists('get_user_by')) {
-        include ABSPATH . 'wp-includes/pluggable.php';
-    }
-    $adminuser = get_user_by('login', $config['admin_username']);
-    if ($adminuser === false) {
+    
+    $userdata = WP_User::get_data_by( 'login', $config['admin_username'] );
+    if (!$userdata) {
 
         function postie_adminuser_warning() {
             echo "<div id='postie-mbstring-warning' class='error'><p><strong>";
