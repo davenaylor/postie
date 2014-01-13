@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.8
-Stable tag: 1.5.17
+Stable tag: 1.5.18
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -445,6 +445,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.18 (2014.01.12) =
+* Reverted text encoding change in 1.5.17.
+
+
 = 1.5.17 (2013.12.19) =
 * Fixed date calculation in test screen.
 * Fixed text encoding issues for systems with PHP 5.4

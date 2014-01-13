@@ -1086,7 +1086,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                             //$meta_return = "<div>$meta_return</div>\n";
                         } else {
                             DebugEcho("html not allowed (htmlentities)");
-                            $meta_return .= htmlentities($part->body, ENT_QUOTES, "UTF-8");
+                            $meta_return .= htmlentities($part->body);
                         }
                         $meta_return = filter_StripPGP($meta_return);
                         //DebugEcho("meta return: $meta_return");

@@ -22,8 +22,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.18 (future) =
-*
+= 1.5.18 (2014.01.12) =
+* Reverted text encoding change in 1.5.17.
+
 
 = 1.5.17 (2013.12.19) =
 * Fixed date calculation in test screen.
