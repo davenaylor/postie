@@ -10,6 +10,8 @@ plugin conflict - Image Rotation Fixer
 send email notice when attachments are rejected.
 review http://wp.smashingmagazine.com/2011/11/23/improve-wordpress-plugins-readme-txt/
 more info in postie.txt
+configurable message for "post confirmation" - variable substitution
+hook for post failure, success
 
 =========
 AddOn Ideas
