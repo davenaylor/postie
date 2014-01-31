@@ -468,7 +468,8 @@
                     echo BuildBooleanSelect("Use shortcode for embedding video (youtube and others)", "postie-settings[shortcode]", $shortcode);
                     ?>
                     <tr> 
-                        <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> </th> 
+                        <th width="33%" valign="top" scope="row"><?php _e('Encoding for pages and feeds:', 'postie') ?> <br />
+                            <span class='recommendation'><?php _e('The character set for your blog.', 'postie') ?></span></th> 
                         <td>
                             <input name='postie-settings[message_encoding]' type="text" id='postie-settings-message_encoding' value="<?php echo esc_attr($message_encoding); ?>" size="10" />
                             <span class='recommendation'>UTF-8 <?php _e("should handle ISO-8859-1 as well", 'postie'); ?></span>

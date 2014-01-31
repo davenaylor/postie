@@ -37,7 +37,7 @@ class PostieIMAP {
      */
     function TLSOn() {
         $this->_tls_on = true;
-        DebugEcho("IMAP: TLS enabled");
+        DebugEcho($this->_protocol . ": TLS enabled");
     }
 
     /**
@@ -75,23 +75,23 @@ class PostieIMAP {
         }
         if (preg_match("/google|gmail/i", $server)) {
             //Fix from Jim Hodgson http://www.jimhodgson.com/2006/07/19/postie/
-            DebugEcho("IMAP: using Google INBOX");
+            DebugEcho($this->_protocol . ": using Google INBOX");
             $this->_server_string = "{" . $server . ":" . $port . $option . "}INBOX";
         } else {
             $this->_server_string = "{" . $server . ":" . $port . $option . "}";
         }
-        DebugEcho("IMAP: connection string - {$this->_server_string}");
+        DebugEcho($this->_protocol . ": connection string - {$this->_server_string}");
         //Exchange connection, but requires PHP 5.3.2
         if (version_compare(phpversion(), '5.3.2', '<')) {
             $this->_connection = imap_open($this->_server_string, $login, $password);
         } else {
-            DebugEcho("IMAP: disabling GSSAPI");
+            DebugEcho($this->_protocol . ": disabling GSSAPI");
             $this->_connection = imap_open($this->_server_string, $login, $password, NULL, 1, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
         }
 
         if ($this->_connection) {
             $this->_connected = true;
-            DebugEcho("IMAP: connected");
+            DebugEcho($this->_protocol . ": connected");
         } else {
             LogInfo("imap_open failed: " . imap_last_error());
         }
@@ -105,9 +105,9 @@ class PostieIMAP {
     function getNumberOfMessages() {
         $status = imap_status($this->_connection, $this->_server_string, SA_ALL); //get all messages in debug mode so we can reprocess them
         DebugDump($status);
-        if ($status)
+        if ($status) {
             return $status->messages;
-        else {
+        } else {
             LogInfo("Error imap_status did not return a value");
             //DebugDump($this);
             return 0;
@@ -137,7 +137,7 @@ class PostieIMAP {
      * Marks a message for deletion
      */
     function deleteMessage($index) {
-        DebugEcho("IMAP: deleting message $index");
+        DebugEcho($this->_protocol . ": deleting message $index");
         imap_delete($this->_connection, $index);
     }
 
@@ -145,7 +145,7 @@ class PostieIMAP {
      * Handles purging any files that are marked for deletion
      */
     function expungeMessages() {
-        DebugEcho("IMAP: expunge");
+        DebugEcho($this->_protocol . ": expunge");
         imap_expunge($this->_connection);
     }
 
@@ -153,7 +153,7 @@ class PostieIMAP {
      * Handles disconnecting from the server
      */
     function disconnect() {
-        DebugEcho("IMAP: closing connection");
+        DebugEcho($this->_protocol . ": closing connection");
         imap_close($this->_connection);
         $this->_connection = false;
     }
@@ -217,5 +217,3 @@ class PostiePOP3SSL Extends PostieIMAP {
     }
 
 }
-
-?>

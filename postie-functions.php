@@ -1562,8 +1562,8 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     $contenttransferencoding = strtolower($contenttransferencoding);
 
     DebugEcho("before HandleMessageEncoding");
-    DebugEcho("charset: $charset");
-    DebugEcho("encoding: $contenttransferencoding");
+    DebugEcho("email charset: $charset");
+    DebugEcho("email encoding: $contenttransferencoding");
     //DebugDump($body);
 
     if ($contenttransferencoding == 'base64') {
