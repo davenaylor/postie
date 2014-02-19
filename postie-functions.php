@@ -839,7 +839,7 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
                 $emails[$i] = implode('', $m);
                 if ($deleteMessages) {
                     if (!$pop3->delete($i)) {
-                        EchoInfo('POP3MessageFetch: cannot delete message $i ' . $pop3->ERROR);
+                        EchoInfo("POP3MessageFetch: cannot delete message $i: " . $pop3->ERROR);
                         $pop3->reset();
                         exit;
                     }
