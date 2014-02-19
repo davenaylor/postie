@@ -117,13 +117,12 @@
     * {MEDIUMWIDTH} gets replaced with the width of a medium image
     * {MEDIUM} gets replaced with the url to the medium-sized image
     * {PAGELINK} gets replaced with the URL of the file in WordPress
-    * {POSTTITLE} gets replaced with the post title (subject)
     * {RELFILENAME} gets replaced with the relative path to the full-size image
     * {THUMBHEIGHT} gets replaced with the height of a thumbnail image
     * {THUMB} gets replaced with the url to the thumbnail image
     * {THUMBNAIL} same as {THUMB}
     * {THUMBWIDTH} gets replaced with the width of a thumbnail image
-    * {TITLE} same as {POSTTITLE}
+    * {TITLE} same as {FILENAME}
     * {URL} same as {FILELINK}
     * {WIDTH} gets replaced with width of the photo
     * {ICON} insert the icon for the attachment (for non-audio/image/video attachments only)

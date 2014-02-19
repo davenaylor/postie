@@ -2269,7 +2269,6 @@ function parseTemplate($id, $type, $template, $orig_filename, $icon = "") {
     $template = str_replace('{IMAGE}', $fileLink, $template);
     $template = str_replace('{URL}', $fileLink, $template);
     $template = str_replace('{RELFILENAME}', $relFileName, $template);
-    $template = str_replace('{POSTTITLE}', $the_parent->post_title, $template);
     $template = str_replace('{ICON}', $icon, $template);
 
     DebugEcho("parseTemplate - after: $template");
