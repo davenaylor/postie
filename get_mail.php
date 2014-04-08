@@ -3,8 +3,9 @@
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-wp-config.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mimedecode.php');
 require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
-if (!function_exists('file_get_html'))
+if (!function_exists('file_get_html')) {
     require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . 'simple_html_dom.php');
+}
 
 EchoInfo("Starting mail fetch");
 postie_environment();
@@ -15,23 +16,25 @@ if (file_exists($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php")) {
     include_once ($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php");
 }
 
-if (has_filter('postie_post')){
+if (has_filter('postie_post')) {
     echo "Postie: filter 'postie_post' is depricated in favor of 'postie_post_before'";
 }
 
 $test_email = null;
 $config = config_Read();
 extract($config);
-if (!isset($maxemails))
+if (!isset($maxemails)) {
     $maxemails = 0;
+}
 
 $emails = FetchMail($mail_server, $mail_server_port, $mail_userid, $mail_password, $input_protocol, $time_offset, $test_email, $delete_mail_after_processing, $maxemails, $email_tls);
 $message = 'Done.';
 
 EchoInfo(sprintf(__("There are %d messages to process", "postie"), count($emails)));
 
-if (function_exists('memory_get_usage'))
+if (function_exists('memory_get_usage')) {
     DebugEcho(__("memory at start of e-mail processing:") . memory_get_usage());
+}
 
 DebugDump($config);
 
@@ -66,6 +69,6 @@ foreach ($emails as $email) {
 }
 EchoInfo("Mail fetch complete, $message_number emails");
 
-if (function_exists('memory_get_usage'))
+if (function_exists('memory_get_usage')) {
     DebugEcho("memory at end of e-mail processing:" . memory_get_usage());
-?>
+}

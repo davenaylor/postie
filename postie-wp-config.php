@@ -11,4 +11,3 @@ if (file_exists($wp_config_path . DIRECTORY_SEPARATOR . "wp-config.php")) {
 } else {
     die("wp-config.php could not be found.");
 }
-?>

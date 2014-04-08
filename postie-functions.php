@@ -11,7 +11,7 @@ class PostiePostModifiers {
 
     var $PostFormat = 'standard';
 
-    function apply($postid, $postdetails) {
+    function apply($postid) {
 
         if ($this->PostFormat != 'standard') {
             set_post_format($postid, $this->PostFormat);
@@ -26,8 +26,7 @@ if (!function_exists('mb_str_replace')) {
         if (!is_array($subject)) {
             // Normalize $search and $replace so they are both arrays of the same length
             $searches = is_array($search) ? array_values($search) : array($search);
-            $replacements = is_array($replace) ? array_values($replace) : array($replace);
-            $replacements = array_pad($replacements, count($searches), '');
+            $replacements = array_pad(is_array($replace) ? array_values($replace) : array($replace), count($searches), '');
 
             foreach ($searches as $key => $search) {
                 $parts = mb_split(preg_quote($search), $subject);
@@ -119,11 +118,8 @@ function postie_disable_revisions($restore = false) {
 if (!function_exists('fnmatch')) {
 
     function fnmatch($pattern, $string) {
-        $pattern = strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' =>
-            '.', '\[' => '[', '\]' => ']'));
-        return @preg_match(
-                        '/^' . strtr(addcslashes($pattern, '/\\.+^$(){}=!<>|'), array('*' => '.*', '?' => '.?')) . '$/i', $string
-        );
+        $pattern = strtr(preg_quote($pattern, '#'), array('\*' => '.*', '\?' => '.', '\[' => '[', '\]' => ']'));
+        return preg_match('/^' . strtr(addcslashes($pattern, '/\\.+^$(){}=!<>|'), array('*' => '.*', '?' => '.?')) . '$/i', $string);
     }
 
 }
@@ -176,6 +172,7 @@ function tag_Date(&$content, $message_date) {
         DebugEcho("tag_Date: html " . count($es));
         foreach ($es as $e) {
             DebugEcho(trim($e->plaintext));
+            $matches = array();
             if (1 === preg_match("/^date:\s?(.*)$/im", trim($e->plaintext), $matches)) {
                 DebugEcho("tag_Date: found date tag $matches[1]");
                 $newdate = strtotime($matches[1]);
@@ -214,31 +211,37 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
 
     if (array_key_exists('message-id', $mimeDecodedEmail->headers)) {
         DebugEcho("Message Id is :" . htmlentities($mimeDecodedEmail->headers["message-id"]));
-        if ($fulldebugdump)
+        if ($fulldebugdump) {
             DebugDump($mimeDecodedEmail);
+        }
     }
 
     filter_PreferedText($mimeDecodedEmail, $prefer_text_type);
-    if ($fulldebugdump)
+    if ($fulldebugdump) {
         DebugDump($mimeDecodedEmail);
+    }
 
     $content = GetContent($mimeDecodedEmail, $attachments, $post_id, $poster, $config);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("the content is $content");
+    }
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
 
     filter_RemoveSignature($content, $config);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post sig: $content");
+    }
 
     $post_excerpt = tag_Excerpt($content, $config);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post excerpt: $content");
+    }
 
     $postAuthorDetails = getPostAuthorDetails($subject, $content, $mimeDecodedEmail);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post author: $content");
+    }
 
     $message_date = NULL;
     if (array_key_exists("date", $mimeDecodedEmail->headers) && !empty($mimeDecodedEmail->headers["date"])) {
@@ -255,54 +258,66 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     $message_date = tag_Date($content, $message_date);
 
     list($post_date, $post_date_gmt, $delay) = filter_Delay($content, $message_date, $time_offset);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post date: $content");
+    }
 
     filter_Ubb2HTML($content);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post ubb: $content");
+    }
 
     $post_categories = tag_Categories($subject, $default_post_category, $category_match);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post category: $content");
+    }
 
     $post_tags = tag_Tags($content, $default_post_tags);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post tag: $content");
+    }
 
     $comment_status = tag_AllowCommentsOnPost($content);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post comment: $content");
+    }
 
     $post_status = tag_Status($content, $post_status);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post status: $content");
+    }
 
     if ($converturls) {
         $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
-        if ($fulldebug)
+        if ($fulldebug) {
             DebugEcho("post video: $content");
+        }
 
         $content = filter_Linkify($content);
-        if ($fulldebug)
+        if ($fulldebug) {
             DebugEcho("post linkify: $content");
+        }
     }
 
     filter_VodafoneHandler($content, $attachments, $config);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post vodafone: $content");
+    }
 
     filter_ReplaceImageCIDs($content, $attachments, $config);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post cid: $content");
+    }
 
     $customImages = tag_CustomImageField($content, $attachments, $config);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post custom: $content");
+    }
 
     $post_type = tag_PostType($subject, $postmodifiers, $config);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post type: $content");
+    }
 
     $id = GetParentPostForReply($subject);
     if (empty($id)) {
@@ -345,25 +360,30 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     }
 
     filter_Newlines($content, $config);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post newline: $content");
+    }
 
     filter_Start($content, $config);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post start: $content");
+    }
 
     filter_End($content, $config);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post end: $content");
+    }
 
     filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], true);
-    if ($fulldebug)
+    if ($fulldebug) {
         DebugEcho("post body img: $content");
+    }
 
     if ($post_excerpt) {
         filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config, $id, "#eimg%#", false);
-        if ($fulldebug)
+        if ($fulldebug) {
             DebugEcho("post excerpt img: $content");
+        }
     }
 
     DebugEcho("excerpt: $post_excerpt");
@@ -421,8 +441,6 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     DebugEcho(("Post postie_post filter"));
     DebugDump($details);
 
-    DebugEcho("Post modifiers");
-    DebugDump($postmodifiers);
 
     if (empty($details)) {
         // It is possible that the filter has removed the post, in which case, it should not be posted.
@@ -472,9 +490,7 @@ function tag_PostType(&$subject, $postmodifiers, $config) {
     if (strpos($subject, $custom_post_type_delim) !== FALSE) {
         // Captures the custom post type in the subject before $custom_post_type_delim
         $separated_subject = explode($custom_post_type_delim, $subject);
-        $custom_post_type = $separated_subject[0];
-
-        $custom_post_type = trim(strtolower($custom_post_type));
+        $custom_post_type = trim(strtolower($separated_subject[0]));
         DebugEcho("post type: found possible type '$custom_post_type'");
     }
 
@@ -621,6 +637,7 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
     }
 
     // see if subject starts with Fwd:
+    $matches = array();
     if (preg_match("/(^Fwd:) (.*)/", $subject, $matches)) {
         DebugEcho("Fwd: detected");
         $subject = trim($matches[2]);
@@ -674,6 +691,7 @@ function GetParentPostForReply(&$subject) {
     $id = NULL;
 
     // see if subject starts with Re:
+    $matches = array();
     if (preg_match("/(^Re:)(.*)/i", $subject, $matches)) {
         $subject = trim($matches[2]);
         // strip out category info into temporary variable
@@ -682,6 +700,7 @@ function GetParentPostForReply(&$subject) {
             $tmpSubject = trim($matches[2]);
             $matches[1] = array($matches[1]);
         } else if (preg_match_all('/\[(.[^\[]*)\]/', $tmpSubject, $matches)) {
+            $tmpSubject_matches = array();
             preg_match("/](.[^\[]*)$/", $tmpSubject, $tmpSubject_matches);
             $tmpSubject = trim($tmpSubject_matches[1]);
         } else if (preg_match_all('/-(.[^-]*)-/', $tmpSubject, $matches)) {
@@ -907,7 +926,7 @@ function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
             }
         }
 
-        $postmodifiers->apply($post_ID, $details);
+        $postmodifiers->apply($post_ID);
 
         apply_filters('postie_post_after', $details);
     }
