@@ -22,6 +22,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.20 (future) =
+* 
+
 = 1.5.19 (2014.04.30) =
 * Updated image preview to recognize all variables.
 * Updated "wordpress_default" images template to match WP 3.8.
