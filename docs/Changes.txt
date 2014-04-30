@@ -22,11 +22,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.19 (future) =
+= 1.5.19 (2014.04.30) =
 * Updated image preview to recognize all variables.
 * Updated "wordpress_default" images template to match WP 3.8.
 * Clarified logging messages for IMAP/IMAP-SSL/POP3-SSL
 * Removed POSTTITLE from templates since we don't know the actual title at template time.
+* Verified WordPress 3.9 compatibility
 
 = 1.5.18 (2014.01.12) =
 * Reverted text encoding change in 1.5.17.

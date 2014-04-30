@@ -108,9 +108,7 @@
     </form>
 
     <form name="postie-options" method="post" action='options.php' autocomplete="off">
-        <?php
-        settings_fields('postie-settings');
-        ?>
+        <?php settings_fields('postie-settings'); ?>
         <input type="hidden" name="action" value="config" />
         <div id="simpleTabs">
             <div class="simpleTabs-nav">
@@ -187,7 +185,7 @@
                     </tr>
                     <tr>
                         <th>
-                            <?php _e('Check for mail every', 'postie') ?>
+                            <?php _e('Check for mail every', 'postie') ?>:
                         </th>
                         <td>
                             <select name='postie-settings[interval]' id='postie-settings-interval'>
@@ -328,7 +326,7 @@
 
                     <tr valign="top">
                         <th scope="row">
-                            <?php _e('Default post by mail tag(s)', 'postie') ?><br />
+                            <?php _e('Default post by mail tag(s)', 'postie') ?>:<br />
                             <span
                                 class='recommendation'><?php _e('separated by commas', 'postie') ?>
                             </span>
@@ -451,7 +449,7 @@
                     ?>
                     <tr>
                         <th>
-                            <?php _e("Send post confirmation e-mail to", 'postie') ?>
+                            <?php _e("Send post confirmation e-mail to", 'postie') ?>:
                         </th>
                         <td>
                             <select name='postie-settings[confirmation_email]' id='postie-settings-confirmation_email'>
@@ -500,7 +498,7 @@
                         </td> 
                     </tr> 
                     <tr>
-                        <th width="33%" valign="top" scope="row"><?php _e('Image Template', 'postie') ?><br />
+                        <th width="33%" valign="top" scope="row"><?php _e('Image Template', 'postie') ?>:<br />
                             <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie'); ?></span><br /><br />
                             <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br /><br />
                             <span class='recommendation'><?php _e('Sizes for thumbnail, medium, and large images can be chosen in the <a href="options-media.php">Media Settings</a>. The samples here use the default sizes, and will not reflect the sizes you have chosen.', 'postie'); ?></span>
@@ -579,7 +577,7 @@
                 <table class='form-table'>
 
                     <tr>
-                        <th scope='row'><?php _e('Video template 1', 'postie') ?><br />
+                        <th scope='row'><?php _e('Video template 1', 'postie') ?>:<br />
                             <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span><br />
                             <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br />
                         </th>
@@ -628,7 +626,7 @@
                     </tr> 
                     <tr><td colspan="2"><hr /></td></tr>
                     <tr>
-                        <th scope='row'><?php _e('Video template 2', 'postie') ?><br />
+                        <th scope='row'><?php _e('Video template 2', 'postie') ?>:<br />
                             <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span><br/>
                             <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br />
                         </th>
@@ -679,7 +677,7 @@
                     </tr> 
                     <tr><td colspan="2"><hr /></td></tr>
                     <tr>
-                        <th scope='row'><?php _e('Audio template', 'postie') ?><br />
+                        <th scope='row'><?php _e('Audio template', 'postie') ?>:<br />
                             <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span>
                             <br />
                             <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br />
@@ -734,7 +732,7 @@
                 <table class='form-table'>
 
                     <tr>
-                        <th scope='row'><?php _e('Attachment icon set', 'postie') ?><br /></th>
+                        <th scope='row'><?php _e('Attachment icon set', 'postie') ?>:<br /></th>
                         <td>
                             <input type='hidden' id='postie-settings-icon_set' name='postie-settings[icon_set]'
                                    value="<?php echo esc_attr($icon_set) ?>" />
@@ -763,7 +761,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <th scope='row'><?php _e('Attachment icon size (in pixels)', 'postie') ?><br /></th>
+                        <th scope='row'><?php _e('Attachment icon size (in pixels)', 'postie') ?>:<br /></th>
                         <td>
                             <input type='hidden' id='postie-settings-icon_size' name='postie-settings[icon_size]'
                                    value="<?php echo esc_attr($icon_size) ?>" />
@@ -786,7 +784,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <th scope='row'><?php _e('Attachment template', 'postie') ?><br />
+                        <th scope='row'><?php _e('Attachment template', 'postie') ?>:<br />
                             <span class='recommendation'><?php _e('Choose a default template, then customize to your liking in the text box', 'postie') ?></span>
                             <br />
                             <span class='recommendation'><?php _e('Note that this template are only used if the "Preferred Text Type" setting is set to "plain"', 'postie'); ?></span><br />

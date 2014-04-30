@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
-Tested up to: 3.8
-Stable tag: 1.5.18
+Tested up to: 3.9
+Stable tag: 1.5.19
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -198,13 +198,12 @@ Then use the Task Scheduler control panel to call wget or cron.
     * {MEDIUMWIDTH} gets replaced with the width of a medium image
     * {MEDIUM} gets replaced with the url to the medium-sized image
     * {PAGELINK} gets replaced with the URL of the file in WordPress
-    * {POSTTITLE} gets replaced with the post title (subject)
     * {RELFILENAME} gets replaced with the relative path to the full-size image
     * {THUMBHEIGHT} gets replaced with the height of a thumbnail image
     * {THUMB} gets replaced with the url to the thumbnail image
     * {THUMBNAIL} same as {THUMB}
     * {THUMBWIDTH} gets replaced with the width of a thumbnail image
-    * {TITLE} same as {POSTTITLE}
+    * {TITLE} same as {FILENAME}
     * {URL} same as {FILELINK}
     * {WIDTH} gets replaced with width of the photo
     * {ICON} insert the icon for the attachment (for non-audio/image/video attachments only)
@@ -445,9 +444,15 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.19 (2014.04.30) =
+* Updated image preview to recognize all variables.
+* Updated "wordpress_default" images template to match WP 3.8.
+* Clarified logging messages for IMAP/IMAP-SSL/POP3-SSL
+* Removed POSTTITLE from templates since we don't know the actual title at template time.
+* Verified WordPress 3.9 compatibility
+
 = 1.5.18 (2014.01.12) =
 * Reverted text encoding change in 1.5.17.
-
 
 = 1.5.17 (2013.12.19) =
 * Fixed date calculation in test screen.

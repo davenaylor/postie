@@ -689,10 +689,11 @@ function GetParentPostForReply(&$subject) {
     global $wpdb;
 
     $id = NULL;
-
+    DebugEcho("GetParentPostForReply: Looking for parent '$subject'");
     // see if subject starts with Re:
     $matches = array();
     if (preg_match("/(^Re:)(.*)/i", $subject, $matches)) {
+        DebugEcho("GetParentPostForReply: Re: detected");
         $subject = trim($matches[2]);
         // strip out category info into temporary variable
         $tmpSubject = $subject;
@@ -707,12 +708,18 @@ function GetParentPostForReply(&$subject) {
             preg_match("/-(.[^-]*)$/", $tmpSubject, $tmpSubject_matches);
             $tmpSubject = trim($tmpSubject_matches[1]);
         }
+        DebugEcho("GetParentPostForReply: tmpSubject: $tmpSubject");
         $checkExistingPostQuery = "SELECT ID FROM $wpdb->posts WHERE  post_title = %s AND post_status = 'publish'";
         if ($id = $wpdb->get_var($wpdb->prepare($checkExistingPostQuery, $tmpSubject))) {
             if (is_array($id)) {
                 $id = $id[count($id) - 1];
+                DebugEcho("GetParentPostForReply: id: $id");
+            } else {
+                DebugEcho("GetParentPostForReply: No parent id found");
             }
         }
+    } else {
+        DebugEcho("GetParentPostForReply: No parent found");
     }
     return $id;
 }
