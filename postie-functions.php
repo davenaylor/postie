@@ -374,7 +374,9 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         DebugEcho("post end: $content");
     }
 
-    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], true);
+    DebugEcho("prefer_text_type: $prefer_text_type");
+
+    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], ($prefer_text_type == 'plain'));
     if ($fulldebug) {
         DebugEcho("post body img: $content");
     }
@@ -899,6 +901,8 @@ function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
             EchoInfo("Error: " . $post_ID->get_error_message());
             wp_delete_post($details['ID']);
         }
+        //evidently post_category was depricated at some point.
+        wp_set_post_terms($post_ID, $details['post_category']);
     } else {
         $comment = array(
             'comment_author' => $details['comment_author'],
@@ -2370,6 +2374,8 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
                 DebugEcho("Auto gallery: prepend");
             }
             return;
+        } else {
+            DebugEcho("Auto gallery: none");
         }
 
         $pics = "";
@@ -2418,10 +2424,14 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
         }
         if ($autoadd_images) {
             if ($config['images_append']) {
+                DebugEcho("auto adding images to end");
                 $content .= $pics;
             } else {
+                DebugEcho("auto adding images to beginning");
                 $content = $pics . $content;
             }
+        } else {
+            DebugEcho("Not auto adding images");
         }
     }
 }
