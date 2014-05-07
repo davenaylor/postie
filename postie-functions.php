@@ -2433,6 +2433,8 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
         } else {
             DebugEcho("Not auto adding images");
         }
+    } else {
+        DebugEcho("Custom image field, not adding images");
     }
 }
 
@@ -2662,19 +2664,25 @@ function DisplayEmailPost($details) {
  * @param string
  * @param string
  */
-function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL) {
+function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL, $options = null) {
+    
     $html = "<tr>
 	<th scope='row'>" . $label . ":";
     if (!empty($recommendation)) {
         $html.='<br /><span class = "recommendation">' . $recommendation . '</span>';
     }
+    
+    if (!(is_array($options) && count($options) == 2)) {
+        $options = Array('Yes', 'No');
+    }
+    
     $html.="</th>
 	<td><select name='$id' id='$id'>
-            <option value='1'>" . __("Yes", 'postie') . "</option>
-            <option value='0' " . (!$current_value ? "selected='selected'" : "") . ">" . __("No", 'postie') . '</option>
+            <option value='1'>" . __($options[0], 'postie') . "</option>
+            <option value='0' " . (!$current_value ? "selected='selected'" : "") . ">" . __($options[1], 'postie') . '</option>
     </select>';
-
     $html.="</td>\n</tr>";
+    
     return $html;
 }
 

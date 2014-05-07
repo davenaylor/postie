@@ -322,7 +322,7 @@
                             wp_dropdown_categories($args);
                             ?>
                     </tr>
-                    <?php echo BuildBooleanSelect("Match short category", "postie-settings[category_match]", $category_match, "Try to match categories using 'starts with logic' otherwise only do exact matches"); ?>
+                    <?php echo BuildBooleanSelect("Match short category", "postie-settings[category_match]", $category_match, "Try to match categories using 'starts with logic' otherwise only do exact matches.<br />Note that custom taxonomies will not be found if this setting is 'No'"); ?>
 
                     <tr valign="top">
                         <th scope="row">
@@ -487,8 +487,8 @@
                     <?php
                     echo BuildBooleanSelect("Use First Image as Featured Image", "postie-settings[featured_image]", $featured_image, "If any images are attached, the first one will be the featured image for the post");
                     echo BuildBooleanSelect("Automatically insert image gallery", "postie-settings[auto_gallery]", $auto_gallery, "If any images are attached, they will automatically be inserted as a gallery");
-                    echo BuildBooleanSelect("Post Images At End", "postie-settings[images_append]", $images_append, "No means they will be put before the text of the message.");
-                    echo BuildBooleanSelect("Start Image Count At 0", "postie-settings[start_image_count_at_zero]", $start_image_count_at_zero);
+                    echo BuildBooleanSelect("Image Location", "postie-settings[images_append]", $images_append, "No means they will be put before the text of the message.", array('After', 'Before'));
+                    echo BuildBooleanSelect("Start Image Count At 0", "postie-settings[start_image_count_at_zero]", $start_image_count_at_zero, '', array('Start at 0', 'Start at 1'));
                     echo BuildBooleanSelect("Generate Thumbnails", "postie-settings[generate_thumbnails]", $generate_thumbnails, "Some hosts crash during thumbnail generation. Set this to 'No' if you have this issue.");
                     ?>
                     <tr> 
@@ -565,7 +565,6 @@
                             </div>
                         </td>
                     </tr> 
-                    <?php echo BuildBooleanSelect("Use custom image field", "postie-settings[custom_image_field]", $custom_image_field, "When true, images will not appear in the post. Instead the url to the image will be input into a custom field named 'image'."); ?>            
                 </table> 
             </div> 
 
@@ -823,6 +822,7 @@
                                       name='postie-settings[generaltemplate]'><?php echo esc_attr($generaltemplate) ?></textarea>
                         </td>
                     </tr>
+                    <?php echo BuildBooleanSelect("Use custom image field for attachements", "postie-settings[custom_image_field]", $custom_image_field, "When set to 'Yes' no attachements will appear in the post (including images, video &amp; sound files). Instead the url to the attachement will be put into a custom field named 'image'. Your theme will need logic to display these attachements."); ?>            
                 </table> 
             </div>
             <div id="simpleTabs-content-7" class="simpleTabs-content">

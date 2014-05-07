@@ -23,7 +23,8 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.5.20 (future) =
-* Added logic to prevent appending images when preferred text type is HTML
+* Added logic to prevent appending images when preferred text type is HTML.
+* Improved help text on several options and clarified options.
 
 = 1.5.19 (2014.04.30) =
 * Updated image preview to recognize all variables.
