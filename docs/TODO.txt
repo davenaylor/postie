@@ -6,12 +6,13 @@ date: tag is being detected in body when not wanted
 Update tag_* and filter_* to handle HTML (per tag_Tags)
 dynamically determine video size (height/width) - https://code.google.com/p/phpvideotoolkit/
 gallery logic does not handle both images and non-images
-plugin conflict - Image Rotation Fixer
+plugin conflict - Image Rotation Fixer/Image Rotation Repair
 send email notice when attachments are rejected.
 review http://wp.smashingmagazine.com/2011/11/23/improve-wordpress-plugins-readme-txt/
 more info in postie.txt
 configurable message for "post confirmation" - variable substitution
-hook for post failure, success
+hook for post failure, success, media attachment
+collect and send last debug log and system info (see http://wordpress.org/plugins/send-system-info/)
 
 =========
 AddOn Ideas

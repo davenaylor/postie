@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
-Tested up to: 3.9
-Stable tag: 1.5.19
+Tested up to: 3.9.1
+Stable tag: 1.5.20
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -444,6 +444,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.20 (2014.05.29) =
+* Added logic to prevent appending images when preferred text type is HTML.
+* Improved help text on several options and clarified options.
+* Additional logging around attachment uploading
+
 = 1.5.19 (2014.04.30) =
 * Updated image preview to recognize all variables.
 * Updated "wordpress_default" images template to match WP 3.8.

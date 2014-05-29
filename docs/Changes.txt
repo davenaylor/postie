@@ -22,9 +22,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.20 (future) =
+= 1.5.20 (2014.05.29) =
 * Added logic to prevent appending images when preferred text type is HTML.
 * Improved help text on several options and clarified options.
+* Additional logging around attachment uploading
 
 = 1.5.19 (2014.04.30) =
 * Updated image preview to recognize all variables.

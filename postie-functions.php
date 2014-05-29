@@ -1835,6 +1835,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
     if (file_exists(ABSPATH . '/wp-admin/includes/image.php')) {
         include_once(ABSPATH . '/wp-admin/includes/image.php');
         include_once(ABSPATH . '/wp-admin/includes/media.php');
+        DebugEcho("reading metadata");
         if ($image_meta = @wp_read_image_metadata($file)) {
             if (trim($image_meta['title'])) {
                 $title = $image_meta['title'];
@@ -1842,7 +1843,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
             }
             if (trim($image_meta['caption'])) {
                 $content = $image_meta['caption'];
-                DebugEcho("Using metadata caption: $caption");
+                DebugEcho("Using metadata caption: $content");
             }
         }
     }
@@ -1859,8 +1860,10 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
             ), $post_data);
 
     // Save the data
+    DebugEcho("before wp_insert_attachment");
     $id = wp_insert_attachment($attachment, $file, $post_id);
-    DebugEcho("attachement id: $id");
+    DebugEcho("after wp_insert_attachment: attachement id: $id");
+    
     if (!is_wp_error($id)) {
         if ($generate_thubnails) {
             $amd = wp_generate_attachment_metadata($id, $file);
@@ -1905,20 +1908,21 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         __("Failed to write file to disk."));
 
     // Install user overrides. Did we mention that this voids your warranty?
-    if (is_array($overrides))
+    if (is_array($overrides)) {
         extract($overrides, EXTR_OVERWRITE);
-
+    }
     // A successful upload will pass this test. It makes no sense to override this one.
-    if ($file['error'] > 0)
+    if ($file['error'] > 0) {
         return $upload_error_handler($file, $upload_error_strings[$file['error']]);
-
+    }
     // A non-empty file will pass this test.
-    if (!($file['size'] > 0 ))
+    if (!($file['size'] > 0 )) {
         return $upload_error_handler($file, __('File is empty. Please upload something more substantial. This error could also be caused by uploads being disabled in your php.ini.'));
-
+    }
     // A properly uploaded file will pass this test. There should be no reason to override this one.
-    if (!file_exists($file['tmp_name']))
+    if (!file_exists($file['tmp_name'])) {
         return $upload_error_handler($file, __('Specified file failed upload test.'));
+    }
     // A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
 
     $wp_filetype = wp_check_filetype($file['name']);
@@ -1926,19 +1930,19 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
 
     extract($wp_filetype);
 
-    if ((!$type || !$ext ) && !current_user_can('unfiltered_upload'))
+    if ((!$type || !$ext ) && !current_user_can('unfiltered_upload')) {
         return $upload_error_handler($file, __('File type does not meet security guidelines. Try another.'));
-
-    if (!$ext)
+    }
+    if (!$ext) {
         $ext = ltrim(strrchr($file['name'], '.'), '.');
-
-    if (!$type)
+    }
+    if (!$type) {
         $type = $file['type'];
-
+    }
     // A writable uploads dir will pass this test. Again, there's no point overriding this one.
-    if (!( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] ))
+    if (!( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] )) {
         return $upload_error_handler($file, $uploads['error']);
-
+    }
     // fix filename (encode non-standard characters)
     $file['name'] = filename_fix($file['name']);
     $filename = wp_unique_filename($uploads['path'], $file['name']);
@@ -1946,23 +1950,29 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
 
     // Move the file to the uploads dir
     $new_file = $uploads['path'] . "/$filename";
-    if (false === @ rename($file['tmp_name'], $new_file)) {
+    if (false === rename($file['tmp_name'], $new_file)) {
         DebugEcho("upload: rename failed");
+        DebugEcho("old file: " . $file['tmp_name']);
         DebugEcho("new file: $new_file");
         //DebugDump($file);
         //DebugDump($uploads);
         return $upload_error_handler($file, sprintf(__('The uploaded file could not be moved to %s.'), $uploads['path']));
+    } else {
+        DebugEcho("upload: rename to $new_file succeeded");
     }
 
     // Set correct file permissions
     $stat = stat(dirname($new_file));
     $perms = $stat['mode'] & 0000666;
-    @ chmod($new_file, $perms);
+    @chmod($new_file, $perms);
+    DebugEcho("upload: permissions changed");
 
     // Compute the URL
     $url = $uploads['url'] . "/$filename";
 
+    DebugEcho("upload: before apply_filters");
     $return = apply_filters('wp_handle_upload', array('file' => $new_file, 'url' => $url, 'type' => $type));
+    DebugEcho("upload: after apply_filters");
 
     return $return;
 }
@@ -2665,24 +2675,24 @@ function DisplayEmailPost($details) {
  * @param string
  */
 function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL, $options = null) {
-    
+
     $html = "<tr>
 	<th scope='row'>" . $label . ":";
     if (!empty($recommendation)) {
         $html.='<br /><span class = "recommendation">' . $recommendation . '</span>';
     }
-    
+
     if (!(is_array($options) && count($options) == 2)) {
         $options = Array('Yes', 'No');
     }
-    
+
     $html.="</th>
 	<td><select name='$id' id='$id'>
             <option value='1'>" . __($options[0], 'postie') . "</option>
             <option value='0' " . (!$current_value ? "selected='selected'" : "") . ">" . __($options[1], 'postie') . '</option>
     </select>';
     $html.="</td>\n</tr>";
-    
+
     return $html;
 }
 
