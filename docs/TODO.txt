@@ -13,6 +13,7 @@ more info in postie.txt
 configurable message for "post confirmation" - variable substitution
 hook for post failure, success, media attachment
 collect and send last debug log and system info (see http://wordpress.org/plugins/send-system-info/)
+Support EXIF orientation via PHP Exif Library https://github.com/lsolesen/pel
 
 =========
 AddOn Ideas

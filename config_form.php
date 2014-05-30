@@ -822,7 +822,7 @@
                                       name='postie-settings[generaltemplate]'><?php echo esc_attr($generaltemplate) ?></textarea>
                         </td>
                     </tr>
-                    <?php echo BuildBooleanSelect("Use custom image field for attachements", "postie-settings[custom_image_field]", $custom_image_field, "When set to 'Yes' no attachements will appear in the post (including images, video &amp; sound files). Instead the url to the attachement will be put into a custom field named 'image'. Your theme will need logic to display these attachements."); ?>            
+                    <?php echo BuildBooleanSelect("Use custom image field for attachments", "postie-settings[custom_image_field]", $custom_image_field, "When set to 'Yes' no attachments will appear in the post (including images, video &amp; sound files). Instead the url to the attachment will be put into a custom field named 'image'. Your theme will need logic to display these attachments."); ?>            
                 </table> 
             </div>
             <div id="simpleTabs-content-7" class="simpleTabs-content">
