@@ -487,12 +487,14 @@
                     <?php
                     echo BuildBooleanSelect("Use First Image as Featured Image", "postie-settings[featured_image]", $featured_image, "If any images are attached, the first one will be the featured image for the post");
                     echo BuildBooleanSelect("Automatically insert image gallery", "postie-settings[auto_gallery]", $auto_gallery, "If any images are attached, they will automatically be inserted as a gallery");
-                    echo BuildBooleanSelect("Image Location", "postie-settings[images_append]", $images_append, "No means they will be put before the text of the message.", array('After', 'Before'));
-                    echo BuildBooleanSelect("Start Image Count At 0", "postie-settings[start_image_count_at_zero]", $start_image_count_at_zero, '', array('Start at 0', 'Start at 1'));
+                    echo BuildBooleanSelect("Image Location", "postie-settings[images_append]", $images_append, "Location of attachments if using 'plain' format. Before or After content.", array('After', 'Before'));
+                    echo BuildBooleanSelect("Start Image Count At", "postie-settings[start_image_count_at_zero]", $start_image_count_at_zero, 'For use if using "Image Place Holder Tag" below.', array('Start at 0', 'Start at 1'));
                     echo BuildBooleanSelect("Generate Thumbnails", "postie-settings[generate_thumbnails]", $generate_thumbnails, "Some hosts crash during thumbnail generation. Set this to 'No' if you have this issue.");
                     ?>
                     <tr> 
-                        <th width="33%" valign="top" scope="row"><?php _e('Image Place Holder Tag:', 'postie') ?> </th> 
+                        <th width="33%" valign="top" scope="row"><?php _e('Image Place Holder Tag:', 'postie') ?>  <br />
+                            <span class='recommendation'>For use in 'plain' messages. The code for inserting an image. I.e. put "#img1# in your email where you want the first image to show. See also "Start Image Count At" </span>
+                        </th> 
                         <td>
                             <input name='postie-settings[image_placeholder]' type="text" id='postie-settings-image_placeholder' value="<?php echo esc_attr($image_placeholder); ?>" size="50" /><br />
                         </td> 

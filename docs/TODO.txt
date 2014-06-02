@@ -11,7 +11,33 @@ send email notice when attachments are rejected.
 review http://wp.smashingmagazine.com/2011/11/23/improve-wordpress-plugins-readme-txt/
 more info in postie.txt
 configurable message for "post confirmation" - variable substitution
-hook for post failure, success, media attachment
+add hook for post meta data change
+  post type
+  post format
+  category
+  date
+  comment control
+  excerpt
+  tags
+  author
+add hooks for content changes
+  attachment template
+  subject/title
+  post begin
+  post end
+  signature strip
+hook for actions
+  post failure
+  post success
+  media attachment
+  non-permitted attachment types
+  email rejected
+  email connection failure
+  start check
+  end check
+  mail read
+  mail delete
+  content part
 collect and send last debug log and system info (see http://wordpress.org/plugins/send-system-info/)
 Support EXIF orientation via PHP Exif Library https://github.com/lsolesen/pel
 

@@ -281,5 +281,3 @@ function postie_more_reccurences($schedules) {
 
     return $schedules;
 }
-
-?>

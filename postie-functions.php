@@ -1863,7 +1863,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
     DebugEcho("before wp_insert_attachment");
     $id = wp_insert_attachment($attachment, $file, $post_id);
     DebugEcho("after wp_insert_attachment: attachement id: $id");
-    
+
     if (!is_wp_error($id)) {
         if ($generate_thubnails) {
             $amd = wp_generate_attachment_metadata($id, $file);
@@ -2274,11 +2274,21 @@ function parseTemplate($id, $type, $template, $orig_filename, $icon = "") {
         $hwstrings = array();
         $widths = array();
         $heights = array();
+
+        DebugFiltersFor('image_downsize'); //possible overrides for image_downsize()
+
         for ($i = 0; $i < count($sizes); $i++) {
             list( $img_src[$i], $widths[$i], $heights[$i] ) = image_downsize($id, $sizes[$i]);
             $hwstrings[$i] = image_hwstring($widths[$i], $heights[$i]);
         }
     }
+    DebugEcho('Sources');
+    DebugDump($img_src);
+    DebugEcho('Heights');
+    DebugDump($heights);
+    DebugEcho('Widths');
+    DebugDump($widths);
+
     $attachment = get_post($id);
     $the_parent = get_post($attachment->post_parent);
     $uploadDir = wp_upload_dir();
@@ -2383,6 +2393,8 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
                 $content = "$imageTemplate\n" . $content;
                 DebugEcho("Auto gallery: prepend");
             }
+            DebugFiltersFor('post_gallery'); //list gallery handler
+
             return;
         } else {
             DebugEcho("Auto gallery: none");
@@ -3264,4 +3276,12 @@ function filter_VodafoneHandler(&$content, &$attachments, $config) {
     }
 }
 
-?>
+function DebugFiltersFor($hook = '') {
+    global $wp_filter;
+    if (empty($hook) || !isset($wp_filter[$hook])) {
+        DebugEcho("No registered filters for $hook");
+        return;
+    }
+    DebugEcho("Registered filters for $hook");
+    DebugDump($wp_filter[$hook]);
+}
