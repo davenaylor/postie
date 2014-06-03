@@ -38,7 +38,7 @@
       #eimg2# etc.
 
 = Post type/format =
-  You can specify the post type or format by including it as the first part of the subject.
+  You can specify the post type or format by including it as the first part of the subject followed by 2 forward slashes (//).
   E.g. aside//real subject
 
 = Categories =

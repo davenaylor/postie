@@ -1964,7 +1964,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     // Set correct file permissions
     $stat = stat(dirname($new_file));
     $perms = $stat['mode'] & 0000666;
-    @chmod($new_file, $perms);
+    chmod($new_file, $perms);
     DebugEcho("upload: permissions changed");
 
     // Compute the URL
@@ -2274,6 +2274,7 @@ function parseTemplate($id, $type, $template, $orig_filename, $icon = "") {
         $hwstrings = array();
         $widths = array();
         $heights = array();
+        $img_src = array();
 
         DebugFiltersFor('image_downsize'); //possible overrides for image_downsize()
 
@@ -2281,13 +2282,13 @@ function parseTemplate($id, $type, $template, $orig_filename, $icon = "") {
             list( $img_src[$i], $widths[$i], $heights[$i] ) = image_downsize($id, $sizes[$i]);
             $hwstrings[$i] = image_hwstring($widths[$i], $heights[$i]);
         }
+        DebugEcho('Sources');
+        DebugDump($img_src);
+        DebugEcho('Heights');
+        DebugDump($heights);
+        DebugEcho('Widths');
+        DebugDump($widths);
     }
-    DebugEcho('Sources');
-    DebugDump($img_src);
-    DebugEcho('Heights');
-    DebugDump($heights);
-    DebugEcho('Widths');
-    DebugDump($widths);
 
     $attachment = get_post($id);
     $the_parent = get_post($attachment->post_parent);
