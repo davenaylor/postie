@@ -22,10 +22,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.21 (future) =
+= 1.5.21 (2014.06.06) =
 * Fixed spelling errors
 * Added more debugging around image sizes
 * Clarified some image options on settings page
+* Removed call to wp_set_post_terms()
 
 = 1.5.20 (2014.05.29) =
 * Added logic to prevent appending images when preferred text type is HTML.

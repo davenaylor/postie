@@ -902,7 +902,7 @@ function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
             wp_delete_post($details['ID']);
         }
         //evidently post_category was depricated at some point.
-        wp_set_post_terms($post_ID, $details['post_category']);
+        //wp_set_post_terms($post_ID, $details['post_category']);
     } else {
         $comment = array(
             'comment_author' => $details['comment_author'],

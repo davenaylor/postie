@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
 Tested up to: 3.9.1
-Stable tag: 1.5.20
+Stable tag: 1.5.21
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -119,7 +119,7 @@ Then use the Task Scheduler control panel to call wget or cron.
       #eimg2# etc.
 
 = Post type/format =
-  You can specify the post type or format by including it as the first part of the subject.
+  You can specify the post type or format by including it as the first part of the subject followed by 2 forward slashes (//).
   E.g. aside//real subject
 
 = Categories =
@@ -444,6 +444,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.21 (2014.06.06) =
+* Fixed spelling errors
+* Added more debugging around image sizes
+* Clarified some image options on settings page
+* Removed call to wp_set_post_terms()
+
 = 1.5.20 (2014.05.29) =
 * Added logic to prevent appending images when preferred text type is HTML.
 * Improved help text on several options and clarified options.
