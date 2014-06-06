@@ -22,6 +22,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.22 (future) =
+* 
+
 = 1.5.21 (2014.06.06) =
 * Fixed spelling errors
 * Added more debugging around image sizes
