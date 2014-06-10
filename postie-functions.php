@@ -376,7 +376,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
 
     DebugEcho("prefer_text_type: $prefer_text_type");
 
-    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], ($prefer_text_type == 'plain'));
+    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], true);
     if ($fulldebug) {
         DebugEcho("post body img: $content");
     }
