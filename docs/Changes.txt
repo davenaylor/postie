@@ -22,6 +22,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.23 (future) =
+* 
+
 = 1.5.22 (2014.06.10) =
 * Fix missing attachments for html messages
 
