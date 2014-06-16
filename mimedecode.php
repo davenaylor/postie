@@ -58,12 +58,7 @@
  * @version    CVS: $Id: mimeDecode.php 305875 2010-12-01 07:17:10Z alan_k $
  * @link       http://pear.php.net/package/Mail_mime
  */
-/**
- * require PEAR
- *
- * This package depends on PEAR to raise errors.
- */
-require_once 'PEAR.php';
+
 
 /**
  * The Mail_mimeDecode class is used to decode mail/mime messages
@@ -88,7 +83,7 @@ require_once 'PEAR.php';
  * @version    Release: @package_version@
  * @link       http://pear.php.net/package/Mail_mimeDecode
  */
-class Mail_mimeDecode extends PEAR {
+class Mail_mimeDecode {
 
     /**
      * The raw email to decode
@@ -206,7 +201,7 @@ class Mail_mimeDecode extends PEAR {
 
             // Called statically but no input
         } elseif ($isStatic) {
-            return PEAR::raiseError('Called statically and no input given');
+            throw new Exception('Called statically and no input given');
 
             // Called via an object
         } else {
@@ -221,7 +216,7 @@ class Mail_mimeDecode extends PEAR {
 
             $structure = $this->_decode($this->_header, $this->_body);
             if ($structure === false) {
-                $structure = $this->raiseError($this->_error);
+                throw new Exception($this->_error);
             }
         }
 
@@ -245,7 +240,7 @@ class Mail_mimeDecode extends PEAR {
 
         foreach ($headers as $value) {
             $value['value'] = $this->_decode_headers ? $this->_decodeHeader($value['value']) : $value['value'];
-            if (isset($return->headers[strtolower($value['name'])]) AND !is_array($return->headers[strtolower($value['name'])])) {
+            if (isset($return->headers[strtolower($value['name'])]) AND ! is_array($return->headers[strtolower($value['name'])])) {
                 $return->headers[strtolower($value['name'])] = array($return->headers[strtolower($value['name'])]);
                 $return->headers[strtolower($value['name'])][] = $value['value'];
             } elseif (isset($return->headers[strtolower($value['name'])])) {
@@ -323,8 +318,9 @@ class Mail_mimeDecode extends PEAR {
                     for ($i = 0; $i < count($parts); $i++) {
                         list($part_header, $part_body) = $this->_splitBodyHeader($parts[$i]);
                         $part = $this->_decode($part_header, $part_body, $default_ctype);
-                        if ($part === false)
+                        if ($part === false) {
                             $part = $this->raiseError($this->_error);
+                        }
                         $return->parts[] = $part;
                     }
                     break;
@@ -724,15 +720,12 @@ class Mail_mimeDecode extends PEAR {
         switch (strtolower($encoding)) {
             case '7bit':
                 return $input;
-                break;
 
             case 'quoted-printable':
                 return $this->_quotedPrintableDecode($input);
-                break;
 
             case 'base64':
                 return base64_decode($input);
-                break;
 
             default:
                 return $input;
@@ -791,7 +784,7 @@ class Mail_mimeDecode extends PEAR {
                 $d = 0;
                 $len = (int) (((ord(substr($str[$i], 0, 1)) - 32) - ' ') & 077);
 
-                while (($d + 3 <= $len) AND ($pos + 4 <= strlen($str[$i]))) {
+                while (($d + 3 <= $len) AND ( $pos + 4 <= strlen($str[$i]))) {
                     $c0 = (ord(substr($str[$i], $pos, 1)) ^ 0x20);
                     $c1 = (ord(substr($str[$i], $pos + 1, 1)) ^ 0x20);
                     $c2 = (ord(substr($str[$i], $pos + 2, 1)) ^ 0x20);

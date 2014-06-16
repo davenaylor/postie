@@ -216,7 +216,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         }
     }
 
-    filter_PreferedText($mimeDecodedEmail, $prefer_text_type);
+    filter_PreferedText($mimeDecodedEmail, $config['prefer_text_type']);
     if ($fulldebugdump) {
         DebugDump($mimeDecodedEmail);
     }
@@ -257,7 +257,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     }
     $message_date = tag_Date($content, $message_date);
 
-    list($post_date, $post_date_gmt, $delay) = filter_Delay($content, $message_date, $time_offset);
+    list($post_date, $post_date_gmt, $delay) = filter_Delay($content, $message_date, $config['time_offset']);
     if ($fulldebug) {
         DebugEcho("post date: $content");
     }
@@ -267,12 +267,12 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         DebugEcho("post ubb: $content");
     }
 
-    $post_categories = tag_Categories($subject, $default_post_category, $category_match);
+    $post_categories = tag_Categories($subject, $config['default_post_category'], $config['category_match']);
     if ($fulldebug) {
         DebugEcho("post category: $content");
     }
 
-    $post_tags = tag_Tags($content, $default_post_tags);
+    $post_tags = tag_Tags($content, $config['default_post_tags']);
     if ($fulldebug) {
         DebugEcho("post tag: $content");
     }
@@ -287,8 +287,8 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         DebugEcho("post status: $content");
     }
 
-    if ($converturls) {
-        $content = filter_Videos($content, $shortcode); //videos first so linkify doesn't mess with them
+    if ($config['converturls']) {
+        $content = filter_Videos($content, $config['shortcode']); //videos first so linkify doesn't mess with them
         if ($fulldebug) {
             DebugEcho("post video: $content");
         }
@@ -323,8 +323,8 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     if (empty($id)) {
         $id = $post_id;
         $is_reply = false;
-        if ($add_meta == 'yes') {
-            if ($wrap_pre == 'yes') {
+        if ($config['add_meta'] == 'yes') {
+            if ($config['wrap_pre'] == 'yes') {
                 $content = $postAuthorDetails['content'] . "<pre>\n" . $content . "</pre>\n";
                 $content = "<pre>\n" . $content . "</pre>\n";
             } else {
@@ -332,7 +332,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
                 $content = $content;
             }
         } else {
-            if ($wrap_pre == 'yes') {
+            if ($config['wrap_pre'] == 'yes') {
                 $content = "<pre>\n" . $content . "</pre>\n";
             }
         }
@@ -374,7 +374,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         DebugEcho("post end: $content");
     }
 
-    DebugEcho("prefer_text_type: $prefer_text_type");
+    DebugEcho("prefer_text_type: " . $config['prefer_text_type']);
 
     filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], true);
     if ($fulldebug) {
@@ -391,8 +391,8 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     DebugEcho("excerpt: $post_excerpt");
 
     if (trim($subject) == "") {
-        $subject = $default_title;
-        DebugEcho("post parsing subject is blank using: $default_title");
+        $subject = $config['default_title'];
+        DebugEcho("post parsing subject is blank using: " . $config['default_title']);
     }
 
     $details = array(
@@ -2131,8 +2131,9 @@ function DecodeMIMEMail($email) {
     $params['input'] = $email;
     $md = new Mail_mimeDecode($email);
     $decoded = $md->decode($params);
-    if (empty($decoded->parts))
+    if (empty($decoded->parts)) {
         $decoded->parts = array(); // have an empty array at minimum, so that it is safe for "foreach"
+    }
     return $decoded;
 }
 

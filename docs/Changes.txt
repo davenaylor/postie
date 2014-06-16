@@ -23,7 +23,7 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.5.23 (future) =
-* 
+* Remove PEAR/PEAR5 dependency which was causing errors on some systems
 
 = 1.5.22 (2014.06.10) =
 * Fix missing attachments for html messages

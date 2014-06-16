@@ -42,6 +42,20 @@ collect and send last debug log and system info (see http://wordpress.org/plugin
 Support EXIF orientation via PHP Exif Library https://github.com/lsolesen/pel
 
 =========
+Revised parsing logic
+
+convert all logic to filters
+before session filter
+before mail filter
+email/account filter
+attachment filter
+iterate through each html element (p, div, etc) and apply all filters and buffer output
+after mail filter
+after session filter
+
+convert plain text to html using same logic as wp - i.e. all text is html
+Original text is never modified
+=========
 AddOn Ideas
 (done) Google Alerts - turn each alert into a post
 HTML cleaning - use http://htmlpurifier.org/ to convert Word Html and other bad html into standard html
