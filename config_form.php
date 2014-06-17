@@ -108,6 +108,10 @@
     </form>
 
     <form name="postie-options" method="post" action='options.php' autocomplete="off">
+        <!-- fake fields are a workaround for chrome autofill getting the wrong fields -->
+        <input style="display:none" type="text" name="fakeusernameremembered"/>
+        <input style="display:none" type="password" name="fakepasswordremembered"/>
+
         <?php settings_fields('postie-settings'); ?>
         <input type="hidden" name="action" value="config" />
         <div id="simpleTabs">
