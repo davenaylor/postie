@@ -1890,6 +1890,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         }
 
     }
+    $file = apply_filters('wp_handle_upload_prefilter', $file);
 
     // You may define your own function and pass the name in $overrides['upload_error_handler']
     $upload_error_handler = 'wp_handle_upload_error';
@@ -1950,7 +1951,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
 
     // Move the file to the uploads dir
     $new_file = $uploads['path'] . "/$filename";
-    if (false === rename($file['tmp_name'], $new_file)) {
+    if (false === move_uploaded_file($file['tmp_name'], $new_file)) {
         DebugEcho("upload: rename failed");
         DebugEcho("old file: " . $file['tmp_name']);
         DebugEcho("new file: $new_file");
@@ -1964,8 +1965,11 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     // Set correct file permissions
     $stat = stat(dirname($new_file));
     $perms = $stat['mode'] & 0000666;
-    chmod($new_file, $perms);
-    DebugEcho("upload: permissions changed");
+    if (chmod($new_file, $perms)) {
+        DebugEcho("upload: permissions changed");
+    } else {
+        DebugEcho("upload: permissions not changed $new_file");
+    }
 
     // Compute the URL
     $url = $uploads['url'] . "/$filename";
