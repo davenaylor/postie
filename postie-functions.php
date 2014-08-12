@@ -428,9 +428,9 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
 
     /* in order to do attachments correctly, we need to associate the
       attachments with a post. So we add the post here, then update it */
-    $tmpPost = array('post_title' => 'tmptitle', 'post_content' => 'tmpPost');
+    $tmpPost = array('post_title' => 'tmptitle', 'post_content' => 'tmpPost', 'post_status' => 'draft');
     $post_id = wp_insert_post($tmpPost);
-    DebugEcho("new post id is $post_id");
+    DebugEcho("tmp post id is $post_id");
 
     $is_reply = false;
     $postmodifiers = new PostiePostModifiers();
