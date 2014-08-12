@@ -22,8 +22,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.24 (future) =
-* 
+= 1.5.24 (2014.08.12) =
+* Fix attachment renaming bug
+* Test with Wordpress 3.9.2
 
 = 1.5.23 (2014.08.11) =
 * Remove PEAR/PEAR5 dependency which was causing errors on some systems

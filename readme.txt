@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
-Tested up to: 3.9.1
-Stable tag: 1.5.23
+Tested up to: 3.9.2
+Stable tag: 1.5.24
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -444,6 +444,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.24 (2014.08.12) =
+* Fix attachment renaming bug
+* Test with Wordpress 3.9.2
+
 = 1.5.23 (2014.08.11) =
 * Remove PEAR/PEAR5 dependency which was causing errors on some systems
 * Call wp_handle_upload_prefilter before adding images to WP

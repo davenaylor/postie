@@ -1951,7 +1951,9 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
 
     // Move the file to the uploads dir
     $new_file = $uploads['path'] . "/$filename";
-    if (false === move_uploaded_file($file['tmp_name'], $new_file)) {
+    
+    //move_uploaded_file() will not work here
+    if (false === rename($file['tmp_name'], $new_file)) {
         DebugEcho("upload: rename failed");
         DebugEcho("old file: " . $file['tmp_name']);
         DebugEcho("new file: $new_file");
