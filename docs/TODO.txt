@@ -11,7 +11,7 @@ send email notice when attachments are rejected.
 review http://wp.smashingmagazine.com/2011/11/23/improve-wordpress-plugins-readme-txt/
 more info in postie.txt
 configurable message for "post confirmation" - variable substitution
-add hook for post meta data change
+add hooks for post meta data change
   post type
   post format
   category
@@ -20,6 +20,8 @@ add hook for post meta data change
   excerpt
   tags
   author
+add hook for email address extraction
+  author found - allows plugins to change who the author is, filter need access to message to extract from body or headers
 add hooks for content changes
   attachment template
   subject/title
