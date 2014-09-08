@@ -9,6 +9,7 @@ gallery logic does not handle both images and non-images
 plugin conflict - Image Rotation Fixer/Image Rotation Repair
 send email notice when attachments are rejected.
 review http://wp.smashingmagazine.com/2011/11/23/improve-wordpress-plugins-readme-txt/
+use wordpress plugin boilerplate http://wppb.io/
 more info in postie.txt
 configurable message for "post confirmation" - variable substitution
 add hooks for post meta data change
