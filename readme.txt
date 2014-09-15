@@ -5,24 +5,55 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email
 Requires at least: 3.0
-Tested up to: 3.9.2
+Tested up to: 4.0
 Stable tag: 1.5.24
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Postie allows you to blog via e-mail, including many advanced features not found in WordPress's default post by e-mail feature.
+Postie allows you to create posts via e-mail, including many advanced features not found in WordPress's default post by e-mail feature.
 
 == Description ==
-Postie offers many advanced features for posting to your blog via e-mail,
+Postie offers many advanced features for creating posts via e-mail,
 including the ability to assign categories by name, included pictures and
 videos, and automatically strip off signatures. It also has support for both
-imap and pop3, with the option for ssl with both.  For usage notes, see the
+IMAP and POP3, with the option for ssl with both.  For usage notes, see the
 [other notes](other_notes) page
+
+More info at http://PostiePlugin.com/
+
+= Features =
+* Supports IMAP or POP3 servers
+* SSL and TLS supported
+* Control who gets to post via email
+* Set defaults for category, status, post format, post type and tags.
+* Set title, category, status, post format, post type, date, comment control and tags in email to override defaults.
+* Specify post excerpt (including excerpt only images).
+* Use plain text or HTML version of email.
+* Remove headers and footers from email (useful for posting from a mailing list).
+* Optionally send emails on post success/failure.
+* Control the types of attachments that are allowed by file name (wildcards allowed) and MIME type.
+* Optionally make the first image the featured image.
+* Gallery support.
+* Control image placement with plain text email.
+* Templates for images so they look the way you want.
+* Templates for videos.
+* Templates for audio files.
+* Templates for other attachments.
+* Email replies become comments.
+
+= Developers =
+* Several filter hooks available for custom processing of emails.
 
 == Screenshots ==
 
-1. Postie options (showing video and audio templates)
-== Installation ==
+1. Postie server options
+2. Postie user options
+3. Postie message options
+4. More message options
+5. Even more message options
+6. Image options
+7. Video and Audio options
+8. Attachment options== Installation ==
 * Either:
     * Put the postie.zip file in wp-content/plugins/ and unzip it
 * Or:
@@ -444,6 +475,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.5.25 (future) =
+* 
+
 = 1.5.24 (2014.08.12) =
 * Fix attachment renaming bug
 * Test with Wordpress 3.9.2
