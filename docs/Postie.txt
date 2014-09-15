@@ -3,7 +3,7 @@ Contributors: WayneAllen
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HPK99BJ88V4C2
 Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
-Tags: e-mail, email
+Tags: e-mail, email, post-by-email
 Requires at least: 3.0
 Tested up to: 4.0
 Stable tag: 1.5.24
