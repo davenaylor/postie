@@ -11,7 +11,7 @@
         </form>
     </div>
     <h2>
-        <a style='text-decoration:none' href='options-general.php?page=postie/postie.php'>
+        <a style='text-decoration:none' href='admin.php?page=postie-settings'>
             <?php
             echo '<img src="' . plugins_url('images/mail.png', __FILE__) . '" alt="postie" />';
             _e('Postie Settings', 'postie');
@@ -19,7 +19,6 @@
         </a>
         <span class="description">(v<?php _e(POSTIE_VERSION, 'postie'); ?>)</span>
     </h2>
-
 
     <?php
     require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'postie-functions.php');
@@ -34,12 +33,13 @@
                 $message = 1;
                 break;
             case "test":
-                include(POSTIE_ROOT . '/postie_test.php');
+                postie_test_config();
                 exit;
                 break;
             case "runpostie":
                 EchoInfo("Checking for mail manually");
-                include(POSTIE_ROOT . '/get_mail.php');
+                postie_get_mail();
+                //include(POSTIE_ROOT . '/get_mail.php');
                 exit;
                 break;
             case "runpostie-debug":
@@ -159,7 +159,7 @@
                             </span>
                         </th>
                         <td valign="top">
-                            <br/><input name='postie-settings[mail_server_port]' type="text" id='postie-settings-mail_server_port' value="<?php echo esc_attr($mail_server_port); ?>" size="6" />
+                            <br/><input name='postie-settings[mail_server_port]' style="width: 70px;" type="number" min="0" id='postie-settings-mail_server_port' value="<?php echo esc_attr($mail_server_port); ?>" size="6" />
                         </td>
                     </tr>
                     <tr valign="top">
@@ -182,7 +182,7 @@
                             <br />
                             <span class='recommendation'><?php _e("Should be the same as your normal offset, but this lets you adjust it in cases where that doesn't work.", 'postie'); ?></span>
                         </th>
-                        <td><input name='postie-settings[time_offset]' type="text" id='postie-settings-time_offset' size="2" value="<?php echo esc_attr($time_offset); ?>" /> 
+                        <td><input style="width: 50px;" name='postie-settings[time_offset]' type="number" id='postie-settings-time_offset' size="2" value="<?php echo esc_attr($time_offset); ?>" min="0" /> 
                             <?php _e('hours', 'postie') ?> 
 
                         </td>
@@ -853,7 +853,7 @@
 
 <?php $iconDir = get_option('siteurl') . '/' . PLUGINDIR . '/postie/icons'; ?>
 <script type="text/javascript">
-    jQuery(document).ready(function() {
+    jQuery(document).ready(function () {
         jQuery("#simpleTabs").simpleTabs({
             fadeSpeed: "medium", // @param : low, medium, fast
             defautContent: 1, // @param : number ( simpleTabs-nav-number)

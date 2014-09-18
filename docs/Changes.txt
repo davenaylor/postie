@@ -1,5 +1,10 @@
 == Upgrade Notice ==
 
+= 1.6.0 =
+Remote cron jobs need to update the URL used to kick off a manual email check. The new URL is http://<mysite>/?postie=get-mail
+Accessing http://<mysite>/wp-content/plugins/postie/get_mail.php will now receive a 403 error and a message stating what the new URL should be.
+The Postie menu is now at the main level rather than a Settings submenu.
+
 = 1.5.14 =
 The postie_post filter has be deprecated in favor of postie_post_before.
 
@@ -22,8 +27,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.25 (future) =
-* 
+= 1.6.0 (future) =
+* Updated remote cron url to be more compatible with Wordpress
+* The Postie menu has been moved out of the Settings menu to the top level
+* Tested with Wordpress 4.0
 
 = 1.5.24 (2014.08.12) =
 * Fix attachment renaming bug
@@ -32,7 +39,7 @@ Attachments are now processed in the order they were attached.
 = 1.5.23 (2014.08.11) =
 * Remove PEAR/PEAR5 dependency which was causing errors on some systems
 * Call wp_handle_upload_prefilter before adding images to WP
-* Temporary new post is now draft status.
+* Temporary new post is now draft status
 
 = 1.5.22 (2014.06.10) =
 * Fix missing attachments for html messages

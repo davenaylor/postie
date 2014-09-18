@@ -1,5 +1,4 @@
 <?php
-
 /*
   $Id$
  */
@@ -47,7 +46,7 @@ if (!function_exists('mb_str_replace')) {
 
 function postie_environment() {
     DebugEcho("Postie Version: " . POSTIE_VERSION);
-    DebugEcho("WordPres Version: " . get_bloginfo('version'));
+    DebugEcho("Wordpress Version: " . get_bloginfo('version'));
     DebugEcho("PHP Version: " . phpversion());
     DebugEcho("OS: " . php_uname());
     DebugEcho("Debug mode: " . (IsDebugMode() ? "On" : "Off"));
@@ -61,7 +60,7 @@ function postie_environment() {
     if (!isPostieInCorrectDirectory()) {
         EchoInfo("Warning! Postie expects to be in its own directory named postie.");
     } else {
-        EchoInfo("Postie is in " . dirname(__FILE__));
+        EchoInfo("Postie is in " . plugin_dir_path(__FILE__));
     }
 
     if (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON) {
@@ -1951,7 +1950,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
 
     // Move the file to the uploads dir
     $new_file = $uploads['path'] . "/$filename";
-    
+
     //move_uploaded_file() will not work here
     if (false === rename($file['tmp_name'], $new_file)) {
         DebugEcho("upload: rename failed");
@@ -3182,13 +3181,6 @@ function config_ValidateSettings($in) {
 }
 
 /**
- * registers the settings and the admin optionspage
- */
-function postie_admin_settings() {
-    register_setting('postie-settings', 'postie-settings', 'config_ValidateSettings');
-}
-
-/**
  * This function handles setting up the basic permissions
  */
 function UpdatePostiePermissions($role_access) {
@@ -3292,4 +3284,169 @@ function DebugFiltersFor($hook = '') {
     }
     DebugEcho("Registered filters for $hook");
     DebugDump($wp_filter[$hook]);
+}
+
+function postie_test_config() {
+    $config = config_Read();
+    extract($config);
+    $title = __("Postie Diagnosis");
+    $parent_file = 'options-general.php?page=postie/postie.php';
+    get_currentuserinfo();
+
+    if (!current_user_can('manage_options')) {
+        LogInfo("non-admin tried to set options");
+        echo "<h2> Sorry only admin can run this file</h2>";
+        exit();
+    }
+    ?>
+    <div class="wrap"> 
+        <h1>Postie Configuration Test</h1>
+        <?php
+        postie_environment();
+        ?>
+
+        <h2>Clock Tests</h2>
+        <p>This shows what time it would be if you posted right now</p>
+        <?php
+        $content = "";
+        $data = filter_Delay($content, null, $config['time_offset']);
+        EchoInfo("Post time: $data[0]");
+        ?>
+
+        <h2>Connect to Mail Host</h2>
+
+        <?php
+        if (!$mail_server || !$mail_server_port || !$mail_userid) {
+            EchoInfo("FAIL - server settings not complete");
+        } else {
+            DebugEcho("checking");
+        }
+
+        switch (strtolower($config["input_protocol"])) {
+            case 'imap':
+            case 'imap-ssl':
+            case 'pop3-ssl':
+                if (!HasIMAPSupport()) {
+                    EchoInfo("Sorry - you do not have IMAP php module installed - it is required for this mail setting.");
+                } else {
+                    require_once("postieIMAP.php");
+                    $mail_server = &PostieIMAP::Factory($config["input_protocol"]);
+                    if ($email_tls) {
+                        $mail_server->TLSOn();
+                    }
+                    if (!$mail_server->connect($config["mail_server"], $config["mail_server_port"], $config["mail_userid"], $config["mail_password"])) {
+                        EchoInfo("Unable to connect. The server said:");
+                        EchoInfo($mail_server->error());
+                    } else {
+                        EchoInfo("Successful " . strtoupper($config['input_protocol']) . " connection on port {$config["mail_server_port"]}");
+                        EchoInfo("# of waiting messages: " . $mail_server->getNumberOfMessages());
+                        $mail_server->disconnect();
+                    }
+                }
+                break;
+            case 'pop3':
+            default:
+                require_once(ABSPATH . WPINC . DIRECTORY_SEPARATOR . 'class-pop3.php');
+                $pop3 = new POP3();
+                if (defined('POSTIE_DEBUG')) {
+                    $pop3->DEBUG = POSTIE_DEBUG;
+                }
+                if (!$pop3->connect($config["mail_server"], $config["mail_server_port"])) {
+                    EchoInfo("Unable to connect. The server said:" . $pop3->ERROR);
+                } else {
+                    EchoInfo("Sucessful " . strtoupper($config['input_protocol']) . " connection on port {$config["mail_server_port"]}");
+                    $msgs = $pop3->login($config["mail_userid"], $config["mail_password"]);
+                    if ($msgs === false) {
+                        //workaround for bug reported here Apr 12, 2013
+                        //https://sourceforge.net/tracker/?func=detail&atid=100311&aid=3610701&group_id=311
+                        //originally repoted here:
+                        //https://core.trac.wordpress.org/ticket/10587
+                        if (empty($pop3->ERROR)) {
+                            EchoInfo("No waiting messages");
+                        } else {
+                            EchoInfo("Unable to login. The server said:" . $pop3->ERROR);
+                        }
+                    } else {
+                        EchoInfo("# of waiting messages: $msgs");
+                    }
+                    $pop3->quit();
+                }
+                break;
+        }
+        ?>
+    </div>
+    <?php
+}
+
+function postie_get_mail() {
+    require_once (plugin_dir_path(__FILE__) . 'mimedecode.php');
+    if (!function_exists('file_get_html')) {
+        require_once (plugin_dir_path(__FILE__) . 'simple_html_dom.php');
+    }
+
+    EchoInfo("Starting mail fetch");
+    postie_environment();
+    $wp_content_path = dirname(dirname(dirname(__FILE__)));
+    DebugEcho("wp_content_path: $wp_content_path");
+    if (file_exists($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php")) {
+        DebugEcho("found filterPostie.php in $wp_content_path");
+        include_once ($wp_content_path . DIRECTORY_SEPARATOR . "filterPostie.php");
+    }
+
+    if (has_filter('postie_post')) {
+        echo "Postie: filter 'postie_post' is depricated in favor of 'postie_post_before'";
+    }
+
+    $test_email = null;
+    $config = config_Read();
+    //extract($config);
+    if (!array_key_exists('maxemails', $config)) {
+        $maxemails = 0;
+    }
+
+    $emails = FetchMail($mail_server, $mail_server_port, $mail_userid, $mail_password, $input_protocol, $time_offset, $test_email, $delete_mail_after_processing, $maxemails, $email_tls);
+    $message = 'Done.';
+
+    EchoInfo(sprintf(__("There are %d messages to process", "postie"), count($emails)));
+
+    if (function_exists('memory_get_usage')) {
+        DebugEcho(__("memory at start of e-mail processing:") . memory_get_usage());
+    }
+
+    DebugDump($config);
+
+    //loop through messages
+    $message_number = 0;
+    foreach ($emails as $email) {
+        $message_number++;
+        DebugEcho("$message_number: ------------------------------------");
+        //sanity check to see if there is any info in the message
+        if ($email == NULL) {
+            $message = __('Dang, message is empty!', 'postie');
+            EchoInfo("$message_number: $message");
+            continue;
+        } else if ($email == 'already read') {
+            $message = __("Message is already marked 'read'.", 'postie');
+            EchoInfo("$message_number: $message");
+            continue;
+        }
+
+        $mimeDecodedEmail = DecodeMIMEMail($email);
+
+        DebugEmailOutput($email, $mimeDecodedEmail);
+
+        //Check poster to see if a valid person
+        $poster = ValidatePoster($mimeDecodedEmail, $config);
+        if (!empty($poster)) {
+            PostEmail($poster, $mimeDecodedEmail, $config);
+        } else {
+            EchoInfo("Ignoring email - not authorized.");
+        }
+        flush();
+    }
+    EchoInfo("Mail fetch complete, $message_number emails");
+
+    if (function_exists('memory_get_usage')) {
+        DebugEcho("memory at end of e-mail processing:" . memory_get_usage());
+    }
 }

@@ -37,28 +37,17 @@ define("POSTIE_URL", WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)));
 //register the hooks early in the page in case some method needs the result of one of them (i.e. cron_schedules)
 add_action('init', 'disable_kses_content', 20);
 add_action('check_postie_hook', 'check_postie');
+add_action('parse_request', 'postie_parse_request');
+add_action('admin_init', 'postie_admin_init');
+add_action('admin_menu', 'postie_admin_menu');
 
 add_filter('whitelist_options', 'postie_whitelist');
 add_filter('cron_schedules', 'postie_more_reccurences');
+add_filter('query_vars', 'postie_query_vars');
 
 register_activation_hook(__FILE__, 'activate_postie');
 register_activation_hook(__FILE__, 'postie_cron');
 register_deactivation_hook(__FILE__, 'postie_decron');
-
-function postie_loadjs_add_page() {
-    $postiepage = add_options_page('Postie', 'Postie', 'manage_options', POSTIE_ROOT . '/postie.php', 'postie_loadjs_options_page');
-    add_action("admin_print_scripts-$postiepage", 'postie_loadjs_admin_head');
-}
-
-function postie_loadjs_options_page() {
-    require_once POSTIE_ROOT . '/config_form.php';
-}
-
-function postie_loadjs_admin_head() {
-    wp_enqueue_script('loadjs', plugins_url('js/simpleTabs.jquery.js', __FILE__));
-    echo '<link type="text/css" rel="stylesheet" href="' . plugins_url('css/style.css', __FILE__) . "\"/>\n";
-    echo '<link type="text/css" rel="stylesheet" href="' . plugins_url('css/simpleTabs.css', __FILE__) . "\"/>\n";
-}
 
 if (isset($_GET["postie_read_me"])) {
     include_once(ABSPATH . "wp-admin/admin.php");
@@ -71,8 +60,6 @@ if (isset($_GET["postie_read_me"])) {
 //Add Menu Configuration
 if (is_admin()) {
     require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "postie-functions.php");
-    add_action('admin_init', 'postie_admin_settings');
-    add_action('admin_menu', 'postie_loadjs_add_page');
     if (function_exists('load_plugin_textdomain')) {
 
         function postie_load_domain() {
@@ -83,6 +70,57 @@ if (is_admin()) {
         add_action('init', 'postie_load_domain');
     }
     postie_warnings();
+}
+
+//****************** functions *************************
+
+function postie_query_vars($vars) {
+    $vars[] = 'postie';
+    return $vars;
+}
+
+function postie_parse_request($wp) {
+    if (array_key_exists('postie', $wp->query_vars)) {
+        require_once(plugin_dir_path(__FILE__) . "postie-functions.php");
+        switch ($wp->query_vars['postie']) {
+            case 'get-mail':
+                postie_get_mail();
+                die();
+            case 'test-config':
+                postie_test_config();
+                die();
+            default :
+                dir('Unknown option: ' . $wp->query_vars['postie']);
+        }
+    }
+}
+
+function postie_admin_init() {
+    wp_register_style('postie-style', plugins_url('css/style.css', __FILE__));
+    wp_register_style('postie-simpleTabs', plugins_url('css/simpleTabs.css', __FILE__));
+    register_setting('postie-settings', 'postie-settings', 'config_ValidateSettings');
+}
+
+function postie_admin_menu() {
+    $page = add_menu_page('Postie', 'Postie', 'manage_options', 'postie-settings', 'postie_loadjs_options_page');
+    add_action('admin_print_styles-' . $page, 'postie_admin_styles');
+}
+
+function postie_loadjs_options_page() {
+    require_once POSTIE_ROOT . '/config_form.php';
+}
+
+function postie_admin_page() {
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have sufficient permissions to access this page.'));
+    }
+    include 'config_form.php';
+}
+
+function postie_admin_styles() {
+    wp_enqueue_script('loadjs', plugins_url('js/simpleTabs.jquery.js', __FILE__));
+    wp_enqueue_style('postie-style');
+    wp_enqueue_style('postie-simpleTabs');
 }
 
 /*
@@ -175,8 +213,8 @@ function postie_warnings() {
 
         add_action('admin_notices', 'postie_mbstring_warning');
     }
-    
-    $userdata = WP_User::get_data_by( 'login', $config['admin_username'] );
+
+    $userdata = WP_User::get_data_by('login', $config['admin_username']);
     if (!$userdata) {
 
         function postie_adminuser_warning() {

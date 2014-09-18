@@ -10,7 +10,6 @@ plugin conflict - Image Rotation Fixer/Image Rotation Repair
 send email notice when attachments are rejected.
 review http://wp.smashingmagazine.com/2011/11/23/improve-wordpress-plugins-readme-txt/
 use wordpress plugin boilerplate http://wppb.io/
-more info in postie.txt
 configurable message for "post confirmation" - variable substitution
 add hooks for post meta data change
   post type
@@ -23,6 +22,7 @@ add hooks for post meta data change
   author
 add hook for email address extraction
   author found - allows plugins to change who the author is, filter need access to message to extract from body or headers
+  to email - allows plugins to change category/tags based on the TO address (allows CC & BCC to be Postie mailbox)
 add hooks for content changes
   attachment template
   subject/title
@@ -80,6 +80,8 @@ replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMai
 provide a location for custom icons. update docs about location.
 handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
 change all Postie command to use a more consistent and easy to parse syntax
+
+  Use standard shortcode syntax? I.e. [postie date="Jan 1, 2014"]
 
   commands with multiple data
     #custom name="field name" data="field value"  custom#
