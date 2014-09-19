@@ -3,14 +3,14 @@ Contributors: WayneAllen
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HPK99BJ88V4C2
 Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
-Tags: e-mail, email
+Tags: e-mail, email, post-by-email
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 1.5.24
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Postie allows you to create posts via e-mail, including many advanced features not found in WordPress's default post by e-mail feature.
+Postie allows you to create posts via e-mail, including many advanced features not found in WordPress's default Post by Email feature.
 
 == Description ==
 Postie offers many advanced features for creating posts via e-mail,
@@ -453,6 +453,11 @@ It is also possible to turn the WordPress cron off. Please make sure something l
 `define('DISABLE_WP_CRON', true);` is not in your wp-config.php file.
 == Upgrade Notice ==
 
+= 1.6.0 =
+Remote cron jobs need to update the URL used to kick off a manual email check. The new URL is http://<mysite>/?postie=get-mail
+Accessing http://<mysite>/wp-content/plugins/postie/get_mail.php will now receive a 403 error and a message stating what the new URL should be.
+The Postie menu is now at the main level rather than a Settings submenu.
+
 = 1.5.14 =
 The postie_post filter has be deprecated in favor of postie_post_before.
 
@@ -475,8 +480,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.5.25 (future) =
-* 
+= 1.6.0 (2014.09.18) =
+* Updated remote cron url to be more compatible with Wordpress
+* The Postie menu has been moved out of the Settings menu to the top level
+* Tested with Wordpress 4.0
 
 = 1.5.24 (2014.08.12) =
 * Fix attachment renaming bug
@@ -485,7 +492,7 @@ Attachments are now processed in the order they were attached.
 = 1.5.23 (2014.08.11) =
 * Remove PEAR/PEAR5 dependency which was causing errors on some systems
 * Call wp_handle_upload_prefilter before adding images to WP
-* Temporary new post is now draft status.
+* Temporary new post is now draft status
 
 = 1.5.22 (2014.06.10) =
 * Fix missing attachments for html messages

@@ -3401,10 +3401,10 @@ function postie_get_mail() {
     $config = config_Read();
     //extract($config);
     if (!array_key_exists('maxemails', $config)) {
-        $maxemails = 0;
+        $config['maxemails'] = 0;
     }
 
-    $emails = FetchMail($mail_server, $mail_server_port, $mail_userid, $mail_password, $input_protocol, $time_offset, $test_email, $delete_mail_after_processing, $maxemails, $email_tls);
+    $emails = FetchMail($config['mail_server'], $config['mail_server_port'], $config['mail_userid'], $config['mail_password'], $config['input_protocol'], $config['time_offset'], $test_email, $config['delete_mail_after_processing'], $config['maxemails'], $config['email_tls']);
     $message = 'Done.';
 
     EchoInfo(sprintf(__("There are %d messages to process", "postie"), count($emails)));

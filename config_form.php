@@ -39,7 +39,6 @@
             case "runpostie":
                 EchoInfo("Checking for mail manually");
                 postie_get_mail();
-                //include(POSTIE_ROOT . '/get_mail.php');
                 exit;
                 break;
             case "runpostie-debug":
@@ -47,7 +46,7 @@
                 if (!defined('POSTIE_DEBUG')) {
                     define('POSTIE_DEBUG', true);
                 }
-                include(POSTIE_ROOT . '/get_mail.php');
+                postie_get_mail();
                 exit;
                 break;
             default:
@@ -853,7 +852,7 @@
 
 <?php $iconDir = get_option('siteurl') . '/' . PLUGINDIR . '/postie/icons'; ?>
 <script type="text/javascript">
-    jQuery(document).ready(function () {
+    jQuery(document).ready(function() {
         jQuery("#simpleTabs").simpleTabs({
             fadeSpeed: "medium", // @param : low, medium, fast
             defautContent: 1, // @param : number ( simpleTabs-nav-number)

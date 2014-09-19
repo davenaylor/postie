@@ -27,7 +27,7 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.0 (future) =
+= 1.6.0 (2014.09.18) =
 * Updated remote cron url to be more compatible with Wordpress
 * The Postie menu has been moved out of the Settings menu to the top level
 * Tested with Wordpress 4.0
