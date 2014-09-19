@@ -6,14 +6,14 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Postie allows you to create posts via e-mail, including many advanced features not found in WordPress's default Post by Email feature.
+Postie allows you to create posts via email, including many advanced features not found in WordPress's default Post by Email feature.
 
 == Description ==
-Postie offers many advanced features for creating posts via e-mail,
+Postie offers many advanced features for creating posts via email,
 including the ability to assign categories by name, included pictures and
 videos, and automatically strip off signatures. It also has support for both
 IMAP and POP3, with the option for ssl with both.  For usage notes, see the
@@ -480,6 +480,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.1 (2014.09.19) =
+* Allow negative time corrections
+* Fix links to settings page
+* Misc UI updates
+
 = 1.6.0 (2014.09.18) =
 * Updated remote cron url to be more compatible with Wordpress
 * The Postie menu has been moved out of the Settings menu to the top level

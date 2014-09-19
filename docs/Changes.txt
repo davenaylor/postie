@@ -27,8 +27,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.1 (future) =
+= 1.6.1 (2014.09.19) =
 * Allow negative time corrections
+* Fix links to settings page
 * Misc UI updates
 
 = 1.6.0 (2014.09.18) =
