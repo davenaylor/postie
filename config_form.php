@@ -56,11 +56,10 @@
     }
     global $wpdb, $wp_roles;
 
-    $title = __('Postie Options', 'postie');
-    $parent_file = 'options-general.php';
     $config = config_Read();
-    if (empty($config))
+    if (empty($config)) {
         $config = config_ResetToDefault();
+    }
 
     $arrays = config_ArrayedSettings();
     // some fields are stored as arrays, because that makes back-end processing much easier
@@ -181,7 +180,7 @@
                             <br />
                             <span class='recommendation'><?php _e("Should be the same as your normal offset, but this lets you adjust it in cases where that doesn't work.", 'postie'); ?></span>
                         </th>
-                        <td><input style="width: 50px;" name='postie-settings[time_offset]' type="number" id='postie-settings-time_offset' size="2" value="<?php echo esc_attr($time_offset); ?>" min="0" /> 
+                        <td><input style="width: 50px;" name='postie-settings[time_offset]' type="number" id='postie-settings-time_offset' size="2" value="<?php echo esc_attr($time_offset); ?>" /> 
                             <?php _e('hours', 'postie') ?> 
 
                         </td>
@@ -852,7 +851,7 @@
 
 <?php $iconDir = get_option('siteurl') . '/' . PLUGINDIR . '/postie/icons'; ?>
 <script type="text/javascript">
-    jQuery(document).ready(function() {
+    jQuery(document).ready(function () {
         jQuery("#simpleTabs").simpleTabs({
             fadeSpeed: "medium", // @param : low, medium, fast
             defautContent: 1, // @param : number ( simpleTabs-nav-number)

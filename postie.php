@@ -3,7 +3,7 @@
 /*
   Plugin Name: Postie
   Plugin URI: http://PostiePlugin.com/
-  Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href='options-general.php?page=postie/postie.php'>Settings and options</a>) to configure your email settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://wordpress.org/support/plugin/postie'>postie forum</a> for support.
+  Description: Create posts via email. Signifigantly upgrades the Post by Email features of Word Press.
   Version: 1.6.0
   Author: Wayne Allen
   Author URI: http://allens-home.com/
@@ -44,6 +44,8 @@ add_action('admin_menu', 'postie_admin_menu');
 add_filter('whitelist_options', 'postie_whitelist');
 add_filter('cron_schedules', 'postie_more_reccurences');
 add_filter('query_vars', 'postie_query_vars');
+add_filter("plugin_action_links_" . plugin_basename(__FILE__), 'postie_plugin_action_links');
+add_filter('plugin_row_meta', 'postie_plugin_row_meta', 10, 2);
 
 register_activation_hook(__FILE__, 'activate_postie');
 register_activation_hook(__FILE__, 'postie_cron');
@@ -51,8 +53,6 @@ register_deactivation_hook(__FILE__, 'postie_decron');
 
 if (isset($_GET["postie_read_me"])) {
     include_once(ABSPATH . "wp-admin/admin.php");
-    $title = __("Edit Plugins");
-    $parent_file = 'plugins.php';
     include(ABSPATH . 'wp-admin/admin-header.php');
     postie_ShowReadMe();
     include(ABSPATH . 'wp-admin/admin-footer.php');
@@ -73,6 +73,24 @@ if (is_admin()) {
 }
 
 //****************** functions *************************
+
+function postie_plugin_row_meta($links, $file) {
+    if (strpos($file, plugin_basename(__FILE__)) !== false) {
+        $new_links = array(
+        '<a href="http://postieplugin.com/" target="_blank">Support</a>',
+        '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HPK99BJ88V4C2" target="_blank">Donate</a>'
+        );
+
+        $links = array_merge($links, $new_links);
+    }
+
+    return $links;
+}
+
+function postie_plugin_action_links($links) {
+    $links[] = '<a href="admin.php?page=postie-settings">Settings</a>';
+    return $links;
+}
 
 function postie_query_vars($vars) {
     $vars[] = 'postie';
@@ -174,7 +192,7 @@ function postie_warnings() {
 
         function postie_enter_info() {
             echo "<div id='postie-info-warning' class='updated fade'><p><strong>" . __('Postie is almost ready.', 'postie') . "</strong> "
-            . sprintf(__('You must <a href="%1$s">enter your email settings</a> for it to work.', 'postie'), "options-general.php?page=postie/postie.php")
+            . sprintf(__('You must <a href="%1$s">enter your email settings</a> for it to work.', 'postie'), "admin.php?page=postie-settings")
             . "</p></div> ";
         }
 
