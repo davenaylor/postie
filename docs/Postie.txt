@@ -13,7 +13,7 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Postie allows you to create posts via email, including many advanced features not found in WordPress's default Post by Email feature.
 
 == Description ==
-Postie offers many advanced features for creating posts via email,
+Postie offers many advanced features for creating posts by email,
 including the ability to assign categories by name, included pictures and
 videos, and automatically strip off signatures. It also has support for both
 IMAP and POP3, with the option for ssl with both.  For usage notes, see the
@@ -54,3 +54,4 @@ More info at http://PostiePlugin.com/
 6. Image options
 7. Video and Audio options
 8. Attachment options
+

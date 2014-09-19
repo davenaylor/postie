@@ -122,7 +122,6 @@
                     <li id="simpleTabs-nav-5"><?php _e('Video and Audio', 'postie') ?></li>
                     <li id="simpleTabs-nav-6"><?php _e('Attachments', 'postie') ?></li>
                     <li id="simpleTabs-nav-7"><?php _e('Help', 'postie') ?></li>
-                    <li id="simpleTabs-nav-8"><?php _e('FAQ', 'postie') ?></li>
                 </ul>
             </div>
             <div id="simpleTabs-content-1" class="simpleTabs-content">
@@ -830,11 +829,9 @@
                 </table> 
             </div>
             <div id="simpleTabs-content-7" class="simpleTabs-content">
-                <?php include(POSTIE_ROOT . '/readme.html'); ?>
+                Visit <a href="http://postieplugin.com/" target="_blank">PostiePlugin.com</a> for lots of information and assistance.
             </div>
-            <div id="simpleTabs-content-8" class="simpleTabs-content">
-                <?php include(POSTIE_ROOT . '/faq.html'); ?>
-            </div>
+
 
             <p class="submit">
                 <input type="hidden" name="action" value="update" />
