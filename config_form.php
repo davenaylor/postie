@@ -452,7 +452,7 @@
                     ?>
                     <tr>
                         <th>
-                            <?php _e("Send post confirmation e-mail to", 'postie') ?>:
+                            <?php _e("Send post confirmation email to", 'postie') ?>:
                         </th>
                         <td>
                             <select name='postie-settings[confirmation_email]' id='postie-settings-confirmation_email'>

@@ -3,7 +3,7 @@
 /*
   Plugin Name: Postie
   Plugin URI: http://PostiePlugin.com/
-  Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href='options-general.php?page=postie/postie.php'>Settings and options</a>) to configure your e-mail settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://wordpress.org/support/plugin/postie'>postie forum</a> for support.
+  Description: Signifigantly upgrades the posting by mail features of Word Press (See <a href='options-general.php?page=postie/postie.php'>Settings and options</a>) to configure your email settings. See the <a href='http://wordpress.org/extend/plugins/postie/other_notes'>Readme</a> for usage. Visit the <a href='http://wordpress.org/support/plugin/postie'>postie forum</a> for support.
   Version: 1.6.0
   Author: Wayne Allen
   Author URI: http://allens-home.com/
@@ -307,7 +307,7 @@ function postie_decron() {
     wp_clear_scheduled_hook('check_postie_hook');
 }
 
-/* here we add some more cron options for how often to check for e-mail */
+/* here we add some more cron options for how often to check for email */
 
 function postie_more_reccurences($schedules) {
     //Do not echo output in filters, it seems to break some installs

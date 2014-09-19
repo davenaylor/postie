@@ -610,7 +610,7 @@ function make_links($text) {
     );
 }
 
-/* we check whether or not the e-mail is a forwards or a redirect. If it is
+/* we check whether or not the email is a forwards or a redirect. If it is
  * a fwd, then we glean the author details from the body of the post.
  * Otherwise we get them from the headers    
  */
@@ -678,7 +678,7 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
     return $theDetails;
 }
 
-/* we check whether or not the e-mail is a reply to a previously
+/* we check whether or not the email is a reply to a previously
  * published post. First we check whether it starts with Re:, and then
  * we see if the remainder matches an already existing post. If so,
  * then we add that post id to the details array, which will cause the
@@ -1328,7 +1328,7 @@ function filter_Etf2HTML($content) {
     return trim($content);
 }
 
-// This function cleans up HTML in the e-mail
+// This function cleans up HTML in the email
 function filter_CleanHtml($content) {
     $html = str_get_html($content);
     if ($html) {
@@ -2037,7 +2037,7 @@ function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
 }
 
 /**
- * This function can be used to send confirmation or rejection e-mails
+ * This function can be used to send confirmation or rejection emails
  * It accepts an object containing the entire message
  */
 function MailToRecipients(&$mail_content, $testEmail = false, $recipients = array(), $returnToSender, $reject = true) {
@@ -2085,10 +2085,10 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
         $message = "An unauthorized message has been sent to $blogname.\n";
         $message .= "Sender: $from\n";
         $message .= "Subject: $subject\n";
-        $message .= "\n\nIf you wish to allow posts from this address, please add " . $from . " to the registered users list and manually add the content of the e-mail found below.";
-        $message .= "\n\nOtherwise, the e-mail has already been deleted from the server and you can ignore this message.";
+        $message .= "\n\nIf you wish to allow posts from this address, please add " . $from . " to the registered users list and manually add the content of the email found below.";
+        $message .= "\n\nOtherwise, the email has already been deleted from the server and you can ignore this message.";
         $message .= "\n\nIf you would like to prevent postie from forwarding mail in the future, please change the FORWARD_REJECTED_MAIL setting in the Postie settings panel";
-        $message .= "\n\nThe original content of the e-mail has been attached.\n\n";
+        $message .= "\n\nThe original content of the email has been attached.\n\n";
         $mailtext = "--$boundary\r\n";
         $mailtext .= "Content-Type: text/plain;format=flowed;charset=\"iso-8859-1\";reply-type=original\n";
         $mailtext .= "Content-Transfer-Encoding: 7bit\n";
@@ -3410,7 +3410,7 @@ function postie_get_mail() {
     EchoInfo(sprintf(__("There are %d messages to process", "postie"), count($emails)));
 
     if (function_exists('memory_get_usage')) {
-        DebugEcho(__("memory at start of e-mail processing:") . memory_get_usage());
+        DebugEcho(__("memory at start of email processing:") . memory_get_usage());
     }
 
     DebugDump($config);
@@ -3447,6 +3447,6 @@ function postie_get_mail() {
     EchoInfo("Mail fetch complete, $message_number emails");
 
     if (function_exists('memory_get_usage')) {
-        DebugEcho("memory at end of e-mail processing:" . memory_get_usage());
+        DebugEcho("memory at end of email processing:" . memory_get_usage());
     }
 }
