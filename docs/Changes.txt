@@ -29,6 +29,7 @@ Attachments are now processed in the order they were attached.
 == CHANGELOG ==
 = 1.6.2 (future) =
 * Moved FAQ and Help to PostiePlugin.com
+* Fixed file type issue with wp_handle_upload_prefilter()
 
 = 1.6.1 (2014.09.19) =
 * Allow negative time corrections

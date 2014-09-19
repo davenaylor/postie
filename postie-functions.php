@@ -1889,6 +1889,15 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         }
 
     }
+
+    // A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
+    $wp_filetype = wp_check_filetype($file['name']);
+    DebugEcho("postie_handle_upload: detected file type for " . $file['name'] . " is " . $wp_filetype['type']);
+
+    if (!isset($file['type'])) {
+        DebugEcho("postie_handle_upload: adding type - " . $wp_filetype['type']);
+        $file['type'] = $wp_filetype['type'];
+    }
     $file = apply_filters('wp_handle_upload_prefilter', $file);
 
     // You may define your own function and pass the name in $overrides['upload_error_handler']
@@ -1923,10 +1932,6 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     if (!file_exists($file['tmp_name'])) {
         return $upload_error_handler($file, __('Specified file failed upload test.'));
     }
-    // A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
-
-    $wp_filetype = wp_check_filetype($file['name']);
-    DebugEcho("postie_handle_upload: detected file type for " . $file['name'] . " is " . $wp_filetype['type']);
 
     extract($wp_filetype);
 
