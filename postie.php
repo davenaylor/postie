@@ -4,7 +4,7 @@
   Plugin Name: Postie
   Plugin URI: http://PostiePlugin.com/
   Description: Create posts via email. Signifigantly upgrades the Post by Email features of Word Press.
-  Version: 1.6.1
+  Version: 1.6.2
   Author: Wayne Allen
   Author URI: http://allens-home.com/
   License: GPL2
@@ -29,8 +29,9 @@
 /*
   $Id$
  */
+require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "postie-functions.php");
 
-define('POSTIE_VERSION', '1.6.1');
+define('POSTIE_VERSION', '1.6.2');
 define("POSTIE_ROOT", dirname(__FILE__));
 define("POSTIE_URL", WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)));
 
@@ -59,7 +60,6 @@ if (isset($_GET["postie_read_me"])) {
 }
 //Add Menu Configuration
 if (is_admin()) {
-    require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "postie-functions.php");
     if (function_exists('load_plugin_textdomain')) {
 
         function postie_load_domain() {
@@ -77,8 +77,8 @@ if (is_admin()) {
 function postie_plugin_row_meta($links, $file) {
     if (strpos($file, plugin_basename(__FILE__)) !== false) {
         $new_links = array(
-        '<a href="http://postieplugin.com/" target="_blank">Support</a>',
-        '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HPK99BJ88V4C2" target="_blank">Donate</a>'
+            '<a href="http://postieplugin.com/" target="_blank">Support</a>',
+            '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HPK99BJ88V4C2" target="_blank">Donate</a>'
         );
 
         $links = array_merge($links, $new_links);
@@ -99,7 +99,6 @@ function postie_query_vars($vars) {
 
 function postie_parse_request($wp) {
     if (array_key_exists('postie', $wp->query_vars)) {
-        require_once(plugin_dir_path(__FILE__) . "postie-functions.php");
         switch ($wp->query_vars['postie']) {
             case 'get-mail':
                 postie_get_mail();
@@ -257,33 +256,8 @@ function postie_whitelist($options) {
 
 //don't use DebugEcho or EchoInfo here as it is not defined when called as an action
 function check_postie() {
-    //error_log("check_postie");
-
-    $fullurl = plugins_url("get_mail.php", __FILE__);
-    preg_match("/https?:\/\/(.[^\/]*)(.*)/i", $fullurl, $matches);
-    $host = $matches[1];
-
-    $url = "";
-    if (isset($matches[2])) {
-        $url = $matches[2];
-    }
-
-    $port = is_ssl() ? 443 : 80;
-
-    $fp = fsockopen($host, $port, $errno, $errstr);
-    if ($fp) {
-        fputs($fp, "GET $url HTTP/1.0\r\n");
-        fputs($fp, "User-Agent:  Cronless-Postie\r\n");
-        fputs($fp, "Host: $host\r\n");
-        fputs($fp, "\r\n");
-        $page = '';
-        while (!feof($fp)) {
-            $page.=fgets($fp, 128);
-        }
-        fclose($fp);
-    } else {
-        error_log("Cannot connect to server on port $port. Please check to make sure that this port is open on your webhost. Additional information: $errno: $errstr");
-    }
+    error_log("check_postie");
+    postie_get_mail();
 }
 
 function postie_cron($interval = false) {
