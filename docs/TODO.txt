@@ -25,7 +25,6 @@ add hooks for post meta data change
   author
 add hook for email address extraction
   author found - allows plugins to change who the author is, filter need access to message to extract from body or headers
-  to email - allows plugins to change category/tags based on the TO address (allows CC & BCC to be Postie mailbox)
 add hooks for content changes
   attachment template
   subject/title

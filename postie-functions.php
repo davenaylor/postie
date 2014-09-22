@@ -618,13 +618,7 @@ function make_links($text) {
 function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
 
     $theDate = $mimeDecodedEmail->headers['date'];
-
-    $theEmail = $mimeDecodedEmail->headers["from"];
-    DebugEcho("getPostAuthorDetails: pre email filter $theEmail");
-    $theEmail = apply_filters("postie_filter_email", $theEmail);
-    DebugEcho("getPostAuthorDetails: post email filter $theEmail");
-
-    $theEmail = RemoveExtraCharactersInEmailAddress($theEmail);
+    $theEmail = RemoveExtraCharactersInEmailAddress($mimeDecodedEmail->headers["from"]);
 
     $regAuthor = get_user_by('email', $theEmail);
     if ($regAuthor) {
@@ -938,7 +932,7 @@ function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
 
         $postmodifiers->apply($post_ID);
 
-        apply_filters('postie_post_after', $details);
+        do_action('postie_post_after', $details);
     }
 }
 
@@ -1362,7 +1356,20 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     if (property_exists($mimeDecodedEmail, "headers") && array_key_exists('from', $mimeDecodedEmail->headers)) {
         $from = RemoveExtraCharactersInEmailAddress(trim($mimeDecodedEmail->headers["from"]));
         $from = apply_filters("postie_filter_email", $from);
-        DebugEcho("ValidatePoster: post email filter $from");
+        DebugEcho("ValidatePoster: post postie_filter_email $from");
+
+        $toEmail = '';
+        if (isset($mimeDecodedEmail->headers["to"])) {
+            $toEmail = $mimeDecodedEmail->headers["to"];
+        }
+
+        $replytoEmail = '';
+        if (isset($mimeDecodedEmail->headers["reply-to"])) {
+            $replytoEmail = $mimeDecodedEmail->headers["reply-to"];
+        }
+
+        $from = apply_filters("postie_filter_email2", $from, $toEmail, $replytoEmail);
+        DebugEcho("ValidatePoster: post postie_filter_email2 $from");
     } else {
         DebugEcho("No 'from' header found");
         DebugDump($mimeDecodedEmail->headers);
@@ -1387,7 +1394,10 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         if ($user->has_cap("post_via_postie")) {
             DebugEcho("$user_ID has 'post_via_postie' permissions");
             $poster = $user_ID;
-            DebugEcho("posting as user $poster");
+            
+            DebugEcho("ValidatePoster: pre postie_author $poster");
+            $poster = apply_filters("postie_author", $poster);
+            DebugEcho("ValidatePoster: post postie_author $poster");
         } else {
             DebugEcho("$user_ID does not have 'post_via_postie' permissions");
             $user_ID = "";
@@ -1401,6 +1411,9 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
             $poster = 1;
         } else {
             $poster = $user->ID;
+            DebugEcho("ValidatePoster: pre postie_author (default) $poster");
+            $poster = apply_filters("postie_author", $poster);
+            DebugEcho("ValidatePoster: post postie_author (default) $poster");
         }
         DebugEcho("ValidatePoster: found user '$poster'");
     }
