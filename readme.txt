@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 1.6.2
+Stable tag: 1.6.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -238,6 +238,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.3 (2014.10.03) =
+* Added postie_filter_email2 filter which includes To and Reply-To headers
+* Added postie_author filter
+* Revised help/support page
+
 = 1.6.2 (2014.09.22) =
 * Moved FAQ and Help to PostiePlugin.com
 * Fixed file type issue with wp_handle_upload_prefilter()

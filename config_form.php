@@ -121,7 +121,7 @@
                     <li id="simpleTabs-nav-4"><?php _e('Image', 'postie') ?></li>
                     <li id="simpleTabs-nav-5"><?php _e('Video and Audio', 'postie') ?></li>
                     <li id="simpleTabs-nav-6"><?php _e('Attachments', 'postie') ?></li>
-                    <li id="simpleTabs-nav-7"><?php _e('Help', 'postie') ?></li>
+                    <li id="simpleTabs-nav-7"><?php _e('Support', 'postie') ?></li>
                 </ul>
             </div>
             <div id="simpleTabs-content-1" class="simpleTabs-content">
@@ -829,11 +829,25 @@
                 </table> 
             </div>
             <div id="simpleTabs-content-7" class="simpleTabs-content">
-                Visit <a href="http://postieplugin.com/" target="_blank">PostiePlugin.com</a> for lots of information and assistance.
+                <div style="">
+                    <h3>Postie Support</h3>
+                    <p>Please use the Postie <a href="https://wordpress.org/support/plugin/postie" target="_blank">support forums</a></p>
+                    <h3>More Postie info</h3>
+                    <p>Visit <a href="http://postieplugin.com/" target="_blank">PostiePlugin.com</a> for lots of information and assistance 
+                        including information for developers wanting to leverage/extend Postie.</p>
+                </div>
+                <div>
+                    <h3>Postie AddOns</h3>
+                    <p>There are a number of different AddOns available to extend Postie's functionality.
+                        See <a href='http://postieplugin.com/add-ons/' target='_blank'>the list</a> for more information.</p>
+                    <div>
+                        <div id='postie-addons'></div>
+                    </div>
+                </div>
             </div>
 
 
-            <p class="submit">
+            <p class="submit" style="clear: both;">
                 <input type="hidden" name="action" value="update" />
                 <input type="hidden" name="page_options" value="postie-settings" />
                 <input type="submit" name="Submit" value="<?php _e('Save Changes') ?>" class="button button-primary" />
@@ -855,7 +869,29 @@
             autoNav: "false", // @param : true or false
             closeTabs: "false"   // @param : true or false;
         });
-
+        jQuery("#simpleTabs-nav-7").click(function () {
+            jQuery.get('http://postieplugin.com/feed/?post_type=download', function (data) {
+                console.log(data);
+                var h = '';
+                jQuery(data).find("item").each(function () {
+                    var t = jQuery(this).find("title").text();
+                    if (t != 'Donation') {
+                        h += "<div style='float: left; width: 300px;'>";
+                        h += "<h4 class='title'><a href='" + jQuery(this).find("link").text() + "' target='_blank'>" + t + "</a></h4>";
+                        var d = jQuery(this).find("description").text();
+                        if ((i = d.indexOf('<p class="more')) != -1) {
+                            d = d.substring(0, i);
+                        }
+                        else if ((i = d.indexOf('<p>The post <a')) != -1) {
+                            d = d.substring(0, i);
+                        }
+                        h += "<div>" + d + "</div>";
+                        h += "</div>";
+                    }
+                });
+                jQuery("#postie-addons").html(h);
+            });
+        });
     });
 
     function changeIconSet(selectBox, size) {
