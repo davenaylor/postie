@@ -27,6 +27,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.4 (future) =
+* 
+
 = 1.6.3 (2014.10.03) =
 * Added postie_filter_email2 filter which includes To and Reply-To headers
 * Added postie_author filter
