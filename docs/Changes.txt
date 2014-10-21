@@ -27,7 +27,7 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.4 (future) =
+= 1.6.4 (2014.10.21) =
 * Provide post url in success email
 
 = 1.6.3 (2014.10.03) =

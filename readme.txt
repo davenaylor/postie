@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 1.6.3
+Stable tag: 1.6.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,12 +58,12 @@ More info at http://PostiePlugin.com/
 == Installation ==
 * Either:
     * Put the postie.zip file in wp-content/plugins/ and unzip it
+    * Goto the Plugins tab in the WordPress Admin Site
+    * Activate "Postie"
 * Or:
     * Use the automatic installer (WP 2.7+)
 * Login to WordPress as an administrator
-* Goto the Plugins tab in the WordPress Admin Site
-* Activate "Postie"
-* Goto to the "Settings" tab and click on the sub-tab "Postie" to configure it.
+* Click "Postie" on the lefthand menu to configure it.
 * Make sure you enter the mailserver information correctly, including the type
   of connection and the port number. Common port configurations:
 * (Postie ignores the settings under Settings->Writing->Writing-by-Email)
@@ -238,6 +238,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.4 (future) =
+* Provide post url in success email
+
 = 1.6.3 (2014.10.03) =
 * Added postie_filter_email2 filter which includes To and Reply-To headers
 * Added postie_author filter
