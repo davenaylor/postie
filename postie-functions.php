@@ -454,7 +454,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     } else {
         DisplayEmailPost($details);
 
-        PostToDB($details, $is_reply, $custom_image_field, $postmodifiers);
+        $postid = PostToDB($details, $is_reply, $custom_image_field, $postmodifiers);
 
         if ($confirmation_email != '') {
             if ($confirmation_email == 'sender') {
@@ -464,7 +464,7 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
             } elseif ($confirmation_email == 'both') {
                 $recipients = array($details['email_author'], get_option("admin_email"));
             }
-            MailToRecipients($mimeDecodedEmail, false, $recipients, false, false);
+            MailToRecipients($mimeDecodedEmail, false, $recipients, false, false, $postid);
         }
     }
     postie_disable_revisions(true);
@@ -887,7 +887,7 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
  * @param array - details of the post
  */
 function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
-
+    $post_ID = 0;
     if (!$isReply) {
         $post_ID = wp_insert_post($details, true);
         if (is_wp_error($post_ID)) {
@@ -934,6 +934,7 @@ function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
 
         do_action('postie_post_after', $details);
     }
+    return $post_ID;
 }
 
 /**
@@ -1394,7 +1395,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         if ($user->has_cap("post_via_postie")) {
             DebugEcho("$user_ID has 'post_via_postie' permissions");
             $poster = $user_ID;
-            
+
             DebugEcho("ValidatePoster: pre postie_author $poster");
             $poster = apply_filters("postie_author", $poster);
             DebugEcho("ValidatePoster: post postie_author $poster");
@@ -2058,7 +2059,7 @@ function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
  * This function can be used to send confirmation or rejection emails
  * It accepts an object containing the entire message
  */
-function MailToRecipients(&$mail_content, $testEmail = false, $recipients = array(), $returnToSender, $reject = true) {
+function MailToRecipients(&$mail_content, $testEmail = false, $recipients = array(), $returnToSender, $reject = true, $postid = null) {
     DebugEcho("MailToRecipients: send mail");
     if ($testEmail) {
         return false;
@@ -2068,6 +2069,10 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
     $myemailadd = get_option("admin_email");
     $blogname = get_option("blogname");
     $blogurl = get_option("siteurl");
+    $posturl = '';
+    if ($postid != null) {
+        $posturl = get_permalink($postid);
+    }
 
     if (count($recipients) == 0) {
         DebugEcho("MailToRecipients: no recipients");
@@ -2132,8 +2137,8 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
         }
     } else {
         $alert_subject = "Successfully posted to $blogname";
-        DebugEcho("MailToRecipients: $alert_subject");
-        $mailtext = "Your post '$subject' has been successfully published to $blogname <$blogurl>.\n";
+        $mailtext = "Your post '$subject' has been successfully published to $blogname <$posturl>.\n";
+        DebugEcho("MailToRecipients: $alert_subject\n$mailtext");
     }
 
     wp_mail($myemailadd, $alert_subject, $mailtext, $headers);

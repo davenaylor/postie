@@ -28,7 +28,7 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.6.4 (future) =
-* 
+* Provide post url in success email
 
 = 1.6.3 (2014.10.03) =
 * Added postie_filter_email2 filter which includes To and Reply-To headers
