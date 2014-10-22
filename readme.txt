@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 1.6.4
+Stable tag: 1.6.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -238,7 +238,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.4 (future) =
+= 1.6.5 (2014.10.22) =
+* Fixed charset encoding bug when there wasn't a content-transfer-encoding header
+* Upgraded simple_html_dom 
+
+= 1.6.4 (2014.10.21) =
 * Provide post url in success email
 
 = 1.6.3 (2014.10.03) =
