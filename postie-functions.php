@@ -1254,7 +1254,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 break;
         }
     }
-    DebugEcho("GetContent: meta_return: " . $meta_return);
+    DebugEcho("GetContent: meta_return: " . substr($meta_return, 0, 500));
     DebugEcho("GetContent: ==== end");
     return $meta_return;
 }
