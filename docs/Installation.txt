@@ -1,12 +1,12 @@
 == Installation ==
 * Either:
     * Put the postie.zip file in wp-content/plugins/ and unzip it
-    * Goto the Plugins tab in the WordPress Admin Site
-    * Activate "Postie"
 * Or:
     * Use the automatic installer (WP 2.7+)
 * Login to WordPress as an administrator
-* Click "Postie" on the lefthand menu to configure it.
+* Goto the Plugins tab in the WordPress Admin Site
+* Activate "Postie"
+* Goto to the "Settings" tab and click on the sub-tab "Postie" to configure it.
 * Make sure you enter the mailserver information correctly, including the type
   of connection and the port number. Common port configurations:
 * (Postie ignores the settings under Settings->Writing->Writing-by-Email)

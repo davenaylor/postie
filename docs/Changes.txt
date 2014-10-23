@@ -28,7 +28,8 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.6.6 (future) =
-* 
+* Add additional debugging to isValidSmtpServer
+* Add Japanese translation
 
 = 1.6.5 (2014.10.22) =
 * Fixed charset encoding bug when there wasn't a content-transfer-encoding header

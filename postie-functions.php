@@ -1448,19 +1448,21 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
 }
 
 function isValidSmtpServer($mimeDecodedEmail, $smtpservers) {
-    if (empty($smtpservers))
+    if (empty($smtpservers)){
         return true;
-
+    }
+    
     foreach ((array) $mimeDecodedEmail->headers['received'] as $received) {
+        EchoInfo("isValidSmtpServer: checking header $received");
         foreach ($smtpservers as $smtp) {
             if (stristr($received, $smtp) !== false) {
-                DebugEcho("Sent from valid SMTP server.");
+                DebugEcho("isValidSmtpServer: Sent from valid SMTP server.");
                 return true;
             }
         }
     }
 
-    EchoInfo("Sent from invalid SMTP server.");
+    EchoInfo("isValidSmtpServer: Sent from invalid SMTP server.");
     return false;
 }
 
