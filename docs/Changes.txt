@@ -27,9 +27,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.6 (future) =
+= 1.6.6 (2014.10.29) =
 * Add additional debugging to isValidSmtpServer
 * Add Japanese translation
+* Fixed bug where a subject present in the body is not recognized
 
 = 1.6.5 (2014.10.22) =
 * Fixed charset encoding bug when there wasn't a content-transfer-encoding header

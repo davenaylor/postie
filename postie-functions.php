@@ -298,7 +298,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         }
     }
 
-    filter_VodafoneHandler($content, $attachments, $config);
+    filter_VodafoneHandler($content, $attachments);
     if ($fulldebug) {
         DebugEcho("post vodafone: $content");
     }
@@ -972,11 +972,12 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     DecodeBase64Part($part);
 
     //look for banned file names
-    if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters))
+    if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters)) {
         if (isBannedFileName($part->ctype_parameters['name'], $banned_files_list)) {
             DebugEcho("GetContent: found banned filename");
             return NULL;
         }
+    }
 
     if (property_exists($part, "ctype_primary") && $part->ctype_primary == "application" && $part->ctype_secondary == "octet-stream") {
         if (property_exists($part, 'disposition') && $part->disposition == "attachment") {
@@ -1362,7 +1363,6 @@ function filter_CleanHtml($content) {
 function ValidatePoster(&$mimeDecodedEmail, $config) {
     $test_email = '';
     extract($config);
-    global $wpdb;
     $poster = NULL;
     $from = "";
     if (property_exists($mimeDecodedEmail, "headers") && array_key_exists('from', $mimeDecodedEmail->headers)) {
@@ -1396,8 +1396,9 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     if (!empty($from)) {
         DebugEcho("Confirming Access For $from ");
         $user = get_user_by('email', $from);
-        if ($user !== false)
+        if ($user !== false) {
             $user_ID = $user->ID;
+        }
     } else {
         $user_ID = "";
     }
@@ -1448,10 +1449,10 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
 }
 
 function isValidSmtpServer($mimeDecodedEmail, $smtpservers) {
-    if (empty($smtpservers)){
+    if (empty($smtpservers)) {
         return true;
     }
-    
+
     foreach ((array) $mimeDecodedEmail->headers['received'] as $received) {
         EchoInfo("isValidSmtpServer: checking header $received");
         foreach ($smtpservers as $smtp) {
@@ -1526,6 +1527,7 @@ function filter_RemoveSignature(&$content, $config) {
 
 function filter_RemoveSignatureWorker(&$html, $pattern) {
     $found = false;
+    $matches = array();
     if (preg_match($pattern, trim($html->plaintext), $matches)) {
         DebugEcho("filter_RemoveSignatureWorker: signature found in base, removing");
         DebugDump($matches);
@@ -1564,8 +1566,9 @@ function filter_End(&$content, $config) {
     $end = $config['message_end'];
     if ($end) {
         $pos = strpos($content, $end);
-        if ($pos === false)
+        if ($pos === false) {
             return $content;
+        }
         DebugEcho("end filter: $end");
         $content = substr($content, 0, $pos);
     }
@@ -1675,6 +1678,7 @@ function DecodeBase64Part(&$part) {
 function tag_AllowCommentsOnPost(&$content) {
     $comments_allowed = get_option('default_comment_status'); // 'open' or 'closed'
 
+    $matches = array();
     if (preg_match("/comments:([0|1|2])/i", $content, $matches)) {
         $content = preg_replace("/comments:$matches[1]/i", "", $content);
         if ($matches[1] == "1") {
@@ -1690,6 +1694,7 @@ function tag_AllowCommentsOnPost(&$content) {
 
 function tag_Status(&$content, $currentstatus) {
     $poststatus = $currentstatus;
+    $matches = array();
     if (preg_match("/status:\s*(draft|publish|pending|private)/i", $content, $matches)) {
         DebugEcho("tag_Status: found status $matches[1]");
         DebugDump($matches);
@@ -1706,18 +1711,21 @@ function tag_Status(&$content, $currentstatus) {
  */
 function filter_Delay(&$content, $message_date = NULL, $offset = 0) {
     $delay = 0;
-
+    $matches = array();
     if (preg_match("/delay:(-?[0-9dhm]+)/i", $content, $matches) && trim($matches[1])) {
         DebugEcho("found delay: " . $matches[1]);
         $days = 0;
         $hours = 0;
         $minutes = 0;
+        $dayMatches = array();
         if (preg_match("/(-?[0-9]+)d/i", $matches[1], $dayMatches)) {
             $days = $dayMatches[1];
         }
+        $hourMatches = array();
         if (preg_match("/(-?[0-9]+)h/i", $matches[1], $hourMatches)) {
             $hours = $hourMatches[1];
         }
+        $minuteMatches = array();
         if (preg_match("/(-?[0-9]+)m/i", $matches[1], $minuteMatches)) {
             $minutes = $minuteMatches[1];
         }
@@ -1743,18 +1751,19 @@ function filter_Delay(&$content, $message_date = NULL, $offset = 0) {
  * This function takes the content of the message - looks for a subject at the begining surrounded by # and then removes that from the content
  */
 function tag_Subject($content, $defaultTitle) {
-    DebugEcho("Looking for subject in email body");
+    DebugEcho("tag_Subject: Looking for subject in email body");
     if (substr($content, 0, 1) != "#") {
-        DebugEcho("No subject found, using default [1]");
+        DebugEcho("tag_Subject: No subject found, using default [1]");
         return(array($defaultTitle, $content));
     }
     $subjectEndIndex = strpos($content, "#", 1);
     if (!$subjectEndIndex > 0) {
-        DebugEcho("No subject found, using default [2]");
+        DebugEcho("tag_Subject: No subject found, using default [2]");
         return(array($defaultTitle, $content));
     }
     $subject = substr($content, 1, $subjectEndIndex - 1);
     $content = substr($content, $subjectEndIndex + 1, strlen($content));
+    DebugEcho("tag_Subject: Subject found in body: $subject");
     return array($subject, $content);
 }
 
@@ -2027,7 +2036,6 @@ function filename_fix($filename) {
 function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
     DebugEcho("filter_PreferedText: begin " . count($mimeDecodedEmail->parts));
     $newParts = array();
-    $found = false;
 
     for ($i = 0; $i < count($mimeDecodedEmail->parts); $i++) {
         if (!property_exists($mimeDecodedEmail->parts[$i], "ctype_primary")) {
@@ -2073,16 +2081,14 @@ function filter_PreferedText($mimeDecodedEmail, $preferTextType) {
  * This function can be used to send confirmation or rejection emails
  * It accepts an object containing the entire message
  */
-function MailToRecipients(&$mail_content, $testEmail = false, $recipients = array(), $returnToSender, $reject = true, $postid = null) {
+function MailToRecipients(&$mail_content, $testEmail = false, $recipients = array(), $returnToSender = false, $reject = true, $postid = null) {
     DebugEcho("MailToRecipients: send mail");
     if ($testEmail) {
         return false;
     }
-    $user = get_userdata('1');
-    $myname = $user->user_nicename;
+
     $myemailadd = get_option("admin_email");
     $blogname = get_option("blogname");
-    $blogurl = get_option("siteurl");
     $posturl = '';
     if ($postid != null) {
         $posturl = get_permalink($postid);
@@ -2138,16 +2144,19 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
         }
         foreach ($mailparts as $part) {
             $mailtext .= "--$boundary\r\n";
-            if (array_key_exists('content-type', $part->headers))
+            if (array_key_exists('content-type', $part->headers)) {
                 $mailtext .= "Content-Type: " . $part->headers["content-type"] . "\n";
-            if (array_key_exists('content-transfer-encoding', $part->headers))
+            }
+            if (array_key_exists('content-transfer-encoding', $part->headers)) {
                 $mailtext .= "Content-Transfer-Encoding: " . $part->headers["content-transfer-encoding"] . "\n";
+            }
             if (array_key_exists('content-disposition', $part->headers)) {
                 $mailtext .= "Content-Disposition: " . $part->headers["content-disposition"] . "\n";
             }
             $mailtext .= "\n";
-            if (property_exists($part, 'body'))
+            if (property_exists($part, 'body')) {
                 $mailtext .= $part->body;
+            }
         }
     } else {
         $alert_subject = "Successfully posted to $blogname";
@@ -2246,8 +2255,9 @@ function GetNameFromEmail($address) {
  * the attachment
  */
 function chooseAttachmentIcon($file, $primary, $secondary, $iconSet = 'silver', $size = '32') {
-    if ($iconSet == 'none')
+    if ($iconSet == 'none') {
         return('');
+    }
     $fileName = basename($file);
     $parts = explode('.', $fileName);
     $ext = $parts[count($parts) - 1];
@@ -2300,8 +2310,9 @@ function chooseAttachmentIcon($file, $primary, $secondary, $iconSet = 'silver', 
         $fileType = 'default';
     }
     $fileName = "/icons/$iconSet/$fileType-$size.png";
-    if (!file_exists(POSTIE_ROOT . $fileName))
+    if (!file_exists(POSTIE_ROOT . $fileName)) {
         $fileName = "/icons/$iconSet/default-$size.png";
+    }
     $iconHtml = "<img src='" . POSTIE_URL . $fileName . "' alt='$fileType icon' />";
     DebugEcho("icon: $iconHtml");
     return $iconHtml;
@@ -2510,7 +2521,6 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
  */
 function GetSubject(&$mimeDecodedEmail, &$content, $config) {
     extract($config);
-    global $charset;
     //assign the default title/subject
     if (!array_key_exists('subject', $mimeDecodedEmail->headers) || empty($mimeDecodedEmail->headers['subject'])) {
         DebugEcho("No subject in email");
@@ -2529,6 +2539,8 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
             DebugEcho("subject before htmlentities: $subject");
             $subject = htmlentities($subject, ENT_COMPAT, $message_encoding);
             DebugEcho("subject after htmlentities: $subject");
+        } else {
+            list($subject, $content) = tag_Subject($content, $subject);
         }
     }
     //This is for ISO-2022-JP - Can anyone confirm that this is still neeeded?
@@ -2570,6 +2582,7 @@ function tag_Tags(&$content, $defaultTags) {
 
 function tag_TagsWorker(&$content) {
     $post_tags = array();
+    $matches = array();
     if (preg_match('/tags: ?(.*)$/im', $content, $matches)) {
         if (!empty($matches[1])) {
             DebugEcho("Found tags: $matches[1]");
@@ -2583,6 +2596,7 @@ function tag_TagsWorker(&$content) {
 function tag_Tags2(&$content, $defaultTags) {
     $post_tags = array();
     //try and determine tags
+    $matches = array();
     if (preg_match('/tags: ?(.*)$/im', $content, $matches)) {
         if (!empty($matches[1])) {
             DebugEcho("Found tags: $matches[1]");
@@ -2603,6 +2617,7 @@ function tag_Tags2(&$content, $defaultTags) {
  */
 function tag_Excerpt(&$content, $config) {
     $post_excerpt = '';
+    $matches = array();
     if (preg_match('/:excerptstart ?(.*):excerptend/s', $content, $matches)) {
         $content = str_replace($matches[0], "", $content);
         $post_excerpt = $matches[1];
@@ -2784,8 +2799,9 @@ function config_ResetToDefault() {
     $newconfig = config_GetDefaults();
     $config = get_option('postie-settings');
     $save_keys = array('mail_password', 'mail_server', 'mail_server_port', 'mail_userid', 'input_protocol');
-    foreach ($save_keys as $key)
+    foreach ($save_keys as $key) {
         $newconfig[$key] = $config[$key];
+    }
     update_option('postie-settings', $newconfig);
     config_Update($newconfig);
     return $newconfig;
@@ -2930,140 +2946,191 @@ function config_ReadOld() {
  */
 function config_UpgradeOld() {
     $config = config_ReadOld();
-    if (!isset($config["ADMIN_USERNAME"]))
+    if (!isset($config["ADMIN_USERNAME"])) {
         $config["ADMIN_USERNAME"] = 'admin';
-    if (!isset($config["PREFER_TEXT_TYPE"]))
+    }
+    if (!isset($config["PREFER_TEXT_TYPE"])) {
         $config["PREFER_TEXT_TYPE"] = "plain";
-    if (!isset($config["DEFAULT_TITLE"]))
+    }
+    if (!isset($config["DEFAULT_TITLE"])) {
         $config["DEFAULT_TITLE"] = "Live From The Field";
-    if (!isset($config["INPUT_PROTOCOL"]))
+    }
+    if (!isset($config["INPUT_PROTOCOL"])) {
         $config["INPUT_PROTOCOL"] = "pop3";
-    if (!isset($config["IMAGE_PLACEHOLDER"]))
+    }
+    if (!isset($config["IMAGE_PLACEHOLDER"])) {
         $config["IMAGE_PLACEHOLDER"] = "#img%#";
-    if (!isset($config["IMAGES_APPEND"]))
+    }
+    if (!isset($config["IMAGES_APPEND"])) {
         $config["IMAGES_APPEND"] = true;
-
-    if (!isset($config["ALLOW_SUBJECT_IN_MAIL"]))
+    }
+    if (!isset($config["ALLOW_SUBJECT_IN_MAIL"])) {
         $config["ALLOW_SUBJECT_IN_MAIL"] = true;
-    if (!isset($config["DROP_SIGNATURE"]))
+    }
+    if (!isset($config["DROP_SIGNATURE"])) {
         $config["DROP_SIGNATURE"] = true;
-    if (!isset($config["MESSAGE_START"]))
+    }
+    if (!isset($config["MESSAGE_START"])) {
         $config["MESSAGE_START"] = ":start";
-
-    if (!isset($config["MESSAGE_END"]))
+    }
+    if (!isset($config["MESSAGE_END"])) {
         $config["MESSAGE_END"] = ":end";
-    if (!isset($config["FORWARD_REJECTED_MAIL"]))
+    }
+    if (!isset($config["FORWARD_REJECTED_MAIL"])) {
         $config["FORWARD_REJECTED_MAIL"] = true;
-    if (!isset($config["RETURN_TO_SENDER"]))
+    }
+    if (!isset($config["RETURN_TO_SENDER"])) {
         $config["RETURN_TO_SENDER"] = false;
-    if (!isset($config["CONFIRMATION_EMAIL"]))
+    }
+    if (!isset($config["CONFIRMATION_EMAIL"])) {
         $config["CONFIRMATION_EMAIL"] = '';
-    if (!isset($config["ALLOW_HTML_IN_SUBJECT"]))
+    }
+    if (!isset($config["ALLOW_HTML_IN_SUBJECT"])) {
         $config["ALLOW_HTML_IN_SUBJECT"] = true;
-    if (!isset($config["ALLOW_HTML_IN_BODY"]))
+    }
+    if (!isset($config["ALLOW_HTML_IN_BODY"])) {
         $config["ALLOW_HTML_IN_BODY"] = true;
-    if (!isset($config["START_IMAGE_COUNT_AT_ZERO"]))
+    }
+    if (!isset($config["START_IMAGE_COUNT_AT_ZERO"])) {
         $config["START_IMAGE_COUNT_AT_ZERO"] = false;
-    if (!isset($config["MESSAGE_ENCODING"]))
+    }
+    if (!isset($config["MESSAGE_ENCODING"])) {
         $config["MESSAGE_ENCODING"] = "UTF-8";
-    if (!isset($config["MESSAGE_DEQUOTE"]))
+    }
+    if (!isset($config["MESSAGE_DEQUOTE"])) {
         $config["MESSAGE_DEQUOTE"] = true;
-
-    if (!isset($config["TURN_AUTHORIZATION_OFF"]))
+    }
+    if (!isset($config["TURN_AUTHORIZATION_OFF"])) {
         $config["TURN_AUTHORIZATION_OFF"] = false;
-    if (!isset($config["CUSTOM_IMAGE_FIELD"]))
+    }
+    if (!isset($config["CUSTOM_IMAGE_FIELD"])) {
         $config["CUSTOM_IMAGE_FIELD"] = false;
-    if (!isset($config["CONVERTNEWLINE"]))
+    }
+    if (!isset($config["CONVERTNEWLINE"])) {
         $config["CONVERTNEWLINE"] = false;
-    if (!isset($config["SIG_PATTERN_LIST"]))
+    }
+    if (!isset($config["SIG_PATTERN_LIST"])) {
         $config["SIG_PATTERN_LIST"] = array('--', '---');
-    if (!isset($config["BANNED_FILES_LIST"]))
+    }
+    if (!isset($config["BANNED_FILES_LIST"])) {
         $config["BANNED_FILES_LIST"] = array();
-    if (!isset($config["SUPPORTED_FILE_TYPES"]))
+    }
+    if (!isset($config["SUPPORTED_FILE_TYPES"])) {
         $config["SUPPORTED_FILE_TYPES"] = array("application");
-    if (!isset($config["AUTHORIZED_ADDRESSES"]))
+    }
+    if (!isset($config["AUTHORIZED_ADDRESSES"])) {
         $config["AUTHORIZED_ADDRESSES"] = array();
-    if (!isset($config["MAIL_SERVER"]))
+    }
+    if (!isset($config["MAIL_SERVER"])) {
         $config["MAIL_SERVER"] = NULL;
-    if (!isset($config["MAIL_SERVER_PORT"]))
+    }
+    if (!isset($config["MAIL_SERVER_PORT"])) {
         $config["MAIL_SERVER_PORT"] = NULL;
-    if (!isset($config["MAIL_USERID"]))
+    }
+    if (!isset($config["MAIL_USERID"])) {
         $config["MAIL_USERID"] = NULL;
-    if (!isset($config["MAIL_PASSWORD"]))
+    }
+    if (!isset($config["MAIL_PASSWORD"])) {
         $config["MAIL_PASSWORD"] = NULL;
-    if (!isset($config["DEFAULT_POST_CATEGORY"]))
+    }
+    if (!isset($config["DEFAULT_POST_CATEGORY"])) {
         $config["DEFAULT_POST_CATEGORY"] = NULL;
-    if (!isset($config["DEFAULT_POST_TAGS"]))
+    }
+    if (!isset($config["DEFAULT_POST_TAGS"])) {
         $config["DEFAULT_POST_TAGS"] = NULL;
-    if (!isset($config["TIME_OFFSET"]))
+    }
+    if (!isset($config["TIME_OFFSET"])) {
         $config["TIME_OFFSET"] = get_option('gmt_offset');
-    if (!isset($config["WRAP_PRE"]))
+    }
+    if (!isset($config["WRAP_PRE"])) {
         $config["WRAP_PRE"] = 'no';
-    if (!isset($config["CONVERTURLS"]))
+    }
+    if (!isset($config["CONVERTURLS"])) {
         $config["CONVERTURLS"] = true;
-    if (!isset($config["SHORTCODE"]))
+    }
+    if (!isset($config["SHORTCODE"])) {
         $config["SHORTCODE"] = false;
-    if (!isset($config["ADD_META"]))
+    }
+    if (!isset($config["ADD_META"])) {
         $config["ADD_META"] = 'no';
+    }
     $config['ICON_SETS'] = array('silver', 'black', 'white', 'custom', 'none');
-    if (!isset($config["ICON_SET"]))
+    if (!isset($config["ICON_SET"])) {
         $config["ICON_SET"] = 'silver';
+    }
     $config['ICON_SIZES'] = array(32, 48, 64);
-    if (!isset($config["ICON_SIZE"]))
+    if (!isset($config["ICON_SIZE"])) {
         $config["ICON_SIZE"] = 32;
+    }
 
     //audio
     include('templates/audio_templates.php');
-    if (!isset($config["SELECTED_AUDIOTEMPLATE"]))
+    if (!isset($config["SELECTED_AUDIOTEMPLATE"])) {
         $config['SELECTED_AUDIOTEMPLATE'] = 'simple_link';
+    }
     $config['AUDIOTEMPLATES'] = $audioTemplates;
-    if (!isset($config["SELECTED_VIDEO1TEMPLATE"]))
+    if (!isset($config["SELECTED_VIDEO1TEMPLATE"])) {
         $config['SELECTED_VIDEO1TEMPLATE'] = 'simple_link';
-    if (!isset($config["AUDIOTEMPLATE"]))
+    }
+    if (!isset($config["AUDIOTEMPLATE"])) {
         $config["AUDIOTEMPLATE"] = $simple_link;
+    }
 
     //video1
-    if (!isset($config["VIDEO1TYPES"]))
+    if (!isset($config["VIDEO1TYPES"])) {
         $config['VIDEO1TYPES'] = array('mp4', 'mpeg4', '3gp', '3gpp', '3gpp2', '3gp2', 'mov', 'mpeg', 'quicktime');
-    if (!isset($config["AUDIOTYPES"]))
+    }
+    if (!isset($config["AUDIOTYPES"])) {
         $config['AUDIOTYPES'] = array('m4a', 'mp3', 'ogg', 'wav', 'mpeg');
-    if (!isset($config["SELECTED_VIDEO2TEMPLATE"]))
+    }
+    if (!isset($config["SELECTED_VIDEO2TEMPLATE"])) {
         $config['SELECTED_VIDEO2TEMPLATE'] = 'simple_link';
+    }
     include('templates/video1_templates.php');
     $config['VIDEO1TEMPLATES'] = $video1Templates;
-    if (!isset($config["VIDEO1TEMPLATE"]))
+    if (!isset($config["VIDEO1TEMPLATE"])) {
         $config["VIDEO1TEMPLATE"] = $simple_link;
+    }
 
     //video2
-    if (!isset($config["VIDEO2TYPES"]))
+    if (!isset($config["VIDEO2TYPES"])) {
         $config['VIDEO2TYPES'] = array('x-flv');
-    if (!isset($config["POST_STATUS"]))
+    }
+    if (!isset($config["POST_STATUS"])) {
         $config["POST_STATUS"] = 'publish';
-    if (!isset($config["IMAGE_NEW_WINDOW"]))
+    }
+    if (!isset($config["IMAGE_NEW_WINDOW"])) {
         $config["IMAGE_NEW_WINDOW"] = false;
-    if (!isset($config["FILTERNEWLINES"]))
+    }
+    if (!isset($config["FILTERNEWLINES"])) {
         $config["FILTERNEWLINES"] = true;
+    }
     include('templates/video2_templates.php');
     $config['VIDEO2TEMPLATES'] = $video2Templates;
-    if (!isset($config["VIDEO2TEMPLATE"]))
+    if (!isset($config["VIDEO2TEMPLATE"])) {
         $config["VIDEO2TEMPLATE"] = $simple_link;
+    }
 
     //image
-    if (!isset($config["SELECTED_IMAGETEMPLATE"]))
+    if (!isset($config["SELECTED_IMAGETEMPLATE"])) {
         $config['SELECTED_IMAGETEMPLATE'] = 'wordpress_default';
-    if (!isset($config["SMTP"]))
+    }
+    if (!isset($config["SMTP"])) {
         $config["SMTP"] = array();
+    }
     include('templates/image_templates.php');
-    if (!isset($config["IMAGETEMPLATE"]))
+    if (!isset($config["IMAGETEMPLATE"])) {
         $config["IMAGETEMPLATE"] = $wordpress_default;
+    }
     $config['IMAGETEMPLATES'] = $imageTemplates;
 
     //general
     include('templates/general_template.php');
-    if (!isset($config["GENERALTEMPLATE"]))
+    if (!isset($config["GENERALTEMPLATE"])) {
         $config["GENERALTEMPLATE"] = $postie_default;
+    }
 
-    return($config);
+    return $config;
 }
 
 /**
@@ -3199,8 +3266,9 @@ function config_ValidateSettings($in) {
 
     foreach ($arrays as $sep => $fields) {
         foreach ($fields as $field) {
-            if (!is_array($out[$field]))
+            if (!is_array($out[$field])) {
                 $out[$field] = explode($sep, trim($out[$field]));
+            }
             foreach ($out[$field] as $key => $val) {
                 $tst = trim($val);
                 if
@@ -3280,6 +3348,7 @@ function tag_CustomImageField(&$content, &$attachments, $config) {
 
         foreach ($attachments["html"] as $key => $value) {
             //DebugEcho("checking " . htmlentities($value));
+            $matches = array();
             if (preg_match("/src\s*=\s*['\"]([^'\"]*)['\"]/i", $value, $matches)) {
                 DebugEcho("found custom image: " . $matches[1]);
                 array_push($customImages, $matches[1]);
@@ -3292,12 +3361,13 @@ function tag_CustomImageField(&$content, &$attachments, $config) {
 /**
  * Special Vodafone handler - their messages are mostly vendor trash - this strips them down.
  */
-function filter_VodafoneHandler(&$content, &$attachments, $config) {
+function filter_VodafoneHandler(&$content, &$attachments) {
     if (preg_match('/You have been sent a message from Vodafone mobile/', $content)) {
         DebugEcho("Vodafone message");
         $index = strpos($content, "TEXT:");
         if (strpos !== false) {
             $alt_content = substr($content, $index, strlen($content));
+            $matches = array();
             if (preg_match("/<font face=\"verdana,helvetica,arial\" class=\"standard\" color=\"#999999\"><b>(.*)<\/b>/", $alt_content, $matches)) {
                 //The content is now just the text of the message
                 $content = $matches[1];
@@ -3326,8 +3396,6 @@ function DebugFiltersFor($hook = '') {
 function postie_test_config() {
     $config = config_Read();
     extract($config);
-    $title = __("Postie Diagnosis");
-    $parent_file = 'options-general.php?page=postie/postie.php';
     get_currentuserinfo();
 
     if (!current_user_can('manage_options')) {

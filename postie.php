@@ -4,7 +4,7 @@
   Plugin Name: Postie
   Plugin URI: http://PostiePlugin.com/
   Description: Create posts via email. Signifigantly upgrades the Post by Email features of Word Press.
-  Version: 1.6.5
+  Version: 1.6.6
   Author: Wayne Allen
   Author URI: http://allens-home.com/
   License: GPL2
@@ -31,7 +31,7 @@
  */
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . "postie-functions.php");
 
-define('POSTIE_VERSION', '1.6.5');
+define('POSTIE_VERSION', '1.6.6');
 define("POSTIE_ROOT", dirname(__FILE__));
 define("POSTIE_URL", WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)));
 
