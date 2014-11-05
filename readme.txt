@@ -238,6 +238,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.7 (2014.11.05) =
+* Fixed bug where base64 text with utf-8 charset was trying to convert encoding to utf-8
+
 = 1.6.6 (2014.10.29) =
 * Add additional debugging to isValidSmtpServer
 * Add Japanese translation

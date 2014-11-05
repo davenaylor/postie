@@ -1657,14 +1657,20 @@ function DecodeBase64Part(&$part) {
         if (strtolower($part->headers['content-transfer-encoding']) == 'base64') {
             DebugEcho("DecodeBase64Part: base64 detected");
             //DebugDump($part);
+            $decoded = base64_decode($part->body);
             if (isset($part->disposition) && $part->disposition == 'attachment') {
-                $part->body = base64_decode($part->body);
+                $part->body = $decoded;
             } else if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters) && array_key_exists('charset', $part->ctype_parameters)) {
-                $part->body = iconv($part->ctype_parameters['charset'], 'UTF-8//TRANSLIT', base64_decode($part->body));
-                DebugEcho("convertef from: " . $part->ctype_parameters['charset']);
-                $part->ctype_parameters['charset'] = 'default'; //so we don't double decode
+                $charset = strtolower($part->ctype_parameters['charset']);
+                if ($charset != 'utf-8') {
+                    DebugEcho("converted from: " . $charset);
+                    $part->body = iconv($charset, 'UTF-8//TRANSLIT', $decoded);
+                    $part->ctype_parameters['charset'] = 'default'; //so we don't double decode
+                } else {
+                    $part->body = $decoded;
+                }
             } else {
-                $part->body = base64_decode($part->body);
+                $part->body = $decoded;
             }
             $part->headers['content-transfer-encoding'] = '';
         }
