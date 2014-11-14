@@ -1710,11 +1710,6 @@ function tag_Status(&$content, $currentstatus) {
     return $poststatus;
 }
 
-/**
- * Needed to be able to modify the content to remove the usage of the delay tag
- * 
- * todo split delay tag from date logic
- */
 function filter_Delay(&$content, $message_date = NULL, $offset = 0) {
     $delay = 0;
     $matches = array();
@@ -1762,15 +1757,20 @@ function tag_Subject($content, $defaultTitle) {
         DebugEcho("tag_Subject: No subject found, using default [1]");
         return(array($defaultTitle, $content));
     }
-    $subjectEndIndex = strpos($content, "#", 1);
-    if (!$subjectEndIndex > 0) {
-        DebugEcho("tag_Subject: No subject found, using default [2]");
+    if (strtolower(substr($content, 1, 3)) != "img") {
+
+        $subjectEndIndex = strpos($content, "#", 1);
+        if (!$subjectEndIndex > 0) {
+            DebugEcho("tag_Subject: No subject found, using default [2]");
+            return(array($defaultTitle, $content));
+        }
+        $subject = substr($content, 1, $subjectEndIndex - 1);
+        $content = substr($content, $subjectEndIndex + 1, strlen($content));
+        DebugEcho("tag_Subject: Subject found in body: $subject");
+        return array($subject, $content);
+    } else {
         return(array($defaultTitle, $content));
     }
-    $subject = substr($content, 1, $subjectEndIndex - 1);
-    $content = substr($content, $subjectEndIndex + 1, strlen($content));
-    DebugEcho("tag_Subject: Subject found in body: $subject");
-    return array($subject, $content);
 }
 
 /**
@@ -2541,14 +2541,16 @@ function GetSubject(&$mimeDecodedEmail, &$content, $config) {
         $subject = $mimeDecodedEmail->headers['subject'];
         DebugEcho(("Predecoded subject: $subject"));
 
-        if (!$allow_html_in_subject) {
-            DebugEcho("subject before htmlentities: $subject");
-            $subject = htmlentities($subject, ENT_COMPAT, $message_encoding);
-            DebugEcho("subject after htmlentities: $subject");
-        } else {
+        if ($allow_subject_in_mail) {
             list($subject, $content) = tag_Subject($content, $subject);
         }
     }
+    if (!$allow_html_in_subject) {
+        DebugEcho("subject before htmlentities: $subject");
+        $subject = htmlentities($subject, ENT_COMPAT, $message_encoding);
+        DebugEcho("subject after htmlentities: $subject");
+    }
+
     //This is for ISO-2022-JP - Can anyone confirm that this is still neeeded?
     // escape sequence is 'ESC $ B' == 1b 24 42 hex.
     if (strpos($subject, "\x1b\x24\x42") !== false) {
