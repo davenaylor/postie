@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.0
 Tested up to: 4.0
-Stable tag: 1.6.6
+Stable tag: 1.6.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -238,6 +238,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.8 (2014.11.14) =
+* Fixed bug where the #img tag was being used as the subject if it is the very first line in the email.
+* Fixed bug where the allow subject in body setting was being ignored.
+
 = 1.6.7 (2014.11.05) =
 * Fixed bug where base64 text with utf-8 charset was trying to convert encoding to utf-8
 
