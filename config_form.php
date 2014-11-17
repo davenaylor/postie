@@ -323,7 +323,7 @@
                             wp_dropdown_categories($args);
                             ?>
                     </tr>
-                    <?php echo BuildBooleanSelect(__("Match short category", "postie") , "postie-settings[category_match]", $category_match, __("Try to match categories using 'starts with logic' otherwise only do exact matches.<br />Note that custom taxonomies will not be found if this setting is 'No'", "postie")); ?>
+                    <?php echo BuildBooleanSelect(__("Match short category", "postie"), "postie-settings[category_match]", $category_match, __("Try to match categories using 'starts with logic' otherwise only do exact matches.<br />Note that custom taxonomies will not be found if this setting is 'No'", "postie")); ?>
 
                     <tr valign="top">
                         <th scope="row">
@@ -340,27 +340,19 @@
                     <tr> 
                         <th width="33%" valign="top" scope="row"><?php _e('Default Post Status:', 'postie') ?> </th> 
                         <td>
-                            <select name='postie-settings[post_status]' id='postie-settings-post_status'>
-                                <option value="publish" <?php
-                                if ($post_status == "publish") {
-                                    echo "selected";
+                            <select name='postie-settings[post_status]' id='postie-settings-post_status'>                               
+                                <?php
+                                $stati = get_post_stati();
+                                //DebugEcho($config['post_status']);
+                                //DebugDump($stati);
+                                foreach ($stati as $status) {
+                                    $selected = "";
+                                    if ($config['post_status'] == $status) {
+                                        $selected = " selected='selected'";
+                                    }
+                                    echo "<option value='$status'$selected>$status</option>";
                                 }
-                                ?>><?php _e('Published', 'postie') ?></option>
-                                <option value="draft" <?php
-                                if ($post_status == "draft") {
-                                    echo "selected";
-                                }
-                                ?>><?php _e('Draft', 'postie') ?></option>
-                                <option value="pending" <?php
-                                if ($post_status == "pending") {
-                                    echo "selected";
-                                }
-                                ?>><?php _e('Pending Review', 'postie') ?></option>
-                                <option value="private" <?php
-                                if ($post_status == "private") {
-                                    echo "selected";
-                                }
-                                ?>><?php _e('Private', 'postie') ?></option>
+                                ?>
                             </select>               
                         </td> 
                     </tr> 
@@ -494,7 +486,7 @@
                     ?>
                     <tr> 
                         <th width="33%" valign="top" scope="row"><?php _e('Image Place Holder Tag:', 'postie') ?>  <br />
-                            <span class='recommendation'><?php _e("For use in 'plain' messages. The code for inserting an image. I.e. put \"#img1# in your email where you want the first image to show. See also \"Start Image Count At\"" , 'postie') ?></span>
+                            <span class='recommendation'><?php _e("For use in 'plain' messages. The code for inserting an image. I.e. put \"#img1# in your email where you want the first image to show. See also \"Start Image Count At\"", 'postie') ?></span>
                         </th> 
                         <td>
                             <input name='postie-settings[image_placeholder]' type="text" id='postie-settings-image_placeholder' value="<?php echo esc_attr($image_placeholder); ?>" size="50" /><br />
@@ -856,7 +848,7 @@
     <form id="postie-options" name="postie-options" method="post"> 
         <input type="hidden" name="action" value="reset" />
         <input name="Submit" value="<?php _e("Reset Settings To Defaults", 'postie') ?>" type="submit" class='button'> 
-       <span>&nbsp;<?php _e('(Your Mail server settings will be retained)' , 'postie') ?></span>
+        <span>&nbsp;<?php _e('(Your Mail server settings will be retained)', 'postie') ?></span>
     </form>
 </div>
 

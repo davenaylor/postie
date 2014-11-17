@@ -28,7 +28,7 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.6.9 (future) =
-* 
+* Post status list is now read from WordPress settings, rather than being a hard-coded list.
 
 = 1.6.8 (2014.11.14) =
 * Fixed bug where the #img tag was being used as the subject if it is the very first line in the email.
