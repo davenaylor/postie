@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.0
-Tested up to: 4.0
-Stable tag: 1.6.8
+Tested up to: 4.0.1
+Stable tag: 1.6.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -238,6 +238,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.9 (2014.12.1) =
+* Post status list is now read from WordPress settings, rather than being a hard-coded list.
+* Settings look & feel matching WP default style.
+* Testing against WP 4.0.1
+
 = 1.6.8 (2014.11.14) =
 * Fixed bug where the #img tag was being used as the subject if it is the very first line in the email.
 * Fixed bug where the allow subject in body setting was being ignored.
