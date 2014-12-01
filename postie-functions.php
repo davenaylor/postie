@@ -2756,10 +2756,8 @@ function DisplayEmailPost($details) {
 function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL, $options = null) {
 
     $html = "<tr>
-	<th scope='row'>" . $label . ":";
-    if (!empty($recommendation)) {
-        $html.='<br /><span class = "recommendation">' . $recommendation . '</span>';
-    }
+	<th scope='row'><label for='$id'>$label</label>";
+
 
     if (!(is_array($options) && count($options) == 2)) {
         $options = Array('Yes', 'No');
@@ -2770,6 +2768,9 @@ function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL,
             <option value='1'>" . __($options[0], 'postie') . "</option>
             <option value='0' " . (!$current_value ? "selected='selected'" : "") . ">" . __($options[1], 'postie') . '</option>
     </select>';
+    if (!empty($recommendation)) {
+        $html.='<p class = "description">' . $recommendation . '</p>';
+    }
     $html.="</td>\n</tr>";
 
     return $html;
@@ -2783,10 +2784,8 @@ function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL,
  * @param string
  */
 function BuildTextArea($label, $id, $current_value, $recommendation = NULL) {
-    $html = "<tr> <th scope='row'>" . $label . ":";
-    if ($recommendation) {
-        $html.="<br /><span class='recommendation'>" . $recommendation . "</span>";
-    }
+    $html = "<tr><th scope='row'><label for='$id'>$label</label>";
+
     $html.="</th>";
 
     $html .="<td><br /><textarea cols=40 rows=3 name='$id' id='$id'>";
@@ -2796,7 +2795,11 @@ function BuildTextArea($label, $id, $current_value, $recommendation = NULL) {
             $html .= "$item\n";
         }
     }
-    $html .= "</textarea></td></tr>";
+    $html .= "</textarea>";
+    if ($recommendation) {
+        $html.="<p class='description'>" . $recommendation . "</p>";
+    }
+    $html .="</td></tr>";
     return $html;
 }
 

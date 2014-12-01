@@ -20,8 +20,7 @@ table.form-table td {
     padding:10px;
 }
 table.form-table th {
-    width:40%;
-    font-weight:bold;
+    width: 300px;
 }
 .recommendation {
     font-size: 10px;
