@@ -1,3 +1,4 @@
+Separate out video linkifying from normal url linkifying - separate settings
 Add Message-ID header value to custom field (postie_message_id?) to both posts and comments.
 Use In-Reply-To header value as a better way to detect replies
 Verify that {TITLE} is doing the right thing.
@@ -62,10 +63,13 @@ after session filter
 
 convert plain text to html using same logic as wp - i.e. all text is html
 Original text is never modified
+There are filters that modify
+  meta data (tags, categories, date)
+  content (start, end, newlines, linkifying)
 =========
 AddOn Ideas
 (done) Google Alerts - turn each alert into a post
-HTML cleaning - use http://htmlpurifier.org/ to convert Word Html and other bad html into standard html
+(done) HTML cleaning - use http://htmlpurifier.org/ to convert Word Html and other bad html into standard html
 
 =========
 Postie 2.0
@@ -80,35 +84,8 @@ Make sure all failures are sent to admin (option?) failed attachments, etc.
 Option to send logs to support
 Enhance #img# to specify the featured image
 "yoast" style admin sidebar - see clicky by yoast
-replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMailbox
+replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMailbox or Hoard - see "Post By Email" plugin https://wordpress.org/plugins/post-by-email/
 provide a location for custom icons. update docs about location.
 handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
 change all Postie command to use a more consistent and easy to parse syntax
-
-  Use standard shortcode syntax? I.e. [postie date="Jan 1, 2014"]
-
-  commands with multiple data
-    #custom name="field name" data="field value"  custom#
-
-  commands with single data
-    #img the caption img#
-    #tags one, two, three tags#
-    #cat one, two, three cat#
-    #date tomorrow date#
-    #excerpt the excerpt excerpt#
-    #post-type custom post type post-type#
-    #post-format image post-format#
-    #subject title subject#
-    #delay 1 day delay#
-    #content the post content# - replacement for :start/:end
-
-  tag w/o data
-    @more (new)
-    @comments-open, @comments-closed, @comments-registeredonly
-    @status-draft, @status-publish, @status-pending, @status-private
-
-  alternate syntax
-    {{@cmd data }}
-    {{@status draft}}
-    {{@category one, two, three}}
-    {{@custom name="field name" data="field value" }}
+  Use standard shortcode syntax. I.e. [postie date="Jan 1, 2014"]

@@ -242,6 +242,7 @@
                         </td>
                     </tr>
                     <?php echo BuildBooleanSelect(__("Delete email after posting", "postie"), 'postie-settings[delete_mail_after_processing]', $delete_mail_after_processing, __("Only set to no for testing purposes", "postie")); ?>
+                    <?php echo BuildTextArea(__("Allowed SMTP servers", "postie"), "postie-settings[smtp]", $smtp, __("Only allow messages which have been sent throught the following SMTP servers. Put each server on a separate line. Leave blank to allow any SMTP server.", "postie")); ?>
                 </table>
             </div>
 
@@ -310,7 +311,7 @@
             <div id = "simpleTabs-content-3" class = "simpleTabs-content">
                 <table class = 'form-table'>
                     <tr valign = "top">
-                        <th scope = "row"><?php _e('Default post by mail category', 'postie') ?></th>
+                        <th scope = "row"><?php _e('Default category', 'postie') ?></th>
                         <td>
                             <?php
                             $defaultCat = $default_post_category;
@@ -322,7 +323,7 @@
 
                     <tr valign="top">
                         <th scope="row">
-                            <?php _e('Default post by mail tag(s)', 'postie') ?>:<br />
+                            <?php _e('Default tag(s)', 'postie') ?><br />
                         </th>
                         <td>
                             <input type='text' name='postie-settings[default_post_tags]' id='postie-settings-default_post_tags' value='<?php echo esc_attr($default_post_tags) ?>' />
@@ -409,28 +410,28 @@
                         </td> 
                     </tr> 
                     <?php echo BuildBooleanSelect(__("Forward Rejected Mail", "postie"), "postie-settings[forward_rejected_mail]", $forward_rejected_mail); ?>
-                    <?php echo BuildBooleanSelect(__("Allow Subject In Mail", "postie"), "postie-settings[allow_subject_in_mail]", $allow_subject_in_mail); ?>
+                    <?php echo BuildBooleanSelect(__("Allow Subject In Mail", "postie"), "postie-settings[allow_subject_in_mail]", $allow_subject_in_mail, "Enclose the subject between '#' on the very first line. E.g. #this is my subject#"); ?>
                     <?php echo BuildBooleanSelect(__("Allow HTML In Mail Subject", "postie"), "postie-settings[allow_html_in_subject]", $allow_html_in_subject); ?>
                     <?php echo BuildBooleanSelect(__("Allow HTML In Mail Body", "postie"), "postie-settings[allow_html_in_body]", $allow_html_in_body); ?>
                     <tr> 
                         <th scope="row"><?php _e('Text for Message Start', 'postie') ?> </th>
                         <td>
                             <input name='postie-settings[message_start]' type="text" id='postie-settings-message_start' value="<?php echo esc_attr($message_start); ?>" size="50" /><br />
-                            <p class='description'><?php _e('Use to remove any text from a message that the email provider puts at the top of the message', 'postie') ?></p>
+                            <p class='description'><?php _e('Remove all text from the beginning of the message up to the point where this is found.', 'postie') ?></p>
                         </td> 
                     </tr>
                     <tr>
                         <th scope="row"><?php _e('Text for Message End', 'postie') ?> </th>
                         <td>
                             <input name='postie-settings[message_end]' type="text" id='postie-settings-message_end' value="<?php echo esc_attr($message_end); ?>" size="50" /><br />
-                            <p class='description'><?php _e('Use to remove any text from a message that the email provider puts at the end of the message', 'postie') ?></p>
+                            <p class='description'><?php _e('Remove all text from the point this is found to the end of the message.', 'postie') ?></p>
                         </td>
                     </tr>
 
                     <?php
                     echo BuildBooleanSelect(__("Wrap content in pre tags", "postie"), "postie-settings[wrap_pre]", $wrap_pre);
                     echo BuildBooleanSelect(__("Filter newlines", "postie"), "postie-settings[filternewlines]", $filternewlines, __("Retain newlines from plain text. Set to no if using markdown or textitle syntax", "postie"));
-                    echo BuildBooleanSelect(__("Replace newline characters with html line breaks (&lt;br /&gt;)", "postie"), "postie-settings[convertnewline]", $convertnewline, __("Filter newlines must be turned on for this option to take effect.", "postie"));
+                    echo BuildBooleanSelect(__("Replace newline characters with html line breaks (&lt;br /&gt;)", "postie"), "postie-settings[convertnewline]", $convertnewline, __("Filter newlines must be turned on for this option to take effect", "postie"));
                     echo BuildBooleanSelect(__("Return rejected mail to sender", "postie"), "postie-settings[return_to_sender]", $return_to_sender);
                     ?>
                     <tr>
@@ -460,11 +461,8 @@
                         </td> 
                     </tr> 
                     <?php echo BuildBooleanSelect(__("Decode Quoted Printable Data", "postie"), "postie-settings[message_dequote]", $message_dequote); ?>
-                    <?php echo BuildTextArea(__("Supported MIME Types", "postie"), "postie-settings[supported_file_types]", $supported_file_types, __("Add just the type (not the subtype). Text, Video, Audio, Image and Multipart are always supported. Put each type on a single line.", "postie")); ?>
-                    <?php echo BuildTextArea(__("Banned File Names", "postie"), "postie-settings[banned_files_list]", $banned_files_list, __("Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files", "postie")); ?>
                     <?php echo BuildBooleanSelect(__("Drop The Signature From Mail", "postie"), "postie-settings[drop_signature]", $drop_signature); ?>
-                    <?php echo BuildTextArea(__("Signature Patterns", "postie"), "postie-settings[sig_pattern_list]", $sig_pattern_list, __("Put each pattern on a separate line. Patterns are <a href='http://regex101.com/' target='_blank'>regular expressions</a>.", "postie")); ?>
-                    <?php echo BuildTextArea(__("Allowed SMTP servers", "postie"), "postie-settings[smtp]", $smtp, __("Only allow messages which have been sent throught the following smtp servers. Put each server on a separate line. Leave blank to not check smtp servers.", "postie")); ?>
+                    <?php echo BuildTextArea(__("Signature Patterns", "postie"), "postie-settings[sig_pattern_list]", $sig_pattern_list, __("Put each pattern on a separate line. Patterns are <a href='http://regex101.com/' target='_blank'>regular expressions</a>", "postie")); ?>
                 </table> 
             </div>
 
@@ -475,8 +473,8 @@
                     echo BuildBooleanSelect(__("Use First Image as Featured Image", "postie"), "postie-settings[featured_image]", $featured_image, __("If any images are attached, the first one will be the featured image for the post", "postie"));
                     echo BuildBooleanSelect(__("Automatically insert image gallery", "postie"), "postie-settings[auto_gallery]", $auto_gallery, __("If any images are attached, they will automatically be inserted as a gallery", "postie"));
                     echo BuildBooleanSelect(__("Image Location", "postie"), "postie-settings[images_append]", $images_append, __("Location of attachments if using 'plain' format. Before or After content.", "postie"), array('After', 'Before'));
+                    echo BuildBooleanSelect(__("Generate Thumbnails", "postie"), "postie-settings[generate_thumbnails]", $generate_thumbnails, __("Some hosts crash during thumbnail generation. Set this to 'No' if you have this issue", "postie"));
                     echo BuildBooleanSelect(__("Start Image Count At", "postie"), "postie-settings[start_image_count_at_zero]", $start_image_count_at_zero, __('For use if using "Image Place Holder Tag" below.', "postie"), array('Start at 0', 'Start at 1'));
-                    echo BuildBooleanSelect(__("Generate Thumbnails", "postie"), "postie-settings[generate_thumbnails]", $generate_thumbnails, __("Some hosts crash during thumbnail generation. Set this to 'No' if you have this issue.", "postie"));
                     ?>
                     <tr> 
                         <th scope="row"><?php _e('Image Place Holder Tag', 'postie') ?></th> 
@@ -702,8 +700,14 @@
                 </table> 
             </div>
 
+            <!--
+            ## Attachments
+            -->
+
             <div id="simpleTabs-content-6" class="simpleTabs-content">
                 <table class='form-table'>
+                    <?php echo BuildTextArea(__("Supported MIME Types", "postie"), "postie-settings[supported_file_types]", $supported_file_types, __("Add just the type (not the subtype). Text, Video, Audio, Image and Multipart are always supported. Put each type on a single line", "postie")); ?>
+                    <?php echo BuildTextArea(__("Banned File Names", "postie"), "postie-settings[banned_files_list]", $banned_files_list, __("Put each file name on a single line.Files matching this list will never be posted to your blog. You can use wildcards such as *.xls, or *.* for all files", "postie")); ?>
 
                     <tr>
                         <th scope='row'><?php _e('Attachment icon set', 'postie') ?></th>
@@ -797,7 +801,7 @@
                                       name='postie-settings[generaltemplate]'><?php echo esc_attr($generaltemplate) ?></textarea>
                         </td>
                     </tr>
-                    <?php echo BuildBooleanSelect(__("Use custom image field for attachments", "postie"), "postie-settings[custom_image_field]", $custom_image_field, __("When set to 'Yes' no attachments will appear in the post (including images, video &amp; sound files). Instead the url to the attachment will be put into a custom field named 'image'. Your theme will need logic to display these attachments.", "postie")); ?>            
+                    <?php echo BuildBooleanSelect(__("Use custom image field for attachments", "postie"), "postie-settings[custom_image_field]", $custom_image_field, __("When set to 'Yes' no attachments will appear in the post (including images, video &amp; sound files). Instead the url to the attachment will be put into a custom field named 'image'. Your theme will need logic to display these attachments", "postie")); ?>            
                 </table> 
             </div>
             <div id="simpleTabs-content-7" class="simpleTabs-content">
