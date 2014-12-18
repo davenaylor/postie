@@ -1639,6 +1639,7 @@ function HandleMessageEncoding($contenttransferencoding, $charset, $body, $blogE
     if ($dequote && $contenttransferencoding == 'quoted-printable') {
         DebugEcho("quoted-printable detected");
         $body = quoted_printable_decode($body);
+        //DebugEcho($body);
     }
 
     DebugEcho("after HandleMessageEncoding");
@@ -3423,9 +3424,9 @@ function postie_test_config() {
     ?>
     <div class="wrap"> 
         <h1>Postie Configuration Test</h1>
-    <?php
-    postie_environment();
-    ?>
+        <?php
+        postie_environment();
+        ?>
 
         <h2>Clock Tests</h2>
         <p>This shows what time it would be if you posted right now</p>
