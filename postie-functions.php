@@ -19,6 +19,14 @@ class PostiePostModifiers {
 
 }
 
+if (!function_exists('boolval')) {
+
+    function boolval($val) {
+        return (bool) $val;
+    }
+
+}
+
 if (!function_exists('mb_str_replace')) {
 
     function mb_str_replace($search, $replace, $subject, &$count = 0) {
@@ -376,8 +384,6 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     if ($fulldebug) {
         DebugEcho("post end: $content");
     }
-
-    DebugEcho("prefer_text_type: " . $config['prefer_text_type']);
 
     filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], true);
     if ($fulldebug) {
@@ -1143,7 +1149,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 if (!is_wp_error($file_id)) {
                     //featured image logic
                     //set the first image we come across as the featured image
-                    DebugEcho("GetContent: has_post_thumbnail: " . has_post_thumbnail($post_id));
+                    DebugEcho("GetContent: has_post_thumbnail: " . boolval(has_post_thumbnail($post_id)));
                     //DebugEcho("get_the_post_thumbnail: " .get_the_post_thumbnail($post_id));
 
                     if ($featured_image && !has_post_thumbnail($post_id)) {
@@ -1159,7 +1165,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
                     $the_post = get_post($file_id);
                     $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $imagetemplate, $filename);
-                    if ($cid) {
+                    if (!empty($cid)) {
                         $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
                         DebugEcho("GetContent: CID Attachement: $cid");
                     }
@@ -3417,9 +3423,9 @@ function postie_test_config() {
     ?>
     <div class="wrap"> 
         <h1>Postie Configuration Test</h1>
-        <?php
-        postie_environment();
-        ?>
+    <?php
+    postie_environment();
+    ?>
 
         <h2>Clock Tests</h2>
         <p>This shows what time it would be if you posted right now</p>
