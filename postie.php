@@ -41,6 +41,7 @@ add_action('check_postie_hook', 'check_postie');
 add_action('parse_request', 'postie_parse_request');
 add_action('admin_init', 'postie_admin_init');
 add_action('admin_menu', 'postie_admin_menu');
+add_action('admin_head', 'postie_admin_head');
 
 add_filter('whitelist_options', 'postie_whitelist');
 add_filter('cron_schedules', 'postie_more_reccurences');
@@ -73,6 +74,16 @@ if (is_admin()) {
 }
 
 //****************** functions *************************
+function postie_admin_head() {
+    ?>
+    <style type="text/css">
+        #adminmenu #toplevel_page_postie-settings div.wp-menu-image:before {
+            content: "\f466";
+        }    
+    </style>
+    <?php
+
+}
 
 function postie_plugin_row_meta($links, $file) {
     if (strpos($file, plugin_basename(__FILE__)) !== false) {
