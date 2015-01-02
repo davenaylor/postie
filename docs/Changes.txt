@@ -27,6 +27,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.11 (future) =
+* 
+
 = 1.6.10 (2015-1-2) =
 * Testing against 4.1
 * New icon in admin
