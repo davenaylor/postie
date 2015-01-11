@@ -647,7 +647,7 @@ function getPostAuthorDetails(&$subject, &$content, &$mimeDecodedEmail) {
         DebugEcho("Fwd: detected");
         $subject = trim($matches[2]);
         if (preg_match("/\nfrom:(.*?)\n/i", $content, $matches)) {
-            $theAuthor = GetNameFromEmail($matches[1]);
+            $thFeAuthor = GetNameFromEmail($matches[1]);
             $mimeDecodedEmail->headers['from'] = $theAuthor;
         }
         //TODO dosen't always work with HTML
@@ -1451,6 +1451,8 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         }
         return '';
     }
+    wp_set_current_user($poster); //needed by some wp functions who check permissions for the logged in user
+
     return $poster;
 }
 
