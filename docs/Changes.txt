@@ -28,7 +28,9 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.6.11 (future) =
-* Call wp_set_current_user() so that other WP functions that depend on the current user work correctly.
+* Call wp_set_current_user() so that other WP functions that depend on the current user work correctly. (custom taxonomy)
+* Only do image template processing if the preferred text type is plain
+* Removed http_response_code() call since it is only supported by PHP 5.4 or newer.
 
 = 1.6.10 (2015-1-2) =
 * Testing against 4.1

@@ -385,19 +385,20 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         DebugEcho("post end: $content");
     }
 
-    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], true);
-    if ($fulldebug) {
-        DebugEcho("post body img: $content");
-    }
-
-    if ($post_excerpt) {
-        filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config, $id, "#eimg%#", false);
+    if ($config['prefer_text_type'] == 'plain') {
+        filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], true);
         if ($fulldebug) {
-            DebugEcho("post excerpt img: $content");
+            DebugEcho("post body ReplaceImagePlaceHolders: $content");
+        }
+
+        if ($post_excerpt) {
+            filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config, $id, "#eimg%#", false);
+            DebugEcho("excerpt: $post_excerpt");
+            if ($fulldebug) {
+                DebugEcho("post excerpt ReplaceImagePlaceHolders: $content");
+            }
         }
     }
-
-    DebugEcho("excerpt: $post_excerpt");
 
     if (trim($subject) == "") {
         $subject = $config['default_title'];
