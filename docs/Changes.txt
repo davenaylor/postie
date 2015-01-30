@@ -27,7 +27,7 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.11 (future) =
+= 1.6.11 (2015-01-30) =
 * Call wp_set_current_user() so that other WP functions that depend on the current user work correctly. (custom taxonomy)
 * Only do image template processing if the preferred text type is plain
 * Removed http_response_code() call since it is only supported by PHP 5.4 or newer.
