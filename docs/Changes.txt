@@ -28,7 +28,7 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.6.12 (future) =
-*
+* Fix confirmation emails that were always sending to administrator.
 
 = 1.6.11 (2015-01-30) =
 * Call wp_set_current_user() so that other WP functions that depend on the current user work correctly. (custom taxonomy)

@@ -2115,6 +2115,8 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
         return false;
     }
 
+    $to = array_pop($recipients);
+
     $from = trim($mail_content->headers["from"]);
     $subject = $mail_content->headers['subject'];
     if ($returnToSender) {
@@ -2129,7 +2131,10 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
             $headers .= "Cc: " . $recipient . "\r\n";
         }
     }
+    
+    DebugEcho("To: $to");
     DebugEcho($headers);
+    
     // Set email subject
     if ($reject) {
         DebugEcho("MailToRecipients: sending reject mail");
@@ -2180,7 +2185,7 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
         DebugEcho("MailToRecipients: $alert_subject\n$mailtext");
     }
 
-    wp_mail($myemailadd, $alert_subject, $mailtext, $headers);
+    wp_mail($to, $alert_subject, $mailtext, $headers);
 
     return true;
 }
