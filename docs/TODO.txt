@@ -2,7 +2,9 @@ Separate out video linkifying from normal url linkifying - separate settings
 Add Message-ID header value to custom field (postie_message_id?) to both posts and comments.
 Use In-Reply-To header value as a better way to detect replies
 Verify that {TITLE} is doing the right thing.
-Automatic updates for AddOns: https://github.com/seedprod/sellwp-updater
+Automatic updates for AddOns: 
+    https://github.com/seedprod/sellwp-updater
+    http://code.tutsplus.com/series/create-a-license-controlled-theme-and-plugin-update-system--cms-760
 automatically create category if it doesn't exist. new option to allow this feature?
 Add setting for category detection. I.e. checkboxes for [], -- and : styles. Default to all on.
 Add setting to not remove category text from subject/title
