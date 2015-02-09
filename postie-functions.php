@@ -230,7 +230,8 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
 
     $content = GetContent($mimeDecodedEmail, $attachments, $post_id, $poster, $config);
     if ($fulldebug) {
-        DebugEcho("the content is $content");
+        DebugEcho("CreatePost: '$content'");
+        DebugDump($attachments);
     }
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
@@ -385,20 +386,20 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         DebugEcho("post end: $content");
     }
 
-    if ($config['prefer_text_type'] == 'plain') {
-        filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], true);
-        if ($fulldebug) {
-            DebugEcho("post body ReplaceImagePlaceHolders: $content");
-        }
+    //if ($config['prefer_text_type'] == 'plain') {
+    filter_ReplaceImagePlaceHolders($content, $attachments["html"], $config, $id, $config['image_placeholder'], true);
+    if ($fulldebug) {
+        DebugEcho("post body ReplaceImagePlaceHolders: $content");
+    }
 
-        if ($post_excerpt) {
-            filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config, $id, "#eimg%#", false);
-            DebugEcho("excerpt: $post_excerpt");
-            if ($fulldebug) {
-                DebugEcho("post excerpt ReplaceImagePlaceHolders: $content");
-            }
+    if ($post_excerpt) {
+        filter_ReplaceImagePlaceHolders($post_excerpt, $attachments["html"], $config, $id, "#eimg%#", false);
+        DebugEcho("excerpt: $post_excerpt");
+        if ($fulldebug) {
+            DebugEcho("post excerpt ReplaceImagePlaceHolders: $content");
         }
     }
+    //}
 
     if (trim($subject) == "") {
         $subject = $config['default_title'];
@@ -2131,10 +2132,10 @@ function MailToRecipients(&$mail_content, $testEmail = false, $recipients = arra
             $headers .= "Cc: " . $recipient . "\r\n";
         }
     }
-    
+
     DebugEcho("To: $to");
     DebugEcho($headers);
-    
+
     // Set email subject
     if ($reject) {
         DebugEcho("MailToRecipients: sending reject mail");
@@ -2408,39 +2409,47 @@ function parseTemplate($id, $type, $template, $orig_filename, $icon = "") {
  * @param array - array of HTML for images for post
  */
 function filter_ReplaceImageCIDs(&$content, &$attachments, $config) {
-    if ($config['prefer_text_type'] == "html" && count($attachments["cids"])) {
+    if (count($attachments["cids"])) {
         DebugEcho("ReplaceImageCIDs");
         $used = array();
         foreach ($attachments["cids"] as $key => $info) {
-            $key = str_replace('/', '\/', $key);
-            $pattern = "/cid:$key/";
+            DebugEcho("looking for $key in content");
+            $ckey = str_replace('/', '\/', $key);
+            $pattern = "/cid:$ckey/";
             if (preg_match($pattern, $content)) {
                 $content = preg_replace($pattern, $info[0], $content);
                 $used[] = $info[1]; //Index of html to ignore
             }
         }
-        DebugEcho("# cid attachments: " . count($used));
+        if (count($used) > 0) {
+            DebugEcho("# cid attachments: " . count($used));
 
-        $html = array();
-        $att = array_values($attachments["html"]); //make sure there are numeric indexes
-        DebugEcho('$attachments');
-        //DebugDump($attachments);
-        DebugEcho('$used');
-        //DebugDump($used);
-        for ($i = 0; $i < count($attachments["html"]); $i++) {
-            if (!in_array($i, $used)) {
-                $html[] = $att[$i];
+            $html = array();
+            $att = array_values($attachments["html"]); //make sure there are numeric indexes
+            DebugEcho('$attachments["html"]');
+            DebugDump($attachments["html"]);
+            DebugEcho('$used');
+            DebugDump($used);
+            for ($i = 0; $i < count($attachments["html"]); $i++) {
+                DebugEcho("looking for $i in used");
+                if (!in_array($i, $used)) {
+                    DebugEcho("not found, adding {$att[$i]}");
+                    $html[] = $att[$i];
+                }
             }
-        }
 
-        foreach ($attachments['html'] as $key => $value) {
-            if (!in_array($value, $used)) {
-                $html[$key] = $value;
+            foreach ($attachments['html'] as $key => $value) {
+                DebugEcho("Looking for '$value' in attachments");
+                if (!in_array($value, $used)) {
+                    DebugEcho("not found, adding as $key");
+                    $html[$key] = $value;
+                }
             }
+            DebugEcho('$html');
+            DebugDump($html);
+            $attachments["html"] = $html;
+            //DebugDump($attachments);
         }
-
-        $attachments["html"] = $html;
-        //DebugDump($attachments);
     }
 }
 
@@ -2513,6 +2522,7 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
                 $imageTemplate = str_replace('{CAPTION}', '', $imageTemplate);
                 /* if using the gallery shortcode, don't add pictures at all */
                 if (!preg_match("/\[gallery[^\[]*\]/", $content, $matches)) {
+                    DebugEcho("imageTemplate: $imageTemplate");
                     $pics .= $imageTemplate;
                 } else {
                     DebugEcho("gallery detected, not inserting images");
