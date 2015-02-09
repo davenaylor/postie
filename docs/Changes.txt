@@ -27,6 +27,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.13 (future) =
+* 
+
 = 1.6.12 (2015-02-09) =
 * Fix confirmation emails that were always sending to administrator.
 * Fix regression in 1.6.11 which prevented attachments from being displayed in some cases.
