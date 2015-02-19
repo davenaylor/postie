@@ -28,7 +28,7 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.6.13 (future) =
-* 
+* Add some additional checks and error messages to postie_media_handle_upload for cases where the TMP directory isn't writable.
 
 = 1.6.12 (2015-02-09) =
 * Fix confirmation emails that were always sending to administrator.

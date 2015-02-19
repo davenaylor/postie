@@ -60,6 +60,7 @@ function postie_environment() {
     DebugEcho("Debug mode: " . (IsDebugMode() ? "On" : "Off"));
     DebugEcho("Time: " . date('Y-m-d H:i:s', time()) . " GMT");
     DebugEcho("Error log: " . ini_get('error_log'));
+    DebugEcho("TMP dir: " . get_temp_dir());
 
     if (isMarkdownInstalled()) {
         EchoInfo("You currently have the Markdown plugin installed. It will cause problems if you send in HTML email. Please turn it off if you intend to send email using HTML.");
@@ -1810,13 +1811,16 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
     $overrides = array('test_form' => false);
 
     $tmpFile = tempnam(get_temp_dir(), 'postie');
-
-    $fp = fopen($tmpFile, 'w');
-    if ($fp) {
-        fwrite($fp, $part->body);
-        fclose($fp);
+    if ($tmpFile !== false) {
+        $fp = fopen($tmpFile, 'w');
+        if ($fp) {
+            fwrite($fp, $part->body);
+            fclose($fp);
+        } else {
+            EchoInfo("postie_media_handle_upload: Could not write to temp file: '$tmpFile' ");
+        }
     } else {
-        EchoInfo("could not write to temp file: '$tmpFile' ");
+        EchoInfo("postie_media_handle_upload: Could not create temp file in " . get_temp_dir());
     }
 
     //special case to deal with older png implementations
@@ -2417,8 +2421,11 @@ function filter_ReplaceImageCIDs(&$content, &$attachments, $config) {
             $ckey = str_replace('/', '\/', $key);
             $pattern = "/cid:$ckey/";
             if (preg_match($pattern, $content)) {
+                DebugEcho("found $key");
                 $content = preg_replace($pattern, $info[0], $content);
                 $used[] = $info[1]; //Index of html to ignore
+            } else {
+                DebugEcho("did not find $key");
             }
         }
         if (count($used) > 0) {
@@ -2449,6 +2456,8 @@ function filter_ReplaceImageCIDs(&$content, &$attachments, $config) {
             DebugDump($html);
             $attachments["html"] = $html;
             //DebugDump($attachments);
+        } else {
+            DebugEcho("no cid attachments");
         }
     }
 }
