@@ -177,13 +177,14 @@ function tag_Date(&$content, $message_date) {
     $html = LoadDOM($content);
     if ($html !== false) {
         $es = $html->find('text');
-        DebugEcho("tag_Date: html " . count($es));
+        //DebugEcho("tag_Date: html " . count($es));
         foreach ($es as $e) {
-            //DebugEcho("tag_Date: ".trim($e->plaintext));
+            DebugEcho("tag_Date: " . trim($e->plaintext));
             $matches = array();
             if (1 === preg_match("/^date:\s?(.*)$/im", trim($e->plaintext), $matches)) {
+                $possibledate = trim($matches[1]);
                 DebugEcho("tag_Date: found date tag $matches[1]");
-                $newdate = strtotime($matches[1]);
+                $newdate = strtotime($possibledate);
                 if (false !== $newdate) {
                     $t = date("H:i:s", $newdate);
                     DebugEcho("tag_Date: original time: $t");
@@ -195,6 +196,8 @@ function tag_Date(&$content, $message_date) {
                     $message_date = date($format, $newdate);
                     $content = str_replace($matches[0], '', $content);
                     break;
+                } else {
+                    DebugEcho("tag_Date: failed to parse '$possibledate' ($newdate)");
                 }
             }
         }
