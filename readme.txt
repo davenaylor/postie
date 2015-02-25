@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.0
 Tested up to: 4.1
-Stable tag: 1.6.12
+Stable tag: 1.6.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -238,6 +238,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.13 (2015-02-25) =
+* Add some additional checks and error messages to postie_media_handle_upload for cases where the TMP directory isn't writable.
+* Any user with "Roles that can post" can now be the default poster.
+
 = 1.6.12 (2015-02-09) =
 * Fix confirmation emails that were always sending to administrator.
 * Fix regression in 1.6.11 which prevented attachments from being displayed in some cases.
