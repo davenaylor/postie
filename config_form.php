@@ -293,6 +293,9 @@
                             <select name='postie-settings[admin_username]' id='postie-settings[admin_username]'>
                                 <?php
                                 $adminusers = get_users('orderby=nicename&role=administrator');
+                                foreach ($config['role_access'] as $userrole => $value) {
+                                    $adminusers = array_merge($adminusers, get_users("orderby=nicename&role=$userrole"));
+                                }
                                 foreach ($adminusers as $user) {
                                     $selected = "";
                                     if ($user->user_login == $admin_username) {
