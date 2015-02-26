@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.0
 Tested up to: 4.1
-Stable tag: 1.6.13
+Stable tag: 1.6.14
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -238,6 +238,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.14 (2015-02-26) =
+* Fully support custom taxonomies
+
 = 1.6.13 (2015-02-25) =
 * Add some additional checks and error messages to postie_media_handle_upload for cases where the TMP directory isn't writable.
 * Any user with "Roles that can post" can now be the default poster.
