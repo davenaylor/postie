@@ -28,7 +28,7 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.6.14 (future) =
-* 
+* Fully support custom taxonomies
 
 = 1.6.13 (2015-02-25) =
 * Add some additional checks and error messages to postie_media_handle_upload for cases where the TMP directory isn't writable.

@@ -279,7 +279,13 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         DebugEcho("post ubb: $content");
     }
 
-    $post_categories = tag_Categories($subject, $config['default_post_category'], $config['category_match']);
+    //do post type before category to keep the subject line correct
+    $post_type = tag_PostType($subject, $postmodifiers, $config);
+    if ($fulldebug) {
+        DebugEcho("post type: $content");
+    }
+
+    $post_categories = tag_Categories($subject, $config['default_post_category'], $config['category_match'], $post_id);
     if ($fulldebug) {
         DebugEcho("post category: $content");
     }
@@ -324,11 +330,6 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
     $customImages = tag_CustomImageField($content, $attachments, $config);
     if ($fulldebug) {
         DebugEcho("post custom: $content");
-    }
-
-    $post_type = tag_PostType($subject, $postmodifiers, $config);
-    if ($fulldebug) {
-        DebugEcho("post type: $content");
     }
 
     $id = GetParentPostForReply($subject);
@@ -2679,8 +2680,9 @@ function tag_Excerpt(&$content, $config) {
  * This function determines the categories ids for the post
  * @return array
  */
-function tag_Categories(&$subject, $defaultCategory, $category_match) {
+function tag_Categories(&$subject, $defaultCategory, $category_match, $post_id) {
     $original_subject = $subject;
+    $found = false;
     $post_categories = array();
     $matchtypes = array();
     $matches = array();
@@ -2698,9 +2700,17 @@ function tag_Categories(&$subject, $defaultCategory, $category_match) {
     if (preg_match('/(.+): (.*)/', $subject, $matches)) { // <category>:<Subject>
         $category = lookup_category($matches[1], $category_match);
         if (!empty($category)) {
+            $found = true;
             DebugEcho("colon category: $category");
             $subject = trim($matches[2]);
-            $post_categories[] = $category;
+            DebugEcho("colon category: subject: $subject");
+            $tax = lookup_taxonomy($category);
+            if ('category' == $tax) {
+                $post_categories[] = $category;
+            } else {
+                DebugEcho("colon category: custom taxonomy $tax");
+                wp_set_object_terms($post_id, $category, $tax);
+            }
         }
     }
 
@@ -2712,19 +2722,35 @@ function tag_Categories(&$subject, $defaultCategory, $category_match) {
             foreach ($matches[1] as $match) {
                 $category = lookup_category($match, $category_match);
                 if (!empty($category)) {
+                    $found = true;
                     $subject = str_replace($matches[0][$i], '', $subject);
-                    $post_categories[] = $category;
+                    DebugEcho("tag_Categories: subject: $subject");
+                    $tax = lookup_taxonomy($category);
+                    if ('category' == $tax) {
+                        $post_categories[] = $category;
+                    } else {
+                        DebugEcho("tag_Categories: custom taxonomy $tax");
+                        wp_set_object_terms($post_id, $category, $tax);
+                    }
                 }
                 $i++;
             }
         }
     }
-    if (!count($post_categories)) {
+    if (!$found) {
         $post_categories[] = $defaultCategory;
         $subject = $original_subject;
     }
     $subject = trim($subject);
     return $post_categories;
+}
+
+function lookup_taxonomy($termid) {
+    global $wpdb;
+    $tax_sql = 'SELECT taxonomy FROM ' . $wpdb->term_taxonomy . ' WHERE term_id = ' . $termid;
+    $tax = $wpdb->get_var($tax_sql);
+    DebugEcho("lookup_taxonomy: $termid is in taxonomy $tax");
+    return $tax;
 }
 
 function lookup_category($trial_category, $category_match) {
