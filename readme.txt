@@ -56,17 +56,13 @@ More info at http://PostiePlugin.com/
 8. Attachment options
 
 == Installation ==
-* Either:
-    * Put the postie.zip file in wp-content/plugins/ and unzip it
-* Or:
-    * Use the automatic installer (WP 2.7+)
-* Login to WordPress as an administrator
-* Goto the Plugins tab in the WordPress Admin Site
-* Activate "Postie"
-* Goto to the "Settings" tab and click on the sub-tab "Postie" to configure it.
+* Install Postie either via the WordPress.org plugin directory, or by uploading the files to your server.
+* Activate Postie through the Plugins menu in WordPress.
+* Configure the plugin by going to the Postie menu that appears in your admin menu.
 * Make sure you enter the mailserver information correctly, including the type
-  of connection and the port number. Common port configurations:
+  of connection and the port number. 
 * (Postie ignores the settings under Settings->Writing->Writing-by-Email)
+* More information can be found at http://PostiePlugin.com
 == Usage ==
 = Specifying Beginning and Ending of Post =
 * If you put in :start - the message processing won't start until it sees that string.
@@ -238,6 +234,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.15 (future) =
+* Remove "Wrap content in pre tags" option as it was defaulted to "yes" but never correctly applied.
+
 = 1.6.14 (2015-02-26) =
 * Fully support custom taxonomies
 

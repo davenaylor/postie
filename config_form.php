@@ -144,7 +144,7 @@
                     </td>
                     </tr>
 
-                    <?php echo BuildBooleanSelect(__("Use Transport Layer Security (TLS)", "postie"), 'postie-settings[email_tls]', $email_tls, __("Choose Yes if your server requres TLS", "postie")); ?>
+                    <?php echo BuildBooleanSelect(__("Use Transport Layer Security (TLS)", "postie"), 'postie-settings[email_tls]', $email_tls, __("Choose Yes if your server requires TLS", "postie")); ?>
 
                     <tr>
                         <th scope="row"><label for="postie-settings-mail_server_port"><?php _e('Port', 'postie') ?></label></th>
