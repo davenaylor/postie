@@ -28,7 +28,7 @@ Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
 = 1.6.15 (future) =
-* 
+* Remove "Wrap content in pre tags" option as it was defaulted to "yes" but never correctly applied.
 
 = 1.6.14 (2015-02-26) =
 * Fully support custom taxonomies

@@ -313,6 +313,15 @@
 
             <div id = "simpleTabs-content-3" class = "simpleTabs-content">
                 <table class = 'form-table'>
+                    <tr> 
+                        <th scope="row"><?php _e('Preferred Text Type', 'postie') ?> </th> 
+                        <td>
+                            <select name='postie-settings[prefer_text_type]' id='postie-settings-prefer_text_type'>
+                                <?php printf('<option value="plain" %s>plain</option>', ($prefer_text_type == "plain") ? "selected" : "") ?>
+                                <?php printf('<option value="html" %s>html</option>', ($prefer_text_type == "html") ? "selected" : "") ?>
+                            </select>
+                        </td> 
+                    </tr> 
                     <tr valign = "top">
                         <th scope = "row"><?php _e('Default category', 'postie') ?></th>
                         <td>
@@ -403,15 +412,7 @@
                             <input name='postie-settings[default_title]' type="text" id='postie-settings-default_title' value="<?php echo esc_attr($default_title); ?>" size="50" /><br />
                         </td> 
                     </tr> 
-                    <tr> 
-                        <th scope="row"><?php _e('Preferred Text Type', 'postie') ?> </th> 
-                        <td>
-                            <select name='postie-settings[prefer_text_type]' id='postie-settings-prefer_text_type'>
-                                <?php printf('<option value="plain" %s>plain</option>', ($prefer_text_type == "plain") ? "selected" : "") ?>
-                                <?php printf('<option value="html" %s>html</option>', ($prefer_text_type == "html") ? "selected" : "") ?>
-                            </select>
-                        </td> 
-                    </tr> 
+
                     <?php echo BuildBooleanSelect(__("Forward Rejected Mail", "postie"), "postie-settings[forward_rejected_mail]", $forward_rejected_mail); ?>
                     <?php echo BuildBooleanSelect(__("Allow Subject In Mail", "postie"), "postie-settings[allow_subject_in_mail]", $allow_subject_in_mail, "Enclose the subject between '#' on the very first line. E.g. #this is my subject#"); ?>
                     <?php echo BuildBooleanSelect(__("Allow HTML In Mail Subject", "postie"), "postie-settings[allow_html_in_subject]", $allow_html_in_subject); ?>
@@ -432,7 +433,6 @@
                     </tr>
 
                     <?php
-                    echo BuildBooleanSelect(__("Wrap content in pre tags", "postie"), "postie-settings[wrap_pre]", $wrap_pre);
                     echo BuildBooleanSelect(__("Filter newlines", "postie"), "postie-settings[filternewlines]", $filternewlines, __("Retain newlines from plain text. Set to no if using markdown or textitle syntax", "postie"));
                     echo BuildBooleanSelect(__("Replace newline characters with html line breaks (&lt;br /&gt;)", "postie"), "postie-settings[convertnewline]", $convertnewline, __("Filter newlines must be turned on for this option to take effect", "postie"));
                     echo BuildBooleanSelect(__("Return rejected mail to sender", "postie"), "postie-settings[return_to_sender]", $return_to_sender);

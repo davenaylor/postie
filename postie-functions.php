@@ -337,22 +337,6 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         DebugEcho("Not a reply");
         $id = $post_id;
         $is_reply = false;
-        if ($config['add_meta'] == 'yes') {
-            DebugEcho("Adding meta");
-            if ($config['wrap_pre'] == 'yes') {
-                DebugEcho("Adding <pre>");
-                $content = $postAuthorDetails['content'] . "<pre>\n" . $content . "</pre>\n";
-                $content = "<pre>\n" . $content . "</pre>\n";
-            } else {
-                $content = $postAuthorDetails['content'] . $content;
-                $content = $content;
-            }
-        } else {
-            if ($config['wrap_pre'] == 'yes') {
-                DebugEcho("Adding <pre>");
-                $content = "<pre>\n" . $content . "</pre>\n";
-            }
-        }
     } else {
         DebugEcho("Reply detected");
         $is_reply = true;
