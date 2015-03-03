@@ -1,6 +1,7 @@
 Separate out video linkifying from normal url linkifying - separate settings
 Add Message-ID header value to custom field (postie_message_id?) to both posts and comments.
 Use In-Reply-To header value as a better way to detect replies
+Add option to not create comments for replies
 Verify that {TITLE} is doing the right thing.
 Automatic updates for AddOns: 
     https://github.com/seedprod/sellwp-updater
