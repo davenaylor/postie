@@ -357,6 +357,7 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
             wp_delete_post($post_id);
         }
     } else {
+        $id = $post_id;
         DebugEcho("Replies will not be processed as comments");
     }
 
@@ -925,10 +926,11 @@ function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
             DebugEcho("Saving custom image fields");
             //DebugDump($details['customImages']);
 
-            if (count($details['customImages']) > 1) {
+            if (count($details['customImages']) > 0) {
                 $imageField = 1;
                 foreach ($details['customImages'] as $image) {
-                    add_post_meta($post_ID, 'image' . $imageField, $image);
+                    add_post_meta($post_ID, 'image', $image);
+                    DebugEcho("Saving custom image 'image$imageField'");
                     $imageField++;
                 }
             }
@@ -3406,7 +3408,7 @@ function tag_CustomImageField(&$content, &$attachments, $config) {
     $customImages = array();
     if ($config['custom_image_field']) {
         DebugEcho("Looking for custom images");
-        //DebugDump($attachments["html"]);
+        DebugDump($attachments["html"]);
 
         foreach ($attachments["html"] as $key => $value) {
             //DebugEcho("checking " . htmlentities($value));
