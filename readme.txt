@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.0
-Tested up to: 4.1
-Stable tag: 1.6.14
+Tested up to: 4.1.1
+Stable tag: 1.6.15
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -234,8 +234,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.15 (future) =
+= 1.6.15 (2015-03-04) =
 * Remove "Wrap content in pre tags" option as it was defaulted to "yes" but never correctly applied.
+* Allow time correction values of 0.5
+* New setting: "Treat Replies As" allows user to specify if replies should be processed as comments or new posts.
+* Fix bug in reply detection
+* Fix bug when saving custom image field and there was only 1 image
 
 = 1.6.14 (2015-02-26) =
 * Fully support custom taxonomies

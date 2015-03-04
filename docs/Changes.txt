@@ -27,7 +27,7 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.15 (future) =
+= 1.6.15 (2015-03-04) =
 * Remove "Wrap content in pre tags" option as it was defaulted to "yes" but never correctly applied.
 * Allow time correction values of 0.5
 * New setting: "Treat Replies As" allows user to specify if replies should be processed as comments or new posts.
