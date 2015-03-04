@@ -332,28 +332,32 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         DebugEcho("post custom: $content");
     }
 
-    $id = GetParentPostForReply($subject);
-    if (empty($id)) {
-        DebugEcho("Not a reply");
-        $id = $post_id;
-        $is_reply = false;
-    } else {
-        DebugEcho("Reply detected");
-        $is_reply = true;
-        // strip out quoted content
-        $lines = explode("\n", $content);
-        $newContents = '';
-        foreach ($lines as $line) {
-            if (preg_match("/^>.*/i", $line) == 0 &&
-                    preg_match("/^(from|subject|to|date):.*?/i", $line) == 0 &&
-                    preg_match("/^-+.*?(from|subject|to|date).*?/i", $line) == 0 &&
-                    preg_match("/^on.*?wrote:$/i", $line) == 0 &&
-                    preg_match("/^-+\s*forwarded\s*message\s*-+/i", $line) == 0) {
-                $newContents.="$line\n";
+    if ($config['reply_as_comment'] == true) {
+        $id = GetParentPostForReply($subject);
+        if (empty($id)) {
+            DebugEcho("Not a reply");
+            $id = $post_id;
+            $is_reply = false;
+        } else {
+            DebugEcho("Reply detected");
+            $is_reply = true;
+            // strip out quoted content
+            $lines = explode("\n", $content);
+            $newContents = '';
+            foreach ($lines as $line) {
+                if (preg_match("/^>.*/i", $line) == 0 &&
+                        preg_match("/^(from|subject|to|date):.*?/i", $line) == 0 &&
+                        preg_match("/^-+.*?(from|subject|to|date).*?/i", $line) == 0 &&
+                        preg_match("/^on.*?wrote:$/i", $line) == 0 &&
+                        preg_match("/^-+\s*forwarded\s*message\s*-+/i", $line) == 0) {
+                    $newContents.="$line\n";
+                }
             }
+            $content = $newContents;
+            wp_delete_post($post_id);
         }
-        $content = $newContents;
-        wp_delete_post($post_id);
+    } else {
+        DebugEcho("Replies will not be processed as comments");
     }
 
     if ($delay != 0 && $post_status == 'publish') {
@@ -1474,7 +1478,7 @@ function isValidSmtpServer($mimeDecodedEmail, $smtpservers) {
  */
 function filter_Start(&$content, $config) {
     $start = $config['message_start'];
-    if ($start) {
+    if (!empty($start)) {
         $pos = strpos($content, $start);
         if ($pos === false) {
             return $content;
@@ -1563,7 +1567,7 @@ function filter_RemoveSignatureWorker(&$html, $pattern) {
  */
 function filter_End(&$content, $config) {
     $end = $config['message_end'];
-    if ($end) {
+    if (!empty($end)) {
         $pos = strpos($content, $end);
         if ($pos === false) {
             return $content;
@@ -2954,7 +2958,8 @@ function config_GetDefaults() {
         'generaltemplates' => $generalTemplates,
         'generaltemplate' => $postie_default,
         'selected_generaltemplate' => 'postie_default',
-        'generate_thumbnails' => true
+        'generate_thumbnails' => true,
+        'reply_as_comment' => true
     );
 }
 
@@ -3198,7 +3203,7 @@ function config_UpgradeOld() {
  */
 function config_GetOld() {
     $config = config_UpgradeOld();
-//These should only be modified if you are testing
+    //These should only be modified if you are testing
     $config["DELETE_MAIL_AFTER_PROCESSING"] = true;
     $config["POST_TO_DB"] = true;
     $config["TEST_EMAIL"] = false;
@@ -3207,8 +3212,8 @@ function config_GetOld() {
     if (file_exists(POSTIE_ROOT . '/postie_test_variables.php')) {
         include(POSTIE_ROOT . '/postie_test_variables.php');
     }
-//include(POSTIE_ROOT . "/../postie-test.php");
-// These are computed
+    //include(POSTIE_ROOT . "/../postie-test.php");
+    // These are computed
     $config["TIME_OFFSET"] = get_option('gmt_offset');
     $config["POSTIE_ROOT"] = POSTIE_ROOT;
     for ($i = 0; $i < count($config["AUTHORIZED_ADDRESSES"]); $i++) {

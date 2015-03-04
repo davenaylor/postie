@@ -174,9 +174,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <th scope="row"><?php _e('Postie Time Correction', 'postie') ?>
-                        </th>
-                        <td><input style="width: 50px;" name='postie-settings[time_offset]' type="number" id='postie-settings-time_offset' size="2" value="<?php echo esc_attr($time_offset); ?>" /> 
+                        <th scope="row"><?php _e('Postie Time Correction', 'postie') ?></th>
+                        <td><input style="width: 70px;" name='postie-settings[time_offset]' type="number" step="0.5" id='postie-settings-time_offset' size="2" value="<?php echo esc_attr($time_offset); ?>" /> 
                             <?php _e('hours', 'postie') ?> 
                             <p class='description'><?php _e("Should be the same as your normal offset, but this lets you adjust it in cases where that doesn't work.", 'postie'); ?></p>
                         </td>
@@ -413,6 +412,7 @@
                         </td> 
                     </tr> 
 
+                    <?php echo BuildBooleanSelect(__("Treat Replies As", "postie"), "postie-settings[reply_as_comment]", $reply_as_comment, "", array("comments","new posts")); ?>
                     <?php echo BuildBooleanSelect(__("Forward Rejected Mail", "postie"), "postie-settings[forward_rejected_mail]", $forward_rejected_mail); ?>
                     <?php echo BuildBooleanSelect(__("Allow Subject In Mail", "postie"), "postie-settings[allow_subject_in_mail]", $allow_subject_in_mail, "Enclose the subject between '#' on the very first line. E.g. #this is my subject#"); ?>
                     <?php echo BuildBooleanSelect(__("Allow HTML In Mail Subject", "postie"), "postie-settings[allow_html_in_subject]", $allow_html_in_subject); ?>
