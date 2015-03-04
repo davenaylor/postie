@@ -709,10 +709,9 @@ function GetParentPostForReply(&$subject) {
             $tmpSubject = trim($tmpSubject_matches[1]);
         }
         DebugEcho("GetParentPostForReply: tmpSubject: $tmpSubject");
-        $checkExistingPostQuery = "SELECT ID FROM $wpdb->posts WHERE  post_title = %s AND post_status = 'publish'";
+        $checkExistingPostQuery = "SELECT ID FROM $wpdb->posts WHERE  post_title LIKE %s AND post_status = 'publish'";
         if ($id = $wpdb->get_var($wpdb->prepare($checkExistingPostQuery, $tmpSubject))) {
-            if (is_array($id)) {
-                $id = $id[count($id) - 1];
+            if (!empty($id)) {
                 DebugEcho("GetParentPostForReply: id: $id");
             } else {
                 DebugEcho("GetParentPostForReply: No parent id found");
