@@ -22,6 +22,24 @@ use wordpress plugin template
   starter-plugin https://github.com/mattyza/starter-plugin
   WordPress-Plugin-Template https://github.com/hlashbrooke/WordPress-Plugin-Template
 configurable message for "post confirmation" - variable substitution
+
+Shortcodes
+Note: Postie will need to temporarily save the global $shortcode_tags variable off to the side, register its own
+shortcodes (action for user supplied shortcodes?) process the emails then restore the global $shortcode_tags.
+  [postie_status draft | publish | pending | private]
+  [postie_date <the date>]
+  [postie_delay [0-99d][0-99h][0-99m]]
+  [postie_comments 0 | 1 | 2]
+  [postie_excerpt]<excerpt>[/postie_excerpt]
+  [postie_type <posttype>]
+  [postie_format <postformat>]
+  [postie_category <comma separated categories>]
+  [postie_tag <comma separated tags>]
+  [postie_title <title>]
+  [postie_image <image #> caption="<optional caption>"]
+  [postie_more]
+
+Hooks
 add hooks for post meta data change
   post type
   post format
