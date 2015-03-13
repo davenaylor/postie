@@ -1447,8 +1447,16 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         }
         return '';
     }
-    wp_set_current_user($poster); //needed by some wp functions who check permissions for the logged in user
-
+    
+    //actually log in as the user
+    $user = get_user_by('id', $poster);
+    if ($user) {
+        DebugEcho("logging in as {$user->user_login}");
+        wp_set_current_user($poster); 
+        //wp_set_auth_cookie($poster);
+        do_action('wp_login', $user->user_login);
+    }
+    
     return $poster;
 }
 
