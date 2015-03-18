@@ -1,5 +1,4 @@
 Verify that WP is honoring the wp_set_current_user() call. I.e. if the user is not an "author" role can they publish?
-Add caption to media alt text
 Option to not process forwarded emails (getPostAuthorDetails)
 Separate out video linkifying from normal url linkifying - separate settings
 Add Message-ID header value to custom field (postie_message_id?) to both posts and comments.

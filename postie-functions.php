@@ -1447,16 +1447,16 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         }
         return '';
     }
-    
+
     //actually log in as the user
     $user = get_user_by('id', $poster);
     if ($user) {
         DebugEcho("logging in as {$user->user_login}");
-        wp_set_current_user($poster); 
+        wp_set_current_user($poster);
         //wp_set_auth_cookie($poster);
         do_action('wp_login', $user->user_login);
     }
-    
+
     return $poster;
 }
 
@@ -2478,6 +2478,7 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
             'numberposts' => -1,
             'post_mime_type' => 'image',));
         DebugEcho("images in post: " . count($images));
+        DebugDump($images);
 
         if ((count($images) > 0) && $config['auto_gallery']) {
             $imageTemplate = '[gallery]';
@@ -2513,6 +2514,9 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
                         $caption = substr($caption, 1, strlen($caption) - 2);
                     }
                     DebugEcho("caption: $caption");
+                    
+                    DebugEcho("Adding alt text to image {$images[$i]->ID}");
+                    update_post_meta($images[$i]->ID, '_wp_attachment_image_alt', $caption);
 
                     $img_placeholder_temp = substr($matches[0], 0, -1);
                     DebugEcho($img_placeholder_temp);

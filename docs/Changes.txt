@@ -27,8 +27,8 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.16 (future) =
-* 
+= 1.6.16 (2015-03-17) =
+* If using the #img# feature and you supply a caption it will be added to the attachment's alt text.
 
 = 1.6.15 (2015-03-04) =
 * Remove "Wrap content in pre tags" option as it was defaulted to "yes" but never correctly applied.

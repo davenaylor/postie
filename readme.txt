@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.0
 Tested up to: 4.1.1
-Stable tag: 1.6.15
+Stable tag: 1.6.16
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -234,6 +234,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.16 (2015-03-17) =
+* If using the #img# feature and you supply a caption it will be added to the attachment's alt text.
+
 = 1.6.15 (2015-03-04) =
 * Remove "Wrap content in pre tags" option as it was defaulted to "yes" but never correctly applied.
 * Allow time correction values of 0.5
