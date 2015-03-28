@@ -4,9 +4,9 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
-Requires at least: 3.0
+Requires at least: 3.3.0
 Tested up to: 4.1.1
-Stable tag: 1.6.16
+Stable tag: 1.6.17
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -234,6 +234,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.17 (2015-03-28) =
+* Add a setting to attempt a user login based on the from address of the email if a matching Wordpress user exists.
+
 = 1.6.16 (2015-03-17) =
 * If using the #img# feature and you supply a caption it will be added to the attachment's alt text.
 
@@ -1173,4 +1176,4 @@ plugin.  And the rest is history :)
 *  Cleaned up some pear stuff in install
 * 
 =  0.1 - 2004-06 =
-* First release
+* First release
