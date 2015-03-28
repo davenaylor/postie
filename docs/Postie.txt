@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
-Requires at least: 3.0
+Requires at least: 3.3.0
 Tested up to: 4.1.1
 Stable tag: 1.6.16
 License: GPLv2 or later

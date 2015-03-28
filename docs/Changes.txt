@@ -27,6 +27,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.17 (2015-03-28) =
+* Add a setting to attempt a user login based on the from address of the email if a matching Wordpress user exists.
+
 = 1.6.16 (2015-03-17) =
 * If using the #img# feature and you supply a caption it will be added to the attachment's alt text.
 

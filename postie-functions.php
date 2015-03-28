@@ -1449,14 +1449,15 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
     }
 
     //actually log in as the user
-    $user = get_user_by('id', $poster);
-    if ($user) {
-        DebugEcho("logging in as {$user->user_login}");
-        wp_set_current_user($poster);
-        //wp_set_auth_cookie($poster);
-        do_action('wp_login', $user->user_login);
+    if ($config['force_user_login'] == true) {
+        $user = get_user_by('id', $poster);
+        if ($user) {
+            DebugEcho("logging in as {$user->user_login}");
+            wp_set_current_user($poster);
+            //wp_set_auth_cookie($poster);
+            do_action('wp_login', $user->user_login);
+        }
     }
-
     return $poster;
 }
 
@@ -2514,7 +2515,7 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
                         $caption = substr($caption, 1, strlen($caption) - 2);
                     }
                     DebugEcho("caption: $caption");
-                    
+
                     DebugEcho("Adding alt text to image {$images[$i]->ID}");
                     update_post_meta($images[$i]->ID, '_wp_attachment_image_alt', $caption);
 
@@ -2972,7 +2973,8 @@ function config_GetDefaults() {
         'generaltemplate' => $postie_default,
         'selected_generaltemplate' => 'postie_default',
         'generate_thumbnails' => true,
-        'reply_as_comment' => true
+        'reply_as_comment' => true,
+        'force_user_login' => false
     );
 }
 

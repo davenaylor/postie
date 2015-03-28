@@ -249,6 +249,7 @@
                 <table class='form-table'>
 
                     <?php echo BuildBooleanSelect(__("Allow Anyone To Post Via Email", "postie"), "postie-settings[turn_authorization_off]", $turn_authorization_off, __("Changing this to yes <b style='color: red'>is not recommended</b> - anything that gets sent in will automatically be posted.", "postie")); ?>
+                    <?php echo BuildBooleanSelect(__("Force User Login", "postie"), "postie-settings[force_user_login]", $force_user_login, __("Changing this to yes will cause Postie to try and login as the 'from' user if they exist. This should be set to 'Yes' if you use custom taxonomies in the subject line.", "postie")); ?>
                     <tr>
                         <th scope="row">
                             <?php _e('Roles That Can Post', 'postie') ?><br />
@@ -412,7 +413,7 @@
                         </td> 
                     </tr> 
 
-                    <?php echo BuildBooleanSelect(__("Treat Replies As", "postie"), "postie-settings[reply_as_comment]", $reply_as_comment, "", array("comments","new posts")); ?>
+                    <?php echo BuildBooleanSelect(__("Treat Replies As", "postie"), "postie-settings[reply_as_comment]", $reply_as_comment, "", array("comments", "new posts")); ?>
                     <?php echo BuildBooleanSelect(__("Forward Rejected Mail", "postie"), "postie-settings[forward_rejected_mail]", $forward_rejected_mail); ?>
                     <?php echo BuildBooleanSelect(__("Allow Subject In Mail", "postie"), "postie-settings[allow_subject_in_mail]", $allow_subject_in_mail, "Enclose the subject between '#' on the very first line. E.g. #this is my subject#"); ?>
                     <?php echo BuildBooleanSelect(__("Allow HTML In Mail Subject", "postie"), "postie-settings[allow_html_in_subject]", $allow_html_in_subject); ?>
