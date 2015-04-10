@@ -80,7 +80,7 @@ function postie_environment() {
         EchoInfo("WordPress cron is disabled. Postie will not run unless you have an external cron set up.");
     }
 
-    EchoInfo("Cron: " . (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON === true ? "Of" : "On"));
+    EchoInfo("Cron: " . (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON === true ? "Off" : "On"));
     EchoInfo("Alternate Cron: " . (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON === true ? "On" : "Off"));
 
     if (defined('WP_CRON_LOCK_TIMEOUT') && WP_CRON_LOCK_TIMEOUT === true) {
