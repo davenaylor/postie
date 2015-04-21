@@ -5,7 +5,7 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.3.0
-Tested up to: 4.1.1
+Tested up to: 4.1.2
 Stable tag: 1.6.17
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -1176,4 +1176,4 @@ plugin.  And the rest is history :)
 *  Cleaned up some pear stuff in install
 * 
 =  0.1 - 2004-06 =
-* First release
+* First release
