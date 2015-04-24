@@ -1715,7 +1715,7 @@ function tag_AllowCommentsOnPost(&$content) {
 function tag_Status(&$content, $currentstatus) {
     $poststatus = $currentstatus;
     $matches = array();
-    if (preg_match("/status:\s*(draft|publish|pending|private)/i", $content, $matches)) {
+    if (preg_match("/status:\s*(draft|publish|pending|private|future)/i", $content, $matches)) {
         DebugEcho("tag_Status: found status $matches[1]");
         DebugDump($matches);
         $content = preg_replace("/$matches[0]/i", "", $content);
@@ -2761,7 +2761,7 @@ function lookup_category($trial_category, $category_match) {
     $found_category = NULL;
     DebugEcho("lookup_category: $trial_category");
 
-    $term = get_term_by('name', $trial_category, 'category');
+    $term = get_term_by('name', esc_attr($trial_category), 'category');
     if (!empty($term)) {
         DebugEcho("category: found by name $trial_category");
         DebugDump($term);
@@ -2783,7 +2783,7 @@ function lookup_category($trial_category, $category_match) {
 
     if ($category_match) {
         DebugEcho("category wildcard lookup: $trial_category");
-        $sql_sub_name = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE name LIKE \'' . addslashes($trial_category) . '%\' limit 1';
+        $sql_sub_name = 'SELECT term_id FROM ' . $wpdb->terms . ' WHERE name LIKE \'' . addslashes(esc_attr($trial_category)) . '%\' limit 1';
         $found_category = $wpdb->get_var($sql_sub_name);
         DebugEcho("category wildcard found: $found_category");
     }
