@@ -27,7 +27,7 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.18 (2015-04-24) =
+= 1.6.18 (2015-04-27) =
 * Fixed a bug that prevented Postie from detecting categories with an ampersand in them.
 * Added support for "future" post status 
 * Move "Use shortcode for embedding video" setting to Video tab and clarified usage.

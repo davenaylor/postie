@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.3.0
-Tested up to: 4.1.2
-Stable tag: 1.6.17
+Tested up to: 4.2
+Stable tag: 1.6.18
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -234,6 +234,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.18 (2015-04-27) =
+* Fixed a bug that prevented Postie from detecting categories with an ampersand in them.
+* Added support for "future" post status 
+* Move "Use shortcode for embedding video" setting to Video tab and clarified usage.
+* Added setting to specify the link type used with galleries
+
 = 1.6.17 (2015-03-28) =
 * Add a setting to attempt a user login based on the from address of the email if a matching Wordpress user exists.
 
