@@ -30,6 +30,7 @@ Attachments are now processed in the order they were attached.
 = 1.6.18 (2015-04-24) =
 * Fixed a bug that prevented Postie from detecting categories with an ampersand in them.
 * Added support for "future" post status 
+* Move "Use shortcode for embedding video" setting to Video tab and clarified usage.
 
 = 1.6.17 (2015-03-28) =
 * Add a setting to attempt a user login based on the from address of the email if a matching Wordpress user exists.

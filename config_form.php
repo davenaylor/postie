@@ -454,7 +454,6 @@
 
                     <?php
                     echo BuildBooleanSelect(__("Automatically convert urls to links", "postie"), "postie-settings[converturls]", $converturls);
-                    echo BuildBooleanSelect(__("Use shortcode for embedding video (youtube and others)", "postie"), "postie-settings[shortcode]", $shortcode);
                     ?>
                     <tr> 
                         <th scope="row"><?php _e('Encoding for pages and feeds', 'postie') ?> </th> 
@@ -561,7 +560,9 @@
 
             <div id="simpleTabs-content-5" class="simpleTabs-content">
                 <table class='form-table'>
-
+                    <?php
+                    echo BuildBooleanSelect(__("Use shortcode for embedding video (youtube or vimeo)", "postie"), "postie-settings[shortcode]", $shortcode, "Only change this value to 'Yes' if you have another plugin that will process the shortcode.");
+                    ?>
                     <tr>
                         <th scope='row'><?php _e('Video template 1', 'postie') ?></th>
                         <?php $templateDir = get_option('siteurl') . '/' . PLUGINDIR . '/postie/templates'; ?>
