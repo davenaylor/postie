@@ -2482,7 +2482,13 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
         DebugDump($images);
 
         if ((count($images) > 0) && $config['auto_gallery']) {
-            $imageTemplate = '[gallery]';
+            $linktype = strtolower($config['auto_gallery_link']);
+            if ($linktype == 'default') {
+                $imageTemplate = '[gallery]';
+            } else {
+                DebugEcho("Auto gallery: link type $linktype");
+                $imageTemplate = "[gallery link='$linktype']";
+            }
             if ($config['images_append']) {
                 $content .= "\n$imageTemplate";
                 DebugEcho("Auto gallery: append");
@@ -2818,6 +2824,31 @@ function DisplayEmailPost($details) {
  * @param string
  * @param string
  */
+function BuildSelect($label, $id, $current_value, $options, $recommendation = NULL) {
+
+    $html = "<tr>
+	<th scope='row'><label for='$id'>$label</label>";
+
+    $html.="</th><td><select name='$id' id='$id'>";
+    foreach ($options as $value) {
+        $html.="<option value='$value' " . ($value == $current_value ? "selected='selected'" : "") . ">" . __($value, 'postie') . '</option>';
+    }
+    $html.='</select>';
+    if (!empty($recommendation)) {
+        $html.='<p class = "description">' . $recommendation . '</p>';
+    }
+    $html.="</td>\n</tr>";
+
+    return $html;
+}
+
+/**
+ * Takes a value and builds a simple simple yes/no select box
+ * @param string
+ * @param string
+ * @param string
+ * @param string
+ */
 function BuildBooleanSelect($label, $id, $current_value, $recommendation = NULL, $options = null) {
 
     $html = "<tr>
@@ -2974,7 +3005,8 @@ function config_GetDefaults() {
         'selected_generaltemplate' => 'postie_default',
         'generate_thumbnails' => true,
         'reply_as_comment' => true,
-        'force_user_login' => false
+        'force_user_login' => false,
+        'auto_gallery_link' => 'default'
     );
 }
 
