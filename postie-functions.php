@@ -888,8 +888,6 @@ function POP3MessageFetch($server = NULL, $port = NULL, $email = NULL, $password
 
 /**
  * This function handles putting the actual entry into the database
- * @param array - categories to be posted to
- * @param array - details of the post
  */
 function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
     $post_ID = 0;
@@ -2770,7 +2768,7 @@ function lookup_category($trial_category, $category_match) {
     $term = get_term_by('name', esc_attr($trial_category), 'category');
     if (!empty($term)) {
         DebugEcho("category: found by name $trial_category");
-        DebugDump($term);
+        //DebugDump($term);
         //then category is a named and found 
         return $term->term_id;
     }
