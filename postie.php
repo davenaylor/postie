@@ -267,7 +267,7 @@ function postie_whitelist($options) {
 
 //don't use DebugEcho or EchoInfo here as it is not defined when called as an action
 function check_postie() {
-    error_log("check_postie");
+    //error_log("check_postie");
     postie_get_mail();
 }
 

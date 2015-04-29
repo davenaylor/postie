@@ -69,38 +69,38 @@ function postie_environment() {
     if (!isPostieInCorrectDirectory()) {
         EchoInfo("Warning! Postie expects to be in its own directory named postie.");
     } else {
-        EchoInfo("Postie is in " . plugin_dir_path(__FILE__));
+        DebugEcho("Postie is in " . plugin_dir_path(__FILE__));
     }
 
     if (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON) {
-        EchoInfo("Alternate cron is enabled");
+        DebugEcho("Alternate cron is enabled");
     }
 
     if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
-        EchoInfo("WordPress cron is disabled. Postie will not run unless you have an external cron set up.");
+        DebugEcho("WordPress cron is disabled. Postie will not run unless you have an external cron set up.");
     }
 
-    EchoInfo("Cron: " . (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON === true ? "Off" : "On"));
-    EchoInfo("Alternate Cron: " . (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON === true ? "On" : "Off"));
+    DebugEcho("Cron: " . (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON === true ? "Off" : "On"));
+    DebugEcho("Alternate Cron: " . (defined('ALTERNATE_WP_CRON') && ALTERNATE_WP_CRON === true ? "On" : "Off"));
 
     if (defined('WP_CRON_LOCK_TIMEOUT') && WP_CRON_LOCK_TIMEOUT === true) {
-        EchoInfo("Cron lock timeout is:" . WP_CRON_LOCK_TIMEOUT);
+        DebugEcho("Cron lock timeout is:" . WP_CRON_LOCK_TIMEOUT);
     }
 
     if (HasIconvInstalled()) {
-        EchoInfo("iconv: installed");
+        DebugEcho("iconv: installed");
     } else {
         EchoInfo("Warning! Postie requires that iconv be enabled.");
     }
 
     if (function_exists('imap_mime_header_decode')) {
-        EchoInfo("imap: installed");
+        DebugEcho("imap: installed");
     } else {
-        EchoInfo("Warning! Postie requires that imap be enabled if you are using IMAP, IMAP-SSL or POP3-SSL.");
+        DebugEcho("Warning! Postie requires that imap be enabled if you are using IMAP, IMAP-SSL or POP3-SSL.");
     }
 
     if (HasMbStringInstalled()) {
-        EchoInfo("mbstring: installed");
+        DebugEcho("mbstring: installed");
     } else {
         EchoInfo("Warning! Postie requires that mbstring be enabled.");
     }
