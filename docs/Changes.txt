@@ -27,6 +27,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.20 (future) =
+* 
+
 = 1.6.19 (2015-05-04) =
 * Reduced the number of messages sent to the log for successful runs
 * Rename the disable_kses_content() function to postie_disable_kses_content() to fix a conflict with DAP WP LiveLinks Plugin
