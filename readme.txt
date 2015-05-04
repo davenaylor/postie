@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.3.0
-Tested up to: 4.2
-Stable tag: 1.6.18
+Tested up to: 4.2.1
+Stable tag: 1.6.19
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -234,6 +234,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.6.19 (2015-05-04) =
+* Reduced the number of messages sent to the log for successful runs
+* Rename the disable_kses_content() function to postie_disable_kses_content() to fix a conflict with DAP WP LiveLinks Plugin
+
 = 1.6.18 (2015-04-27) =
 * Fixed a bug that prevented Postie from detecting categories with an ampersand in them.
 * Added support for "future" post status 
