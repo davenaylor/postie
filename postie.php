@@ -36,7 +36,7 @@ define("POSTIE_ROOT", dirname(__FILE__));
 define("POSTIE_URL", WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)));
 
 //register the hooks early in the page in case some method needs the result of one of them (i.e. cron_schedules)
-add_action('init', 'disable_kses_content', 20);
+add_action('init', 'postie_disable_kses_content', 20);
 add_action('check_postie_hook', 'check_postie');
 add_action('parse_request', 'postie_parse_request');
 add_action('admin_init', 'postie_admin_init');
@@ -255,7 +255,7 @@ function postie_warnings() {
     }
 }
 
-function disable_kses_content() {
+function postie_disable_kses_content() {
     remove_filter('content_save_pre', 'wp_filter_post_kses');
 }
 

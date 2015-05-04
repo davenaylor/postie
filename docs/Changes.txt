@@ -29,6 +29,7 @@ Attachments are now processed in the order they were attached.
 == CHANGELOG ==
 = 1.6.19 (future) =
 * Reduced the number of messages sent to the log for successful runs
+* Rename the disable_kses_content() function to postie_disable_kses_content() to fix a conflict with DAP WP LiveLinks Plugin
 
 = 1.6.18 (2015-04-27) =
 * Fixed a bug that prevented Postie from detecting categories with an ampersand in them.
