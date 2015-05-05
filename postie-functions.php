@@ -1361,7 +1361,6 @@ function filter_CleanHtml($content) {
  * @return integer|NULL
  */
 function ValidatePoster(&$mimeDecodedEmail, $config) {
-    $test_email = '';
     extract($config);
     $poster = NULL;
     $from = "";
@@ -1437,7 +1436,7 @@ function ValidatePoster(&$mimeDecodedEmail, $config) {
         EchoInfo('Invalid sender: ' . htmlentities($from) . "! Not adding email!");
         if ($forward_rejected_mail) {
             $admin_email = get_option("admin_email");
-            if (MailToRecipients($mimeDecodedEmail, $test_email, array($admin_email), $return_to_sender)) {
+            if (MailToRecipients($mimeDecodedEmail, false, array($admin_email), $return_to_sender)) {
                 EchoInfo("A copy of the message has been forwarded to the administrator.");
             } else {
                 EchoInfo("The message was unable to be forwarded to the adminstrator.");
@@ -1991,19 +1990,27 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         return $upload_error_handler($file, __('Specified file failed upload test.'));
     }
 
-    extract($wp_filetype);
+    //extract($wp_filetype);
+    $type = $wp_filetype['type'];
+    $ext = $wp_filetype['ext'];
 
-    if ((!$type || !$ext ) && !current_user_can('unfiltered_upload')) {
-        return $upload_error_handler($file, __('File type does not meet security guidelines. Try another.'));
-    }
-    if (!$ext) {
+    if (empty($ext)) {
         $ext = ltrim(strrchr($file['name'], '.'), '.');
     }
-    if (!$type) {
+    if (empty($type)) {
         $type = $file['type'];
     }
+
+    DebugEcho("postie_handle_upload (type/ext): '$type' / '$ext'");
+
+    if ((empty($type) && empty($ext)) && !current_user_can('unfiltered_upload')) {
+        DebugEcho("postie_handle_upload: no type/ext & user restricted");
+        return $upload_error_handler($file, __('File type does not meet security guidelines. Try another.'));
+    }
+
     // A writable uploads dir will pass this test. Again, there's no point overriding this one.
     if (!( ( $uploads = wp_upload_dir($time) ) && false === $uploads['error'] )) {
+        DebugEcho("postie_handle_upload: directory not writable");
         return $upload_error_handler($file, $uploads['error']);
     }
     // fix filename (encode non-standard characters)
