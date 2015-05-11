@@ -1,3 +1,4 @@
+Change successful post language to take post status into account (i.e. draft really isn't posted - possible link to publish draft?)
 Verify that WP is honoring the wp_set_current_user() call. I.e. if the user is not an "author" role can they publish?
 Option to not process forwarded emails (getPostAuthorDetails)
 Separate out video linkifying from normal url linkifying - separate settings
