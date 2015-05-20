@@ -29,6 +29,7 @@ Attachments are now processed in the order they were attached.
 == CHANGELOG ==
 = 1.6.20 (future) =
 * Fixed attachment uploading bug when the type & extension weren't available.
+* Clarified "Filter newlines" setting description.
 
 = 1.6.19 (2015-05-04) =
 * Reduced the number of messages sent to the log for successful runs

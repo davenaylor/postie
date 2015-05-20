@@ -434,7 +434,7 @@
                     </tr>
 
                     <?php
-                    echo BuildBooleanSelect(__("Filter newlines", "postie"), "postie-settings[filternewlines]", $filternewlines, __("Retain newlines from plain text. Set to no if using markdown or textitle syntax", "postie"));
+                    echo BuildBooleanSelect(__("Filter newlines", "postie"), "postie-settings[filternewlines]", $filternewlines, __("Whether to strip newlines from plain text. Set to no if using markdown or textitle syntax", "postie"));
                     echo BuildBooleanSelect(__("Replace newline characters with html line breaks (&lt;br /&gt;)", "postie"), "postie-settings[convertnewline]", $convertnewline, __("Filter newlines must be turned on for this option to take effect", "postie"));
                     echo BuildBooleanSelect(__("Return rejected mail to sender", "postie"), "postie-settings[return_to_sender]", $return_to_sender);
                     ?>

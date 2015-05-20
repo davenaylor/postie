@@ -88,7 +88,7 @@ Make sure all failures are sent to admin (option?) failed attachments, etc.
 Option to send logs to support
 Enhance #img# to specify the featured image
 "yoast" style admin sidebar - see clicky by yoast
-replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMailbox or Hoard - see "Post By Email" plugin https://wordpress.org/plugins/post-by-email/
+replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMailbox or Hoard http://dev.horde.org/imap_client/install.php - see "Post By Email" plugin https://wordpress.org/plugins/post-by-email/
 provide a location for custom icons. update docs about location.
 handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
 change all Postie command to use a more consistent and easy to parse syntax
