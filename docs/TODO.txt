@@ -1,4 +1,5 @@
-Change successful post language to take post status into account (i.e. draft really isn't posted - possible link to publish draft?)
+Preferred text type: just html, just plain, html fallback to plain
+Change successful post message to take post status into account (i.e. draft really isn't posted - possible link to publish draft?)
 Verify that WP is honoring the wp_set_current_user() call. I.e. if the user is not an "author" role can they publish?
 Option to not process forwarded emails (getPostAuthorDetails)
 Separate out video linkifying from normal url linkifying - separate settings
@@ -15,6 +16,7 @@ Comment not being created when subject contains category command []. I.e. listse
 date: tag is being detected in body when not wanted
 Update tag_* and filter_* to handle HTML (per tag_Tags)
 dynamically determine video size (height/width) - https://code.google.com/p/phpvideotoolkit/
+new video template with <video> tag
 gallery logic does not handle both images and non-images
 plugin conflict - Image Rotation Fixer/Image Rotation Repair
 send email notice when attachments are rejected.

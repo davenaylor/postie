@@ -686,7 +686,7 @@ code better. In June/July 2005 I discovered a little plugin by Chris J Davis (ht
 feature to it (basically a bookmarklet).  In the process I started looking at his code and realized how much you could do with the plugin system 
 available in Word Press.
 
-So I decided to make an offical fork. I put up an article on my blog asking for new names. I picked Postie.  I then modified the code to be a proper 
+So I decided to make an official fork. I put up an article on my blog asking for new names. I picked Postie.  I then modified the code to be a proper 
 plugin.  And the rest is history :)
 
 * BUGFIX -problem with subject
