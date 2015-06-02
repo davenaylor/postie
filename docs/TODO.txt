@@ -1,6 +1,7 @@
 Preferred text type: just html, just plain, html fallback to plain
 Change successful post message to take post status into account (i.e. draft really isn't posted - possible link to publish draft?)
 Verify that WP is honoring the wp_set_current_user() call. I.e. if the user is not an "author" role can they publish?
+Test server port combination by opening a socket connection to see if any service responds. (via ajax call)
 Option to not process forwarded emails (getPostAuthorDetails)
 Separate out video linkifying from normal url linkifying - separate settings
 Add Message-ID header value to custom field (postie_message_id?) to both posts and comments.
@@ -84,7 +85,6 @@ http://www.yaconiello.com/blog/how-to-write-wordpress-plugin/
 
 setting to turn off individual tags
 process single email at a time and don't delete unless successful
-plugin mechanism to add new tags (and define "built-in ones")
 fix postie settings	http://alisothegeek.com/2011/01/wordpress-settings-api-tutorial-1/
 Make sure all failures are sent to admin (option?) failed attachments, etc.
 Option to send logs to support
@@ -92,6 +92,3 @@ Enhance #img# to specify the featured image
 "yoast" style admin sidebar - see clicky by yoast
 replace native imap MIME parser with flourish - http://flourishlib.com/docs/fMailbox or Hoard http://dev.horde.org/imap_client/install.php - see "Post By Email" plugin https://wordpress.org/plugins/post-by-email/
 provide a location for custom icons. update docs about location.
-handle condition where only one of text/plain & text/html is supplied, but Preferred Text Type is set to the opposite.
-change all Postie command to use a more consistent and easy to parse syntax
-  Use standard shortcode syntax. I.e. [postie date="Jan 1, 2014"]
