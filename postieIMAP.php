@@ -22,7 +22,7 @@ class PostieIMAP {
     var $_self_cert;
     var $_tls_on;
     var $_connection;
-    var $_server_string;
+    var $_mailbox;
 
     function PostieIMAP($protocol = "imap", $ssl_on = false, $self_cert = true) {
         $this->_connected = false;
@@ -76,17 +76,17 @@ class PostieIMAP {
         if (preg_match("/google|gmail/i", $server)) {
             //Fix from Jim Hodgson http://www.jimhodgson.com/2006/07/19/postie/
             DebugEcho($this->_protocol . ": using Google INBOX");
-            $this->_server_string = "{" . $server . ":" . $port . $option . "}INBOX";
+            $this->_mailbox = "{" . $server . ":" . $port . $option . "}INBOX";
         } else {
-            $this->_server_string = "{" . $server . ":" . $port . $option . "}";
+            $this->_mailbox = "{" . $server . ":" . $port . $option . "}";
         }
-        DebugEcho($this->_protocol . ": connection string - {$this->_server_string}");
+        DebugEcho($this->_protocol . ": connection string - {$this->_mailbox}");
         //Exchange connection, but requires PHP 5.3.2
         if (version_compare(phpversion(), '5.3.2', '<')) {
-            $this->_connection = imap_open($this->_server_string, $login, $password);
+            $this->_connection = imap_open($this->_mailbox, $login, $password);
         } else {
             DebugEcho($this->_protocol . ": disabling GSSAPI");
-            $this->_connection = imap_open($this->_server_string, $login, $password, NULL, 1, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
+            $this->_connection = imap_open($this->_mailbox, $login, $password, NULL, 1, array('DISABLE_AUTHENTICATOR' => 'GSSAPI'));
         }
 
         if ($this->_connection) {
@@ -103,10 +103,10 @@ class PostieIMAP {
      * @return integer
      */
     function getNumberOfMessages() {
-        $status = imap_status($this->_connection, $this->_server_string, SA_ALL); //get all messages in debug mode so we can reprocess them
+        $status = imap_status($this->_connection, $this->_mailbox, SA_ALL); 
         DebugDump($status);
         if ($status) {
-            return $status->messages;
+            return max($status->messages, imap_num_msg($this->_connection));
         } else {
             LogInfo("Error imap_status did not return a value");
             //DebugDump($this);
