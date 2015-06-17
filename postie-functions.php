@@ -237,6 +237,15 @@ function CreatePost($poster, $mimeDecodedEmail, $post_id, &$is_reply, $config, $
         DebugEcho("CreatePost: '$content'");
         DebugDump($attachments);
     }
+    if (IsDebugMode()) {
+        $dname = POSTIE_ROOT . DIRECTORY_SEPARATOR . "test_emails" . DIRECTORY_SEPARATOR;
+        if (is_dir($dname)) {
+            $fname = $dname . sanitize_file_name($mimeDecodedEmail->headers["message-id"]);
+            $file = fopen($fname . ".content.txt ", "w");
+            fwrite($file, $content);
+            fclose($file);
+        }
+    }
 
     $subject = GetSubject($mimeDecodedEmail, $content, $config);
 
