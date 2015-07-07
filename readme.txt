@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.3.0
-Tested up to: 4.2.1
-Stable tag: 1.6.19
+Tested up to: 4.2.2
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -234,6 +234,12 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.7.0 (2015-07-07) =
+* Fixed attachment uploading bug when the type & extension weren't available.
+* Clarified "Filter newlines" setting description.
+* Better support for Exchange 2010+ thanks to Andrew Chaplin
+* New action hook - postie_file_added
+
 = 1.6.19 (2015-05-04) =
 * Reduced the number of messages sent to the log for successful runs
 * Rename the disable_kses_content() function to postie_disable_kses_content() to fix a conflict with DAP WP LiveLinks Plugin
@@ -889,7 +895,7 @@ code better. In June/July 2005 I discovered a little plugin by Chris J Davis (ht
 feature to it (basically a bookmarklet).  In the process I started looking at his code and realized how much you could do with the plugin system 
 available in Word Press.
 
-So I decided to make an offical fork. I put up an article on my blog asking for new names. I picked Postie.  I then modified the code to be a proper 
+So I decided to make an official fork. I put up an article on my blog asking for new names. I picked Postie.  I then modified the code to be a proper 
 plugin.  And the rest is history :)
 
 * BUGFIX -problem with subject
