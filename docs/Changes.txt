@@ -27,6 +27,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.7.1 (future) =
+* 
+
 = 1.7.0 (2015-07-07) =
 * Fixed attachment uploading bug when the type & extension weren't available.
 * Clarified "Filter newlines" setting description.
