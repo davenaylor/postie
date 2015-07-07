@@ -1882,18 +1882,17 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
     }
 
     $file = postie_handle_upload($the_file, $overrides, $time);
-    //unlink($tmpFile);
+
 
     if (isset($file['error'])) {
         DebugDump($file['error']);
-        //throw new Exception($file['error']);
         return new WP_Error('upload_error', $file['error']);
     }
 
     $url = $file['url'];
     $type = $file['type'];
-    $file = $file['file'];
-    $title = preg_replace('/\.[^.]+$/', '', basename($file));
+    $filename = $file['file'];
+    $title = preg_replace('/\.[^.]+$/', '', basename($filename));
     $content = '';
 
     // use image exif/iptc data for title and caption defaults if possible
@@ -1901,7 +1900,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
         include_once(ABSPATH . '/wp-admin/includes/image.php');
         include_once(ABSPATH . '/wp-admin/includes/media.php');
         DebugEcho("reading metadata");
-        if ($image_meta = @wp_read_image_metadata($file)) {
+        if ($image_meta = @wp_read_image_metadata($filename)) {
             if (trim($image_meta['title'])) {
                 $title = $image_meta['title'];
                 DebugEcho("Using metadata title: $title");
@@ -1926,12 +1925,14 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
 
     // Save the data
     DebugEcho("before wp_insert_attachment");
-    $id = wp_insert_attachment($attachment, $file, $post_id);
+    $id = wp_insert_attachment($attachment, $filename, $post_id);
     DebugEcho("after wp_insert_attachment: attachement id: $id");
 
     if (!is_wp_error($id)) {
+        do_action('postie_file_added', $post_id, $id, $file);
+
         if ($generate_thubnails) {
-            $amd = wp_generate_attachment_metadata($id, $file);
+            $amd = wp_generate_attachment_metadata($id, $filename);
             DebugEcho("wp_generate_attachment_metadata");
             //DebugDump($amd);
             wp_update_attachment_metadata($id, $amd);
@@ -2000,19 +2001,19 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     }
 
     //extract($wp_filetype);
-    $type = $wp_filetype['type'];
+    $mimetype = $wp_filetype['type'];
     $ext = $wp_filetype['ext'];
 
     if (empty($ext)) {
         $ext = ltrim(strrchr($file['name'], '.'), '.');
     }
-    if (empty($type)) {
-        $type = $file['type'];
+    if (empty($mimetype)) {
+        $mimetype = $file['type'];
     }
 
-    DebugEcho("postie_handle_upload (type/ext): '$type' / '$ext'");
+    DebugEcho("postie_handle_upload (type/ext): '$mimetype' / '$ext'");
 
-    if ((empty($type) && empty($ext)) && !current_user_can('unfiltered_upload')) {
+    if ((empty($mimetype) && empty($ext)) && !current_user_can('unfiltered_upload')) {
         DebugEcho("postie_handle_upload: no type/ext & user restricted");
         return $upload_error_handler($file, __('File type does not meet security guidelines. Try another.'));
     }
@@ -2055,7 +2056,7 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
     $url = $uploads['url'] . "/$filename";
 
     DebugEcho("upload: before apply_filters");
-    $return = apply_filters('wp_handle_upload', array('file' => $new_file, 'url' => $url, 'type' => $type));
+    $return = apply_filters('wp_handle_upload', array('file' => $new_file, 'url' => $url, 'type' => $mimetype));
     DebugEcho("upload: after apply_filters");
 
     return $return;

@@ -27,10 +27,11 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.6.20 (future) =
+= 1.7.0 (future) =
 * Fixed attachment uploading bug when the type & extension weren't available.
 * Clarified "Filter newlines" setting description.
 * Better support for Exchange 2010+ thanks to Andrew Chaplin
+* New action hook - postie_file_added
 
 = 1.6.19 (2015-05-04) =
 * Reduced the number of messages sent to the log for successful runs
