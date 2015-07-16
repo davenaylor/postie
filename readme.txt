@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.3.0
 Tested up to: 4.2.2
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -234,6 +234,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.7.1 (2015-07-16) =
+* Fixed issue where multiple custom taxonomy terms were not correctly being saved
+
 = 1.7.0 (2015-07-07) =
 * Fixed attachment uploading bug when the type & extension weren't available.
 * Clarified "Filter newlines" setting description.
@@ -1192,4 +1195,4 @@ plugin.  And the rest is history :)
 *  Cleaned up some pear stuff in install
 * 
 =  0.1 - 2004-06 =
-* First release
+* First release

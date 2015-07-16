@@ -2732,7 +2732,7 @@ function tag_Categories(&$subject, $defaultCategory, $category_match, $post_id) 
                 $post_categories[] = $category;
             } else {
                 DebugEcho("colon category: custom taxonomy $tax");
-                wp_set_object_terms($post_id, $category, $tax);
+                wp_set_object_terms($post_id, $category, $tax, true);
             }
         }
     }
@@ -2753,7 +2753,7 @@ function tag_Categories(&$subject, $defaultCategory, $category_match, $post_id) 
                         $post_categories[] = $category;
                     } else {
                         DebugEcho("tag_Categories: custom taxonomy $tax");
-                        wp_set_object_terms($post_id, $category, $tax);
+                        wp_set_object_terms($post_id, $category, $tax, true);
                     }
                 }
                 $i++;
