@@ -2499,10 +2499,10 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
         if ((count($images) > 0) && $config['auto_gallery']) {
             $linktype = strtolower($config['auto_gallery_link']);
             if ($linktype == 'default') {
-                $imageTemplate = '[gallery]';
+                $imageTemplate = apply_filters('postie_gallery', $post_id, '[gallery]');
             } else {
                 DebugEcho("Auto gallery: link type $linktype");
-                $imageTemplate = "[gallery link='$linktype']";
+                $imageTemplate = apply_filters('postie_gallery', $post_id, "[gallery link='$linktype']");
             }
             if ($config['images_append']) {
                 $content .= "\n$imageTemplate";
