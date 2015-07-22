@@ -2498,12 +2498,14 @@ function filter_ReplaceImagePlaceHolders(&$content, $attachments, $config, $post
 
         if ((count($images) > 0) && $config['auto_gallery']) {
             $linktype = strtolower($config['auto_gallery_link']);
+            DebugEcho("Auto gallery: link type $linktype");
+            DebugFiltersFor('postie_gallery');
             if ($linktype == 'default') {
-                $imageTemplate = apply_filters('postie_gallery', $post_id, '[gallery]');
+                $imageTemplate = apply_filters('postie_gallery', '[gallery]', $post_id);
             } else {
-                DebugEcho("Auto gallery: link type $linktype");
-                $imageTemplate = apply_filters('postie_gallery', $post_id, "[gallery link='$linktype']");
+                $imageTemplate = apply_filters('postie_gallery', "[gallery link='$linktype']", $post_id);
             }
+            DebugEcho("Auto gallery: template '$imageTemplate'");
             if ($config['images_append']) {
                 $content .= "\n$imageTemplate";
                 DebugEcho("Auto gallery: append");
