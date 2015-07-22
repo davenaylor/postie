@@ -443,44 +443,50 @@ function PostEmail($poster, $mimeDecodedEmail, $config) {
     /* in order to do attachments correctly, we need to associate the
       attachments with a post. So we add the post here, then update it */
     $tmpPost = array('post_title' => 'tmptitle', 'post_content' => 'tmpPost', 'post_status' => 'draft');
-    $post_id = wp_insert_post($tmpPost);
-    DebugEcho("tmp post id is $post_id");
+    $post_id = wp_insert_post($tmpPost, true);
+    if (!is_wp_error($post_id)) {
+        DebugEcho("tmp post id is $post_id");
 
-    $is_reply = false;
-    $postmodifiers = new PostiePostModifiers();
+        $is_reply = false;
+        $postmodifiers = new PostiePostModifiers();
 
-    $details = CreatePost($poster, $mimeDecodedEmail, $post_id, $is_reply, $config, $postmodifiers);
+        $details = CreatePost($poster, $mimeDecodedEmail, $post_id, $is_reply, $config, $postmodifiers);
 
-    $details = apply_filters('postie_post', $details);
-    $details = apply_filters('postie_post_before', $details);
+        $details = apply_filters('postie_post', $details);
+        $details = apply_filters('postie_post_before', $details);
 
-    DebugEcho(("Post postie_post filter"));
-    DebugDump($details);
+        DebugEcho(("Post postie_post filter"));
+        DebugDump($details);
 
 
-    if (empty($details)) {
-        // It is possible that the filter has removed the post, in which case, it should not be posted.
-        // And if we created a placeholder post (because this was not a reply to an existing post),
-        // then it should be removed
-        if (!$is_reply) {
-            wp_delete_post($post_id);
-            EchoInfo("postie_post filter cleared the post, not saving.");
+        if (empty($details)) {
+            // It is possible that the filter has removed the post, in which case, it should not be posted.
+            // And if we created a placeholder post (because this was not a reply to an existing post),
+            // then it should be removed
+            if (!$is_reply) {
+                wp_delete_post($post_id);
+                EchoInfo("postie_post filter cleared the post, not saving.");
+            }
+        } else {
+            DisplayEmailPost($details);
+
+            $postid = PostToDB($details, $is_reply, $custom_image_field, $postmodifiers);
+
+            if ($confirmation_email != '') {
+                if ($confirmation_email == 'sender') {
+                    $recipients = array($details['email_author']);
+                } elseif ($confirmation_email == 'admin') {
+                    $recipients = array(get_option("admin_email"));
+                } elseif ($confirmation_email == 'both') {
+                    $recipients = array($details['email_author'], get_option("admin_email"));
+                }
+                MailToRecipients($mimeDecodedEmail, false, $recipients, false, false, $postid);
+            }
         }
     } else {
-        DisplayEmailPost($details);
-
-        $postid = PostToDB($details, $is_reply, $custom_image_field, $postmodifiers);
-
-        if ($confirmation_email != '') {
-            if ($confirmation_email == 'sender') {
-                $recipients = array($details['email_author']);
-            } elseif ($confirmation_email == 'admin') {
-                $recipients = array(get_option("admin_email"));
-            } elseif ($confirmation_email == 'both') {
-                $recipients = array($details['email_author'], get_option("admin_email"));
-            }
-            MailToRecipients($mimeDecodedEmail, false, $recipients, false, false, $postid);
-        }
+        EchoInfo("wp_insert_post failed: " . $post_id->get_error_message());
+        DebugDump($post_id->get_error_messages());
+        DebugDump($post_id->get_error_data());
     }
     postie_disable_revisions(true);
     DebugEcho("Done");
