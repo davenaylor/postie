@@ -1154,7 +1154,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
             case 'image':
                 DebugEcho("GetContent: image Attachement: $filename");
-                $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails);
+                $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails, $mimetype_primary, $mimetype_secondary);
                 if (!is_wp_error($file_id)) {
                     //featured image logic
                     //set the first image we come across as the featured image
@@ -1820,7 +1820,7 @@ function filter_AppleFile(&$mimeDecodedEmail) {
     }
 }
 
-function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnails = true) {
+function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnails = true, $mimetype_primary = null, $mimetype_secondary = null) {
     $post_data = array();
     $overrides = array('test_form' => false);
 
@@ -1887,7 +1887,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
         $time = $post->post_date;
     }
 
-    $file = postie_handle_upload($the_file, $overrides, $time);
+    $file = postie_handle_upload($the_file, $overrides, $time, $mimetype_primary, $mimetype_secondary);
 
 
     if (isset($file['error'])) {
@@ -1953,7 +1953,7 @@ function postie_media_handle_upload($part, $post_id, $poster, $generate_thubnail
     return $id;
 }
 
-function postie_handle_upload(&$file, $overrides = false, $time = null) {
+function postie_handle_upload(&$file, $overrides = false, $time = null, $mimetype_primary = null, $mimetype_secondary = null) {
     // The default error handler.
     if (!function_exists('wp_handle_upload_error')) {
 
@@ -1965,12 +1965,18 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
 
     // A correct MIME type will pass this test. Override $mimes or use the upload_mimes filter.
     $wp_filetype = wp_check_filetype($file['name']);
-    DebugEcho("postie_handle_upload: detected file type for " . $file['name'] . " is " . $wp_filetype['type']);
-
     if (!isset($file['type'])) {
-        DebugEcho("postie_handle_upload: adding type - " . $wp_filetype['type']);
-        $file['type'] = $wp_filetype['type'];
+        DebugEcho("postie_handle_upload: missing file[type]");
+        if (!empty($wp_filetype['type'])) {
+            DebugEcho("postie_handle_upload: substituting wp_filetype[type] - " . $wp_filetype['type']);
+            $file['type'] = $wp_filetype['type'];
+        } else if (!empty($mimetype_primary)) {
+            DebugEcho("postie_handle_upload: substituting mimetype_primary - $mimetype_primary/$mimetype_secondary");
+            $file['type'] = "$mimetype_primary/$mimetype_secondary";
+        }
     }
+    DebugEcho("postie_handle_upload: detected file type for " . $file['name'] . " is " . $file['type']);
+
     $file = apply_filters('wp_handle_upload_prefilter', $file);
 
     // You may define your own function and pass the name in $overrides['upload_error_handler']
@@ -2006,15 +2012,15 @@ function postie_handle_upload(&$file, $overrides = false, $time = null) {
         return $upload_error_handler($file, __('Specified file failed upload test.'));
     }
 
-    //extract($wp_filetype);
-    $mimetype = $wp_filetype['type'];
+    $mimetype = $file['type'];
     $ext = $wp_filetype['ext'];
 
     if (empty($ext)) {
         $ext = ltrim(strrchr($file['name'], '.'), '.');
     }
-    if (empty($mimetype)) {
-        $mimetype = $file['type'];
+    if (empty($ext) && !empty($mimetype_secondary)) {
+        $ext = $mimetype_secondary;
+        $file['name'] = $file['name'] . ".$ext";
     }
 
     DebugEcho("postie_handle_upload (type/ext): '$mimetype' / '$ext'");
