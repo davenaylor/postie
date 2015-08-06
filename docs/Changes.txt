@@ -27,8 +27,8 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
-= 1.7.5 (future) =
-* 
+= 1.7.5 (2015-08-06) =
+* If featured image is enabled, the featured image will no longer appear in the post.
 
 = 1.7.4 (2015-07-30) =
 * Added additional output if wp_insert_post() fails

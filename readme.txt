@@ -5,8 +5,8 @@ Author URI: http://allens-home.com/
 Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.3.0
-Tested up to: 4.2.3
-Stable tag: 1.7.4
+Tested up to: 4.2.4
+Stable tag: 1.7.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -234,6 +234,9 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.7.5 (2015-08-06) =
+* If featured image is enabled, the featured image will no longer appear in the post.
+
 = 1.7.4 (2015-07-30) =
 * Added additional output if wp_insert_post() fails
 * Fixed image upload failure when image filename doesn't have an extension

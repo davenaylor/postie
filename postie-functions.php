@@ -988,7 +988,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
     //look for banned file names
     if (property_exists($part, 'ctype_parameters') && is_array($part->ctype_parameters) && array_key_exists('name', $part->ctype_parameters)) {
-        if (isBannedFileName($part->ctype_parameters['name'], $banned_files_list)) {
+        if (isBannedFileName($part->ctype_parameters['name'], $config['banned_files_list'])) {
             DebugEcho("GetContent: found banned filename");
             return NULL;
         }
@@ -1000,7 +1000,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
         } else {
             DebugEcho("GetContent: decoding application/octet-stream");
             $mimeDecodedEmail = DecodeMIMEMail($part->body);
-            filter_PreferedText($mimeDecodedEmail, $prefer_text_type);
+            filter_PreferedText($mimeDecodedEmail, $config['prefer_text_type']);
             foreach ($mimeDecodedEmail->parts as $section) {
                 $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
             }
@@ -1010,7 +1010,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
     if (property_exists($part, "ctype_primary") && $part->ctype_primary == "multipart" && $part->ctype_secondary == "appledouble") {
         DebugEcho("GetContent: multipart appledouble");
         $mimeDecodedEmail = DecodeMIMEMail("Content-Type: multipart/mixed; boundary=" . $part->ctype_parameters["boundary"] . "\n" . $part->body);
-        filter_PreferedText($mimeDecodedEmail, $prefer_text_type);
+        filter_PreferedText($mimeDecodedEmail, $config['prefer_text_type']);
         filter_AppleFile($mimeDecodedEmail);
         foreach ($mimeDecodedEmail->parts as $section) {
             $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
@@ -1047,11 +1047,11 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             $mimetype_secondary = $mimeparts[1];
         } else {
             DebugEcho("GetContent: secondary lookup failed, checking configured extensions");
-            if (in_array($fileext, $audiotypes)) {
+            if (in_array($fileext, $config['audiotypes'])) {
                 DebugEcho("GetContent: found audio extension");
                 $mimetype_primary = 'audio';
                 $mimetype_secondary = $fileext;
-            } elseif (in_array($fileext, array_merge($video1types, $video2types))) {
+            } elseif (in_array($fileext, array_merge($config['video1types'], $config['video2types']))) {
                 DebugEcho("GetContent: found video extension");
                 $mimetype_primary = 'video';
                 $mimetype_secondary = $fileext;
@@ -1066,7 +1066,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             case 'multipart':
                 DebugEcho("GetContent: multipart: " . count($part->parts));
                 //DebugDump($part);
-                filter_PreferedText($part, $prefer_text_type);
+                filter_PreferedText($part, $config['prefer_text_type']);
                 foreach ($part->parts as $section) {
                     //DebugDump($section->headers);
                     $meta_return .= GetContent($section, $attachments, $post_id, $poster, $config);
@@ -1091,7 +1091,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
                 if ($charset !== '' || $encoding !== '') {
                     //DebugDump($part);
-                    $part->body = HandleMessageEncoding($encoding, $charset, $part->body, $message_encoding, $message_dequote);
+                    $part->body = HandleMessageEncoding($encoding, $charset, $part->body, $config['message_encoding'], $config['message_dequote']);
                     if (!empty($charset)) {
                         $part->ctype_parameters['charset'] = ""; //reset so we don't double decode
                     }
@@ -1100,10 +1100,10 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 if (array_key_exists('disposition', $part) && $part->disposition == 'attachment') {
                     DebugEcho("GetContent: text Attachement: $filename");
                     if (!preg_match('/ATT\d\d\d\d\d.txt/i', $filename)) {
-                        $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails);
+                        $file_id = postie_media_handle_upload($part, $post_id, $poster, $config['generate_thumbnails']);
                         if (!is_wp_error($file_id)) {
                             $file = wp_get_attachment_url($file_id);
-                            $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
+                            $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $config['icon_set'], $config['icon_size']);
                             $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
                             DebugEcho("GetContent: text attachment: adding '$filename'");
                         } else {
@@ -1128,7 +1128,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         //DebugDump($part);
 
                         DebugEcho("GetContent: body text");
-                        if ($allow_html_in_body) {
+                        if ($config['allow_html_in_body']) {
                             DebugEcho("GetContent: html allowed");
                             $meta_return .= $part->body;
                             //$meta_return = "<div>$meta_return</div>\n";
@@ -1143,7 +1143,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         $file_id = postie_media_handle_upload($part, $post_id, $poster);
                         if (!is_wp_error($file_id)) {
                             $file = wp_get_attachment_url($file_id);
-                            $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
+                            $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $config['icon_set'], $config['icon_size']);
                             $attachments["html"][$filename] = "<a href='$file'>" . $icon . $filename . '</a>' . "\n";
                         } else {
                             LogInfo($file_id->get_error_message());
@@ -1154,29 +1154,29 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
             case 'image':
                 DebugEcho("GetContent: image Attachement: $filename");
-                $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails, $mimetype_primary, $mimetype_secondary);
+                $file_id = postie_media_handle_upload($part, $post_id, $poster, $config['generate_thumbnails'], $mimetype_primary, $mimetype_secondary);
                 if (!is_wp_error($file_id)) {
                     //featured image logic
                     //set the first image we come across as the featured image
                     DebugEcho("GetContent: has_post_thumbnail: " . boolval(has_post_thumbnail($post_id)));
                     //DebugEcho("get_the_post_thumbnail: " .get_the_post_thumbnail($post_id));
 
-                    if ($featured_image && !has_post_thumbnail($post_id)) {
+                    if ($config['featured_image'] && !has_post_thumbnail($post_id)) {
                         DebugEcho("GetContent: featured image: $file_id");
                         set_post_thumbnail($post_id, $file_id);
-                    }
-                    $file = wp_get_attachment_url($file_id);
-                    $cid = "";
-                    if (array_key_exists('content-id', $part->headers)) {
-                        $cid = trim($part->headers["content-id"], "<>");
-                        DebugEcho("GetContent: found cid: $cid");
-                    }
+                    } else {
+                        $cid = "";
+                        if (array_key_exists('content-id', $part->headers)) {
+                            $cid = trim($part->headers["content-id"], "<>");
+                            DebugEcho("GetContent: found cid: $cid");
+                        }
 
-                    $the_post = get_post($file_id);
-                    $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $imagetemplate, $filename);
-                    if (!empty($cid)) {
-                        $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
-                        DebugEcho("GetContent: CID Attachement: $cid");
+                        $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $config['imagetemplate'], $filename);
+                        if (!empty($cid)) {
+                            $file = wp_get_attachment_url($file_id);
+                            $attachments["cids"][$cid] = array($file, count($attachments["html"]) - 1);
+                            DebugEcho("GetContent: CID Attachement: $cid");
+                        }
                     }
                 } else {
                     LogInfo("image error: " . $file_id->get_error_message());
@@ -1186,7 +1186,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
             case 'audio':
                 //DebugDump($part->headers);
                 DebugEcho("GetContent: audio Attachement: $filename");
-                $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails);
+                $file_id = postie_media_handle_upload($part, $post_id, $poster, $config['generate_thumbnails']);
                 if (!is_wp_error($file_id)) {
                     $file = wp_get_attachment_url($file_id);
                     $cid = "";
@@ -1194,12 +1194,12 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         $cid = trim($part->headers["content-id"], "<>");
                         DebugEcho("GetContent: audio Attachement cid: $cid");
                     }
-                    if (in_array($fileext, $audiotypes)) {
+                    if (in_array($fileext, $config['audiotypes'])) {
                         DebugEcho("GetContent: using audio template: $mimetype_secondary");
-                        $audioTemplate = $audiotemplate;
+                        $audioTemplate = $config['audiotemplate'];
                     } else {
                         DebugEcho("GetContent: using default audio template: $mimetype_secondary");
-                        $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
+                        $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $config['icon_set'], $config['icon_size']);
                         $audioTemplate = '<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
                     }
                     $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $audioTemplate, $filename);
@@ -1210,7 +1210,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
             case 'video':
                 DebugEcho("GetContent: video Attachement: $filename");
-                $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails);
+                $file_id = postie_media_handle_upload($part, $post_id, $poster, $config['generate_thumbnails']);
                 if (!is_wp_error($file_id)) {
                     $file = wp_get_attachment_url($file_id);
                     $cid = "";
@@ -1219,15 +1219,15 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                         DebugEcho("GetContent: video Attachement cid: $cid");
                     }
                     //DebugDump($part);
-                    if (in_array($fileext, $video1types)) {
+                    if (in_array($fileext, $config['video1types'])) {
                         DebugEcho("GetContent: using video1 template: $fileext");
-                        $videoTemplate = $video1template;
-                    } elseif (in_array($fileext, $video2types)) {
+                        $videoTemplate = $config['video1template'];
+                    } elseif (in_array($fileext, $config['video2types'])) {
                         DebugEcho("GetContent: using video2 template: $fileext");
-                        $videoTemplate = $video2template;
+                        $videoTemplate = $config['video2template'];
                     } else {
                         DebugEcho("GetContent: using default template: $fileext");
-                        $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
+                        $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $config['icon_set'], $config['icon_size']);
                         $videoTemplate = '<a href="{FILELINK}">' . $icon . '{FILENAME}</a>';
                     }
                     $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $videoTemplate, $filename);
@@ -1239,19 +1239,19 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
 
             default:
                 DebugEcho("GetContent: found file type: " . $mimetype_primary);
-                if (in_array($mimetype_primary, $supported_file_types)) {
+                if (in_array($mimetype_primary, $config['supported_file_types'])) {
                     //pgp signature - then forget it
                     if ($mimetype_secondary == 'pgp-signature') {
                         DebugEcho("GetContent: found pgp-signature - done");
                         break;
                     }
-                    $file_id = postie_media_handle_upload($part, $post_id, $poster, $generate_thumbnails);
+                    $file_id = postie_media_handle_upload($part, $post_id, $poster, $config['generate_thumbnails']);
                     if (!is_wp_error($file_id)) {
                         $file = wp_get_attachment_url($file_id);
                         DebugEcho("GetContent: uploaded $file_id ($file)");
-                        $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $icon_set, $icon_size);
+                        $icon = chooseAttachmentIcon($file, $mimetype_primary, $mimetype_secondary, $config['icon_set'], $config['icon_size']);
                         DebugEcho("GetContent: default: $icon $filename");
-                        $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $generaltemplate, $filename, $icon);
+                        $attachments["html"][$filename] = parseTemplate($file_id, $mimetype_primary, $config['generaltemplate'], $filename, $icon);
                         if (array_key_exists('content-id', $part->headers)) {
                             $cid = trim($part->headers["content-id"], "<>");
                             if ($cid) {
@@ -1265,7 +1265,7 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                     }
                 } else {
                     DebugEcho("GetContent: Not in supported filetype list");
-                    DebugDump($supported_file_types);
+                    DebugDump($config['supported_file_types']);
                 }
                 break;
         }
