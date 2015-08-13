@@ -930,8 +930,9 @@ function PostToDB($details, $isReply, $customImageField, $postmodifiers) {
             'comment_parent' => 0,
             'user_id' => $details['user_ID']
         );
-
-        $post_ID = wp_insert_comment($comment);
+        $comment = apply_filters('postie_comment_before', $comment);
+        $post_ID = wp_new_comment($comment);
+        do_action('postie_comment_after', $comment);
     }
 
     if ($post_ID) {
@@ -1156,15 +1157,18 @@ function GetContent($part, &$attachments, $post_id, $poster, $config) {
                 DebugEcho("GetContent: image Attachement: $filename");
                 $file_id = postie_media_handle_upload($part, $post_id, $poster, $config['generate_thumbnails'], $mimetype_primary, $mimetype_secondary);
                 if (!is_wp_error($file_id)) {
-                    //featured image logic
+                    $addimage = true;
                     //set the first image we come across as the featured image
-                    DebugEcho("GetContent: has_post_thumbnail: " . boolval(has_post_thumbnail($post_id)));
-                    //DebugEcho("get_the_post_thumbnail: " .get_the_post_thumbnail($post_id));
-
                     if ($config['featured_image'] && !has_post_thumbnail($post_id)) {
                         DebugEcho("GetContent: featured image: $file_id");
                         set_post_thumbnail($post_id, $file_id);
-                    } else {
+
+                        //optionally skip adding the featured imagea to the post
+                        $addimage = $config['include_featured_image'];
+                    }
+
+                    if ($addimage) {
+                        DebugEcho("GetContent: adding image: $file_id");
                         $cid = "";
                         if (array_key_exists('content-id', $part->headers)) {
                             $cid = trim($part->headers["content-id"], "<>");
@@ -3026,6 +3030,7 @@ function config_GetDefaults() {
         'video2templates' => $video2Templates,
         'wrap_pre' => 'no',
         'featured_image' => false,
+        'include_featured_image' => true,
         'email_tls' => false,
         'post_format' => 'standard',
         'post_type' => 'post',

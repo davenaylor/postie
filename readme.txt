@@ -6,7 +6,7 @@ Plugin URI: http://PostiePlugin.com/
 Tags: e-mail, email, post-by-email
 Requires at least: 3.3.0
 Tested up to: 4.2.4
-Stable tag: 1.7.5
+Stable tag: 1.7.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -234,6 +234,10 @@ All script, style and body tags are stripped from html emails.
 Attachments are now processed in the order they were attached.
 
 == CHANGELOG ==
+= 1.7.6 (2015-08-13) =
+* Added setting to control whether the featured image is included in the post or not.
+* Added 2 new filters, postie_comment_before and postie_comment_after 
+
 = 1.7.5 (2015-08-06) =
 * If featured image is enabled, the featured image will no longer appear in the post.
 

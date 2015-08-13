@@ -474,6 +474,7 @@
 
                     <?php
                     echo BuildBooleanSelect(__("Use First Image as Featured Image", "postie"), "postie-settings[featured_image]", $featured_image, __("If any images are attached, the first one will be the featured image for the post", "postie"));
+                    echo BuildBooleanSelect(__("Include Featured Image in Post", "postie"), "postie-settings[include_featured_image]", $include_featured_image, __("Should the featured image be included in the post", "postie"));
                     echo BuildBooleanSelect(__("Automatically insert image gallery", "postie"), "postie-settings[auto_gallery]", $auto_gallery, __("If any images are attached, they will automatically be inserted as a gallery", "postie"));
                     echo BuildSelect(__("Gallery Link Type", "postie"), "postie-settings[auto_gallery_link]", $auto_gallery_link, array('Default', 'Post', 'File', 'None'),"Select the type of link the gallery should use");
                     echo BuildBooleanSelect(__("Image Location", "postie"), "postie-settings[images_append]", $images_append, __("Location of attachments if using 'plain' format. Before or After content.", "postie"), array('After', 'Before'));
