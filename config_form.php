@@ -567,7 +567,7 @@
                     ?>
                     <tr>
                         <th scope='row'><?php _e('Video template 1', 'postie') ?></th>
-                        <?php $templateDir = get_option('siteurl') . '/' . PLUGINDIR . '/postie/templates'; ?>
+                        <?php $templateDir = esc_url( WP_PLUGIN_URL . '/postie/templates' ); ?>
                         <td>
                             <input type='hidden' id='postie-settings-selected_video1template' name='postie-settings[selected_video1template]'
                                    value="<?php echo esc_attr($selected_video1template) ?>" />
@@ -843,7 +843,7 @@
     </form>
 </div>
 
-<?php $iconDir = get_option('siteurl') . '/' . PLUGINDIR . '/postie/icons'; ?>
+<?php $iconDir = esc_url( WP_PLUGIN_URL . '/postie/icons' ); ?>
 <script type="text/javascript">
     jQuery(document).ready(function () {
         jQuery("#simpleTabs").simpleTabs({
@@ -923,7 +923,7 @@
         var thumb = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/, '-150x150.jpg');
         var medium = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/, '-300x200.jpg');
         var large = '<?php echo $templateDir ?>/' + sample.replace(/\.jpg/, '-1024x682.jpg');
-        var pagelink = '<?php echo get_option("siteurl") ?>' + '/?attachment_id=9999';
+        var pagelink = '<?php echo home_url() ?>' + '/?attachment_id=9999';
         previewHTML = previewHTML.replace(/{FILELINK}/g, fileLink);
         previewHTML = previewHTML.replace(/{FULL}/g, fileLink);
         previewHTML = previewHTML.replace(/{IMAGE}/g, fileLink);
