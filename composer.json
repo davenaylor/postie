@@ -1,0 +1,25 @@
+{
+    "name": "davenaylor/postie",
+    "version": "1.7.7",
+    "description": "Postie",
+    "homepage": "https://wpranger.co.uk",
+    "require": {
+        "wp-cli/wp-cli": ">=0.16"
+    },
+    "license": "GPLv2",
+    "keywords": ["postie","ssh","remote"],
+    "authors": [
+        {
+            "name": "Dave Naylor",
+            "email": "dave@wpranger,co.uk",
+            "homepage": "https://caramboo.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.4"
+    },
+    "type": "wordpress-plugin"
+}
+
+
